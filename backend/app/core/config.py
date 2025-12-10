@@ -13,7 +13,11 @@ class Settings(BaseSettings):
     @property
     def bright_data_proxy_config(self):
         if self.BRIGHT_DATA_ACCOUNT_ID and self.BRIGHT_DATA_ZONE_PASSWORD:
-            zone_part = f"-zone-{self.BRIGHT_DATA_ZONE_NAME}" if self.BRIGHT_DATA_ZONE_NAME else ""
+            zone_name = self.BRIGHT_DATA_ZONE_NAME.strip() if self.BRIGHT_DATA_ZONE_NAME else ""
+            if zone_name and zone_name.lower() not in ["zone_name", "", "empty", "none"]:
+                zone_part = f"-zone-{zone_name}"
+            else:
+                zone_part = ""
             return {
                 "server": "http://brd.superproxy.io:33335",
                 "username": f"brd-customer-{self.BRIGHT_DATA_ACCOUNT_ID}{zone_part}",

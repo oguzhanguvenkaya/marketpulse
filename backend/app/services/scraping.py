@@ -49,7 +49,9 @@ class ScrapingService:
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
             print(f"Scraping URL: {search_url}")
             
-            await page.goto(search_url, timeout=60000, wait_until="networkidle")
+            response = await page.goto(search_url, timeout=60000, wait_until="networkidle")
+            print(f"Response status: {response.status if response else 'No response'}")
+            print(f"Response URL: {response.url if response else 'No URL'}")
             await page.wait_for_timeout(3000)
             
             try:
