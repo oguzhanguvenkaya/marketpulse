@@ -11,39 +11,60 @@ class ScrapingService:
     def __init__(self):
         self.bright_api_key = settings.BRIGHT_API_KEY
         self.browser: Optional[Browser] = None
+        self.playwright = None
     
     async def init_browser(self):
-        playwright = await async_playwright().start()
+        self.playwright = await async_playwright().start()
         
-        self.browser = await playwright.chromium.launch(headless=True)
+        if self.bright_api_key:
+            sbr_ws_cdp = f"wss://{self.bright_api_key}@brd.superproxy.io:9222"
+            print(f"Connecting to Bright Data Scraping Browser...")
+            self.browser = await self.playwright.chromium.connect_over_cdp(sbr_ws_cdp)
+            print("Connected to Bright Data!")
+        else:
+            print("No Bright Data API key, using local browser")
+            self.browser = await self.playwright.chromium.launch(headless=True)
         
         return self.browser
     
     async def close_browser(self):
         if self.browser:
             await self.browser.close()
+        if self.playwright:
+            await self.playwright.stop()
     
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = 100) -> List[Dict[str, Any]]:
         if not self.browser:
             await self.init_browser()
         
         products = []
-        page = await self.browser.new_page()
+        context = self.browser.contexts[0] if self.browser.contexts else await self.browser.new_context()
+        page = await context.new_page()
         
         try:
-            await page.set_extra_http_headers({
-                "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-            })
-            
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
             print(f"Scraping URL: {search_url}")
             
-            await page.goto(search_url, timeout=60000, wait_until="networkidle")
-            await page.wait_for_timeout(5000)
+            await page.goto(search_url, timeout=120000)
             
-            await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
-            await page.wait_for_timeout(2000)
+            if self.bright_api_key:
+                try:
+                    client = await page.context.new_cdp_session(page)
+                    print("Waiting for CAPTCHA to be solved (if any)...")
+                    solve_res = await client.send('Captcha.waitForSolve', {
+                        'detectTimeout': 30000,
+                    })
+                    print(f"CAPTCHA solve status: {solve_res.get('status', 'unknown')}")
+                except Exception as e:
+                    print(f"CAPTCHA wait skipped: {e}")
+            
+            await page.wait_for_timeout(3000)
+            
+            try:
+                await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+                await page.wait_for_timeout(2000)
+            except:
+                pass
             
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
@@ -63,9 +84,15 @@ class ScrapingService:
                 print(f"Found {len(product_cards)} product cards with moria-ProductCard")
             
             if not product_cards:
-                product_cards = soup.select('a[href*="-p-"]')
-                print(f"Found {len(product_cards)} links with -p- pattern")
-                product_cards = [card.parent for card in product_cards if card.parent][:max_products]
+                all_links = soup.select('a[href*="-p-"]')
+                print(f"Found {len(all_links)} links with -p- pattern")
+                seen_parents = set()
+                for link in all_links:
+                    parent = link.find_parent('li') or link.find_parent('div', class_=lambda x: x and 'product' in x.lower() if x else False)
+                    if parent and id(parent) not in seen_parents:
+                        seen_parents.add(id(parent))
+                        product_cards.append(parent)
+                print(f"Extracted {len(product_cards)} unique product containers")
             
             for card in product_cards[:max_products]:
                 try:
@@ -80,6 +107,8 @@ class ScrapingService:
             
         except Exception as e:
             print(f"Scraping error: {e}")
+            import traceback
+            traceback.print_exc()
         finally:
             await page.close()
         
