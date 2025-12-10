@@ -10,7 +10,7 @@ class Product(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     platform = Column(String(20), nullable=False, index=True)
-    external_id = Column(String(100), nullable=False)
+    external_id = Column(Text, nullable=False)
     name = Column(Text, nullable=False)
     url = Column(Text, nullable=False)
     seller_name = Column(String(255))
