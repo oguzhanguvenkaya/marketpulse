@@ -50,14 +50,6 @@ waitForPort = 8000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 42443
-externalPort = 3000
-
-[[ports]]
-localPort = 45361
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "autoscale"
 publicDir = "."
