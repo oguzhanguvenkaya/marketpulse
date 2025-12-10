@@ -4,7 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["gitFull", "libxcrypt", "playwright-driver"]
+packages = ["gitFull", "libxcrypt", "playwright-driver", "nspr", "nss", "at-spi2-atk", "cups", "libdrm", "libxkbcommon", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxcb", "mesa", "alsa-lib", "pango", "cairo"]
 
 [workflows]
 runButton = "Project"
