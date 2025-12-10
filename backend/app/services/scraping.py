@@ -15,14 +15,7 @@ class ScrapingService:
     async def init_browser(self):
         playwright = await async_playwright().start()
         
-        if self.bright_api_key:
-            proxy_url = f"http://brd-customer-{self.bright_api_key}:@brd.superproxy.io:22225"
-            self.browser = await playwright.chromium.launch(
-                headless=True,
-                proxy={"server": proxy_url}
-            )
-        else:
-            self.browser = await playwright.chromium.launch(headless=True)
+        self.browser = await playwright.chromium.launch(headless=True)
         
         return self.browser
     
@@ -38,18 +31,41 @@ class ScrapingService:
         page = await self.browser.new_page()
         
         try:
+            await page.set_extra_http_headers({
+                "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            })
+            
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
-            await page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
-            await page.wait_for_timeout(3000)
+            print(f"Scraping URL: {search_url}")
+            
+            await page.goto(search_url, timeout=60000, wait_until="networkidle")
+            await page.wait_for_timeout(5000)
+            
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+            await page.wait_for_timeout(2000)
             
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
             
-            product_cards = soup.select('[data-test-id="product-card-item"]')
+            print(f"Page title: {soup.title.string if soup.title else 'No title'}")
+            print(f"Content length: {len(content)}")
+            
+            product_cards = soup.select('li[class*="productListContent"]')
+            print(f"Found {len(product_cards)} product cards with productListContent")
+            
             if not product_cards:
-                product_cards = soup.select('.productListContent-frGrtf5XrVXRwJ05HUfU')
+                product_cards = soup.select('[data-test-id="product-card-item"]')
+                print(f"Found {len(product_cards)} product cards with data-test-id")
+            
             if not product_cards:
-                product_cards = soup.select('[class*="product"]')[:max_products]
+                product_cards = soup.select('div[class*="moria-ProductCard"]')
+                print(f"Found {len(product_cards)} product cards with moria-ProductCard")
+            
+            if not product_cards:
+                product_cards = soup.select('a[href*="-p-"]')
+                print(f"Found {len(product_cards)} links with -p- pattern")
+                product_cards = [card.parent for card in product_cards if card.parent][:max_products]
             
             for card in product_cards[:max_products]:
                 try:
@@ -57,7 +73,10 @@ class ScrapingService:
                     if product:
                         products.append(product)
                 except Exception as e:
+                    print(f"Parse error: {e}")
                     continue
+            
+            print(f"Successfully parsed {len(products)} products")
             
         except Exception as e:
             print(f"Scraping error: {e}")
