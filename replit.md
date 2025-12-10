@@ -5,9 +5,10 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 
 ## Current State
 - **Status**: MVP Phase 1 Complete
-- **Backend**: FastAPI with PostgreSQL, Celery for async tasks
+- **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
 - **Features**: Product search, data scraping, price/rating charts, AI analysis
+- **Note**: Using FastAPI BackgroundTasks instead of Celery/Redis for simplicity in MVP
 
 ## Project Structure
 ```
@@ -51,7 +52,7 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 
 ## Tech Stack
 - **Frontend**: React 18, TypeScript, TailwindCSS v4, Plotly.js, React Router
-- **Backend**: Python 3.11, FastAPI, SQLAlchemy, Celery
+- **Backend**: Python 3.11, FastAPI, SQLAlchemy, BackgroundTasks
 - **Scraping**: Playwright, BeautifulSoup4, Bright Data proxy
 - **Database**: PostgreSQL (Replit built-in)
 - **AI**: OpenAI GPT-4o-mini
