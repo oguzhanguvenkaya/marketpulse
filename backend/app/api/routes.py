@@ -76,7 +76,7 @@ async def run_scraping_background(task_id: str):
             await scraper.init_browser()
             
             if task.platform == "hepsiburada":
-                products_data = await scraper.scrape_hepsiburada_search(task.keyword, max_products=50)
+                products_data = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
             else:
                 products_data = []
             

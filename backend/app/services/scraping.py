@@ -1,11 +1,15 @@
 import os
 import re
 import json
+import random
 from datetime import date
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright, Browser, Page
+from playwright_stealth import Stealth
 from app.core.config import settings
+
+stealth = Stealth()
 
 class ScrapingService:
     def __init__(self):
@@ -65,6 +69,14 @@ class ScrapingService:
         )
         page = await context.new_page()
         
+        await stealth.apply_stealth_async(page)
+        
+        await page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+        """)
+        
         try:
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
             print(f"Scraping URL: {search_url}")
@@ -73,7 +85,10 @@ class ScrapingService:
             print(f"Response status: {response.status if response else 'No response'}")
             print(f"Response URL: {response.url if response else 'No URL'}")
             
-            await page.wait_for_timeout(5000)
+            await page.wait_for_timeout(random.randint(3000, 5000))
+            
+            await page.mouse.move(random.randint(100, 500), random.randint(100, 300))
+            await page.wait_for_timeout(random.randint(500, 1000))
             
             current_url = page.url
             page_title = await page.title()
