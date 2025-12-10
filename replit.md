@@ -47,7 +47,9 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 ## Environment Variables Required
 - `DATABASE_URL` - PostgreSQL connection (auto-configured by Replit)
 - `OPENAI_API_KEY` - For AI analysis features
-- `BRIGHT_API_KEY` - For Bright Data proxy (scraping)
+- `BRIGHT_DATA_ACCOUNT_ID` - Bright Data account ID (e.g., hl_xxxxx)
+- `BRIGHT_DATA_ZONE_NAME` - Bright Data Residential Proxy zone name
+- `BRIGHT_DATA_ZONE_PASSWORD` - Bright Data zone password
 - `REDIS_URL` - For Celery task queue (optional)
 
 ## Tech Stack
@@ -72,4 +74,9 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 - Focus on Hepsiburada marketplace initially
 
 ## Recent Changes
+- December 10, 2025: Bright Data Residential Proxies entegrasyonu tamamlandı
+  - chromium.launch(proxy=config) metodu ile Hepsiburada scraping çalışıyor
+  - SSL sertifika hatası çözüldü (ignore_https_errors=True)
+  - Tarayıcı parmak izi eklendi (Türkiye locale, Chrome User-Agent)
+  - 46 ürün başarıyla scraped ve veritabanına kaydedildi
 - December 10, 2025: Initial MVP implementation with scraping, dashboard, and AI analysis
