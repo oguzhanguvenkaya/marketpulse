@@ -42,7 +42,7 @@ class ScrapingService:
             await self.init_browser()
         
         products = []
-        context = self.browser.contexts[0] if self.browser.contexts else await self.browser.new_context()
+        context = await self.browser.new_context(ignore_https_errors=True)
         page = await context.new_page()
         
         try:
