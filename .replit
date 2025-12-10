@@ -1,4 +1,4 @@
-modules = ["python-3.11", "nodejs-20"]
+modules = ["python-3.11", "nodejs-20", "postgresql-16"]
 [agent]
 expertMode = true
 
@@ -38,25 +38,25 @@ outputType = "webview"
 name = "Backend"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && python run.py"
 waitForPort = 8000
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 45565
+localPort = 42443
 externalPort = 3000
 
 [[ports]]
-localPort = 8000
-externalPort = 8000
+localPort = 45361
+externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"
