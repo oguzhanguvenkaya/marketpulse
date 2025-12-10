@@ -1,32 +1,74 @@
 # Pazaryeri Veri Analiz Platformu
 
 ## Overview
-This project contains documentation and planning materials for a Marketplace Data Analysis Platform (in Turkish). The platform is designed to help marketplace sellers and marketing agencies make data-driven decisions to improve advertising efficiency and market share.
+A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: Planning/Documentation phase
-- **Runnable**: Yes - displays project documentation via static HTML page
+- **Status**: MVP Phase 1 Complete
+- **Backend**: FastAPI with PostgreSQL, Celery for async tasks
+- **Frontend**: React + Vite + TailwindCSS v4
+- **Features**: Product search, data scraping, price/rating charts, AI analysis
 
 ## Project Structure
 ```
 .
-├── index.html                              # Main documentation webpage
-├── server.py                               # Simple Python HTTP server
-├── 1. Sistem Mimarisi.md                   # System Architecture doc
-├── Proje Planı_ Pazaryeri Veri Analiz Platformu.md  # Project Plan docs
-└── replit.md                               # This file
+├── backend/
+│   ├── app/
+│   │   ├── api/routes.py         # API endpoints
+│   │   ├── core/config.py        # Configuration
+│   │   ├── db/
+│   │   │   ├── database.py       # SQLAlchemy setup
+│   │   │   └── models.py         # Product, Snapshot, Task models
+│   │   ├── services/
+│   │   │   ├── scraping.py       # Playwright + Bright Data scraping
+│   │   │   └── llm_service.py    # OpenAI integration
+│   │   ├── tasks.py              # Celery async tasks
+│   │   └── main.py               # FastAPI app entry
+│   ├── run.py                    # Backend runner
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/Layout.tsx
+│   │   ├── pages/
+│   │   │   ├── Dashboard.tsx     # Main dashboard with search
+│   │   │   ├── Products.tsx      # Product list
+│   │   │   └── ProductDetail.tsx # Product details with charts
+│   │   └── services/api.ts       # API client
+│   ├── package.json
+│   └── vite.config.ts
+└── replit.md
 ```
 
 ## Running the Project
-The project runs a simple Python HTTP server that serves the `index.html` documentation page on port 5000.
+- **Frontend**: Runs on port 5000 (webview)
+- **Backend**: Runs on port 8000 (localhost)
 
-## Planned Technology Stack (from documentation)
-- **Frontend**: React, TypeScript, TailwindCSS
-- **Backend**: Python, FastAPI, Celery
-- **Web Scraping**: Bright Data, Playwright
-- **Database**: PostgreSQL, Redis
-- **LLM Integration**: OpenAI GPT-4, LangChain
-- **Deployment**: Docker, Nginx
+## Environment Variables Required
+- `DATABASE_URL` - PostgreSQL connection (auto-configured by Replit)
+- `OPENAI_API_KEY` - For AI analysis features
+- `BRIGHT_API_KEY` - For Bright Data proxy (scraping)
+- `REDIS_URL` - For Celery task queue (optional)
 
-## Deployment
-Configured as a static site deployment serving the current directory.
+## Tech Stack
+- **Frontend**: React 18, TypeScript, TailwindCSS v4, Plotly.js, React Router
+- **Backend**: Python 3.11, FastAPI, SQLAlchemy, Celery
+- **Scraping**: Playwright, BeautifulSoup4, Bright Data proxy
+- **Database**: PostgreSQL (Replit built-in)
+- **AI**: OpenAI GPT-4o-mini
+
+## API Endpoints
+- `POST /api/search` - Start a new search task
+- `GET /api/search/{id}` - Get task status
+- `GET /api/tasks` - List recent tasks
+- `GET /api/products` - List products
+- `GET /api/products/{id}` - Get product details
+- `GET /api/products/{id}/snapshots` - Get price/rating history
+- `POST /api/analyze` - AI analysis of products
+- `GET /api/stats` - Dashboard statistics
+
+## User Preferences
+- Turkish language UI
+- Focus on Hepsiburada marketplace initially
+
+## Recent Changes
+- December 10, 2025: Initial MVP implementation with scraping, dashboard, and AI analysis
