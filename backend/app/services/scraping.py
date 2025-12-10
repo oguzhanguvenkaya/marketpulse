@@ -9,20 +9,24 @@ from app.core.config import settings
 
 class ScrapingService:
     def __init__(self):
-        self.bright_api_key = settings.BRIGHT_API_KEY
+        self.proxy_config = settings.bright_data_proxy_config
         self.browser: Optional[Browser] = None
         self.playwright = None
     
     async def init_browser(self):
         self.playwright = await async_playwright().start()
         
-        if self.bright_api_key:
-            sbr_ws_cdp = f"wss://{self.bright_api_key}@brd.superproxy.io:9222"
-            print(f"Connecting to Bright Data Scraping Browser...")
-            self.browser = await self.playwright.chromium.connect_over_cdp(sbr_ws_cdp)
-            print("Connected to Bright Data!")
+        if self.proxy_config:
+            print(f"Launching browser with Bright Data Residential Proxy...")
+            print(f"Proxy server: {self.proxy_config['server']}")
+            print(f"Username: {self.proxy_config['username']}")
+            self.browser = await self.playwright.chromium.launch(
+                headless=True,
+                proxy=self.proxy_config
+            )
+            print("Browser launched with Bright Data proxy!")
         else:
-            print("No Bright Data API key, using local browser")
+            print("No Bright Data credentials, using local browser")
             self.browser = await self.playwright.chromium.launch(headless=True)
         
         return self.browser
@@ -45,19 +49,7 @@ class ScrapingService:
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
             print(f"Scraping URL: {search_url}")
             
-            await page.goto(search_url, timeout=120000)
-            
-            if self.bright_api_key:
-                try:
-                    client = await page.context.new_cdp_session(page)
-                    print("Waiting for CAPTCHA to be solved (if any)...")
-                    solve_res = await client.send('Captcha.waitForSolve', {
-                        'detectTimeout': 30000,
-                    })
-                    print(f"CAPTCHA solve status: {solve_res.get('status', 'unknown')}")
-                except Exception as e:
-                    print(f"CAPTCHA wait skipped: {e}")
-            
+            await page.goto(search_url, timeout=60000, wait_until="networkidle")
             await page.wait_for_timeout(3000)
             
             try:
