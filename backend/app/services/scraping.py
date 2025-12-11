@@ -4,7 +4,7 @@ import json
 import random
 import asyncio
 import aiohttp
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote, urlparse, parse_qs
 from datetime import date
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
@@ -98,7 +98,7 @@ class ScrapingService:
         print("No fallback provider available")
         return False
     
-    async def _fetch_with_scraperapi(self, url: str, render: bool = True) -> Optional[str]:
+    async def _fetch_with_scraperapi(self, url: str, render: bool = True, premium: bool = False) -> Optional[str]:
         if not settings.SCRAPER_API_KEY:
             return None
         
@@ -107,8 +107,11 @@ class ScrapingService:
             "url": url,
             "render": "true" if render else "false",
             "country_code": "tr",
-            "device_type": "desktop"
+            "device_type": "desktop",
         }
+        
+        if premium:
+            params["premium"] = "true"
         
         api_url = f"{SCRAPERAPI_BASE_URL}?" + "&".join([f"{k}={quote_plus(str(v))}" for k, v in params.items()])
         
@@ -144,11 +147,102 @@ class ScrapingService:
             debug_logger.log_error(url, "scraperapi", e)
             return None
     
+    def _extract_real_url_from_tracking(self, href: str) -> Optional[str]:
+        """Extract real product URL from adservice tracking URL"""
+        if 'adservice.' in href and 'redirect=' in href:
+            try:
+                parsed = urlparse(href)
+                params = parse_qs(parsed.query)
+                if 'redirect' in params:
+                    redirect_url = unquote(params['redirect'][0])
+                    if '-p-' in redirect_url or '-pm-' in redirect_url:
+                        return redirect_url.split('?')[0]
+            except Exception as e:
+                print(f"Error parsing tracking URL: {e}")
+        return None
+    
+    def _extract_product_urls_from_soup(self, soup: BeautifulSoup, max_products: int) -> List[str]:
+        """Extract product URLs from search result page, targeting only the main product grid"""
+        urls = []
+        seen_urls = set()
+        
+        product_cards = soup.select('article[class*="productCard-module_article"]')
+        
+        if product_cards:
+            print(f"Found {len(product_cards)} product cards via article selector")
+            product_links = []
+            for card in product_cards:
+                links = card.select('a[href*="-p-"], a[href*="-pm-"]')
+                product_links.extend(links)
+        else:
+            product_links = soup.select('a[class*="productCardLink"][href*="-p-"], a[class*="productCardLink"][href*="-pm-"]')
+            if product_links:
+                print(f"Found {len(product_links)} product links via productCardLink selector")
+            else:
+                product_containers = soup.select('ul[class*="productListContent"], div[class*="productListContent"]')
+                if product_containers:
+                    for container in product_containers:
+                        links = container.select('a[href*="-p-"], a[href*="-pm-"]')
+                        product_links.extend(links)
+                    print(f"Found {len(product_links)} links in {len(product_containers)} product containers")
+                else:
+                    product_links = soup.select('a[href*="-p-"], a[href*="-pm-"]')
+                    print(f"Using fallback: found {len(product_links)} total product links")
+        
+        for link in product_links:
+            href = link.get('href', '')
+            if not href:
+                continue
+            
+            full_url = None
+            
+            if 'adservice.' in href and 'redirect=' in href:
+                full_url = self._extract_real_url_from_tracking(href)
+            elif href.startswith('/'):
+                if '-p-' in href or '-pm-' in href:
+                    full_url = f"https://www.hepsiburada.com{href}"
+            elif href.startswith('https://www.hepsiburada.com/'):
+                if '-p-' in href or '-pm-' in href:
+                    full_url = href
+            
+            if not full_url:
+                continue
+            
+            if 'adservice.' in full_url or 'tracking.' in full_url or 'event/api' in full_url:
+                continue
+            
+            if not full_url.startswith('https://www.hepsiburada.com/'):
+                continue
+            
+            base_url = full_url.split('?')[0]
+            
+            if base_url in seen_urls:
+                continue
+            
+            seen_urls.add(base_url)
+            urls.append(base_url)
+            
+            if len(urls) >= max_products:
+                break
+        
+        print(f"Extracted {len(urls)} unique product URLs from search (filtered)")
+        if urls:
+            print(f"First 3 URLs: {urls[:3]}")
+        
+        return urls
+    
     async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> List[str]:
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         print(f"Fetching search results via ScraperAPI HTTP API: {search_url}")
         
-        html = await self._fetch_with_scraperapi(search_url, render=True)
+        html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
+        
+        if html:
+            soup_check = BeautifulSoup(html, 'html.parser')
+            title = soup_check.find('title')
+            if title and "En Çok Tavsiye Edilen" in title.get_text():
+                print("WARNING: Got homepage instead of search results, retrying with premium...")
+                html = None
         
         if not html:
             print("ScraperAPI failed, trying Bright Data fallback...")
@@ -157,31 +251,19 @@ class ScrapingService:
                 await self.init_browser("brightdata")
             return await self._get_product_urls_from_search(keyword, max_products)
         
-        urls = []
         soup = BeautifulSoup(html, 'html.parser')
         
-        product_links = soup.select('a[href*="-pm-"], a[href*="-p-"]')
-        seen_urls = set()
+        if settings.DEBUG_SAVE_HTML:
+            import os
+            debug_dir = "/tmp/scraping_debug"
+            os.makedirs(debug_dir, exist_ok=True)
+            debug_file = f"{debug_dir}/search_{keyword.replace(' ', '_')}.html"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"Saved search HTML to {debug_file}")
         
-        for link in product_links:
-            href = link.get('href', '')
-            if href and ('-pm-' in href or '-p-' in href):
-                if href.startswith('/'):
-                    full_url = f"https://www.hepsiburada.com{href}"
-                elif href.startswith('http'):
-                    full_url = href
-                else:
-                    continue
-                
-                base_url = full_url.split('?')[0]
-                if base_url not in seen_urls:
-                    seen_urls.add(base_url)
-                    urls.append(base_url)
-                    
-                    if len(urls) >= max_products:
-                        break
+        urls = self._extract_product_urls_from_soup(soup, max_products)
         
-        print(f"Extracted {len(urls)} unique product URLs from search")
         return urls
     
     async def _scrape_product_via_http_api(self, url: str) -> Optional[Dict[str, Any]]:
@@ -322,29 +404,7 @@ class ScrapingService:
                 return []
             
             soup = BeautifulSoup(content, 'html.parser')
-            
-            product_links = soup.select('a[href*="-pm-"], a[href*="-p-"]')
-            seen_urls = set()
-            
-            for link in product_links:
-                href = link.get('href', '')
-                if href and ('-pm-' in href or '-p-' in href):
-                    if href.startswith('/'):
-                        full_url = f"https://www.hepsiburada.com{href}"
-                    elif href.startswith('http'):
-                        full_url = href
-                    else:
-                        continue
-                    
-                    base_url = full_url.split('?')[0]
-                    if base_url not in seen_urls:
-                        seen_urls.add(base_url)
-                        urls.append(base_url)
-                        
-                        if len(urls) >= max_products:
-                            break
-            
-            print(f"Extracted {len(urls)} unique product URLs from search")
+            urls = self._extract_product_urls_from_soup(soup, max_products)
             
             if len(urls) > 0:
                 debug_logger.log_request(search_url, self.current_provider_name, status, f"Found {len(urls)} products")
