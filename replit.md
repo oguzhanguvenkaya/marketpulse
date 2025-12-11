@@ -141,6 +141,12 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 11, 2025: Phase 3.2 - Other Sellers Complete Data
+  - Fixed other sellers extraction: now extracts seller_name, seller_rating, AND price
+  - merchantInfo JSON blocks parsed with regex pattern to extract complete data
+  - Prices extracted from nested "prices" array within merchantInfo blocks
+  - All other sellers now saved with complete pricing (e.g., DS Detailing Store 9.9★ 799.00 TL)
+  - Known limitation: "Sepete özel fiyat" (cart special price) is dynamically loaded via JS, not in static HTML
 - December 11, 2025: Phase 3.1 - Complete Data Extraction
   - Added _parse_float and _parse_int helper methods with Turkish number format support
   - Fixed product description extraction from HTML (productDescriptionContent selector)
