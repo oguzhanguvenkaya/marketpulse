@@ -141,6 +141,11 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 11, 2025: Phase 3.1 - Complete Data Extraction
+  - Added _parse_float and _parse_int helper methods with Turkish number format support
+  - Fixed product description extraction from HTML (productDescriptionContent selector)
+  - Reviews now correctly extracted from JSON-LD structured data
+  - All product fields working: name, brand, price, rating, reviews, description, seller, category
 - December 11, 2025: Phase 3 - ScraperAPI Proxy Port Method (WORKING!)
   - Fixed ScraperAPI: HTTP API method doesn't work, PROXY PORT method works
   - Proxy URL: `http://proxy-server.scraperapi.com:8001`

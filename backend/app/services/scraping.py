@@ -382,6 +382,10 @@ class ScrapingService:
                 product_data["origin_country"] = html_data["origin_country"]
             if html_data.get("other_sellers"):
                 product_data["other_sellers"] = html_data["other_sellers"]
+            if html_data.get("description"):
+                product_data["description"] = html_data["description"]
+            if html_data.get("image_url") and not product_data.get("image_url"):
+                product_data["image_url"] = html_data["image_url"]
         
         if not product_data.get("name"):
             title = soup.find("h1")
@@ -800,11 +804,15 @@ class ScrapingService:
                 if next_elem:
                     data['origin_country'] = next_elem.get_text(strip=True)
         
-        desc_elem = soup.select_one('[class*="productDescription"]')
+        desc_elem = soup.select_one('.productDescriptionContent')
+        if not desc_elem:
+            desc_elem = soup.select_one('[class*="ProductDescription"]')
         if not desc_elem:
             desc_elem = soup.select_one('[data-test-id="product-description"]')
         if desc_elem:
-            data['description'] = desc_elem.get_text(strip=True)[:5000]
+            desc_text = desc_elem.get_text(strip=True)
+            if desc_text and 'Hepsiburada' not in desc_text[:100]:
+                data['description'] = desc_text[:5000]
         
         img_elem = soup.select_one('[class*="product-image"] img') or soup.select_one('[data-test-id="product-image"] img')
         if not img_elem:
