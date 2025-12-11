@@ -388,6 +388,21 @@ class ScrapingService:
             if title:
                 product_data["name"] = title.get_text(strip=True)
         
+        product_data['other_sellers'] = self._extract_other_sellers(soup)
+        product_data['reviews'] = self._extract_reviews(soup)
+        
+        if settings.DEBUG_SAVE_HTML:
+            import os
+            debug_dir = "/tmp/scraping_debug"
+            os.makedirs(debug_dir, exist_ok=True)
+            external_id = product_data.get('external_id', 'unknown')
+            debug_file = f"{debug_dir}/product_{external_id}.html"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"Saved product HTML to {debug_file}")
+            print(f"  -> Extracted {len(product_data.get('other_sellers', []))} other sellers")
+            print(f"  -> Extracted {len(product_data.get('reviews', []))} reviews")
+        
         return product_data
     
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
@@ -597,6 +612,33 @@ class ScrapingService:
         except Exception as e:
             print(f"Error extracting JSON-LD: {e}")
         return None
+    
+    def _parse_float(self, value) -> Optional[float]:
+        if value is None:
+            return None
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            value_str = str(value).strip()
+            value_str = value_str.replace(',', '.')
+            value_str = re.sub(r'[^\d.]', '', value_str)
+            return float(value_str) if value_str else None
+        except:
+            return None
+    
+    def _parse_int(self, value) -> Optional[int]:
+        if value is None:
+            return None
+        try:
+            if isinstance(value, int):
+                return value
+            if isinstance(value, float):
+                return int(value)
+            value_str = str(value).strip()
+            value_str = re.sub(r'[^\d]', '', value_str)
+            return int(value_str) if value_str else None
+        except:
+            return None
     
     def _parse_utag_data(self, utag: Dict) -> Dict[str, Any]:
         data = {}
@@ -821,23 +863,54 @@ class ScrapingService:
     def _extract_reviews(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
         reviews = []
         
-        review_cards = soup.select('[class*="reviewCard"], [data-test-id*="review"]')
+        json_ld_scripts = soup.select('script[type="application/ld+json"]')
+        for script in json_ld_scripts:
+            try:
+                script_content = script.string
+                if not script_content:
+                    continue
+                data = json.loads(script_content)
+                if isinstance(data, list):
+                    for item in data:
+                        if item.get('@type') == 'Review':
+                            rating_obj = item.get('reviewRating', {})
+                            rating_val = rating_obj.get('ratingValue') if isinstance(rating_obj, dict) else None
+                            review = {
+                                'author': item.get('author', 'Anonim'),
+                                'rating': self._parse_float(rating_val),
+                                'review_text': item.get('reviewBody', ''),
+                                'review_date': item.get('datePublished')
+                            }
+                            reviews.append(review)
+            except Exception as e:
+                print(f"Error parsing JSON-LD for reviews: {e}")
+                continue
         
-        if not review_cards:
-            json_ld_scripts = soup.select('script[type="application/ld+json"]')
-            for script in json_ld_scripts:
+        if not reviews:
+            review_cards = soup.select('[class*="reviewCard"], [class*="ReviewCard"]')
+            for card in review_cards[:20]:
                 try:
-                    data = json.loads(script.string)
-                    if isinstance(data, list):
-                        for item in data:
-                            if item.get('@type') == 'Review':
-                                review = {
-                                    'author': item.get('author', 'Anonim'),
-                                    'rating': item.get('reviewRating', {}).get('ratingValue'),
-                                    'review_text': item.get('reviewBody', ''),
-                                    'review_date': item.get('datePublished')
-                                }
-                                reviews.append(review)
+                    author = card.select_one('[class*="author"], [class*="userName"]')
+                    rating_elem = card.select_one('[class*="rating"], [class*="stars"]')
+                    text_elem = card.select_one('[class*="text"], [class*="comment"], [class*="body"]')
+                    date_elem = card.select_one('[class*="date"]')
+                    
+                    review = {
+                        'author': author.get_text(strip=True) if author else 'Anonim',
+                        'review_text': text_elem.get_text(strip=True) if text_elem else '',
+                    }
+                    
+                    if rating_elem:
+                        rating_text = rating_elem.get_text(strip=True)
+                        rating_match = re.search(r'(\d+(?:[.,]\d+)?)', rating_text)
+                        if rating_match:
+                            review['rating'] = self._parse_float(rating_match.group(1))
+                    
+                    if date_elem:
+                        review['review_date'] = date_elem.get_text(strip=True)
+                    
+                    if review.get('review_text'):
+                        reviews.append(review)
                 except:
                     continue
         
