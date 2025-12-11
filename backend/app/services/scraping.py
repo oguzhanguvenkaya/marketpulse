@@ -98,13 +98,7 @@ class ScrapingService:
             await self.init_browser()
         
         product_urls = await self._get_product_urls_from_search(keyword, max_products)
-        
-        if len(product_urls) == 0 and self.current_provider_name != "brightdata":
-            print(f"No products found with {self.current_provider_name}, trying fallback...")
-            if await self.reinit_with_fallback():
-                product_urls = await self._get_product_urls_from_search(keyword, max_products)
-        
-        print(f"Found {len(product_urls)} product URLs to scrape")
+        print(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
         
         products = []
         for i, url in enumerate(product_urls[:max_products]):
@@ -122,7 +116,7 @@ class ScrapingService:
         print(f"Successfully scraped {len(products)} products with full details")
         return products
     
-    async def _get_product_urls_from_search(self, keyword: str, max_products: int) -> List[str]:
+    async def _get_product_urls_from_search(self, keyword: str, max_products: int, retry_count: int = 0) -> List[str]:
         page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
         await self._apply_anti_detection(page)
@@ -144,6 +138,12 @@ class ScrapingService:
                 content = await page.content()
                 debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
                 print(f"ERROR: Received {status} status - possible bot detection or rate limiting")
+                await page.close()
+                
+                if retry_count < MAX_RETRIES and self.current_provider_name != "direct":
+                    print(f"Attempting fallback (retry {retry_count + 1}/{MAX_RETRIES})...")
+                    if await self.reinit_with_fallback():
+                        return await self._get_product_urls_from_search(keyword, max_products, retry_count + 1)
                 return []
             
             await self._random_delay(3000, 5000)

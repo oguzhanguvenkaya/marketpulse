@@ -4,11 +4,28 @@
 A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: MVP Phase 2 - Enhanced Data Collection
+- **Status**: MVP Phase 2.5 - Modular Proxy Architecture
 - **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
 - **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis
-- **Note**: Using FastAPI BackgroundTasks instead of Celery/Redis for simplicity in MVP
+- **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
+
+## Proxy Architecture
+
+### Provider Hierarchy (Auto Mode)
+1. **ScraperAPI** (Primary) - Ucuz, 3M istek/ay $249
+2. **Bright Data** (Fallback) - Premium, zor durumlar icin
+3. **Direct** (Last resort) - Proxy yok
+
+### Configuration
+```python
+PROXY_PROVIDER = "auto"  # Options: auto, scraperapi, brightdata
+DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
+```
+
+### Fallback Logic
+- If ScraperAPI returns 403/429/503 -> Auto-switch to Bright Data
+- Debug HTML saved to `/tmp/scraping_debug/` for analysis
 
 ## Scraping Strategy
 **Two-Stage Scraping Approach:**
@@ -21,32 +38,33 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 - HTML elements: discounted price, coupons, campaigns, other sellers, reviews, stock count, origin country
 
 **Limits:**
-- MAX_PRODUCTS_PER_SEARCH = 8 (to manage Bright Data costs)
+- MAX_PRODUCTS_PER_SEARCH = 8 (to manage proxy costs)
 
 ## Project Structure
 ```
 .
 ├── backend/
 │   ├── app/
-│   │   ├── api/routes.py         # API endpoints
-│   │   ├── core/config.py        # Configuration
+│   │   ├── api/routes.py           # API endpoints
+│   │   ├── core/config.py          # Configuration (proxy settings)
 │   │   ├── db/
-│   │   │   ├── database.py       # SQLAlchemy setup
-│   │   │   └── models.py         # Product, Snapshot, Seller, Review models
+│   │   │   ├── database.py         # SQLAlchemy setup
+│   │   │   └── models.py           # Product, Snapshot, Seller, Review models
 │   │   ├── services/
-│   │   │   ├── scraping.py       # Two-stage Playwright + Bright Data scraping
-│   │   │   └── llm_service.py    # OpenAI integration
-│   │   └── main.py               # FastAPI app entry
-│   ├── run.py                    # Backend runner
+│   │   │   ├── scraping.py         # Two-stage Playwright scraping
+│   │   │   ├── proxy_providers.py  # Modular proxy provider system
+│   │   │   └── llm_service.py      # OpenAI integration
+│   │   └── main.py                 # FastAPI app entry
+│   ├── run.py                      # Backend runner
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── components/Layout.tsx
 │   │   ├── pages/
-│   │   │   ├── Dashboard.tsx     # Main dashboard with search
-│   │   │   ├── Products.tsx      # Product list
-│   │   │   └── ProductDetail.tsx # Product details with tabs (info, sellers, reviews)
-│   │   └── services/api.ts       # API client with extended types
+│   │   │   ├── Dashboard.tsx       # Main dashboard with search
+│   │   │   ├── Products.tsx        # Product list
+│   │   │   └── ProductDetail.tsx   # Product details with tabs
+│   │   └── services/api.ts         # API client with extended types
 │   ├── package.json
 │   └── vite.config.ts
 └── replit.md
@@ -82,14 +100,17 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 ## Environment Variables Required
 - `DATABASE_URL` - PostgreSQL connection (auto-configured by Replit)
 - `OPENAI_API_KEY` - For AI analysis features
-- `BRIGHT_DATA_ACCOUNT_ID` - Bright Data account ID (e.g., hl_xxxxx)
+- `SCRAPPER_API` - ScraperAPI key (primary proxy)
+- `BRIGHT_DATA_ACCOUNT_ID` - Bright Data account ID (fallback)
 - `BRIGHT_DATA_ZONE_NAME` - Bright Data Residential Proxy zone name
 - `BRIGHT_DATA_ZONE_PASSWORD` - Bright Data zone password
+- `PROXY_PROVIDER` - Provider selection: auto, scraperapi, brightdata (default: auto)
 
 ## Tech Stack
 - **Frontend**: React 18, TypeScript, TailwindCSS v4, Plotly.js, React Router
 - **Backend**: Python 3.11, FastAPI, SQLAlchemy, BackgroundTasks
-- **Scraping**: Playwright, playwright-stealth, BeautifulSoup4, Bright Data Residential Proxy
+- **Scraping**: Playwright, playwright-stealth, BeautifulSoup4
+- **Proxy**: ScraperAPI (primary), Bright Data Residential (fallback)
 - **Database**: PostgreSQL (Replit built-in)
 - **AI**: OpenAI GPT-4o-mini
 
@@ -102,22 +123,27 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 - `GET /api/products/{id}/snapshots` - Get price/rating history
 - `POST /api/analyze` - AI analysis of products
 - `GET /api/stats` - Dashboard statistics
+- `GET /api/scraping/status` - Proxy provider status and availability
 
 ## User Preferences
 - Turkish language UI
 - Focus on Hepsiburada marketplace initially
 - Limit to 8 products per search to manage costs
+- ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 11, 2025: Phase 2.5 - Modular Proxy Architecture
+  - Added ScraperAPI as primary proxy provider (cheaper)
+  - Bright Data moved to fallback role
+  - ProxyManager class with auto-fallback logic
+  - DebugLogger for detailed error tracking
+  - Debug HTML saving on 403/429/503 errors
+  - /api/scraping/status endpoint for monitoring
 - December 11, 2025: Phase 2 - Enhanced Data Collection
   - Two-stage scraping: URL collection + product detail page scraping
   - utagData parser: extracts rich data from JavaScript object
   - JSON-LD parser: extracts structured data
   - HTML parser: extracts discounted prices, coupons, campaigns, other sellers
   - Extended database schema: new columns and tables for sellers/reviews
-  - ProductDetail page: tabs for info, other sellers, reviews display
-  - Frontend updated with new data types and UI components
 - December 10, 2025: Bright Data Residential Proxies integration
-  - chromium.launch(proxy=config) for Hepsiburada scraping
-  - playwright-stealth for bot detection bypass
 - December 10, 2025: Initial MVP implementation
