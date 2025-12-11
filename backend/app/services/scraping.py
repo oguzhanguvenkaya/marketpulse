@@ -98,6 +98,60 @@ class ScrapingService:
         print("No fallback provider available")
         return False
     
+    async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1) -> Optional[str]:
+        """Fetch URL using ScraperAPI proxy port method - WORKING for Hepsiburada"""
+        if not settings.SCRAPER_API_KEY:
+            return None
+        
+        proxy_url = "http://proxy-server.scraperapi.com:8001"
+        proxy_username = f"scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={session_number}:{settings.SCRAPER_API_KEY}"
+        
+        print(f"ScraperAPI PROXY PORT request: {url[:60]}...")
+        print(f"Using session_number: {session_number}")
+        
+        try:
+            timeout = aiohttp.ClientTimeout(total=180)
+            
+            connector = aiohttp.TCPConnector(ssl=False)
+            
+            auth = aiohttp.BasicAuth(
+                login=f"scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={session_number}",
+                password=settings.SCRAPER_API_KEY
+            )
+            
+            async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
+                async with session.get(
+                    url,
+                    proxy=proxy_url,
+                    proxy_auth=auth,
+                    ssl=False
+                ) as response:
+                    status = response.status
+                    print(f"ScraperAPI PROXY response status: {status}")
+                    
+                    debug_logger.log_request(url, "scraperapi-proxy", status)
+                    
+                    if status == 200:
+                        html = await response.text()
+                        print(f"ScraperAPI PROXY returned {len(html)} bytes")
+                        return html
+                    elif status in [403, 429, 500, 503]:
+                        content = await response.text()
+                        debug_logger.save_debug_html(url, content, status, "scraperapi-proxy")
+                        print(f"ScraperAPI PROXY error {status}: {content[:200]}")
+                        return None
+                    else:
+                        print(f"ScraperAPI PROXY unexpected status: {status}")
+                        return None
+        except asyncio.TimeoutError:
+            print(f"ScraperAPI PROXY timeout for {url}")
+            debug_logger.log_error(url, "scraperapi-proxy", Exception("Timeout"))
+            return None
+        except Exception as e:
+            print(f"ScraperAPI PROXY error: {e}")
+            debug_logger.log_error(url, "scraperapi-proxy", e)
+            return None
+    
     async def _fetch_with_scraperapi(self, url: str, render: bool = True, premium: bool = False) -> Optional[str]:
         if not settings.SCRAPER_API_KEY:
             return None
@@ -232,26 +286,37 @@ class ScrapingService:
         return urls
     
     async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> List[str]:
-        search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
-        print(f"Fetching search results via ScraperAPI HTTP API: {search_url}")
+        """Get product URLs using ScraperAPI PROXY PORT method - proven to work with Hepsiburada"""
         
-        html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
+        search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
+        print(f"Fetching search results via ScraperAPI PROXY PORT: {search_url}")
+        
+        session_number = random.randint(1, 10000)
+        html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
         
         if html:
             soup_check = BeautifulSoup(html, 'html.parser')
             title = soup_check.find('title')
-            if title and "En Çok Tavsiye Edilen" in title.get_text():
-                print("WARNING: Got homepage instead of search results, retrying with premium...")
-                html = None
+            title_text = title.get_text() if title else ""
+            
+            if "En Çok Tavsiye Edilen" in title_text or "Anasayfa" in title_text:
+                print(f"WARNING: Got homepage instead of search results (title: {title_text[:50]})")
+                print("Retrying with new session...")
+                session_number = random.randint(10001, 20000)
+                html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
         
         if not html:
-            print("ScraperAPI failed, trying Bright Data fallback...")
+            print("ScraperAPI PROXY failed, trying Bright Data fallback...")
             self.current_provider_name = "brightdata"
             if not self.browser:
                 await self.init_browser("brightdata")
             return await self._get_product_urls_from_search(keyword, max_products)
         
         soup = BeautifulSoup(html, 'html.parser')
+        
+        title = soup.find('title')
+        title_text = title.get_text() if title else "No title"
+        print(f"Page title: {title_text[:80]}")
         
         if settings.DEBUG_SAVE_HTML:
             import os
@@ -266,8 +331,12 @@ class ScrapingService:
         
         return urls
     
-    async def _scrape_product_via_http_api(self, url: str) -> Optional[Dict[str, Any]]:
-        html = await self._fetch_with_scraperapi(url, render=True)
+    async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
+        """Scrape product detail page using ScraperAPI PROXY PORT method"""
+        if session_number is None:
+            session_number = random.randint(1, 10000)
+        
+        html = await self._fetch_with_scraperapi_proxy(url, session_number=session_number)
         
         if not html:
             print(f"ScraperAPI failed for product: {url}")
