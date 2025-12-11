@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from uuid import UUID
 from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask
-from app.services.scraping import ScrapingService
+from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 
 router = APIRouter()
@@ -491,3 +491,8 @@ async def get_stats(db: Session = Depends(get_db)):
         "total_sellers": total_sellers,
         "total_reviews": total_reviews
     }
+
+@router.get("/scraping/status")
+async def get_scraping_status():
+    status = get_proxy_status()
+    return status

@@ -8,31 +8,45 @@ from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright, Browser, Page
 from playwright_stealth import Stealth
 from app.core.config import settings
+from app.services.proxy_providers import proxy_manager, debug_logger, ProxyProvider
 
 stealth = Stealth()
 
 MAX_PRODUCTS_PER_SEARCH = 8
+MAX_RETRIES = 2
 
 class ScrapingService:
     def __init__(self):
-        self.proxy_config = settings.bright_data_proxy_config
         self.browser: Optional[Browser] = None
         self.playwright = None
         self.context = None
+        self.current_provider: Optional[ProxyProvider] = None
+        self.current_provider_name: str = "direct"
     
-    async def init_browser(self):
+    async def init_browser(self, provider_name: Optional[str] = None, premium: bool = False):
         self.playwright = await async_playwright().start()
         
-        if self.proxy_config:
-            print(f"Launching browser with Bright Data Residential Proxy...")
-            print(f"Proxy server: {self.proxy_config['server']}")
+        if provider_name:
+            provider = proxy_manager.get_provider(provider_name)
+        else:
+            provider = proxy_manager.get_primary_provider()
+        
+        self.current_provider = provider
+        self.current_provider_name = provider.name if provider else "direct"
+        
+        proxy_config = provider.get_proxy_config(premium) if provider else None
+        
+        if proxy_config:
+            print(f"Launching browser with {self.current_provider_name.upper()} proxy...")
+            print(f"Proxy server: {proxy_config['server']}")
+            print(f"Proxy username: {proxy_config['username'][:50]}...")
             self.browser = await self.playwright.chromium.launch(
                 headless=True,
-                proxy=self.proxy_config
+                proxy=proxy_config
             )
-            print("Browser launched with Bright Data proxy!")
+            print(f"Browser launched with {self.current_provider_name} proxy!")
         else:
-            print("No Bright Data credentials, using local browser")
+            print("No proxy configured, using direct connection")
             self.browser = await self.playwright.chromium.launch(headless=True)
         
         self.context = await self.browser.new_context(
@@ -67,16 +81,29 @@ class ScrapingService:
         if self.playwright:
             await self.playwright.stop()
     
+    async def reinit_with_fallback(self) -> bool:
+        await self.close_browser()
+        
+        fallback = proxy_manager.get_fallback_provider(self.current_provider_name)
+        if fallback:
+            print(f"Switching to fallback provider: {fallback.name}")
+            await self.init_browser(fallback.name)
+            return True
+        
+        print("No fallback provider available")
+        return False
+    
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
-        """
-        Two-stage scraping:
-        1. Get product URLs from search/listing page
-        2. Visit each product detail page for comprehensive data
-        """
         if not self.browser:
             await self.init_browser()
         
         product_urls = await self._get_product_urls_from_search(keyword, max_products)
+        
+        if len(product_urls) == 0 and self.current_provider_name != "brightdata":
+            print(f"No products found with {self.current_provider_name}, trying fallback...")
+            if await self.reinit_with_fallback():
+                product_urls = await self._get_product_urls_from_search(keyword, max_products)
+        
         print(f"Found {len(product_urls)} product URLs to scrape")
         
         products = []
@@ -89,30 +116,46 @@ class ScrapingService:
                     print(f"  -> Successfully scraped: {product_data.get('name', 'Unknown')[:50]}")
                 await self._random_delay(1000, 3000)
             except Exception as e:
-                print(f"  -> Error scraping product: {e}")
+                debug_logger.log_error(url, self.current_provider_name, e)
                 continue
         
         print(f"Successfully scraped {len(products)} products with full details")
         return products
     
     async def _get_product_urls_from_search(self, keyword: str, max_products: int) -> List[str]:
-        """Get product URLs from search results page"""
         page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
         await self._apply_anti_detection(page)
         
         urls = []
+        search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
+        
         try:
-            search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
             print(f"Fetching search results: {search_url}")
+            print(f"Using provider: {self.current_provider_name}")
             
             response = await page.goto(search_url, timeout=90000, wait_until="domcontentloaded")
-            print(f"Search page response: {response.status if response else 'No response'}")
+            status = response.status if response else 0
+            print(f"Search page response: {status}")
+            
+            debug_logger.log_request(search_url, self.current_provider_name, status)
+            
+            if status in [403, 429, 503]:
+                content = await page.content()
+                debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
+                print(f"ERROR: Received {status} status - possible bot detection or rate limiting")
+                return []
             
             await self._random_delay(3000, 5000)
             await self._simulate_human_behavior(page)
             
             content = await page.content()
+            
+            if "captcha" in content.lower() or "robot" in content.lower():
+                debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
+                print("WARNING: CAPTCHA or robot detection detected!")
+                return []
+            
             soup = BeautifulSoup(content, 'html.parser')
             
             product_links = soup.select('a[href*="-pm-"], a[href*="-p-"]')
@@ -138,8 +181,13 @@ class ScrapingService:
             
             print(f"Extracted {len(urls)} unique product URLs from search")
             
+            if len(urls) > 0:
+                debug_logger.log_request(search_url, self.current_provider_name, status, f"Found {len(urls)} products")
+            else:
+                debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
+            
         except Exception as e:
-            print(f"Error getting product URLs: {e}")
+            debug_logger.log_error(search_url, self.current_provider_name, e)
             import traceback
             traceback.print_exc()
         finally:
@@ -148,15 +196,20 @@ class ScrapingService:
         return urls
     
     async def scrape_product_detail_page(self, url: str) -> Optional[Dict[str, Any]]:
-        """Scrape comprehensive product data from detail page"""
         page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
         await self._apply_anti_detection(page)
         
         try:
             response = await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            if not response or response.status != 200:
-                print(f"Bad response for {url}: {response.status if response else 'None'}")
+            status = response.status if response else 0
+            
+            debug_logger.log_request(url, self.current_provider_name, status)
+            
+            if status not in [200, 301, 302]:
+                print(f"Bad response for {url}: {status}")
+                content = await page.content()
+                debug_logger.save_debug_html(url, content, status, self.current_provider_name)
                 return None
             
             await self._random_delay(2000, 4000)
@@ -190,7 +243,7 @@ class ScrapingService:
             return product_data
             
         except Exception as e:
-            print(f"Error scraping product detail: {e}")
+            debug_logger.log_error(url, self.current_provider_name, e)
             import traceback
             traceback.print_exc()
             return None
@@ -198,14 +251,12 @@ class ScrapingService:
             await page.close()
     
     def _extract_external_id(self, url: str) -> str:
-        """Extract product ID from URL"""
         match = re.search(r'-pm?-(\w+)', url)
         if match:
             return match.group(1)
         return url.split('/')[-1]
     
     def _extract_utag_data(self, html_content: str) -> Optional[Dict]:
-        """Extract utagData JavaScript object from page"""
         try:
             match = re.search(r'const\s+utagData\s*=\s*(\{[^;]+\});', html_content)
             if match:
@@ -218,7 +269,6 @@ class ScrapingService:
         return None
     
     def _extract_json_ld_data(self, soup: BeautifulSoup) -> Optional[Dict]:
-        """Extract JSON-LD structured data"""
         try:
             scripts = soup.select('script[type="application/ld+json"]')
             for script in scripts:
@@ -238,7 +288,6 @@ class ScrapingService:
         return None
     
     def _parse_utag_data(self, utag: Dict) -> Dict[str, Any]:
-        """Parse utagData into structured product data"""
         data = {}
         
         if 'product_name_array' in utag:
@@ -294,7 +343,6 @@ class ScrapingService:
         return data
     
     def _parse_json_ld_data(self, json_ld: Dict) -> Dict[str, Any]:
-        """Parse JSON-LD data into product data"""
         data = {}
         
         if 'name' in json_ld and 'name' not in data:
@@ -333,7 +381,6 @@ class ScrapingService:
         return data
     
     def _extract_html_data(self, soup: BeautifulSoup) -> Dict[str, Any]:
-        """Extract data directly from HTML elements"""
         data = {}
         
         price_elem = soup.select_one('[data-test-id="price-current-price"]')
@@ -409,7 +456,6 @@ class ScrapingService:
         return data
     
     def _extract_other_sellers(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-        """Extract other sellers information"""
         sellers = []
         
         seller_section = soup.select('[class*="otherSeller"], [data-test-id*="other-seller"]')
@@ -452,7 +498,6 @@ class ScrapingService:
         return sellers
     
     def _extract_reviews(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-        """Extract product reviews"""
         reviews = []
         
         review_cards = soup.select('[class*="reviewCard"], [data-test-id*="review"]')
@@ -478,7 +523,6 @@ class ScrapingService:
         return reviews[:20]
     
     def _extract_coupons(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-        """Extract available coupons"""
         coupons = []
         
         coupon_section = soup.select('[class*="coupon"], [data-test-id*="coupon"]')
@@ -502,7 +546,6 @@ class ScrapingService:
         return coupons
     
     def _extract_campaigns(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-        """Extract active campaigns"""
         campaigns = []
         
         campaign_links = soup.select('a[href*="/kampanyalar/"]')
@@ -520,7 +563,6 @@ class ScrapingService:
         return campaigns[:5]
     
     async def _apply_anti_detection(self, page: Page):
-        """Apply anti-detection measures"""
         await page.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
@@ -537,7 +579,6 @@ class ScrapingService:
         """)
     
     async def _simulate_human_behavior(self, page: Page):
-        """Simulate human-like mouse movements and scrolling"""
         try:
             await page.mouse.move(random.randint(100, 500), random.randint(100, 300))
             await self._random_delay(200, 500)
@@ -548,7 +589,18 @@ class ScrapingService:
             pass
     
     async def _random_delay(self, min_ms: int, max_ms: int):
-        """Add random delay to simulate human behavior"""
         import asyncio
         delay = random.randint(min_ms, max_ms)
         await asyncio.sleep(delay / 1000)
+
+
+def get_proxy_status() -> Dict[str, Any]:
+    providers = proxy_manager.get_available_providers()
+    primary = proxy_manager.get_primary_provider()
+    
+    return {
+        "providers": providers,
+        "primary_provider": primary.name if primary else "none",
+        "debug_enabled": settings.DEBUG_SAVE_HTML,
+        "debug_path": settings.DEBUG_HTML_PATH
+    }
