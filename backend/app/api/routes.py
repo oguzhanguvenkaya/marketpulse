@@ -3,11 +3,11 @@ from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from uuid import UUID
 from app.db.database import get_db, SessionLocal
-from app.db.models import Product, ProductSnapshot, SearchTask
+from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask
 from app.services.scraping import ScrapingService
 from app.services.llm_service import LLMService
 
@@ -32,30 +32,73 @@ class SearchTaskResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class CouponResponse(BaseModel):
+    amount: Optional[int] = None
+    min_order: Optional[int] = None
+
+class CampaignResponse(BaseModel):
+    name: str
+    url: Optional[str] = None
+
+class SellerResponse(BaseModel):
+    seller_name: str
+    seller_rating: Optional[float] = None
+    price: Optional[float] = None
+    is_authorized: bool = False
+
+class ReviewResponse(BaseModel):
+    author: Optional[str] = None
+    rating: Optional[int] = None
+    review_text: Optional[str] = None
+    review_date: Optional[str] = None
+    seller_name: Optional[str] = None
+
 class ProductResponse(BaseModel):
     id: str
     platform: str
     external_id: str
+    sku: Optional[str] = None
+    barcode: Optional[str] = None
     name: str
     url: str
-    seller_name: Optional[str]
-    category_path: Optional[str]
-    image_url: Optional[str]
+    brand: Optional[str] = None
+    seller_name: Optional[str] = None
+    seller_rating: Optional[float] = None
+    category_path: Optional[str] = None
+    category_hierarchy: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    origin_country: Optional[str] = None
     latest_price: Optional[float] = None
+    discounted_price: Optional[float] = None
+    discount_percentage: Optional[float] = None
     latest_rating: Optional[float] = None
     reviews_count: Optional[int] = None
+    stock_count: Optional[int] = None
+    in_stock: Optional[bool] = None
     is_sponsored: Optional[bool] = None
+    coupons: Optional[List[Dict[str, Any]]] = None
+    campaigns: Optional[List[Dict[str, Any]]] = None
     
     class Config:
         from_attributes = True
 
+class ProductDetailResponse(ProductResponse):
+    other_sellers: List[SellerResponse] = []
+    reviews: List[ReviewResponse] = []
+
 class SnapshotResponse(BaseModel):
     id: int
-    price: Optional[float]
-    rating: Optional[float]
-    reviews_count: Optional[int]
-    in_stock: bool
-    is_sponsored: bool
+    price: Optional[float] = None
+    discounted_price: Optional[float] = None
+    discount_percentage: Optional[float] = None
+    rating: Optional[float] = None
+    reviews_count: Optional[int] = None
+    stock_count: Optional[int] = None
+    in_stock: bool = True
+    is_sponsored: bool = False
+    coupons: Optional[List[Dict[str, Any]]] = None
+    campaigns: Optional[List[Dict[str, Any]]] = None
     snapshot_date: str
     
     class Config:
@@ -91,14 +134,34 @@ async def run_scraping_background(task_id: str):
                 
                 if existing:
                     product = existing
+                    product.name = p_data.get("name", product.name)
+                    product.brand = p_data.get("brand", product.brand)
+                    product.seller_name = p_data.get("seller_name", product.seller_name)
+                    product.seller_rating = p_data.get("seller_rating", product.seller_rating)
+                    product.category_path = p_data.get("category_path", product.category_path)
+                    product.category_hierarchy = p_data.get("category_hierarchy", product.category_hierarchy)
+                    product.image_url = p_data.get("image_url", product.image_url)
+                    product.description = p_data.get("description", product.description)
+                    product.sku = p_data.get("sku", product.sku)
+                    product.barcode = p_data.get("barcode", product.barcode)
+                    product.origin_country = p_data.get("origin_country", product.origin_country)
+                    product.updated_at = datetime.utcnow()
                 else:
                     product = Product(
                         platform=p_data["platform"],
                         external_id=p_data["external_id"],
-                        name=p_data["name"],
+                        name=p_data.get("name", "Unknown"),
                         url=p_data["url"],
+                        brand=p_data.get("brand"),
                         seller_name=p_data.get("seller_name"),
-                        image_url=p_data.get("image_url")
+                        seller_rating=p_data.get("seller_rating"),
+                        category_path=p_data.get("category_path"),
+                        category_hierarchy=p_data.get("category_hierarchy"),
+                        image_url=p_data.get("image_url"),
+                        description=p_data.get("description"),
+                        sku=p_data.get("sku"),
+                        barcode=p_data.get("barcode"),
+                        origin_country=p_data.get("origin_country")
                     )
                     db.add(product)
                     db.flush()
@@ -112,13 +175,51 @@ async def run_scraping_background(task_id: str):
                     snapshot = ProductSnapshot(
                         product_id=product.id,
                         price=p_data.get("price"),
+                        discounted_price=p_data.get("discounted_price"),
+                        discount_percentage=p_data.get("discount_percentage"),
                         rating=p_data.get("rating"),
                         reviews_count=p_data.get("reviews_count", 0),
+                        stock_count=p_data.get("stock_count"),
                         in_stock=p_data.get("in_stock", True),
                         is_sponsored=p_data.get("is_sponsored", False),
+                        coupons=p_data.get("coupons", []),
+                        campaigns=p_data.get("campaigns", []),
                         snapshot_date=today
                     )
                     db.add(snapshot)
+                
+                db.query(ProductSeller).filter(
+                    ProductSeller.product_id == product.id,
+                    ProductSeller.snapshot_date == today
+                ).delete()
+                
+                for seller in p_data.get("other_sellers", []):
+                    ps = ProductSeller(
+                        product_id=product.id,
+                        seller_name=seller.get("seller_name", "Unknown"),
+                        seller_rating=seller.get("seller_rating"),
+                        price=seller.get("price"),
+                        is_authorized=seller.get("is_authorized", False),
+                        shipping_info=seller.get("shipping_info"),
+                        snapshot_date=today
+                    )
+                    db.add(ps)
+                
+                existing_reviews = db.query(ProductReview).filter(
+                    ProductReview.product_id == product.id
+                ).count()
+                
+                if existing_reviews == 0:
+                    for review in p_data.get("reviews", [])[:20]:
+                        pr = ProductReview(
+                            product_id=product.id,
+                            author=review.get("author"),
+                            rating=review.get("rating"),
+                            review_text=review.get("review_text"),
+                            review_date=review.get("review_date"),
+                            seller_name=review.get("seller_name")
+                        )
+                        db.add(pr)
                 
                 saved_count += 1
             
@@ -131,6 +232,8 @@ async def run_scraping_background(task_id: str):
         finally:
             await scraper.close_browser()
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         task = db.query(SearchTask).filter(SearchTask.id == task_id).first()
         if task:
             task.status = "failed"
@@ -217,20 +320,33 @@ async def list_products(
             id=str(p.id),
             platform=p.platform,
             external_id=p.external_id,
+            sku=p.sku,
+            barcode=p.barcode,
             name=p.name,
             url=p.url,
+            brand=p.brand,
             seller_name=p.seller_name,
+            seller_rating=p.seller_rating,
             category_path=p.category_path,
+            category_hierarchy=p.category_hierarchy,
             image_url=p.image_url,
+            description=p.description[:500] if p.description else None,
+            origin_country=p.origin_country,
             latest_price=float(latest.price) if latest and latest.price else None,
+            discounted_price=float(latest.discounted_price) if latest and latest.discounted_price else None,
+            discount_percentage=latest.discount_percentage if latest else None,
             latest_rating=latest.rating if latest else None,
             reviews_count=latest.reviews_count if latest else None,
-            is_sponsored=latest.is_sponsored if latest else None
+            stock_count=latest.stock_count if latest else None,
+            in_stock=latest.in_stock if latest else None,
+            is_sponsored=latest.is_sponsored if latest else None,
+            coupons=latest.coupons if latest else None,
+            campaigns=latest.campaigns if latest else None
         ))
     
     return result
 
-@router.get("/products/{product_id}", response_model=ProductResponse)
+@router.get("/products/{product_id}", response_model=ProductDetailResponse)
 async def get_product(product_id: str, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
@@ -240,19 +356,57 @@ async def get_product(product_id: str, db: Session = Depends(get_db)):
         ProductSnapshot.product_id == product.id
     ).order_by(desc(ProductSnapshot.snapshot_date)).first()
     
-    return ProductResponse(
+    other_sellers = db.query(ProductSeller).filter(
+        ProductSeller.product_id == product.id
+    ).order_by(desc(ProductSeller.snapshot_date)).limit(10).all()
+    
+    reviews = db.query(ProductReview).filter(
+        ProductReview.product_id == product.id
+    ).limit(20).all()
+    
+    return ProductDetailResponse(
         id=str(product.id),
         platform=product.platform,
         external_id=product.external_id,
+        sku=product.sku,
+        barcode=product.barcode,
         name=product.name,
         url=product.url,
+        brand=product.brand,
         seller_name=product.seller_name,
+        seller_rating=product.seller_rating,
         category_path=product.category_path,
+        category_hierarchy=product.category_hierarchy,
         image_url=product.image_url,
+        description=product.description,
+        origin_country=product.origin_country,
         latest_price=float(latest.price) if latest and latest.price else None,
+        discounted_price=float(latest.discounted_price) if latest and latest.discounted_price else None,
+        discount_percentage=latest.discount_percentage if latest else None,
         latest_rating=latest.rating if latest else None,
         reviews_count=latest.reviews_count if latest else None,
-        is_sponsored=latest.is_sponsored if latest else None
+        stock_count=latest.stock_count if latest else None,
+        in_stock=latest.in_stock if latest else None,
+        is_sponsored=latest.is_sponsored if latest else None,
+        coupons=latest.coupons if latest else None,
+        campaigns=latest.campaigns if latest else None,
+        other_sellers=[
+            SellerResponse(
+                seller_name=s.seller_name,
+                seller_rating=s.seller_rating,
+                price=float(s.price) if s.price else None,
+                is_authorized=s.is_authorized
+            ) for s in other_sellers
+        ],
+        reviews=[
+            ReviewResponse(
+                author=r.author,
+                rating=r.rating,
+                review_text=r.review_text,
+                review_date=r.review_date.isoformat() if r.review_date else None,
+                seller_name=r.seller_name
+            ) for r in reviews
+        ]
     )
 
 @router.get("/products/{product_id}/snapshots", response_model=List[SnapshotResponse])
@@ -271,10 +425,15 @@ async def get_product_snapshots(
         SnapshotResponse(
             id=s.id,
             price=float(s.price) if s.price else None,
+            discounted_price=float(s.discounted_price) if s.discounted_price else None,
+            discount_percentage=s.discount_percentage,
             rating=s.rating,
             reviews_count=s.reviews_count,
+            stock_count=s.stock_count,
             in_stock=s.in_stock,
             is_sponsored=s.is_sponsored,
+            coupons=s.coupons,
+            campaigns=s.campaigns,
             snapshot_date=s.snapshot_date.isoformat()
         ) for s in snapshots
     ]
@@ -291,15 +450,22 @@ async def analyze_products(request: AnalysisRequest, db: Session = Depends(get_d
             
             products_data.append({
                 "name": product.name,
+                "brand": product.brand,
                 "platform": product.platform,
                 "seller": product.seller_name,
+                "category": product.category_hierarchy,
+                "description": product.description[:1000] if product.description else None,
                 "snapshots": [
                     {
                         "date": s.snapshot_date.isoformat(),
                         "price": float(s.price) if s.price else None,
+                        "discounted_price": float(s.discounted_price) if s.discounted_price else None,
                         "rating": s.rating,
                         "reviews": s.reviews_count,
-                        "sponsored": s.is_sponsored
+                        "stock": s.stock_count,
+                        "sponsored": s.is_sponsored,
+                        "coupons": s.coupons,
+                        "campaigns": s.campaigns
                     } for s in snapshots
                 ]
             })
@@ -314,10 +480,14 @@ async def get_stats(db: Session = Depends(get_db)):
     total_snapshots = db.query(ProductSnapshot).count()
     total_tasks = db.query(SearchTask).count()
     completed_tasks = db.query(SearchTask).filter(SearchTask.status == "completed").count()
+    total_sellers = db.query(ProductSeller).count()
+    total_reviews = db.query(ProductReview).count()
     
     return {
         "total_products": total_products,
         "total_snapshots": total_snapshots,
         "total_tasks": total_tasks,
-        "completed_tasks": completed_tasks
+        "completed_tasks": completed_tasks,
+        "total_sellers": total_sellers,
+        "total_reviews": total_reviews
     }

@@ -11,11 +11,14 @@ from app.core.config import settings
 
 stealth = Stealth()
 
+MAX_PRODUCTS_PER_SEARCH = 8
+
 class ScrapingService:
     def __init__(self):
         self.proxy_config = settings.bright_data_proxy_config
         self.browser: Optional[Browser] = None
         self.playwright = None
+        self.context = None
     
     async def init_browser(self):
         self.playwright = await async_playwright().start()
@@ -23,7 +26,6 @@ class ScrapingService:
         if self.proxy_config:
             print(f"Launching browser with Bright Data Residential Proxy...")
             print(f"Proxy server: {self.proxy_config['server']}")
-            print(f"Username: {self.proxy_config['username']}")
             self.browser = await self.playwright.chromium.launch(
                 headless=True,
                 proxy=self.proxy_config
@@ -33,20 +35,7 @@ class ScrapingService:
             print("No Bright Data credentials, using local browser")
             self.browser = await self.playwright.chromium.launch(headless=True)
         
-        return self.browser
-    
-    async def close_browser(self):
-        if self.browser:
-            await self.browser.close()
-        if self.playwright:
-            await self.playwright.stop()
-    
-    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = 100) -> List[Dict[str, Any]]:
-        if not self.browser:
-            await self.init_browser()
-        
-        products = []
-        context = await self.browser.new_context(
+        self.context = await self.browser.new_context(
             ignore_https_errors=True,
             viewport={'width': 1920, 'height': 1080},
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -67,229 +56,499 @@ class ScrapingService:
                 'Upgrade-Insecure-Requests': '1'
             }
         )
-        page = await context.new_page()
         
+        return self.browser
+    
+    async def close_browser(self):
+        if self.context:
+            await self.context.close()
+        if self.browser:
+            await self.browser.close()
+        if self.playwright:
+            await self.playwright.stop()
+    
+    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
+        """
+        Two-stage scraping:
+        1. Get product URLs from search/listing page
+        2. Visit each product detail page for comprehensive data
+        """
+        if not self.browser:
+            await self.init_browser()
+        
+        product_urls = await self._get_product_urls_from_search(keyword, max_products)
+        print(f"Found {len(product_urls)} product URLs to scrape")
+        
+        products = []
+        for i, url in enumerate(product_urls[:max_products]):
+            print(f"Scraping product {i+1}/{len(product_urls[:max_products])}: {url[:80]}...")
+            try:
+                product_data = await self.scrape_product_detail_page(url)
+                if product_data:
+                    products.append(product_data)
+                    print(f"  -> Successfully scraped: {product_data.get('name', 'Unknown')[:50]}")
+                await self._random_delay(1000, 3000)
+            except Exception as e:
+                print(f"  -> Error scraping product: {e}")
+                continue
+        
+        print(f"Successfully scraped {len(products)} products with full details")
+        return products
+    
+    async def _get_product_urls_from_search(self, keyword: str, max_products: int) -> List[str]:
+        """Get product URLs from search results page"""
+        page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
+        await self._apply_anti_detection(page)
         
-        await page.add_init_script("""
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined
-            });
-        """)
-        
+        urls = []
         try:
             search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
-            print(f"Scraping URL: {search_url}")
+            print(f"Fetching search results: {search_url}")
             
             response = await page.goto(search_url, timeout=90000, wait_until="domcontentloaded")
-            print(f"Response status: {response.status if response else 'No response'}")
-            print(f"Response URL: {response.url if response else 'No URL'}")
+            print(f"Search page response: {response.status if response else 'No response'}")
             
-            await page.wait_for_timeout(random.randint(3000, 5000))
-            
-            await page.mouse.move(random.randint(100, 500), random.randint(100, 300))
-            await page.wait_for_timeout(random.randint(500, 1000))
-            
-            current_url = page.url
-            page_title = await page.title()
-            print(f"Current URL: {current_url}")
-            print(f"Page title: {page_title}")
-            
-            if "güvenlik" in page_title.lower() or "security" in page_title.lower():
-                print("Security page detected, waiting longer...")
-                await page.wait_for_timeout(10000)
-            
-            try:
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
-                await page.wait_for_timeout(2000)
-            except:
-                pass
+            await self._random_delay(3000, 5000)
+            await self._simulate_human_behavior(page)
             
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
             
-            print(f"Page title: {soup.title.string if soup.title else 'No title'}")
-            print(f"Content length: {len(content)}")
+            product_links = soup.select('a[href*="-pm-"], a[href*="-p-"]')
+            seen_urls = set()
             
-            product_cards = soup.select('li[class*="productListContent"]')
-            print(f"Found {len(product_cards)} product cards with productListContent")
+            for link in product_links:
+                href = link.get('href', '')
+                if href and ('-pm-' in href or '-p-' in href):
+                    if href.startswith('/'):
+                        full_url = f"https://www.hepsiburada.com{href}"
+                    elif href.startswith('http'):
+                        full_url = href
+                    else:
+                        continue
+                    
+                    base_url = full_url.split('?')[0]
+                    if base_url not in seen_urls:
+                        seen_urls.add(base_url)
+                        urls.append(base_url)
+                        
+                        if len(urls) >= max_products:
+                            break
             
-            if not product_cards:
-                product_cards = soup.select('[data-test-id="product-card-item"]')
-                print(f"Found {len(product_cards)} product cards with data-test-id")
-            
-            if not product_cards:
-                product_cards = soup.select('div[class*="moria-ProductCard"]')
-                print(f"Found {len(product_cards)} product cards with moria-ProductCard")
-            
-            if not product_cards:
-                all_links = soup.select('a[href*="-p-"]')
-                print(f"Found {len(all_links)} links with -p- pattern")
-                seen_parents = set()
-                for link in all_links:
-                    parent = link.find_parent('li') or link.find_parent('div', class_=lambda x: x and 'product' in x.lower() if x else False)
-                    if parent and id(parent) not in seen_parents:
-                        seen_parents.add(id(parent))
-                        product_cards.append(parent)
-                print(f"Extracted {len(product_cards)} unique product containers")
-            
-            for i, card in enumerate(product_cards[:max_products]):
-                try:
-                    product = self._parse_hepsiburada_card(card, debug=(i < 3))
-                    if product:
-                        products.append(product)
-                except Exception as e:
-                    print(f"Parse error: {e}")
-                    continue
-            
-            print(f"Successfully parsed {len(products)} products")
+            print(f"Extracted {len(urls)} unique product URLs from search")
             
         except Exception as e:
-            print(f"Scraping error: {e}")
+            print(f"Error getting product URLs: {e}")
             import traceback
             traceback.print_exc()
         finally:
             await page.close()
         
-        return products
+        return urls
     
-    def _parse_hepsiburada_card(self, card, debug=False) -> Optional[Dict[str, Any]]:
+    async def scrape_product_detail_page(self, url: str) -> Optional[Dict[str, Any]]:
+        """Scrape comprehensive product data from detail page"""
+        page = await self.context.new_page()
+        await stealth.apply_stealth_async(page)
+        await self._apply_anti_detection(page)
+        
         try:
-            link_elem = card.select_one('a[href*="-p-"]') or card.select_one('a[href*="/"]')
-            url = ""
-            external_id = ""
-            if link_elem:
-                href = link_elem.get('href', '')
-                if href.startswith('/'):
-                    url = f"https://www.hepsiburada.com{href}"
-                elif href.startswith('http'):
-                    url = href
-                else:
-                    url = f"https://www.hepsiburada.com/{href}"
-                match = re.search(r'-p-(\w+)', url)
-                if match:
-                    external_id = match.group(1)
-            
-            if debug:
-                print(f"DEBUG - URL: {url[:80] if url else 'None'}...")
-            
-            name_elem = card.select_one('[data-test-id="product-card-name"]') or \
-                       card.select_one('h3') or \
-                       card.select_one('[class*="productName"]') or \
-                       card.select_one('[class*="product-title"]') or \
-                       card.select_one('a[title]') or \
-                       card.select_one('span[title]')
-            name = ""
-            if name_elem:
-                name = name_elem.get('title') or name_elem.get_text(strip=True)
-            
-            if debug:
-                print(f"DEBUG - Name: {name[:50] if name else 'None'}...")
-            
-            price_elem = card.select_one('[data-test-id="price-current-price"]') or \
-                        card.select_one('[class*="price"]')
-            price = None
-            if price_elem:
-                price_text = price_elem.get_text(strip=True)
-                price_match = re.search(r'[\d.,]+', price_text.replace('.', '').replace(',', '.'))
-                if price_match:
-                    try:
-                        price = float(price_match.group())
-                    except:
-                        pass
-            
-            rating_elem = card.select_one('[class*="rating"]') or card.select_one('[data-test-id="rating"]')
-            rating = None
-            if rating_elem:
-                rating_text = rating_elem.get_text(strip=True)
-                rating_match = re.search(r'[\d.]+', rating_text)
-                if rating_match:
-                    try:
-                        rating = float(rating_match.group())
-                    except:
-                        pass
-            
-            reviews_elem = card.select_one('[class*="review"]') or card.select_one('[data-test-id="review-count"]')
-            reviews_count = 0
-            if reviews_elem:
-                reviews_text = reviews_elem.get_text(strip=True)
-                reviews_match = re.search(r'[\d.]+', reviews_text.replace('.', ''))
-                if reviews_match:
-                    try:
-                        reviews_count = int(reviews_match.group())
-                    except:
-                        pass
-            
-            img_elem = card.select_one('img')
-            image_url = img_elem.get('src') or img_elem.get('data-src') if img_elem else None
-            
-            is_sponsored = bool(card.select_one('[class*="sponsored"]') or 
-                              card.select_one('[data-test-id="sponsored"]') or
-                              'sponsor' in str(card).lower())
-            
-            seller_elem = card.select_one('[class*="seller"]') or card.select_one('[data-test-id="seller"]')
-            seller_name = seller_elem.get_text(strip=True) if seller_elem else None
-            
-            if debug:
-                print(f"DEBUG - Final check: name={bool(name)}, url={bool(url)}")
-            
-            if not name and not url:
+            response = await page.goto(url, timeout=60000, wait_until="domcontentloaded")
+            if not response or response.status != 200:
+                print(f"Bad response for {url}: {response.status if response else 'None'}")
                 return None
             
-            if not url and external_id:
-                url = f"https://www.hepsiburada.com/-p-{external_id}"
-            
-            return {
-                "platform": "hepsiburada",
-                "external_id": external_id or url.split('/')[-1],
-                "name": name,
-                "url": url,
-                "price": price,
-                "rating": rating,
-                "reviews_count": reviews_count,
-                "image_url": image_url,
-                "is_sponsored": is_sponsored,
-                "seller_name": seller_name,
-                "in_stock": True
-            }
-        except Exception as e:
-            return None
-    
-    async def scrape_product_details(self, url: str) -> Optional[Dict[str, Any]]:
-        if not self.browser:
-            await self.init_browser()
-        
-        page = await self.browser.new_page()
-        
-        try:
-            await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            await page.wait_for_timeout(2000)
+            await self._random_delay(2000, 4000)
             
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
             
-            name_elem = soup.select_one('h1') or soup.select_one('[data-test-id="product-name"]')
-            name = name_elem.get_text(strip=True) if name_elem else ""
+            utag_data = self._extract_utag_data(content)
+            json_ld_data = self._extract_json_ld_data(soup)
             
-            price_elem = soup.select_one('[data-test-id="price-current-price"]') or \
-                        soup.select_one('[class*="price"]')
-            price = None
-            if price_elem:
-                price_text = price_elem.get_text(strip=True)
-                price_match = re.search(r'[\d.,]+', price_text.replace('.', '').replace(',', '.'))
-                if price_match:
-                    try:
-                        price = float(price_match.group())
-                    except:
-                        pass
-            
-            return {
-                "name": name,
-                "price": price,
-                "url": url
+            product_data = {
+                "platform": "hepsiburada",
+                "url": url,
+                "external_id": self._extract_external_id(url),
             }
+            
+            if utag_data:
+                product_data.update(self._parse_utag_data(utag_data))
+            
+            if json_ld_data:
+                product_data.update(self._parse_json_ld_data(json_ld_data))
+            
+            html_data = self._extract_html_data(soup)
+            product_data.update(html_data)
+            
+            product_data['other_sellers'] = self._extract_other_sellers(soup)
+            product_data['reviews'] = self._extract_reviews(soup)
+            product_data['coupons'] = self._extract_coupons(soup)
+            product_data['campaigns'] = self._extract_campaigns(soup)
+            
+            return product_data
+            
         except Exception as e:
-            print(f"Product detail error: {e}")
+            print(f"Error scraping product detail: {e}")
+            import traceback
+            traceback.print_exc()
             return None
         finally:
             await page.close()
+    
+    def _extract_external_id(self, url: str) -> str:
+        """Extract product ID from URL"""
+        match = re.search(r'-pm?-(\w+)', url)
+        if match:
+            return match.group(1)
+        return url.split('/')[-1]
+    
+    def _extract_utag_data(self, html_content: str) -> Optional[Dict]:
+        """Extract utagData JavaScript object from page"""
+        try:
+            match = re.search(r'const\s+utagData\s*=\s*(\{[^;]+\});', html_content)
+            if match:
+                json_str = match.group(1)
+                json_str = re.sub(r',\s*}', '}', json_str)
+                json_str = re.sub(r',\s*]', ']', json_str)
+                return json.loads(json_str)
+        except Exception as e:
+            print(f"Error extracting utagData: {e}")
+        return None
+    
+    def _extract_json_ld_data(self, soup: BeautifulSoup) -> Optional[Dict]:
+        """Extract JSON-LD structured data"""
+        try:
+            scripts = soup.select('script[type="application/ld+json"]')
+            for script in scripts:
+                try:
+                    data = json.loads(script.string)
+                    if isinstance(data, list):
+                        for item in data:
+                            if item.get('@type') == 'Product':
+                                return item
+                    elif isinstance(data, dict):
+                        if data.get('@type') == 'Product':
+                            return data
+                except:
+                    continue
+        except Exception as e:
+            print(f"Error extracting JSON-LD: {e}")
+        return None
+    
+    def _parse_utag_data(self, utag: Dict) -> Dict[str, Any]:
+        """Parse utagData into structured product data"""
+        data = {}
+        
+        if 'product_name_array' in utag:
+            data['name'] = utag['product_name_array']
+        elif 'product_names' in utag and utag['product_names']:
+            data['name'] = utag['product_names'][0] if isinstance(utag['product_names'], list) else utag['product_names']
+        
+        if 'product_brand' in utag:
+            data['brand'] = utag['product_brand']
+        elif 'product_brands' in utag and utag['product_brands']:
+            data['brand'] = utag['product_brands'][0] if isinstance(utag['product_brands'], list) else utag['product_brands']
+        
+        if 'merchant_names' in utag and utag['merchant_names']:
+            data['seller_name'] = utag['merchant_names'][0] if isinstance(utag['merchant_names'], list) else utag['merchant_names']
+        
+        if 'category_name_hierarchy' in utag:
+            data['category_hierarchy'] = utag['category_name_hierarchy']
+        
+        if 'category_path' in utag:
+            data['category_path'] = utag['category_path']
+        
+        if 'product_barcode' in utag:
+            data['barcode'] = utag['product_barcode']
+        elif 'product_barcodes' in utag and utag['product_barcodes']:
+            data['barcode'] = utag['product_barcodes'][0]
+        
+        if 'product_skus' in utag and utag['product_skus']:
+            data['sku'] = utag['product_skus'][0]
+        
+        if 'product_status' in utag:
+            data['in_stock'] = utag['product_status'].lower() == 'instock'
+        
+        if 'review_rate' in utag:
+            try:
+                rating_str = str(utag['review_rate']).replace(',', '.')
+                data['rating'] = float(rating_str)
+            except:
+                pass
+        
+        if 'review_count' in utag:
+            try:
+                data['reviews_count'] = int(str(utag['review_count']).replace('.', ''))
+            except:
+                pass
+        
+        if 'product_prices' in utag and utag['product_prices']:
+            try:
+                price_str = str(utag['product_prices'][0]).replace('.', '').replace(',', '.')
+                data['price'] = float(price_str)
+            except:
+                pass
+        
+        return data
+    
+    def _parse_json_ld_data(self, json_ld: Dict) -> Dict[str, Any]:
+        """Parse JSON-LD data into product data"""
+        data = {}
+        
+        if 'name' in json_ld and 'name' not in data:
+            data['name'] = json_ld['name']
+        
+        if 'description' in json_ld:
+            data['description'] = json_ld['description']
+        
+        if 'sku' in json_ld:
+            data['sku'] = json_ld['sku']
+        
+        if 'gtin' in json_ld:
+            data['barcode'] = json_ld['gtin']
+        
+        if 'brand' in json_ld:
+            brand = json_ld['brand']
+            if isinstance(brand, dict):
+                data['brand'] = brand.get('name', '')
+            else:
+                data['brand'] = str(brand)
+        
+        if 'aggregateRating' in json_ld:
+            rating = json_ld['aggregateRating']
+            if 'ratingValue' in rating:
+                data['rating'] = float(rating['ratingValue'])
+            if 'ratingCount' in rating:
+                data['reviews_count'] = int(rating['ratingCount'])
+        
+        if 'image' in json_ld:
+            img = json_ld['image']
+            if isinstance(img, list):
+                data['image_url'] = img[0] if img else None
+            else:
+                data['image_url'] = img
+        
+        return data
+    
+    def _extract_html_data(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract data directly from HTML elements"""
+        data = {}
+        
+        price_elem = soup.select_one('[data-test-id="price-current-price"]')
+        if not price_elem:
+            price_elem = soup.select_one('[class*="currentPrice"]')
+        if price_elem:
+            price_text = price_elem.get_text(strip=True)
+            try:
+                price_str = re.sub(r'[^\d,.]', '', price_text).replace('.', '').replace(',', '.')
+                if price_str:
+                    data['price'] = float(price_str)
+            except:
+                pass
+        
+        discounted_elem = soup.select_one('[class*="discountedPrice"]')
+        if not discounted_elem:
+            campaign_price = soup.find(string=re.compile(r'Sepete özel fiyat'))
+            if campaign_price:
+                parent = campaign_price.find_parent()
+                if parent:
+                    price_match = re.search(r'[\d.]+,\d+', parent.get_text())
+                    if price_match:
+                        try:
+                            price_str = price_match.group().replace('.', '').replace(',', '.')
+                            data['discounted_price'] = float(price_str)
+                        except:
+                            pass
+        
+        stock_elem = soup.find(string=re.compile(r'Stok Adedi'))
+        if stock_elem:
+            parent = stock_elem.find_parent()
+            if parent:
+                next_elem = parent.find_next_sibling() or parent.find_next()
+                if next_elem:
+                    stock_text = next_elem.get_text(strip=True)
+                    match = re.search(r'(\d+)', stock_text)
+                    if match:
+                        data['stock_count'] = int(match.group(1))
+                    elif 'az' in stock_text.lower():
+                        data['stock_count'] = 50
+        
+        origin_elem = soup.find(string=re.compile(r'Menşei'))
+        if origin_elem:
+            parent = origin_elem.find_parent()
+            if parent:
+                next_elem = parent.find_next_sibling() or parent.find_next()
+                if next_elem:
+                    data['origin_country'] = next_elem.get_text(strip=True)
+        
+        desc_elem = soup.select_one('[class*="productDescription"]')
+        if not desc_elem:
+            desc_elem = soup.select_one('[data-test-id="product-description"]')
+        if desc_elem:
+            data['description'] = desc_elem.get_text(strip=True)[:5000]
+        
+        img_elem = soup.select_one('[class*="product-image"] img') or soup.select_one('[data-test-id="product-image"] img')
+        if not img_elem:
+            img_elem = soup.select_one('img[src*="productimages"]')
+        if img_elem:
+            data['image_url'] = img_elem.get('src') or img_elem.get('data-src')
+        
+        seller_rating_elem = soup.select_one('[class*="sellerRating"]')
+        if not seller_rating_elem:
+            seller_rating_text = soup.find(string=re.compile(r'\d+[,\.]\d+\s*Satıcı puanı'))
+            if seller_rating_text:
+                match = re.search(r'(\d+[,\.]\d+)', seller_rating_text)
+                if match:
+                    try:
+                        data['seller_rating'] = float(match.group(1).replace(',', '.'))
+                    except:
+                        pass
+        
+        return data
+    
+    def _extract_other_sellers(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Extract other sellers information"""
+        sellers = []
+        
+        seller_section = soup.select('[class*="otherSeller"], [data-test-id*="other-seller"]')
+        if not seller_section:
+            seller_links = soup.select('a[href*="/magaza/"]')
+            seen_sellers = set()
+            
+            for link in seller_links:
+                seller_name = link.get_text(strip=True)
+                if seller_name and seller_name not in seen_sellers and len(seller_name) < 100:
+                    seen_sellers.add(seller_name)
+                    
+                    parent = link.find_parent('div') or link.find_parent('li')
+                    seller_data = {
+                        'seller_name': seller_name,
+                        'is_authorized': 'yetkili' in str(parent).lower() if parent else False
+                    }
+                    
+                    if parent:
+                        price_elem = parent.select_one('[class*="price"]')
+                        if price_elem:
+                            price_text = price_elem.get_text(strip=True)
+                            match = re.search(r'[\d.]+,\d+', price_text)
+                            if match:
+                                try:
+                                    seller_data['price'] = float(match.group().replace('.', '').replace(',', '.'))
+                                except:
+                                    pass
+                        
+                        rating_match = re.search(r'(\d+[,\.]\d+)', parent.get_text())
+                        if rating_match:
+                            try:
+                                seller_data['seller_rating'] = float(rating_match.group(1).replace(',', '.'))
+                            except:
+                                pass
+                    
+                    if len(sellers) < 10:
+                        sellers.append(seller_data)
+        
+        return sellers
+    
+    def _extract_reviews(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Extract product reviews"""
+        reviews = []
+        
+        review_cards = soup.select('[class*="reviewCard"], [data-test-id*="review"]')
+        
+        if not review_cards:
+            json_ld_scripts = soup.select('script[type="application/ld+json"]')
+            for script in json_ld_scripts:
+                try:
+                    data = json.loads(script.string)
+                    if isinstance(data, list):
+                        for item in data:
+                            if item.get('@type') == 'Review':
+                                review = {
+                                    'author': item.get('author', 'Anonim'),
+                                    'rating': item.get('reviewRating', {}).get('ratingValue'),
+                                    'review_text': item.get('reviewBody', ''),
+                                    'review_date': item.get('datePublished')
+                                }
+                                reviews.append(review)
+                except:
+                    continue
+        
+        return reviews[:20]
+    
+    def _extract_coupons(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Extract available coupons"""
+        coupons = []
+        
+        coupon_section = soup.select('[class*="coupon"], [data-test-id*="coupon"]')
+        if not coupon_section:
+            coupon_text = soup.find(string=re.compile(r'Kupon'))
+            if coupon_text:
+                parent = coupon_text.find_parent('div')
+                if parent:
+                    amount_match = re.search(r'(\d+)\s*TL', parent.get_text())
+                    limit_match = re.search(r'Alt limit[:\s]*(\d+)', parent.get_text())
+                    
+                    coupon = {}
+                    if amount_match:
+                        coupon['amount'] = int(amount_match.group(1))
+                    if limit_match:
+                        coupon['min_order'] = int(limit_match.group(1))
+                    
+                    if coupon:
+                        coupons.append(coupon)
+        
+        return coupons
+    
+    def _extract_campaigns(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Extract active campaigns"""
+        campaigns = []
+        
+        campaign_links = soup.select('a[href*="/kampanyalar/"]')
+        seen = set()
+        
+        for link in campaign_links:
+            text = link.get_text(strip=True)
+            if text and text not in seen and len(text) > 5:
+                seen.add(text)
+                campaigns.append({
+                    'name': text,
+                    'url': link.get('href', '')
+                })
+        
+        return campaigns[:5]
+    
+    async def _apply_anti_detection(self, page: Page):
+        """Apply anti-detection measures"""
+        await page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5]
+            });
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['tr-TR', 'tr', 'en-US', 'en']
+            });
+            window.chrome = {
+                runtime: {}
+            };
+        """)
+    
+    async def _simulate_human_behavior(self, page: Page):
+        """Simulate human-like mouse movements and scrolling"""
+        try:
+            await page.mouse.move(random.randint(100, 500), random.randint(100, 300))
+            await self._random_delay(200, 500)
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 3)")
+            await self._random_delay(500, 1000)
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+        except:
+            pass
+    
+    async def _random_delay(self, min_ms: int, max_ms: int):
+        """Add random delay to simulate human behavior"""
+        import asyncio
+        delay = random.randint(min_ms, max_ms)
+        await asyncio.sleep(delay / 1000)

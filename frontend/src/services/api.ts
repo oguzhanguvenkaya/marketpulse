@@ -13,28 +13,76 @@ export interface SearchTask {
   created_at: string;
 }
 
+export interface Coupon {
+  amount?: number;
+  min_order?: number;
+}
+
+export interface Campaign {
+  name: string;
+  url?: string;
+}
+
+export interface Seller {
+  seller_name: string;
+  seller_rating?: number;
+  price?: number;
+  is_authorized: boolean;
+}
+
+export interface Review {
+  author?: string;
+  rating?: number;
+  review_text?: string;
+  review_date?: string;
+  seller_name?: string;
+}
+
 export interface Product {
   id: string;
   platform: string;
   external_id: string;
+  sku?: string;
+  barcode?: string;
   name: string;
   url: string;
+  brand?: string;
   seller_name?: string;
+  seller_rating?: number;
   category_path?: string;
+  category_hierarchy?: string;
   image_url?: string;
+  description?: string;
+  origin_country?: string;
   latest_price?: number;
+  discounted_price?: number;
+  discount_percentage?: number;
   latest_rating?: number;
   reviews_count?: number;
+  stock_count?: number;
+  in_stock?: boolean;
   is_sponsored?: boolean;
+  coupons?: Coupon[];
+  campaigns?: Campaign[];
+}
+
+export interface ProductDetail extends Product {
+  other_sellers: Seller[];
+  reviews: Review[];
 }
 
 export interface Snapshot {
   id: number;
   price?: number;
+  discounted_price?: number;
+  discount_percentage?: number;
   rating?: number;
   reviews_count?: number;
+  stock_count?: number;
   in_stock: boolean;
   is_sponsored: boolean;
+  coupons?: Coupon[];
+  campaigns?: Campaign[];
   snapshot_date: string;
 }
 
@@ -43,6 +91,8 @@ export interface Stats {
   total_snapshots: number;
   total_tasks: number;
   completed_tasks: number;
+  total_sellers?: number;
+  total_reviews?: number;
 }
 
 export const createSearchTask = async (keyword: string, platform: string = 'hepsiburada'): Promise<SearchTask> => {
@@ -65,7 +115,7 @@ export const getProducts = async (keyword?: string, platform?: string, limit: nu
   return response.data;
 };
 
-export const getProduct = async (productId: string): Promise<Product> => {
+export const getProduct = async (productId: string): Promise<ProductDetail> => {
   const response = await api.get(`/products/${productId}`);
   return response.data;
 };
