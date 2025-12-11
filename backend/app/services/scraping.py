@@ -2,6 +2,9 @@ import os
 import re
 import json
 import random
+import asyncio
+import aiohttp
+from urllib.parse import quote_plus
 from datetime import date
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
@@ -14,6 +17,8 @@ stealth = Stealth()
 
 MAX_PRODUCTS_PER_SEARCH = 8
 MAX_RETRIES = 2
+
+SCRAPERAPI_BASE_URL = "http://api.scraperapi.com"
 
 class ScrapingService:
     def __init__(self):
@@ -93,11 +98,171 @@ class ScrapingService:
         print("No fallback provider available")
         return False
     
-    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
-        if not self.browser:
-            await self.init_browser()
+    async def _fetch_with_scraperapi(self, url: str, render: bool = True) -> Optional[str]:
+        if not settings.SCRAPER_API_KEY:
+            return None
         
-        product_urls = await self._get_product_urls_from_search(keyword, max_products)
+        params = {
+            "api_key": settings.SCRAPER_API_KEY,
+            "url": url,
+            "render": "true" if render else "false",
+            "country_code": "tr",
+            "device_type": "desktop"
+        }
+        
+        api_url = f"{SCRAPERAPI_BASE_URL}?" + "&".join([f"{k}={quote_plus(str(v))}" for k, v in params.items()])
+        
+        print(f"ScraperAPI HTTP request: {url[:60]}...")
+        
+        try:
+            timeout = aiohttp.ClientTimeout(total=120)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(api_url) as response:
+                    status = response.status
+                    print(f"ScraperAPI response status: {status}")
+                    
+                    debug_logger.log_request(url, "scraperapi", status)
+                    
+                    if status == 200:
+                        html = await response.text()
+                        print(f"ScraperAPI returned {len(html)} bytes")
+                        return html
+                    elif status in [403, 429, 500, 503]:
+                        content = await response.text()
+                        debug_logger.save_debug_html(url, content, status, "scraperapi")
+                        print(f"ScraperAPI error {status}: {content[:200]}")
+                        return None
+                    else:
+                        print(f"ScraperAPI unexpected status: {status}")
+                        return None
+        except asyncio.TimeoutError:
+            print(f"ScraperAPI timeout for {url}")
+            debug_logger.log_error(url, "scraperapi", Exception("Timeout"))
+            return None
+        except Exception as e:
+            print(f"ScraperAPI error: {e}")
+            debug_logger.log_error(url, "scraperapi", e)
+            return None
+    
+    async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> List[str]:
+        search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
+        print(f"Fetching search results via ScraperAPI HTTP API: {search_url}")
+        
+        html = await self._fetch_with_scraperapi(search_url, render=True)
+        
+        if not html:
+            print("ScraperAPI failed, trying Bright Data fallback...")
+            self.current_provider_name = "brightdata"
+            if not self.browser:
+                await self.init_browser("brightdata")
+            return await self._get_product_urls_from_search(keyword, max_products)
+        
+        urls = []
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        product_links = soup.select('a[href*="-pm-"], a[href*="-p-"]')
+        seen_urls = set()
+        
+        for link in product_links:
+            href = link.get('href', '')
+            if href and ('-pm-' in href or '-p-' in href):
+                if href.startswith('/'):
+                    full_url = f"https://www.hepsiburada.com{href}"
+                elif href.startswith('http'):
+                    full_url = href
+                else:
+                    continue
+                
+                base_url = full_url.split('?')[0]
+                if base_url not in seen_urls:
+                    seen_urls.add(base_url)
+                    urls.append(base_url)
+                    
+                    if len(urls) >= max_products:
+                        break
+        
+        print(f"Extracted {len(urls)} unique product URLs from search")
+        return urls
+    
+    async def _scrape_product_via_http_api(self, url: str) -> Optional[Dict[str, Any]]:
+        html = await self._fetch_with_scraperapi(url, render=True)
+        
+        if not html:
+            print(f"ScraperAPI failed for product: {url}")
+            return None
+        
+        soup = BeautifulSoup(html, 'html.parser')
+        utag_data = self._extract_utag_data(html)
+        json_ld_data = self._extract_json_ld_data(soup)
+        
+        product_data = {
+            "platform": "hepsiburada",
+            "url": url,
+            "external_id": self._extract_external_id(url),
+        }
+        
+        if utag_data:
+            product_data.update({
+                "name": utag_data.get("product_name"),
+                "brand": utag_data.get("product_brand"),
+                "sku": utag_data.get("product_sku"),
+                "barcode": utag_data.get("product_barcode"),
+                "price": self._parse_price(utag_data.get("product_unit_price")),
+                "seller_name": utag_data.get("merchant_name"),
+                "seller_rating": None,
+                "rating": self._parse_float(utag_data.get("product_rating")),
+                "reviews_count": self._parse_int(utag_data.get("product_comment_count")),
+                "in_stock": utag_data.get("product_in_stock") == "true" or utag_data.get("product_in_stock") == True,
+                "category_path": " > ".join(utag_data.get("page_category", [])) if isinstance(utag_data.get("page_category"), list) else utag_data.get("page_category"),
+                "category_hierarchy": utag_data.get("page_category"),
+            })
+        
+        if json_ld_data:
+            if not product_data.get("name"):
+                product_data["name"] = json_ld_data.get("name")
+            if not product_data.get("brand"):
+                product_data["brand"] = json_ld_data.get("brand", {}).get("name") if isinstance(json_ld_data.get("brand"), dict) else json_ld_data.get("brand")
+            if not product_data.get("rating") and json_ld_data.get("aggregateRating"):
+                product_data["rating"] = self._parse_float(json_ld_data["aggregateRating"].get("ratingValue"))
+                product_data["reviews_count"] = self._parse_int(json_ld_data["aggregateRating"].get("reviewCount"))
+            product_data["image_url"] = json_ld_data.get("image")
+            product_data["description"] = json_ld_data.get("description")
+        
+        html_data = self._extract_html_data(soup)
+        if html_data:
+            if html_data.get("discounted_price"):
+                product_data["discounted_price"] = html_data["discounted_price"]
+                if product_data.get("price") and html_data["discounted_price"]:
+                    product_data["discount_percentage"] = round((1 - html_data["discounted_price"] / product_data["price"]) * 100, 1)
+            if html_data.get("coupons"):
+                product_data["coupons"] = html_data["coupons"]
+            if html_data.get("campaigns"):
+                product_data["campaigns"] = html_data["campaigns"]
+            if html_data.get("stock_count"):
+                product_data["stock_count"] = html_data["stock_count"]
+            if html_data.get("origin_country"):
+                product_data["origin_country"] = html_data["origin_country"]
+            if html_data.get("other_sellers"):
+                product_data["other_sellers"] = html_data["other_sellers"]
+        
+        if not product_data.get("name"):
+            title = soup.find("h1")
+            if title:
+                product_data["name"] = title.get_text(strip=True)
+        
+        return product_data
+    
+    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
+        provider = proxy_manager.get_primary_provider()
+        self.current_provider_name = provider.name if provider else "direct"
+        
+        if self.current_provider_name == "scraperapi":
+            product_urls = await self._get_product_urls_via_http_api(keyword, max_products)
+        else:
+            if not self.browser:
+                await self.init_browser()
+            product_urls = await self._get_product_urls_from_search(keyword, max_products)
+        
         print(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
         
         products = []
@@ -196,6 +361,13 @@ class ScrapingService:
         return urls
     
     async def scrape_product_detail_page(self, url: str) -> Optional[Dict[str, Any]]:
+        if self.current_provider_name == "scraperapi":
+            return await self._scrape_product_via_http_api(url)
+        
+        if not self.context:
+            if not self.browser:
+                await self.init_browser()
+        
         page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
         await self._apply_anti_detection(page)

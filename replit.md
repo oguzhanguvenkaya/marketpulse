@@ -13,9 +13,16 @@ A Marketplace Data Analysis Platform that helps marketplace sellers and marketin
 ## Proxy Architecture
 
 ### Provider Hierarchy (Auto Mode)
-1. **ScraperAPI** (Primary) - Ucuz, 3M istek/ay $249
-2. **Bright Data** (Fallback) - Premium, zor durumlar icin
+1. **ScraperAPI** (Primary) - Ucuz, 3M istek/ay $249, HTTP API ile
+2. **Bright Data** (Fallback) - Premium, Playwright proxy ile
 3. **Direct** (Last resort) - Proxy yok
+
+### Implementation Details
+- **ScraperAPI**: HTTP API endpoint kullanılır (proxy port Playwright ile çalışmıyor)
+  - URL: `http://api.scraperapi.com?api_key=xxx&render=true&url=TARGET`
+  - aiohttp ile async istek
+  - BeautifulSoup ile HTML parse
+- **Bright Data**: Playwright proxy olarak kullanılır (çalışıyor)
 
 ### Configuration
 ```python
@@ -24,7 +31,7 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 ```
 
 ### Fallback Logic
-- If ScraperAPI returns 403/429/503 -> Auto-switch to Bright Data
+- If ScraperAPI returns 403/429/500/503 -> Auto-switch to Bright Data
 - Debug HTML saved to `/tmp/scraping_debug/` for analysis
 
 ## Scraping Strategy
