@@ -620,7 +620,14 @@ class ScrapingService:
             if isinstance(value, (int, float)):
                 return float(value)
             value_str = str(value).strip()
-            value_str = value_str.replace(',', '.')
+            if ',' in value_str and '.' in value_str:
+                if value_str.rfind(',') > value_str.rfind('.'):
+                    value_str = value_str.replace('.', '')
+                    value_str = value_str.replace(',', '.')
+                else:
+                    value_str = value_str.replace(',', '')
+            elif ',' in value_str:
+                value_str = value_str.replace(',', '.')
             value_str = re.sub(r'[^\d.]', '', value_str)
             return float(value_str) if value_str else None
         except:
