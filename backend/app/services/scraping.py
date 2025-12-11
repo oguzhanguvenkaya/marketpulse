@@ -835,43 +835,102 @@ class ScrapingService:
     
     def _extract_other_sellers(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
         sellers = []
+        html = str(soup)
         
-        seller_section = soup.select('[class*="otherSeller"], [data-test-id*="other-seller"]')
-        if not seller_section:
-            seller_links = soup.select('a[href*="/magaza/"]')
-            seen_sellers = set()
-            
-            for link in seller_links:
-                seller_name = link.get_text(strip=True)
-                if seller_name and seller_name not in seen_sellers and len(seller_name) < 100:
-                    seen_sellers.add(seller_name)
+        try:
+            listings_start = html.find('"listings":[{"merchantId"')
+            if listings_start != -1:
+                start = html.find('[', listings_start)
+                depth = 0
+                end = start
+                for i, c in enumerate(html[start:start+15000]):
+                    if c == '[': depth += 1
+                    elif c == ']': depth -= 1
+                    if depth == 0 and c == ']':
+                        end = start + i + 1
+                        break
+                
+                listings_json = html[start:end]
+                listings = json.loads(listings_json)
+                
+                merchant_data = {}
+                mi_pattern = r'"merchantInfo":\{"id":"([^"]+)".*?(?="merchantInfo":|$)'
+                for match in re.finditer(mi_pattern, html, re.DOTALL):
+                    block = match.group(0)
+                    merchant_id = match.group(1)
                     
-                    parent = link.find_parent('div') or link.find_parent('li')
+                    name_match = re.search(r'"name":"([^"]+)"', block)
+                    rating_match = re.search(r'"lifetimeRating":([0-9.]+)', block)
+                    price_match = re.search(r'"prices":\[\{"formattedPrice":"[^"]+","value":([0-9.]+)', block)
+                    
+                    if name_match:
+                        merchant_data[merchant_id] = {
+                            'name': name_match.group(1),
+                            'rating': float(rating_match.group(1)) if rating_match else None,
+                            'price': float(price_match.group(1)) if price_match else None
+                        }
+                
+                for listing in listings[:10]:
+                    merchant_id = listing.get('merchantId')
+                    merchant_name = listing.get('merchantName')
+                    
+                    if not merchant_name:
+                        continue
+                    
                     seller_data = {
-                        'seller_name': seller_name,
-                        'is_authorized': 'yetkili' in str(parent).lower() if parent else False
+                        'seller_name': merchant_name,
+                        'merchant_id': merchant_id,
+                        'is_authorized': False
                     }
                     
-                    if parent:
-                        price_elem = parent.select_one('[class*="price"]')
-                        if price_elem:
-                            price_text = price_elem.get_text(strip=True)
-                            match = re.search(r'[\d.]+,\d+', price_text)
-                            if match:
-                                try:
-                                    seller_data['price'] = float(match.group().replace('.', '').replace(',', '.'))
-                                except:
-                                    pass
-                        
-                        rating_match = re.search(r'(\d+[,\.]\d+)', parent.get_text())
-                        if rating_match:
+                    if merchant_id in merchant_data:
+                        if merchant_data[merchant_id]['rating']:
+                            seller_data['seller_rating'] = merchant_data[merchant_id]['rating']
+                        if merchant_data[merchant_id]['price']:
+                            seller_data['price'] = merchant_data[merchant_id]['price']
+                    
+                    sellers.append(seller_data)
+                
+                if sellers:
+                    print(f"Extracted {len(sellers)} other sellers from JSON")
+                    return sellers
+        except Exception as e:
+            print(f"Error extracting sellers from JSON: {e}")
+        
+        seller_links = soup.select('a[href*="/magaza/"]')
+        seen_sellers = set()
+        
+        for link in seller_links:
+            seller_name = link.get_text(strip=True)
+            if seller_name and seller_name not in seen_sellers and len(seller_name) < 100:
+                seen_sellers.add(seller_name)
+                
+                parent = link.find_parent('div') or link.find_parent('li')
+                seller_data = {
+                    'seller_name': seller_name,
+                    'is_authorized': 'yetkili' in str(parent).lower() if parent else False
+                }
+                
+                if parent:
+                    price_elem = parent.select_one('[class*="price"]')
+                    if price_elem:
+                        price_text = price_elem.get_text(strip=True)
+                        match = re.search(r'[\d.]+,\d+', price_text)
+                        if match:
                             try:
-                                seller_data['seller_rating'] = float(rating_match.group(1).replace(',', '.'))
+                                seller_data['price'] = float(match.group().replace('.', '').replace(',', '.'))
                             except:
                                 pass
                     
-                    if len(sellers) < 10:
-                        sellers.append(seller_data)
+                    rating_match = re.search(r'(\d+[,\.]\d+)', parent.get_text())
+                    if rating_match:
+                        try:
+                            seller_data['seller_rating'] = float(rating_match.group(1).replace(',', '.'))
+                        except:
+                            pass
+                
+                if len(sellers) < 10:
+                    sellers.append(seller_data)
         
         return sellers
     
