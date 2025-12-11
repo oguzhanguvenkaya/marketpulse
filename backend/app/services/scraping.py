@@ -353,20 +353,7 @@ class ScrapingService:
         }
         
         if utag_data:
-            product_data.update({
-                "name": utag_data.get("product_name"),
-                "brand": utag_data.get("product_brand"),
-                "sku": utag_data.get("product_sku"),
-                "barcode": utag_data.get("product_barcode"),
-                "price": self._parse_price(utag_data.get("product_unit_price")),
-                "seller_name": utag_data.get("merchant_name"),
-                "seller_rating": None,
-                "rating": self._parse_float(utag_data.get("product_rating")),
-                "reviews_count": self._parse_int(utag_data.get("product_comment_count")),
-                "in_stock": utag_data.get("product_in_stock") == "true" or utag_data.get("product_in_stock") == True,
-                "category_path": " > ".join(utag_data.get("page_category", [])) if isinstance(utag_data.get("page_category"), list) else utag_data.get("page_category"),
-                "category_hierarchy": utag_data.get("page_category"),
-            })
+            product_data.update(self._parse_utag_data(utag_data))
         
         if json_ld_data:
             if not product_data.get("name"):
@@ -559,12 +546,35 @@ class ScrapingService:
     
     def _extract_utag_data(self, html_content: str) -> Optional[Dict]:
         try:
-            match = re.search(r'const\s+utagData\s*=\s*(\{[^;]+\});', html_content)
-            if match:
+            match = re.search(r'const\s+utagData\s*=\s*(\{.*?\});\s*\n?\s*window\.utagData', html_content, re.DOTALL)
+            if not match:
+                match = re.search(r'const\s+utagData\s*=\s*(\{[^}]+(?:\{[^}]*\}[^}]*)*\});', html_content)
+            if not match:
+                start = html_content.find('const utagData = {')
+                if start != -1:
+                    brace_count = 0
+                    json_start = html_content.find('{', start)
+                    for i, char in enumerate(html_content[json_start:], json_start):
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                json_str = html_content[json_start:i+1]
+                                break
+                    else:
+                        return None
+                else:
+                    return None
+            else:
                 json_str = match.group(1)
-                json_str = re.sub(r',\s*}', '}', json_str)
-                json_str = re.sub(r',\s*]', ']', json_str)
-                return json.loads(json_str)
+            
+            json_str = re.sub(r',\s*}', '}', json_str)
+            json_str = re.sub(r',\s*]', ']', json_str)
+            
+            result = json.loads(json_str)
+            print(f"utagData extracted: {list(result.keys())[:10]}...")
+            return result
         except Exception as e:
             print(f"Error extracting utagData: {e}")
         return None
@@ -636,10 +646,20 @@ class ScrapingService:
         
         if 'product_prices' in utag and utag['product_prices']:
             try:
-                price_str = str(utag['product_prices'][0]).replace('.', '').replace(',', '.')
+                price_str = str(utag['product_prices'][0])
+                if ',' in price_str and '.' in price_str:
+                    if price_str.rfind(',') < price_str.rfind('.'):
+                        price_str = price_str.replace(',', '')
+                    else:
+                        price_str = price_str.replace('.', '').replace(',', '.')
+                elif ',' in price_str:
+                    price_str = price_str.replace(',', '.')
                 data['price'] = float(price_str)
-            except:
-                pass
+                print(f"Parsed price: {data['price']} from {utag['product_prices'][0]}")
+            except Exception as e:
+                print(f"Error parsing price: {e}")
+        
+        print(f"_parse_utag_data result: name={data.get('name', 'N/A')[:30] if data.get('name') else 'N/A'}, price={data.get('price')}, rating={data.get('rating')}, brand={data.get('brand')}")
         
         return data
     

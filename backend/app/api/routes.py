@@ -171,7 +171,26 @@ async def run_scraping_background(task_id: str):
                     ProductSnapshot.snapshot_date == today
                 ).first()
                 
-                if not existing_snapshot:
+                if existing_snapshot:
+                    if p_data.get("price") is not None:
+                        existing_snapshot.price = p_data.get("price")
+                    if p_data.get("discounted_price") is not None:
+                        existing_snapshot.discounted_price = p_data.get("discounted_price")
+                    if p_data.get("discount_percentage") is not None:
+                        existing_snapshot.discount_percentage = p_data.get("discount_percentage")
+                    if p_data.get("rating") is not None:
+                        existing_snapshot.rating = p_data.get("rating")
+                    if p_data.get("reviews_count") is not None:
+                        existing_snapshot.reviews_count = p_data.get("reviews_count")
+                    if p_data.get("stock_count") is not None:
+                        existing_snapshot.stock_count = p_data.get("stock_count")
+                    if p_data.get("in_stock") is not None:
+                        existing_snapshot.in_stock = p_data.get("in_stock")
+                    if p_data.get("coupons"):
+                        existing_snapshot.coupons = p_data.get("coupons")
+                    if p_data.get("campaigns"):
+                        existing_snapshot.campaigns = p_data.get("campaigns")
+                else:
                     snapshot = ProductSnapshot(
                         product_id=product.id,
                         price=p_data.get("price"),

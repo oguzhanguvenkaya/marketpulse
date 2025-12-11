@@ -141,6 +141,14 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 11, 2025: Phase 3 - ScraperAPI Proxy Port Method (WORKING!)
+  - Fixed ScraperAPI: HTTP API method doesn't work, PROXY PORT method works
+  - Proxy URL: `http://proxy-server.scraperapi.com:8001`
+  - Username format: `scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={random}`
+  - Fixed utagData extraction with brace-counting algorithm
+  - Fixed Turkish number format price parsing (1,234.05 → 1234.05)
+  - Added snapshot update logic: existing snapshots now get updated with new data
+  - All product data now correctly parsed: price, rating, brand, seller, category
 - December 11, 2025: Phase 2.5 - Modular Proxy Architecture
   - Added ScraperAPI as primary proxy provider (cheaper)
   - Bright Data moved to fallback role
