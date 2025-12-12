@@ -159,6 +159,13 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 12, 2025: Phase 4.1 - "Sepete Özel" Dynamic Price Capture
+  - ScraperAPI proxy now supports JS rendering with `render_js` parameter
+  - Enhanced CSS selectors (8 patterns) and regex patterns (6 patterns) for discounted_price
+  - Two-level fallback: ScraperAPI render → ScraperAPI standard → Playwright with Bright Data
+  - Playwright fallback properly initializes Bright Data proxy when ScraperAPI fails
+  - Fixed context initialization bug for Playwright fallback
+  - Playwright fallback merges discounted_price, coupons, campaigns, and stock_count
 - December 12, 2025: Phase 4 - Sponsored Ads Tracking (COMPLETE!)
   - Sponsored product detection via `advertisement-module_adRoot` class in product cards
   - Tracking URL parsing: `adservice.hepsiburada.com` redirect URLs decoded for real product URLs
