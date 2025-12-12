@@ -98,16 +98,35 @@ class ScrapingService:
         print("No fallback provider available")
         return False
     
-    async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1) -> Optional[str]:
-        """Fetch URL using ScraperAPI proxy port method - WORKING for Hepsiburada"""
+    async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1, render_js: bool = False, wait_for_selector: str = None) -> Optional[str]:
+        """Fetch URL using ScraperAPI proxy port method - WORKING for Hepsiburada
+        
+        Args:
+            url: URL to fetch
+            session_number: Session number for sticky session
+            render_js: Enable JavaScript rendering (for dynamic content like "Sepete özel" prices)
+            wait_for_selector: CSS selector to wait for before returning (requires render_js=True)
+        """
         if not settings.SCRAPER_API_KEY:
             return None
         
         proxy_url = "http://proxy-server.scraperapi.com:8001"
-        proxy_username = f"scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={session_number}:{settings.SCRAPER_API_KEY}"
+        
+        username_parts = [
+            "scraperapi",
+            "country_code=tr",
+            "device_type=desktop",
+            "max_cost=200",
+            f"session_number={session_number}"
+        ]
+        
+        if render_js:
+            username_parts.insert(1, "render=true")
+        
+        proxy_username = ".".join(username_parts)
         
         print(f"ScraperAPI PROXY PORT request: {url[:60]}...")
-        print(f"Using session_number: {session_number}")
+        print(f"Using session_number: {session_number}, render_js: {render_js}")
         
         try:
             timeout = aiohttp.ClientTimeout(total=180)
@@ -115,15 +134,30 @@ class ScrapingService:
             connector = aiohttp.TCPConnector(ssl=False)
             
             auth = aiohttp.BasicAuth(
-                login=f"scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={session_number}",
+                login=proxy_username,
                 password=settings.SCRAPER_API_KEY
             )
+            
+            headers = {}
+            if render_js:
+                headers['x-sapi-render'] = 'true'
+                if wait_for_selector:
+                    instruction_set = [
+                        {
+                            "type": "wait_for_selector",
+                            "selector": {"type": "css", "value": wait_for_selector},
+                            "timeout": 10
+                        }
+                    ]
+                    headers['x-sapi-instruction_set'] = json.dumps(instruction_set)
+                    print(f"Waiting for selector: {wait_for_selector}")
             
             async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
                 async with session.get(
                     url,
                     proxy=proxy_url,
                     proxy_auth=auth,
+                    headers=headers if headers else None,
                     ssl=False
                 ) as response:
                     status = response.status
@@ -426,82 +460,96 @@ class ScrapingService:
         }
     
     async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
-        """Scrape product detail page using ScraperAPI PROXY PORT method"""
+        """Scrape product detail page using ScraperAPI PROXY PORT method
+        
+        Strategy:
+        1. First try ScraperAPI with JS render (for dynamic content like "sepete özel")
+        2. If render fails (500 = premium required), fallback to standard ScraperAPI
+        3. Parse product data and check for discounted_price
+        """
         if session_number is None:
             session_number = random.randint(1, 10000)
         
-        html = await self._fetch_with_scraperapi_proxy(url, session_number=session_number)
+        html = await self._fetch_with_scraperapi_proxy(
+            url, 
+            session_number=session_number,
+            render_js=True,
+            wait_for_selector='[data-test-id="price-current-price"]'
+        )
         
         if not html:
-            print(f"ScraperAPI failed for product: {url}")
-            return None
+            print("JS render failed, trying standard ScraperAPI...")
+            html = await self._fetch_with_scraperapi_proxy(url, session_number=session_number)
+        product_data = None
         
-        soup = BeautifulSoup(html, 'html.parser')
-        utag_data = self._extract_utag_data(html)
-        json_ld_data = self._extract_json_ld_data(soup)
-        
-        product_data = {
-            "platform": "hepsiburada",
-            "url": url,
-            "external_id": self._extract_external_id(url),
-        }
-        
-        if utag_data:
-            product_data.update(self._parse_utag_data(utag_data))
-        
-        if json_ld_data:
+        if html:
+            soup = BeautifulSoup(html, 'html.parser')
+            utag_data = self._extract_utag_data(html)
+            json_ld_data = self._extract_json_ld_data(soup)
+            
+            product_data = {
+                "platform": "hepsiburada",
+                "url": url,
+                "external_id": self._extract_external_id(url),
+            }
+            
+            if utag_data:
+                product_data.update(self._parse_utag_data(utag_data))
+            
+            if json_ld_data:
+                if not product_data.get("name"):
+                    product_data["name"] = json_ld_data.get("name")
+                if not product_data.get("brand"):
+                    product_data["brand"] = json_ld_data.get("brand", {}).get("name") if isinstance(json_ld_data.get("brand"), dict) else json_ld_data.get("brand")
+                if not product_data.get("rating") and json_ld_data.get("aggregateRating"):
+                    product_data["rating"] = self._parse_float(json_ld_data["aggregateRating"].get("ratingValue"))
+                    product_data["reviews_count"] = self._parse_int(json_ld_data["aggregateRating"].get("reviewCount"))
+                product_data["image_url"] = json_ld_data.get("image")
+                product_data["description"] = json_ld_data.get("description")
+            
+            html_data = self._extract_html_data(soup)
+            if html_data:
+                if html_data.get("discounted_price"):
+                    product_data["discounted_price"] = html_data["discounted_price"]
+                    if product_data.get("price") and html_data["discounted_price"]:
+                        product_data["discount_percentage"] = round((1 - html_data["discounted_price"] / product_data["price"]) * 100, 1)
+                if html_data.get("coupons"):
+                    product_data["coupons"] = html_data["coupons"]
+                if html_data.get("campaigns"):
+                    product_data["campaigns"] = html_data["campaigns"]
+                if html_data.get("stock_count"):
+                    product_data["stock_count"] = html_data["stock_count"]
+                if html_data.get("origin_country"):
+                    product_data["origin_country"] = html_data["origin_country"]
+                if html_data.get("description"):
+                    product_data["description"] = html_data["description"]
+                if html_data.get("image_url") and not product_data.get("image_url"):
+                    product_data["image_url"] = html_data["image_url"]
+            
             if not product_data.get("name"):
-                product_data["name"] = json_ld_data.get("name")
-            if not product_data.get("brand"):
-                product_data["brand"] = json_ld_data.get("brand", {}).get("name") if isinstance(json_ld_data.get("brand"), dict) else json_ld_data.get("brand")
-            if not product_data.get("rating") and json_ld_data.get("aggregateRating"):
-                product_data["rating"] = self._parse_float(json_ld_data["aggregateRating"].get("ratingValue"))
-                product_data["reviews_count"] = self._parse_int(json_ld_data["aggregateRating"].get("reviewCount"))
-            product_data["image_url"] = json_ld_data.get("image")
-            product_data["description"] = json_ld_data.get("description")
+                title = soup.find("h1")
+                if title:
+                    product_data["name"] = title.get_text(strip=True)
+            
+            product_data['other_sellers'] = self._extract_other_sellers(soup)
+            product_data['reviews'] = self._extract_reviews(soup)
+            
+            if settings.DEBUG_SAVE_HTML:
+                debug_dir = "/tmp/scraping_debug"
+                os.makedirs(debug_dir, exist_ok=True)
+                external_id = product_data.get('external_id', 'unknown')
+                debug_file = f"{debug_dir}/product_{external_id}.html"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(html)
+                print(f"Saved product HTML to {debug_file}")
+                print(f"  -> Extracted {len(product_data.get('other_sellers', []))} other sellers")
+                print(f"  -> Extracted {len(product_data.get('reviews', []))} reviews")
+                print(f"  -> Discounted price: {product_data.get('discounted_price', 'NOT FOUND')}")
+            
+            return product_data
         
-        html_data = self._extract_html_data(soup)
-        if html_data:
-            if html_data.get("discounted_price"):
-                product_data["discounted_price"] = html_data["discounted_price"]
-                if product_data.get("price") and html_data["discounted_price"]:
-                    product_data["discount_percentage"] = round((1 - html_data["discounted_price"] / product_data["price"]) * 100, 1)
-            if html_data.get("coupons"):
-                product_data["coupons"] = html_data["coupons"]
-            if html_data.get("campaigns"):
-                product_data["campaigns"] = html_data["campaigns"]
-            if html_data.get("stock_count"):
-                product_data["stock_count"] = html_data["stock_count"]
-            if html_data.get("origin_country"):
-                product_data["origin_country"] = html_data["origin_country"]
-            if html_data.get("other_sellers"):
-                product_data["other_sellers"] = html_data["other_sellers"]
-            if html_data.get("description"):
-                product_data["description"] = html_data["description"]
-            if html_data.get("image_url") and not product_data.get("image_url"):
-                product_data["image_url"] = html_data["image_url"]
-        
-        if not product_data.get("name"):
-            title = soup.find("h1")
-            if title:
-                product_data["name"] = title.get_text(strip=True)
-        
-        product_data['other_sellers'] = self._extract_other_sellers(soup)
-        product_data['reviews'] = self._extract_reviews(soup)
-        
-        if settings.DEBUG_SAVE_HTML:
-            import os
-            debug_dir = "/tmp/scraping_debug"
-            os.makedirs(debug_dir, exist_ok=True)
-            external_id = product_data.get('external_id', 'unknown')
-            debug_file = f"{debug_dir}/product_{external_id}.html"
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(html)
-            print(f"Saved product HTML to {debug_file}")
-            print(f"  -> Extracted {len(product_data.get('other_sellers', []))} other sellers")
-            print(f"  -> Extracted {len(product_data.get('reviews', []))} reviews")
-        
-        return product_data
+        print(f"ScraperAPI failed for product: {url}")
+        return None
     
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> Dict[str, Any]:
         """Scrape Hepsiburada search results
@@ -880,19 +928,76 @@ class ScrapingService:
             except:
                 pass
         
-        discounted_elem = soup.select_one('[class*="discountedPrice"]')
-        if not discounted_elem:
-            campaign_price = soup.find(string=re.compile(r'Sepete özel fiyat'))
+        discounted_price = None
+        
+        sepete_ozel_selectors = [
+            '[class*="sepete"]',
+            '[class*="Sepete"]',
+            '[class*="cartSpecial"]',
+            '[class*="campaignPrice"]',
+            '[class*="specialPrice"]',
+            '[data-test-id*="campaign"]',
+            '[class*="discountedPrice"]',
+            '[class*="DiscountedPrice"]',
+        ]
+        
+        for selector in sepete_ozel_selectors:
+            elem = soup.select_one(selector)
+            if elem:
+                price_text = elem.get_text(strip=True)
+                price_match = re.search(r'([\d.]+,\d+)', price_text)
+                if price_match:
+                    try:
+                        price_str = price_match.group(1).replace('.', '').replace(',', '.')
+                        discounted_price = float(price_str)
+                        print(f"Found sepete özel price via {selector}: {discounted_price}")
+                        break
+                    except:
+                        pass
+        
+        if not discounted_price:
+            sepete_patterns = [
+                r'Sepete\s+özel[^0-9]*([\d.]+,\d+)',
+                r'Sepette[^0-9]*([\d.]+,\d+)',
+                r'sepete\s+özel[^0-9]*([\d.]+,\d+)',
+                r'Size\s+özel[^0-9]*([\d.]+,\d+)',
+                r'Sepete\s+özel[^0-9]*([\d.]+,\d+)\s*[₺TL]',
+                r'([\d.]+,\d+)\s*₺.*?[Ss]epete',
+            ]
+            html_text = str(soup)
+            for pattern in sepete_patterns:
+                match = re.search(pattern, html_text, re.IGNORECASE)
+                if match:
+                    try:
+                        price_str = match.group(1).replace('.', '').replace(',', '.')
+                        discounted_price = float(price_str)
+                        print(f"Found sepete özel price via pattern '{pattern[:30]}': {discounted_price}")
+                        break
+                    except:
+                        pass
+        
+        if not discounted_price:
+            campaign_price = soup.find(string=re.compile(r'Sepete özel fiyat|sepete ekleyin|Size özel', re.IGNORECASE))
             if campaign_price:
                 parent = campaign_price.find_parent()
                 if parent:
-                    price_match = re.search(r'[\d.]+,\d+', parent.get_text())
-                    if price_match:
-                        try:
-                            price_str = price_match.group().replace('.', '').replace(',', '.')
-                            data['discounted_price'] = float(price_str)
-                        except:
-                            pass
+                    for _ in range(5):
+                        parent_text = parent.get_text()
+                        price_match = re.search(r'([\d.]+,\d+)\s*[₺TL]', parent_text)
+                        if price_match:
+                            try:
+                                price_str = price_match.group(1).replace('.', '').replace(',', '.')
+                                discounted_price = float(price_str)
+                                print(f"Found sepete özel price via parent traversal: {discounted_price}")
+                                break
+                            except:
+                                pass
+                        parent = parent.find_parent()
+                        if not parent:
+                            break
+        
+        if discounted_price:
+            data['discounted_price'] = discounted_price
         
         stock_elem = soup.find(string=re.compile(r'Stok Adedi'))
         if stock_elem:
