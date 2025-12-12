@@ -1,0 +1,35 @@
+No discounted_price found via ScraperAPI, trying Playwright fallback for: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-pm-...
+Playwright scraping: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-pm-...
+Playwright error for https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-pm-HBC00004KHI7D: Page.goto: Timeout 60000ms exceeded.
+Call log:
+  - navigating to "https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-pm-HBC00004KHI7D", waiting until "networkidle"
+
+  -> Successfully scraped: Nasiol Yüksek Su Emici Özellikli 60x90cm-600gsm Mi
+Scraping product 2/8: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x60-cm-600-gsm-pm-HBC...
+ScraperAPI PROXY PORT request: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x...
+Using session_number: 2466, render_js: True
+Waiting for selector: [data-test-id="price-current-price"]
+ScraperAPI PROXY response status: 500
+[2025-12-12 21:21:18] Provider: scraperapi-proxy | URL: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x60-cm-600-gsm-pm-HBC... | Status: 500 | 
+Debug HTML saved: /tmp/scraping_debug/20251212_212118_500_scraperapi-proxy_www.hepsiburada.com_nasiol-arac-kurulama-havlusu-5.html
+ScraperAPI PROXY error 500: Request failed. You will not be charged for this request. Please make sure your url is correct and try again. Protected domains may require adding premium=true OR ultra_premium=true parameter to your 
+JS render failed, trying standard ScraperAPI...
+ScraperAPI PROXY PORT request: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x...
+Using session_number: 2466, render_js: False
+ScraperAPI PROXY response status: 200
+[2025-12-12 21:21:22] Provider: scraperapi-proxy | URL: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x60-cm-600-gsm-pm-HBC... | Status: 200 | 
+ScraperAPI PROXY returned 678150 bytes
+utagData extracted: ['canonical_url', 'category_id_hierarchy', 'category_name_hierarchy', 'category_path', 'is_canonical', 'listing_ids', 'merchant_ids', 'merchant_names', 'new_site', 'order_currency']...
+Parsed price: 382.47 from 382.47
+_parse_utag_data result: name=Nasiol Yüksek Su Emici Özellik, price=382.47, rating=4.8, brand=Nasiol
+Saved product HTML to /tmp/scraping_debug/product_HBC00005MKJ9W.html
+  -> Extracted 1 other sellers
+  -> Extracted 5 reviews
+  -> Discounted price: NOT FOUND
+No discounted_price found via ScraperAPI, trying Playwright fallback for: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x...
+Playwright scraping: https://www.hepsiburada.com/nasiol-arac-kurulama-havlusu-50x...
+INFO:     10.84.3.7:0 - "GET /api/products?limit=100 HTTP/1.1" 200 OK
+INFO:     10.84.3.7:0 - "GET /api/products?limit=100 HTTP/1.1" 200 OK
+INFO:     10.84.3.7:0 - "GET /api/tasks?limit=10 HTTP/1.1" 200 OK
+INFO:     10.84.3.7:0 - "GET /api/stats HTTP/1.1" 200 OK
+INFO:     10.84.6.6:0 - "GET /api/tasks?limit=10 HTTP/1.1" 200 

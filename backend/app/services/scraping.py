@@ -670,14 +670,19 @@ class ScrapingService:
         
         try:
             print(f"Playwright scraping: {url[:60]}...")
-            response = await page.goto(url, timeout=60000, wait_until="networkidle")
+            response = await page.goto(url, timeout=45000, wait_until="domcontentloaded")
             status = response.status if response else 0
             
             if status not in [200, 301, 302]:
                 print(f"Playwright bad response for {url}: {status}")
                 return None
             
-            await self._random_delay(3000, 5000)
+            try:
+                await page.wait_for_selector('[data-test-id="price-current-price"], [class*="price"], .product-price', timeout=10000)
+            except:
+                pass
+            
+            await self._random_delay(2000, 3000)
             
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
