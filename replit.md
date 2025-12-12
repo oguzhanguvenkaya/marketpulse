@@ -4,10 +4,10 @@
 A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: MVP Phase 2.5 - Modular Proxy Architecture
+- **Status**: MVP Phase 4 - Sponsored Ads Tracking Complete
 - **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
-- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis
+- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis
 - **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
 
 ## Proxy Architecture
@@ -102,6 +102,24 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - id, product_id, author, rating, review_text
 - review_date, seller_name, is_helpful_count
 
+### SponsoredBrandAds Table
+- id, search_task_id, seller_name, seller_id
+- position, products (JSON with url, name per product)
+- snapshot_date
+
+## Sponsored Ads Tracking
+
+**Individual Sponsored Products:**
+- Detected by `advertisement-module_adRoot` class in product cards
+- `adservice.hepsiburada.com` tracking URLs parsed to extract real product URL
+- `magaza=` parameter in redirect URL provides seller name
+- Products marked with `is_sponsored=true` in snapshots
+
+**Brand Advertisers:**
+- Grouped from individual sponsored products by seller name
+- Stored in `sponsored_brand_ads` table with product list
+- API endpoint: `GET /api/search/{task_id}/sponsored-brands`
+
 ## Running the Project
 - **Frontend**: Runs on port 5000 (webview)
 - **Backend**: Runs on port 8000 (localhost)
@@ -141,6 +159,14 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 12, 2025: Phase 4 - Sponsored Ads Tracking (COMPLETE!)
+  - Sponsored product detection via `advertisement-module_adRoot` class in product cards
+  - Tracking URL parsing: `adservice.hepsiburada.com` redirect URLs decoded for real product URLs
+  - Seller extraction from `magaza=` parameter in ad URLs
+  - Products marked with `is_sponsored=true` when they have "Reklam" badge
+  - Brand advertisers grouped from sponsored products and stored in `sponsored_brand_ads` table
+  - New endpoint: `GET /api/search/{task_id}/sponsored-brands` for competitive analysis
+  - Working example: TULPAR KİMYA with 4 sponsored products, MTS Kimya, AutoGleam, etc.
 - December 11, 2025: Phase 3.2 - Other Sellers Complete Data
   - Fixed other sellers extraction: now extracts seller_name, seller_rating, AND price
   - merchantInfo JSON blocks parsed with regex pattern to extract complete data

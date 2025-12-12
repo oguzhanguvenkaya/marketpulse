@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from uuid import UUID
 from app.db.database import get_db, SessionLocal
-from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask
+from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd
 from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 
@@ -119,12 +119,35 @@ async def run_scraping_background(task_id: str):
             await scraper.init_browser()
             
             if task.platform == "hepsiburada":
-                products_data = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
+                search_result = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
+                products_data = search_result.get('products', [])
+                sponsored_brands = search_result.get('sponsored_brands', [])
             else:
                 products_data = []
+                sponsored_brands = []
             
             today = date.today()
             saved_count = 0
+            
+            for brand_ad in sponsored_brands:
+                existing_ad = db.query(SponsoredBrandAd).filter(
+                    SponsoredBrandAd.search_task_id == task.id,
+                    SponsoredBrandAd.seller_name == brand_ad['seller_name']
+                ).first()
+                
+                if not existing_ad:
+                    new_ad = SponsoredBrandAd(
+                        search_task_id=task.id,
+                        seller_name=brand_ad['seller_name'],
+                        seller_id=brand_ad.get('seller_id'),
+                        position=brand_ad.get('position'),
+                        products=brand_ad.get('products', []),
+                        snapshot_date=today
+                    )
+                    db.add(new_ad)
+            
+            if sponsored_brands:
+                print(f"Saved {len(sponsored_brands)} brand ads to database")
             
             for p_data in products_data:
                 existing = db.query(Product).filter(
@@ -186,6 +209,8 @@ async def run_scraping_background(task_id: str):
                         existing_snapshot.stock_count = p_data.get("stock_count")
                     if p_data.get("in_stock") is not None:
                         existing_snapshot.in_stock = p_data.get("in_stock")
+                    if p_data.get("is_sponsored"):
+                        existing_snapshot.is_sponsored = True
                     if p_data.get("coupons"):
                         existing_snapshot.coupons = p_data.get("coupons")
                     if p_data.get("campaigns"):
@@ -313,6 +338,31 @@ async def list_tasks(
             created_at=t.created_at.isoformat()
         ) for t in tasks
     ]
+
+@router.get("/search/{task_id}/sponsored-brands")
+async def get_sponsored_brands(task_id: str, db: Session = Depends(get_db)):
+    """Get brand ads (marka reklamları) for a search task"""
+    task = db.query(SearchTask).filter(SearchTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    brand_ads = db.query(SponsoredBrandAd).filter(
+        SponsoredBrandAd.search_task_id == task.id
+    ).order_by(SponsoredBrandAd.position).all()
+    
+    return {
+        "keyword": task.keyword,
+        "sponsored_brands": [
+            {
+                "seller_name": ad.seller_name,
+                "seller_id": ad.seller_id,
+                "position": ad.position,
+                "products": ad.products or [],
+                "snapshot_date": ad.snapshot_date.isoformat() if ad.snapshot_date else None
+            }
+            for ad in brand_ads
+        ]
+    }
 
 @router.get("/products", response_model=List[ProductResponse])
 async def list_products(

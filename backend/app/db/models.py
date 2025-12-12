@@ -101,5 +101,25 @@ class SearchTask(Base):
     completed_at = Column(DateTime)
     error_message = Column(Text)
     
+    sponsored_brands = relationship("SponsoredBrandAd", back_populates="search_task", cascade="all, delete-orphan")
+    
+    class Config:
+        from_attributes = True
+
+
+class SponsoredBrandAd(Base):
+    """Marka reklamları - arama sayfasındaki carousel reklamlar (AUTO POWER, MTS Kimya vb.)"""
+    __tablename__ = "sponsored_brand_ads"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    search_task_id = Column(UUID(as_uuid=True), ForeignKey("search_tasks.id"), nullable=False, index=True)
+    seller_name = Column(String(255), nullable=False)
+    seller_id = Column(String(100))
+    position = Column(Integer)
+    products = Column(JSON)
+    snapshot_date = Column(Date, default=date.today)
+    
+    search_task = relationship("SearchTask", back_populates="sponsored_brands")
+    
     class Config:
         from_attributes = True

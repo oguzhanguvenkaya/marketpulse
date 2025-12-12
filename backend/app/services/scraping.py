@@ -215,6 +215,123 @@ class ScrapingService:
                 print(f"Error parsing tracking URL: {e}")
         return None
     
+    def _slugify_seller_name(self, name: str) -> str:
+        """Create a URL-safe seller ID from Turkish seller name"""
+        tr_to_ascii = {
+            'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'I': 'I',
+            'İ': 'I', 'i': 'i', 'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S',
+            'ü': 'u', 'Ü': 'U'
+        }
+        result = name.lower()
+        for tr_char, ascii_char in tr_to_ascii.items():
+            result = result.replace(tr_char, ascii_char.lower())
+        result = re.sub(r'[^\w\s-]', '', result)
+        result = re.sub(r'[\s_]+', '_', result).strip('_')
+        return result
+    
+    def _extract_sponsored_brands_from_search(self, soup: BeautifulSoup, sponsored_products: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract brand ads from sponsored products - groups products by seller"""
+        sponsored_brands = []
+        seller_products = {}
+        
+        for product in sponsored_products:
+            seller_name = product.get('seller_name')
+            if not seller_name:
+                continue
+            
+            if seller_name not in seller_products:
+                seller_products[seller_name] = {
+                    'seller_name': seller_name,
+                    'seller_id': self._slugify_seller_name(seller_name),
+                    'position': len(seller_products) + 1,
+                    'products': []
+                }
+            
+            seller_products[seller_name]['products'].append({
+                'url': product.get('url'),
+                'name': product.get('name')
+            })
+        
+        sponsored_brands = list(seller_products.values())
+        
+        if sponsored_brands:
+            print(f"Extracted {len(sponsored_brands)} brand advertisers from sponsored products:")
+            for brand in sponsored_brands[:5]:
+                print(f"  - {brand['seller_name']}: {len(brand['products'])} products")
+        
+        return sponsored_brands
+    
+    def _extract_sponsored_products_from_search(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Extract individual sponsored products (with Reklam badge) from search page"""
+        sponsored_products = []
+        seen_urls = set()
+        
+        li_products = soup.find_all('li', class_=lambda x: x and 'productListContent' in str(x))
+        
+        for li in li_products:
+            li_str = str(li)
+            is_sponsored = (
+                'advertisement-module_adRoot' in li_str or
+                'advertisement-LxEy' in li_str or
+                'adRoot' in li_str or
+                '>Reklam<' in li_str
+            )
+            
+            if not is_sponsored:
+                continue
+            
+            url = None
+            seller_name = None
+            
+            all_links = li.find_all('a', href=True)
+            for link in all_links:
+                href = link.get('href', '')
+                
+                if 'adservice.hepsiburada.com' in href and 'redirect=' in href:
+                    redirect_match = re.search(r'redirect=([^&]+)', href)
+                    if redirect_match:
+                        from urllib.parse import unquote
+                        redirect_url = unquote(redirect_match.group(1))
+                        
+                        if '-p-' in redirect_url or '-pm-' in redirect_url:
+                            url = redirect_url.split('?')[0]
+                            
+                            magaza_match = re.search(r'[?&]magaza=([^&]+)', redirect_url)
+                            if magaza_match:
+                                seller_name = unquote(magaza_match.group(1).replace('+', ' '))
+                            break
+                
+                elif ('-p-' in href or '-pm-' in href) and 'adservice' not in href:
+                    if href.startswith('/'):
+                        url = f"https://www.hepsiburada.com{href.split('?')[0]}"
+                    else:
+                        url = href.split('?')[0]
+            
+            name = None
+            h3 = li.find('h3')
+            if h3:
+                name = h3.get_text(strip=True)
+            if not name:
+                title_elem = li.find(attrs={'title': True})
+                if title_elem:
+                    name = title_elem.get('title')
+            
+            if url and url not in seen_urls:
+                seen_urls.add(url)
+                sponsored_products.append({
+                    'url': url,
+                    'name': name,
+                    'seller_name': seller_name,
+                    'is_sponsored': True
+                })
+        
+        if sponsored_products:
+            print(f"Found {len(sponsored_products)} sponsored products in search results")
+            for sp in sponsored_products[:3]:
+                print(f"  - {sp['name'][:50] if sp['name'] else 'N/A'}... (seller: {sp['seller_name']})")
+        
+        return sponsored_products
+    
     def _extract_product_urls_from_soup(self, soup: BeautifulSoup, max_products: int) -> List[str]:
         """Extract product URLs from search result page, targeting only the main product grid"""
         urls = []
@@ -285,8 +402,14 @@ class ScrapingService:
         
         return urls
     
-    async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> List[str]:
-        """Get product URLs using ScraperAPI PROXY PORT method - proven to work with Hepsiburada"""
+    async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> Dict[str, Any]:
+        """Get product URLs using ScraperAPI PROXY PORT method - proven to work with Hepsiburada
+        
+        Returns dict with:
+        - urls: List of product URLs to scrape
+        - sponsored_brands: List of brand ads (AUTO POWER, MTS Kimya vb.)
+        - sponsored_product_urls: Set of URLs that are sponsored
+        """
         
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         print(f"Fetching search results via ScraperAPI PROXY PORT: {search_url}")
@@ -310,7 +433,8 @@ class ScrapingService:
             self.current_provider_name = "brightdata"
             if not self.browser:
                 await self.init_browser("brightdata")
-            return await self._get_product_urls_from_search(keyword, max_products)
+            urls = await self._get_product_urls_from_search(keyword, max_products)
+            return {'urls': urls, 'sponsored_brands': [], 'sponsored_product_urls': set()}
         
         soup = BeautifulSoup(html, 'html.parser')
         
@@ -327,9 +451,18 @@ class ScrapingService:
                 f.write(html)
             print(f"Saved search HTML to {debug_file}")
         
+        sponsored_products = self._extract_sponsored_products_from_search(soup)
+        sponsored_product_urls = {p['url'] for p in sponsored_products if p.get('url')}
+        
+        sponsored_brands = self._extract_sponsored_brands_from_search(soup, sponsored_products)
+        
         urls = self._extract_product_urls_from_soup(soup, max_products)
         
-        return urls
+        return {
+            'urls': urls,
+            'sponsored_brands': sponsored_brands,
+            'sponsored_product_urls': sponsored_product_urls
+        }
     
     async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
         """Scrape product detail page using ScraperAPI PROXY PORT method"""
@@ -409,12 +542,24 @@ class ScrapingService:
         
         return product_data
     
-    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> List[Dict[str, Any]]:
+    async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> Dict[str, Any]:
+        """Scrape Hepsiburada search results
+        
+        Returns dict with:
+        - products: List of scraped product data
+        - sponsored_brands: List of brand ads (AUTO POWER, MTS Kimya vb.)
+        """
         provider = proxy_manager.get_primary_provider()
         self.current_provider_name = provider.name if provider else "direct"
         
+        sponsored_brands = []
+        sponsored_product_urls = set()
+        
         if self.current_provider_name == "scraperapi":
-            product_urls = await self._get_product_urls_via_http_api(keyword, max_products)
+            search_result = await self._get_product_urls_via_http_api(keyword, max_products)
+            product_urls = search_result['urls']
+            sponsored_brands = search_result['sponsored_brands']
+            sponsored_product_urls = search_result['sponsored_product_urls']
         else:
             if not self.browser:
                 await self.init_browser()
@@ -428,6 +573,8 @@ class ScrapingService:
             try:
                 product_data = await self.scrape_product_detail_page(url)
                 if product_data:
+                    if url in sponsored_product_urls:
+                        product_data['is_sponsored'] = True
                     products.append(product_data)
                     print(f"  -> Successfully scraped: {product_data.get('name', 'Unknown')[:50]}")
                 await self._random_delay(1000, 3000)
@@ -436,7 +583,10 @@ class ScrapingService:
                 continue
         
         print(f"Successfully scraped {len(products)} products with full details")
-        return products
+        return {
+            'products': products,
+            'sponsored_brands': sponsored_brands
+        }
     
     async def _get_product_urls_from_search(self, keyword: str, max_products: int, retry_count: int = 0) -> List[str]:
         page = await self.context.new_page()
