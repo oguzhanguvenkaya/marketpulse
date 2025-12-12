@@ -654,9 +654,80 @@ class ScrapingService:
         
         return urls
     
+    async def _scrape_product_via_playwright(self, url: str) -> Optional[Dict[str, Any]]:
+        """Scrape product using Playwright with Bright Data proxy for JS-rendered content
+        
+        This is used as a fallback when ScraperAPI doesn't find discounted_price.
+        It only returns html_data (discounted_price, coupons, campaigns, etc.)
+        to be merged with the ScraperAPI product_data.
+        """
+        if not self.browser or not self.context:
+            await self.init_browser("brightdata")
+        
+        page = await self.context.new_page()
+        await stealth.apply_stealth_async(page)
+        await self._apply_anti_detection(page)
+        
+        try:
+            print(f"Playwright scraping: {url[:60]}...")
+            response = await page.goto(url, timeout=60000, wait_until="networkidle")
+            status = response.status if response else 0
+            
+            if status not in [200, 301, 302]:
+                print(f"Playwright bad response for {url}: {status}")
+                return None
+            
+            await self._random_delay(3000, 5000)
+            
+            content = await page.content()
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            html_data = self._extract_html_data(soup)
+            
+            if settings.DEBUG_SAVE_HTML:
+                debug_dir = "/tmp/scraping_debug"
+                os.makedirs(debug_dir, exist_ok=True)
+                debug_file = f"{debug_dir}/playwright_{self._extract_external_id(url)}.html"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Saved Playwright HTML to {debug_file}")
+            
+            return html_data
+            
+        except Exception as e:
+            print(f"Playwright error for {url}: {e}")
+            return None
+        finally:
+            await page.close()
+    
     async def scrape_product_detail_page(self, url: str) -> Optional[Dict[str, Any]]:
         if self.current_provider_name == "scraperapi":
-            return await self._scrape_product_via_http_api(url)
+            product_data = await self._scrape_product_via_http_api(url)
+            
+            if not product_data:
+                print(f"ScraperAPI failed completely, falling back to Playwright for full scrape: {url[:60]}...")
+                self.current_provider_name = "brightdata"
+                if self.browser:
+                    await self.close_browser()
+                await self.init_browser("brightdata")
+            elif not product_data.get('discounted_price'):
+                print(f"No discounted_price found via ScraperAPI, trying Playwright fallback for: {url[:60]}...")
+                playwright_data = await self._scrape_product_via_playwright(url)
+                if playwright_data:
+                    if playwright_data.get('discounted_price'):
+                        product_data['discounted_price'] = playwright_data['discounted_price']
+                        if product_data.get('price') and playwright_data['discounted_price']:
+                            product_data['discount_percentage'] = round((1 - playwright_data['discounted_price'] / product_data['price']) * 100, 1)
+                        print(f"  -> Found discounted_price via Playwright: {playwright_data['discounted_price']}")
+                    if playwright_data.get('coupons') and not product_data.get('coupons'):
+                        product_data['coupons'] = playwright_data['coupons']
+                    if playwright_data.get('campaigns') and not product_data.get('campaigns'):
+                        product_data['campaigns'] = playwright_data['campaigns']
+                    if playwright_data.get('stock_count') and not product_data.get('stock_count'):
+                        product_data['stock_count'] = playwright_data['stock_count']
+                return product_data
+            else:
+                return product_data
         
         if not self.context:
             if not self.browser:
