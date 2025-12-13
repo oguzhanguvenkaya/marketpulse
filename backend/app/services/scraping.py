@@ -78,13 +78,35 @@ class ScrapingService:
         
         return self.browser
     
-    async def close_browser(self):
+    async def close_browser(self, reset_provider: bool = False):
+        """Close browser and optionally reset provider state.
+        
+        Args:
+            reset_provider: If True, reset provider info. Keep False when switching providers
+                           so reinit_with_fallback can determine the next provider in chain.
+        """
         if self.context:
-            await self.context.close()
+            try:
+                await self.context.close()
+            except Exception as e:
+                print(f"Error closing context: {e}")
+            self.context = None
         if self.browser:
-            await self.browser.close()
+            try:
+                await self.browser.close()
+            except Exception as e:
+                print(f"Error closing browser: {e}")
+            self.browser = None
         if self.playwright:
-            await self.playwright.stop()
+            try:
+                await self.playwright.stop()
+            except Exception as e:
+                print(f"Error stopping playwright: {e}")
+            self.playwright = None
+        
+        if reset_provider:
+            self.current_provider = None
+            self.current_provider_name = "direct"
     
     async def reinit_with_fallback(self) -> bool:
         await self.close_browser()
@@ -98,7 +120,7 @@ class ScrapingService:
         print("No fallback provider available")
         return False
     
-    async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1, render_js: bool = False, wait_for_selector: str = None) -> Optional[str]:
+    async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1, render_js: bool = False, wait_for_selector: str = None, premium: bool = True) -> Optional[str]:
         """Fetch URL using ScraperAPI proxy port method - WORKING for Hepsiburada
         
         Args:
@@ -106,6 +128,7 @@ class ScrapingService:
             session_number: Session number for sticky session
             render_js: Enable JavaScript rendering (for dynamic content like "Sepete özel" prices)
             wait_for_selector: CSS selector to wait for before returning (requires render_js=True)
+            premium: Use premium proxies for protected domains like Hepsiburada (default: True)
         """
         if not settings.SCRAPER_API_KEY:
             return None
@@ -119,6 +142,9 @@ class ScrapingService:
             "max_cost=200",
             f"session_number={session_number}"
         ]
+        
+        if premium:
+            username_parts.insert(1, "premium=true")
         
         if render_js:
             username_parts.insert(1, "render=true")
@@ -473,8 +499,11 @@ class ScrapingService:
         if not html:
             print("ScraperAPI PROXY failed, trying Bright Data fallback...")
             self.current_provider_name = "brightdata"
-            if not self.browser:
-                await self.init_browser("brightdata")
+            if self.browser:
+                print("Closing existing browser before switching to Bright Data...")
+                await self.close_browser()
+            print("Initializing Bright Data browser with Playwright...")
+            await self.init_browser("brightdata")
             urls = await self._get_product_urls_from_search(keyword, max_products)
             return {'urls': urls, 'sponsored_brands': [], 'sponsored_product_urls': set()}
         
