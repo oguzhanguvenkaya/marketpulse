@@ -152,17 +152,18 @@ async def run_scraping_background(task_id: str):
                 print(f"Saved {len(sponsored_brands)} brand ads to database")
             
             for sp in sponsored_products:
+                product_url = sp.get('url') or sp.get('product_url', '')
                 existing_sp = db.query(SearchSponsoredProduct).filter(
                     SearchSponsoredProduct.search_task_id == task.id,
-                    SearchSponsoredProduct.product_url == sp['product_url']
+                    SearchSponsoredProduct.product_url == product_url
                 ).first()
                 
-                if not existing_sp:
+                if not existing_sp and product_url:
                     new_sp = SearchSponsoredProduct(
                         search_task_id=task.id,
                         order_index=sp.get('order_index', 0),
-                        product_url=sp['product_url'],
-                        product_name=sp.get('product_name'),
+                        product_url=product_url,
+                        product_name=sp.get('name') or sp.get('product_name'),
                         seller_name=sp.get('seller_name'),
                         price=sp.get('price'),
                         discounted_price=sp.get('discounted_price'),
