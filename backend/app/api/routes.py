@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from uuid import UUID
 from app.db.database import get_db, SessionLocal
-from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd
+from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct
 from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 
@@ -122,9 +122,11 @@ async def run_scraping_background(task_id: str):
                 search_result = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
                 products_data = search_result.get('products', [])
                 sponsored_brands = search_result.get('sponsored_brands', [])
+                sponsored_products = search_result.get('sponsored_products', [])
             else:
                 products_data = []
                 sponsored_brands = []
+                sponsored_products = []
             
             today = date.today()
             saved_count = 0
@@ -148,6 +150,31 @@ async def run_scraping_background(task_id: str):
             
             if sponsored_brands:
                 print(f"Saved {len(sponsored_brands)} brand ads to database")
+            
+            for sp in sponsored_products:
+                existing_sp = db.query(SearchSponsoredProduct).filter(
+                    SearchSponsoredProduct.search_task_id == task.id,
+                    SearchSponsoredProduct.product_url == sp['product_url']
+                ).first()
+                
+                if not existing_sp:
+                    new_sp = SearchSponsoredProduct(
+                        search_task_id=task.id,
+                        order_index=sp.get('order_index', 0),
+                        product_url=sp['product_url'],
+                        product_name=sp.get('product_name'),
+                        seller_name=sp.get('seller_name'),
+                        price=sp.get('price'),
+                        discounted_price=sp.get('discounted_price'),
+                        image_url=sp.get('image_url'),
+                        payload=sp.get('payload'),
+                        snapshot_date=today
+                    )
+                    db.add(new_sp)
+            
+            if sponsored_products:
+                task.total_sponsored_products = len(sponsored_products)
+                print(f"Saved {len(sponsored_products)} sponsored products to database")
             
             for p_data in products_data:
                 existing = db.query(Product).filter(
@@ -361,6 +388,35 @@ async def get_sponsored_brands(task_id: str, db: Session = Depends(get_db)):
                 "snapshot_date": ad.snapshot_date.isoformat() if ad.snapshot_date else None
             }
             for ad in brand_ads
+        ]
+    }
+
+@router.get("/search/{task_id}/sponsored-products")
+async def get_sponsored_products(task_id: str, db: Session = Depends(get_db)):
+    """Get sponsored products for a search task (sıralı liste)"""
+    task = db.query(SearchTask).filter(SearchTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    sponsored = db.query(SearchSponsoredProduct).filter(
+        SearchSponsoredProduct.search_task_id == task.id
+    ).order_by(SearchSponsoredProduct.order_index).all()
+    
+    return {
+        "keyword": task.keyword,
+        "total_sponsored": len(sponsored),
+        "sponsored_products": [
+            {
+                "order_index": sp.order_index,
+                "product_url": sp.product_url,
+                "product_name": sp.product_name,
+                "seller_name": sp.seller_name,
+                "price": float(sp.price) if sp.price else None,
+                "discounted_price": float(sp.discounted_price) if sp.discounted_price else None,
+                "image_url": sp.image_url,
+                "snapshot_date": sp.snapshot_date.isoformat() if sp.snapshot_date else None
+            }
+            for sp in sponsored
         ]
     }
 
