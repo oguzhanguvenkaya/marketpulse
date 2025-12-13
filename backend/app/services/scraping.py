@@ -314,42 +314,68 @@ class ScrapingService:
         return sponsored_brands
     
     def _extract_sponsored_products_from_search(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-        """Extract individual sponsored products (with Reklam badge) from search page"""
+        """Extract individual sponsored products (with Reklam badge) from search page with order info.
+        
+        Returns list of sponsored products with their display order (1-indexed position on page).
+        """
         sponsored_products = []
         
-        li_products = soup.find_all('li', class_=lambda x: x and 'productListContent' in str(x))
+        product_cards = soup.select('article[class*="productCard-module_article"]')
+        if not product_cards:
+            li_products = soup.find_all('li', class_=lambda x: x and 'productListContent' in str(x))
+            product_cards = li_products
         
-        for li in li_products:
-            li_str = str(li)
-            is_sponsored = 'advertisement-module_adRoot' in li_str
+        for idx, card in enumerate(product_cards, start=1):
+            card_str = str(card)
+            is_sponsored = 'advertisement-module_adRoot' in card_str or 'adRoot' in card_str
             
             if not is_sponsored:
                 continue
             
-            link = li.find('a', href=lambda x: x and ('/p-' in x or '/pm-' in x))
+            link = card.select_one('a[href*="-p-"], a[href*="-pm-"]')
+            if not link:
+                link = card.find('a', href=lambda x: x and ('/p-' in x or '/pm-' in x))
             url = link.get('href') if link else None
             
             name = None
-            h3 = li.find('h3')
+            h3 = card.find('h3')
             if h3:
                 name = h3.get_text(strip=True)
             if not name:
-                title_elem = li.find(attrs={'title': True})
+                title_elem = card.find(attrs={'title': True})
                 if title_elem:
                     name = title_elem.get('title')
+            
+            price = None
+            discounted_price = None
+            price_elem = card.select_one('[data-test-id="price-current-price"], [class*="price"]')
+            if price_elem:
+                price_text = price_elem.get_text(strip=True)
+                price_match = re.search(r'([\d.]+,\d+)', price_text)
+                if price_match:
+                    price = self._parse_float(price_match.group(1).replace('.', '').replace(',', '.'))
+            
+            image_url = None
+            img = card.select_one('img[src*="productimages"], img[data-src*="productimages"]')
+            if img:
+                image_url = img.get('src') or img.get('data-src')
             
             if url:
                 if url.startswith('/'):
                     url = f"https://www.hepsiburada.com{url}"
                 
                 sponsored_products.append({
+                    'order_index': idx,
                     'url': url.split('?')[0],
                     'name': name,
+                    'price': price,
+                    'discounted_price': discounted_price,
+                    'image_url': image_url,
                     'is_sponsored': True
                 })
         
         if sponsored_products:
-            print(f"Found {len(sponsored_products)} sponsored products in search results")
+            print(f"Found {len(sponsored_products)} sponsored products in search results at positions: {[p['order_index'] for p in sponsored_products]}")
         
         return sponsored_products
     
@@ -400,19 +426,32 @@ class ScrapingService:
         
         return basket_prices
     
-    def _extract_product_urls_from_soup(self, soup: BeautifulSoup, max_products: int) -> List[str]:
-        """Extract product URLs from search result page, targeting only the main product grid"""
+    def _extract_product_urls_from_soup(self, soup: BeautifulSoup, max_products: int, sponsored_urls: set = None) -> List[str]:
+        """Extract ORGANIC product URLs from search result page (excludes sponsored products).
+        
+        Args:
+            soup: BeautifulSoup object of search page
+            max_products: Maximum number of organic products to return
+            sponsored_urls: Set of sponsored product URLs to exclude from count
+        
+        Returns:
+            List of organic product URLs (up to max_products)
+        """
         urls = []
         seen_urls = set()
+        sponsored_urls = sponsored_urls or set()
         
         product_cards = soup.select('article[class*="productCard-module_article"]')
         
         if product_cards:
             print(f"Found {len(product_cards)} product cards via article selector")
-            product_links = []
+            cards_with_links = []
             for card in product_cards:
+                card_str = str(card)
+                is_sponsored = 'advertisement-module_adRoot' in card_str or 'adRoot' in card_str
                 links = card.select('a[href*="-p-"], a[href*="-pm-"]')
-                product_links.extend(links)
+                if links:
+                    cards_with_links.append((links[0], is_sponsored))
         else:
             product_links = soup.select('a[class*="productCardLink"][href*="-p-"], a[class*="productCardLink"][href*="-pm-"]')
             if product_links:
@@ -427,8 +466,12 @@ class ScrapingService:
                 else:
                     product_links = soup.select('a[href*="-p-"], a[href*="-pm-"]')
                     print(f"Using fallback: found {len(product_links)} total product links")
+            cards_with_links = [(link, False) for link in product_links]
         
-        for link in product_links:
+        organic_count = 0
+        sponsored_count = 0
+        
+        for link, is_card_sponsored in cards_with_links:
             href = link.get('href', '')
             if not href:
                 continue
@@ -459,12 +502,18 @@ class ScrapingService:
                 continue
             
             seen_urls.add(base_url)
-            urls.append(base_url)
             
-            if len(urls) >= max_products:
+            if is_card_sponsored or base_url in sponsored_urls:
+                sponsored_count += 1
+                continue
+            
+            urls.append(base_url)
+            organic_count += 1
+            
+            if organic_count >= max_products:
                 break
         
-        print(f"Extracted {len(urls)} unique product URLs from search (filtered)")
+        print(f"Extracted {len(urls)} ORGANIC product URLs (skipped {sponsored_count} sponsored)")
         if urls:
             print(f"First 3 URLs: {urls[:3]}")
         
@@ -529,11 +578,12 @@ class ScrapingService:
         
         basket_campaign_prices = self._extract_basket_campaign_prices(soup)
         
-        urls = self._extract_product_urls_from_soup(soup, max_products)
+        urls = self._extract_product_urls_from_soup(soup, max_products, sponsored_urls=sponsored_product_urls)
         
         return {
             'urls': urls,
             'sponsored_brands': sponsored_brands,
+            'sponsored_products': sponsored_products,
             'sponsored_product_urls': sponsored_product_urls,
             'basket_campaign_prices': basket_campaign_prices
         }
@@ -634,13 +684,15 @@ class ScrapingService:
         """Scrape Hepsiburada search results
         
         Returns dict with:
-        - products: List of scraped product data
-        - sponsored_brands: List of brand ads (AUTO POWER, MTS Kimya vb.)
+        - products: List of scraped ORGANIC product data (excludes sponsored)
+        - sponsored_brands: List of brand carousel ads (AUTO POWER, MTS Kimya vb.)
+        - sponsored_products: List of sponsored products with display order
         """
         provider = proxy_manager.get_primary_provider()
         self.current_provider_name = provider.name if provider else "direct"
         
         sponsored_brands = []
+        sponsored_products = []
         sponsored_product_urls = set()
         basket_campaign_prices = {}
         
@@ -648,6 +700,7 @@ class ScrapingService:
             search_result = await self._get_product_urls_via_http_api(keyword, max_products)
             product_urls = search_result['urls']
             sponsored_brands = search_result['sponsored_brands']
+            sponsored_products = search_result.get('sponsored_products', [])
             sponsored_product_urls = search_result['sponsored_product_urls']
             basket_campaign_prices = search_result.get('basket_campaign_prices', {})
         else:
@@ -681,10 +734,12 @@ class ScrapingService:
                 debug_logger.log_error(url, self.current_provider_name, e)
                 continue
         
-        print(f"Successfully scraped {len(products)} products with full details")
+        print(f"Successfully scraped {len(products)} ORGANIC products with full details")
+        print(f"Found {len(sponsored_products)} sponsored products, {len(sponsored_brands)} brand ads")
         return {
             'products': products,
-            'sponsored_brands': sponsored_brands
+            'sponsored_brands': sponsored_brands,
+            'sponsored_products': sponsored_products
         }
     
     async def _get_product_urls_from_search(self, keyword: str, max_products: int, retry_count: int = 0) -> List[str]:

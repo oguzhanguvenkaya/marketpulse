@@ -97,11 +97,13 @@ class SearchTask(Base):
     platform = Column(String(20), nullable=False)
     status = Column(String(20), default="pending")
     total_products = Column(Integer, default=0)
+    total_sponsored_products = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime)
     error_message = Column(Text)
     
     sponsored_brands = relationship("SponsoredBrandAd", back_populates="search_task", cascade="all, delete-orphan")
+    sponsored_products = relationship("SearchSponsoredProduct", back_populates="search_task", cascade="all, delete-orphan")
     
     class Config:
         from_attributes = True
@@ -120,6 +122,28 @@ class SponsoredBrandAd(Base):
     snapshot_date = Column(Date, default=date.today)
     
     search_task = relationship("SearchTask", back_populates="sponsored_brands")
+    
+    class Config:
+        from_attributes = True
+
+
+class SearchSponsoredProduct(Base):
+    """Sponsorlu ürünler - arama sonuçlarında 'Reklam' badge'i olan ürünler (sıralı liste)"""
+    __tablename__ = "search_sponsored_products"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    search_task_id = Column(UUID(as_uuid=True), ForeignKey("search_tasks.id"), nullable=False, index=True)
+    order_index = Column(Integer, nullable=False)
+    product_url = Column(Text, nullable=False)
+    product_name = Column(Text)
+    seller_name = Column(String(255))
+    price = Column(Numeric(10, 2))
+    discounted_price = Column(Numeric(10, 2))
+    image_url = Column(Text)
+    payload = Column(JSON)
+    snapshot_date = Column(Date, default=date.today)
+    
+    search_task = relationship("SearchTask", back_populates="sponsored_products")
     
     class Config:
         from_attributes = True
