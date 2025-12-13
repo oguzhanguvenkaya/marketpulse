@@ -4,10 +4,10 @@
 A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: MVP Phase 4.2 - Basket Campaign Price Extraction from Search Page
+- **Status**: MVP Phase 5 - Ads Page with Sponsored Products UI
 - **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
-- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices
+- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices, **Reklamlar sayfası**
 - **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
 
 ## Proxy Architecture
@@ -72,7 +72,8 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 │   │   ├── pages/
 │   │   │   ├── Dashboard.tsx       # Main dashboard with search
 │   │   │   ├── Products.tsx        # Product list
-│   │   │   └── ProductDetail.tsx   # Product details with tabs
+│   │   │   ├── ProductDetail.tsx   # Product details with tabs
+│   │   │   └── Ads.tsx             # Reklamlar - sponsorlu ürünler ve marka reklamları
 │   │   └── services/api.ts         # API client with extended types
 │   ├── package.json
 │   └── vite.config.ts
