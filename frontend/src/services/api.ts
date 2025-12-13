@@ -135,4 +135,49 @@ export const getStats = async (): Promise<Stats> => {
   return response.data;
 };
 
+export interface SponsoredProduct {
+  order_index: number;
+  product_url: string;
+  product_name?: string;
+  seller_name?: string;
+  price?: number;
+  discounted_price?: number;
+  image_url?: string;
+  snapshot_date?: string;
+}
+
+export interface BrandProduct {
+  url: string;
+  name?: string;
+}
+
+export interface SponsoredBrand {
+  seller_name: string;
+  seller_id?: string;
+  position?: number;
+  products?: BrandProduct[];
+  snapshot_date?: string;
+}
+
+export interface SponsoredProductsResponse {
+  keyword: string;
+  total_sponsored: number;
+  sponsored_products: SponsoredProduct[];
+}
+
+export interface SponsoredBrandsResponse {
+  keyword: string;
+  sponsored_brands: SponsoredBrand[];
+}
+
+export const getSponsoredProducts = async (taskId: string): Promise<SponsoredProductsResponse> => {
+  const response = await api.get(`/search/${taskId}/sponsored-products`);
+  return response.data;
+};
+
+export const getSponsoredBrands = async (taskId: string): Promise<SponsoredBrandsResponse> => {
+  const response = await api.get(`/search/${taskId}/sponsored-brands`);
+  return response.data;
+};
+
 export default api;

@@ -10,6 +10,7 @@ export default function Layout({ children }: LayoutProps) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/products', label: 'Ürünler', icon: '📦' },
+    { path: '/ads', label: 'Reklamlar', icon: '📢' },
   ];
 
   return (
