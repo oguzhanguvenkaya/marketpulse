@@ -4,10 +4,10 @@
 A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: MVP Phase 4 - Sponsored Ads Tracking Complete
+- **Status**: MVP Phase 4.2 - Basket Campaign Price Extraction from Search Page
 - **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
-- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis
+- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices
 - **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
 
 ## Proxy Architecture
@@ -159,6 +159,13 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- December 13, 2025: Phase 4.2 - Basket Campaign Price from Search Page (COMPLETE!)
+  - Discovered: `isBasketCampaign` class exists in SEARCH PAGE HTML (not product detail page)
+  - New method: `_extract_basket_campaign_prices()` extracts prices from search page
+  - Prices mapped by product URL and applied during scraping
+  - Removed Playwright fallback for discounted_price (no longer needed, much faster)
+  - CSS selectors updated: `[class*="isBasketCampaign"]`, `[class*="priceAreaRoot"]`
+  - Scraping now 3-4x faster without Playwright timeout waits
 - December 12, 2025: Phase 4.1 - "Sepete Özel" Dynamic Price Capture
   - ScraperAPI proxy now supports JS rendering with `render_js` parameter
   - Enhanced CSS selectors (8 patterns) and regex patterns (6 patterns) for discounted_price
