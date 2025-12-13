@@ -327,6 +327,53 @@ class ScrapingService:
         
         return sponsored_products
     
+    def _extract_basket_campaign_prices(self, soup: BeautifulSoup) -> Dict[str, float]:
+        """Extract discounted prices from basket campaign elements in search page.
+        
+        Returns dict mapping product URL -> discounted price
+        """
+        basket_prices = {}
+        
+        product_cards = soup.select('article[class*="productCard-module_article"]')
+        
+        for card in product_cards:
+            basket_campaign = card.select_one('[class*="isBasketCampaign"]')
+            if not basket_campaign:
+                continue
+            
+            link = card.select_one('a[href*="-p-"], a[href*="-pm-"]')
+            if not link:
+                continue
+            
+            href = link.get('href', '')
+            if href.startswith('/'):
+                url = f"https://www.hepsiburada.com{href}".split('?')[0]
+            elif href.startswith('https://'):
+                url = href.split('?')[0]
+            else:
+                continue
+            
+            text = basket_campaign.get_text(strip=True)
+            prices = re.findall(r'([\d.]+,\d+)\s*TL', text)
+            
+            if len(prices) >= 2:
+                try:
+                    discounted = float(prices[1].replace('.', '').replace(',', '.'))
+                    basket_prices[url] = discounted
+                except:
+                    pass
+            elif len(prices) == 1:
+                try:
+                    discounted = float(prices[0].replace('.', '').replace(',', '.'))
+                    basket_prices[url] = discounted
+                except:
+                    pass
+        
+        if basket_prices:
+            print(f"Extracted {len(basket_prices)} basket campaign prices from search page")
+        
+        return basket_prices
+    
     def _extract_product_urls_from_soup(self, soup: BeautifulSoup, max_products: int) -> List[str]:
         """Extract product URLs from search result page, targeting only the main product grid"""
         urls = []
@@ -451,12 +498,15 @@ class ScrapingService:
         sponsored_products = self._extract_sponsored_products_from_search(soup)
         sponsored_product_urls = {p['url'] for p in sponsored_products if p.get('url')}
         
+        basket_campaign_prices = self._extract_basket_campaign_prices(soup)
+        
         urls = self._extract_product_urls_from_soup(soup, max_products)
         
         return {
             'urls': urls,
             'sponsored_brands': sponsored_brands,
-            'sponsored_product_urls': sponsored_product_urls
+            'sponsored_product_urls': sponsored_product_urls,
+            'basket_campaign_prices': basket_campaign_prices
         }
     
     async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
@@ -563,18 +613,22 @@ class ScrapingService:
         
         sponsored_brands = []
         sponsored_product_urls = set()
+        basket_campaign_prices = {}
         
         if self.current_provider_name == "scraperapi":
             search_result = await self._get_product_urls_via_http_api(keyword, max_products)
             product_urls = search_result['urls']
             sponsored_brands = search_result['sponsored_brands']
             sponsored_product_urls = search_result['sponsored_product_urls']
+            basket_campaign_prices = search_result.get('basket_campaign_prices', {})
         else:
             if not self.browser:
                 await self.init_browser()
             product_urls = await self._get_product_urls_from_search(keyword, max_products)
         
         print(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
+        if basket_campaign_prices:
+            print(f"Found {len(basket_campaign_prices)} basket campaign prices from search page")
         
         products = []
         for i, url in enumerate(product_urls[:max_products]):
@@ -584,6 +638,13 @@ class ScrapingService:
                 if product_data:
                     if url in sponsored_product_urls:
                         product_data['is_sponsored'] = True
+                    
+                    if url in basket_campaign_prices and not product_data.get('discounted_price'):
+                        product_data['discounted_price'] = basket_campaign_prices[url]
+                        if product_data.get('price') and basket_campaign_prices[url]:
+                            product_data['discount_percentage'] = round((1 - basket_campaign_prices[url] / product_data['price']) * 100, 1)
+                        print(f"  -> Applied basket campaign price from search: {basket_campaign_prices[url]} TL")
+                    
                     products.append(product_data)
                     print(f"  -> Successfully scraped: {product_data.get('name', 'Unknown')[:50]}")
                 await self._random_delay(1000, 3000)
@@ -715,22 +776,6 @@ class ScrapingService:
                 if self.browser:
                     await self.close_browser()
                 await self.init_browser("brightdata")
-            elif not product_data.get('discounted_price'):
-                print(f"No discounted_price found via ScraperAPI, trying Playwright fallback for: {url[:60]}...")
-                playwright_data = await self._scrape_product_via_playwright(url)
-                if playwright_data:
-                    if playwright_data.get('discounted_price'):
-                        product_data['discounted_price'] = playwright_data['discounted_price']
-                        if product_data.get('price') and playwright_data['discounted_price']:
-                            product_data['discount_percentage'] = round((1 - playwright_data['discounted_price'] / product_data['price']) * 100, 1)
-                        print(f"  -> Found discounted_price via Playwright: {playwright_data['discounted_price']}")
-                    if playwright_data.get('coupons') and not product_data.get('coupons'):
-                        product_data['coupons'] = playwright_data['coupons']
-                    if playwright_data.get('campaigns') and not product_data.get('campaigns'):
-                        product_data['campaigns'] = playwright_data['campaigns']
-                    if playwright_data.get('stock_count') and not product_data.get('stock_count'):
-                        product_data['stock_count'] = playwright_data['stock_count']
-                return product_data
             else:
                 return product_data
         
@@ -1007,6 +1052,8 @@ class ScrapingService:
         discounted_price = None
         
         sepete_ozel_selectors = [
+            '[class*="isBasketCampaign"]',
+            '[class*="priceAreaRoot"][class*="isBasketCampaign"]',
             '[class*="sepete"]',
             '[class*="Sepete"]',
             '[class*="cartSpecial"]',

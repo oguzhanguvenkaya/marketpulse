@@ -1,0 +1,49 @@
+Bu kısımları biraz dahaa inceleyelim;
+_fetch_with_scraperapi_proxy(url, session_number, render_js, wait_for_selector)
+kullanınca neyin çıktısı geliyor, sayfa kaynağındaki html içeriği mi geliyor? Parametrelerdeki wait_for_selector nedir? render_js neden false ve true olunca ene oluyor, session_number nedir biz mi oluşturuyoruz_?
+---------
+scrape_hepsiburada_search(keyword, max_products)
+Keyworde göre ürünleri nerede arıyor? max_products parametresi nedir? neden keyword ile beraber gönderiliyor, Gelen çıktı daki "sponsored_brands" nedir veriyi nereden alıyor, products ile gelen veriyi html içeriğinden nasıl alıyoruz, hepsiburada html içeriğinde  products card gibi bir kısım mı var biz tek tek mi alıyoruz, products içindeki özellikler bizim aldığımız parametre ismi ile mi html içeriğinde tutuluyor yoksa biz aldıktan sonra isim mi atadık mesela : {
+    'products': [
+        {
+            'platform': 'hepsiburada',
+            'external_id': 'HBC00004KHI7D',
+            'name': 'Ürün Adı',
+            'url': 'https://...',
+            'price': 607.6,
+            'rating': 4.8,
+            'brand': 'Nasiol',
+            'seller_name': 'Satıcı',
+            'discounted_price': None,
+            'coupons': [],
+            'campaigns': [],
+            'other_sellers': [...],
+            'reviews': [...],
+            ...
+        }
+    ],
+    'sponsored_brands': [
+        {
+            'seller_name': 'TULPAR KİMYA',
+            'seller_id': '123',
+            'position': 1,
+            'products': [...]
+        }
+    ]
+}
+
+coupons, name, price url vs..
+------------
+_get_product_urls_via_http_api(keyword, max_products)
+arama sayfasındaki ürün urllerini nereden çıkartıyor, bu fonksiyon içinde tekrar istek atılıp scraping mi yapılıyor zaten scrape_hepsiburada_search ile almamış mıydık o keyword ile gelen ürünleri ve o sayfadaki reklamları, bu fonksiyonun içinde tekrar self._fetch_with_scraperapi_proxy(search_url, session_number=session_number) çağırılıyor gibi duruyor
+Çıktı:
+
+{
+    'urls': ['https://...', ...],           # Ürün URL listesi
+    'sponsored_brands': [...],               # Marka reklamları
+    'sponsored_product_urls': {'url1', ...}  # Sponsorlu ürün URL'leri
+}
+burada gelen çıktı da sponsored brands marka reklamlarındaki ürün urllerini nasıl alınıyor bu kısım sayfa yüklendikten sonra tam yükleniyor, sayfanın html içeriğinde tam şekilde olmuyor, sponsored product url ler nasıl seçiliyor,
+------------
+_extract_product_urls_from_soup(soup, max_products)
+soup objesinden ürün urlleri çıkartma kısmında soup objesi nerede oluşturuluyor,
