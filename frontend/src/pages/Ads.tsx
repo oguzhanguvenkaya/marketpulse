@@ -148,6 +148,7 @@ export default function Ads() {
               brands={sponsoredBrands} 
               expandedBrand={expandedBrand}
               setExpandedBrand={setExpandedBrand}
+              formatPrice={formatPrice}
             />
           )}
         </div>
@@ -237,9 +238,10 @@ interface BrandAdsTabProps {
   brands: SponsoredBrand[];
   expandedBrand: string | null;
   setExpandedBrand: (brand: string | null) => void;
+  formatPrice: (price?: number) => string;
 }
 
-function BrandAdsTab({ brands, expandedBrand, setExpandedBrand }: BrandAdsTabProps) {
+function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: BrandAdsTabProps) {
   if (brands.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -278,24 +280,58 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand }: BrandAdsTabPro
           
           {expandedBrand === brand.seller_name && brand.products && brand.products.length > 0 && (
             <div className="p-4 border-t bg-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {brand.products.map((product, pIndex) => (
-                  <a
-                    key={pIndex}
-                    href={product.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                  <div key={pIndex} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="relative bg-gray-50 h-32">
+                      {product.image_url ? (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name || 'Ürün'} 
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
                         {product.name || 'Ürün'}
                       </p>
-                      <p className="text-xs text-indigo-600">
-                        Ürüne Git →
-                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        {product.discounted_price ? (
+                          <>
+                            <span className="text-sm font-bold text-green-600">
+                              {formatPrice(product.discounted_price)}
+                            </span>
+                            <span className="text-xs text-gray-400 line-through">
+                              {formatPrice(product.price)}
+                            </span>
+                          </>
+                        ) : product.price ? (
+                          <span className="text-sm font-bold text-gray-900">
+                            {formatPrice(product.price)}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">Fiyat yok</span>
+                        )}
+                      </div>
+                      {product.url && (
+                        <a 
+                          href={product.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-indigo-600 hover:text-indigo-800"
+                        >
+                          Ürüne Git →
+                        </a>
+                      )}
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             </div>

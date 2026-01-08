@@ -276,40 +276,94 @@ class ScrapingService:
         return None
     
     def _extract_sponsored_brands_from_search(self, html: str) -> List[Dict[str, Any]]:
-        """Extract brand carousel ads (AUTO POWER, MTS Kimya vb.) from search page"""
+        """Extract brand carousel ads (AUTO POWER, MTS Kimya vb.) from search page with full product data"""
         sponsored_brands = []
-        seen_merchants = set()
+        products_by_merchant = {}
         
-        merchant_pattern = r'"merchantName":"([^"]+)".*?"merchantId":"([^"]+)".*?"listingId":"([^"]+)"'
+        ad_info_pattern = r'"adInfo":"[^"]*".*?"merchantName":"([^"]+)".*?"merchantId":"([^"]+)".*?"listingId":"([^"]+)"'
         
-        positions_pattern = r'"adInfo":"([^"]*)".*?"merchantName":"([^"]+)".*?"merchantId":"([^"]+)".*?"price":([0-9.]+)'
-        
-        for match in re.finditer(positions_pattern, html, re.DOTALL):
-            ad_info, merchant_name, merchant_id, price = match.groups()
+        for match in re.finditer(ad_info_pattern, html, re.DOTALL):
+            merchant_name, merchant_id, listing_id = match.groups()
+            start_pos = match.start()
+            end_pos = min(match.end() + 2000, len(html))
+            context = html[start_pos:end_pos]
             
-            if merchant_id in seen_merchants:
-                for brand in sponsored_brands:
-                    if brand['seller_id'] == merchant_id:
-                        brand['products'].append({
-                            'price': self._parse_float(price),
-                            'ad_info': ad_info[:50] if ad_info else None
-                        })
-                        break
-                continue
+            product_data = {
+                'price': None,
+                'discounted_price': None,
+                'name': None,
+                'url': None,
+                'image_url': None
+            }
             
-            seen_merchants.add(merchant_id)
+            price_match = re.search(r'"price":\s*([0-9.]+)', context)
+            if price_match:
+                product_data['price'] = self._parse_float(price_match.group(1))
+            
+            disc_patterns = [
+                r'"discountedPrice":\s*([0-9.]+)',
+                r'"salePrice":\s*([0-9.]+)',
+                r'"discountPrice":\s*([0-9.]+)'
+            ]
+            for pattern in disc_patterns:
+                disc_match = re.search(pattern, context)
+                if disc_match:
+                    product_data['discounted_price'] = self._parse_float(disc_match.group(1))
+                    break
+            
+            name_patterns = [
+                r'"productName":"([^"]+)"',
+                r'"name":"([^"]+)"',
+                r'"title":"([^"]+)"'
+            ]
+            for pattern in name_patterns:
+                name_match = re.search(pattern, context)
+                if name_match:
+                    product_data['name'] = name_match.group(1)
+                    break
+            
+            url_match = re.search(r'"url":"(/[^"]+)"', context)
+            if url_match:
+                product_data['url'] = f"https://www.hepsiburada.com{url_match.group(1)}"
+            else:
+                url_match = re.search(r'"url":"(https://[^"]+)"', context)
+                if url_match:
+                    product_data['url'] = url_match.group(1)
+            
+            img_patterns = [
+                r'"imageUrl":"([^"]+)"',
+                r'"image":"([^"]+)"',
+                r'"productImage":"([^"]+)"',
+                r'"images":\["([^"]+)"'
+            ]
+            for pattern in img_patterns:
+                img_match = re.search(pattern, context)
+                if img_match:
+                    product_data['image_url'] = img_match.group(1)
+                    break
+            
+            if merchant_id not in products_by_merchant:
+                products_by_merchant[merchant_id] = {
+                    'seller_name': merchant_name,
+                    'seller_id': merchant_id,
+                    'products': []
+                }
+            
+            products_by_merchant[merchant_id]['products'].append(product_data)
+        
+        for idx, (merchant_id, brand_data) in enumerate(products_by_merchant.items(), start=1):
             sponsored_brands.append({
-                'seller_name': merchant_name,
-                'seller_id': merchant_id,
-                'position': len(sponsored_brands) + 1,
-                'products': [{
-                    'price': self._parse_float(price),
-                    'ad_info': ad_info[:50] if ad_info else None
-                }]
+                'seller_name': brand_data['seller_name'],
+                'seller_id': brand_data['seller_id'],
+                'position': idx,
+                'products': brand_data['products']
             })
         
         if sponsored_brands:
-            print(f"Extracted {len(sponsored_brands)} brand ads: {[b['seller_name'] for b in sponsored_brands]}")
+            total_products = sum(len(b['products']) for b in sponsored_brands)
+            print(f"Extracted {len(sponsored_brands)} brand ads with {total_products} total products")
+            for brand in sponsored_brands:
+                print(f"  - {brand['seller_name']}: {len(brand['products'])} products")
         
         return sponsored_brands
     

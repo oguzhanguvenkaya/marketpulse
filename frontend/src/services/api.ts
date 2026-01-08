@@ -147,8 +147,11 @@ export interface SponsoredProduct {
 }
 
 export interface BrandProduct {
-  url: string;
+  url?: string;
   name?: string;
+  price?: number;
+  discounted_price?: number;
+  image_url?: string;
 }
 
 export interface SponsoredBrand {
