@@ -4,11 +4,34 @@
 A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
 
 ## Current State
-- **Status**: MVP Phase 5 - Ads Page with Sponsored Products UI
+- **Status**: MVP Phase 6 - Price Monitoring for Distributors
 - **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
 - **Frontend**: React + Vite + TailwindCSS v4
-- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices, **Reklamlar sayfası**
+- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices, **Reklamlar sayfası**, **Fiyat Takip sayfası**
 - **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
+
+## Price Monitoring System (NEW)
+
+### Purpose
+Distributors can track seller prices across 800+ SKUs to verify minimum price compliance.
+
+### Technical Approach
+- Uses Hepsiburada's listings API: `/api/v1/product/listings/{SKU}`
+- ScraperAPI proxy port method with SSL verification disabled
+- No Playwright needed - direct JSON API responses
+
+### Database Tables
+- **MonitoredProduct**: id, sku, product_url, product_name, brand, image_url, is_active, last_fetched_at
+- **SellerSnapshot**: id, product_id, merchant_id, merchant_name, price, original_price, minimum_price, stock_quantity, buybox_order, free_shipping, fast_shipping, snapshot_date
+- **PriceMonitorTask**: id, status, total_products, completed_products, started_at, completed_at
+
+### API Endpoints
+- `GET /api/price-monitor/products` - List monitored products
+- `POST /api/price-monitor/products` - Bulk add products (JSON format: {productUrl, sku})
+- `GET /api/price-monitor/products/{id}` - Get product with sellers
+- `POST /api/price-monitor/fetch-single/{id}` - Fetch prices for single product
+- `POST /api/price-monitor/fetch` - Start bulk price fetch task
+- `DELETE /api/price-monitor/products/{id}` - Delete monitored product
 
 ## Proxy Architecture
 
@@ -160,6 +183,13 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
 ## Recent Changes
+- January 24, 2026: Phase 6 - Price Monitoring for Distributors (COMPLETE!)
+  - New feature: Fiyat Takip (Price Monitor) page for tracking seller prices across 800+ SKUs
+  - Uses Hepsiburada's listings API instead of Playwright scraping (faster, cheaper)
+  - Database: MonitoredProduct, SellerSnapshot, PriceMonitorTask tables
+  - API: Bulk product import, single/batch price fetching, seller data with buybox order
+  - Frontend: Product list with seller counts, seller details panel, JSON import modal
+  - Successfully tested: 5 sellers retrieved for test SKU with complete pricing data
 - December 13, 2025: Phase 4.2 - Basket Campaign Price from Search Page (COMPLETE!)
   - Discovered: `isBasketCampaign` class exists in SEARCH PAGE HTML (not product detail page)
   - New method: `_extract_basket_campaign_prices()` extracts prices from search page
