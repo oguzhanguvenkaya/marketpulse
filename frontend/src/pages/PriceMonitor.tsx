@@ -191,10 +191,31 @@ export default function PriceMonitor() {
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{product.sku}</div>
+                    <div className="flex-1 min-w-0">
+                      {product.product_name ? (
+                        <a
+                          href={product.product_url || `https://www.hepsiburada.com/ara?q=${product.sku}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline truncate block"
+                          title={product.product_name}
+                        >
+                          {product.product_name}
+                        </a>
+                      ) : (
+                        <a
+                          href={product.product_url || `https://www.hepsiburada.com/ara?q=${product.sku}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                        >
+                          {product.sku}
+                        </a>
+                      )}
                       {product.product_name && (
-                        <div className="text-xs text-gray-500 truncate">{product.product_name}</div>
+                        <div className="text-xs text-gray-500">{product.sku}</div>
                       )}
                       <div className="text-xs text-gray-400 mt-1">
                         {product.seller_count} satıcı
@@ -203,7 +224,7 @@ export default function PriceMonitor() {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-shrink-0">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleFetchSingle(product.id); }}
                         className="text-indigo-600 hover:text-indigo-800 text-xs px-2 py-1"
@@ -261,7 +282,18 @@ export default function PriceMonitor() {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="font-medium text-sm flex items-center gap-2">
-                            {seller.merchant_name}
+                            {seller.merchant_url ? (
+                              <a
+                                href={seller.merchant_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                              >
+                                {seller.merchant_name}
+                              </a>
+                            ) : (
+                              seller.merchant_name
+                            )}
                             {seller.buybox_order === 1 && (
                               <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
                                 Buybox

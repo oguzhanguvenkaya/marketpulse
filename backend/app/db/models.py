@@ -179,6 +179,7 @@ class SellerSnapshot(Base):
     merchant_id = Column(String(100), nullable=False)
     merchant_name = Column(String(255), nullable=False)
     merchant_logo = Column(Text)
+    merchant_url_postfix = Column(String(255))
     merchant_rating = Column(Float)
     merchant_rating_count = Column(Integer)
     merchant_city = Column(String(100))

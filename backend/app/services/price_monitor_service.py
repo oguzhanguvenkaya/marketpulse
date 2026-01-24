@@ -81,10 +81,12 @@ class PriceMonitorService:
         listings = data.get('listings', [])
         
         for listing in listings:
+            merchant_info = listing.get('merchantInfo', {})
             seller = {
                 'merchant_id': listing.get('merchantId'),
                 'merchant_name': listing.get('merchantName'),
                 'merchant_logo': listing.get('logo'),
+                'merchant_url_postfix': merchant_info.get('urlPostfix'),
                 'merchant_city': listing.get('merchantCity'),
                 'price': listing.get('price', {}).get('value'),
                 'original_price': listing.get('originalPrice', {}).get('value'),
@@ -126,6 +128,7 @@ class PriceMonitorService:
                 merchant_id=seller['merchant_id'],
                 merchant_name=seller['merchant_name'],
                 merchant_logo=seller.get('merchant_logo'),
+                merchant_url_postfix=seller.get('merchant_url_postfix'),
                 merchant_rating=seller.get('merchant_rating'),
                 merchant_rating_count=seller.get('merchant_rating_count'),
                 merchant_city=seller.get('merchant_city'),

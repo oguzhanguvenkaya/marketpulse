@@ -684,12 +684,21 @@ class FetchTaskResponse(BaseModel):
         from_attributes = True
 
 
+def extract_sku_from_url(url: str) -> Optional[str]:
+    """URL'den SKU çıkar: -p-SKU veya -pm-SKU formatından"""
+    import re
+    match = re.search(r'-p[m]?-([A-Z0-9]+)', url, re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+    return None
+
+
 @router.post("/price-monitor/products")
 async def add_monitored_products(
     request: BulkProductsRequest,
     db: Session = Depends(get_db)
 ):
-    """JSON formatında SKU listesi yükle"""
+    """JSON formatında SKU listesi yükle - sadece URL verilse bile SKU çıkarır"""
     added = 0
     updated = 0
     errors = []
@@ -697,13 +706,21 @@ async def add_monitored_products(
     for item in request.products:
         try:
             sku = item.sku
-            if sku.startswith('SKU: '):
-                sku = sku.replace('SKU: ', '')
+            if sku:
+                if sku.startswith('SKU: '):
+                    sku = sku.replace('SKU: ', '')
+            else:
+                sku = extract_sku_from_url(item.productUrl) if item.productUrl else None
+            
+            if not sku:
+                errors.append({"url": item.productUrl, "error": "SKU bulunamadı"})
+                continue
             
             existing = db.query(MonitoredProduct).filter(MonitoredProduct.sku == sku).first()
             
             if existing:
-                existing.product_url = item.productUrl
+                if item.productUrl:
+                    existing.product_url = item.productUrl
                 existing.is_active = True
                 updated += 1
             else:
@@ -715,7 +732,7 @@ async def add_monitored_products(
                 db.add(product)
                 added += 1
         except Exception as e:
-            errors.append({"sku": item.sku, "error": str(e)})
+            errors.append({"sku": item.sku or item.productUrl, "error": str(e)})
     
     db.commit()
     
@@ -782,10 +799,13 @@ async def get_monitored_product_detail(
     for s in latest_snapshots:
         if s.merchant_id not in seen_merchants:
             seen_merchants.add(s.merchant_id)
+            merchant_url = f"https://www.hepsiburada.com/magaza/{s.merchant_url_postfix}" if s.merchant_url_postfix else None
             unique_sellers.append({
                 "merchant_id": s.merchant_id,
                 "merchant_name": s.merchant_name,
                 "merchant_logo": s.merchant_logo,
+                "merchant_url_postfix": s.merchant_url_postfix,
+                "merchant_url": merchant_url,
                 "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
                 "merchant_rating_count": s.merchant_rating_count,
                 "merchant_city": s.merchant_city,

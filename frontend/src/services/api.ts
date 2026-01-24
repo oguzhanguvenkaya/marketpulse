@@ -199,6 +199,8 @@ export interface SellerSnapshot {
   merchant_id: string;
   merchant_name: string;
   merchant_logo?: string;
+  merchant_url_postfix?: string;
+  merchant_url?: string;
   merchant_rating?: number;
   merchant_rating_count?: number;
   merchant_city?: string;
@@ -235,8 +237,8 @@ export interface FetchTask {
 }
 
 export interface BulkProductInput {
-  productUrl: string;
-  sku: string;
+  productUrl?: string;
+  sku?: string;
 }
 
 export const getMonitoredProducts = async (): Promise<MonitoredProductsResponse> => {
