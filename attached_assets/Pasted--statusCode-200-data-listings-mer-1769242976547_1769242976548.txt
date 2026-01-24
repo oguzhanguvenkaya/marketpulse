@@ -1,0 +1,481 @@
+{
+    "statusCode": 200,
+    "data": {
+        "listings": [
+            {
+                "merchantId": "fc358407-16c9-4485-a88b-d98c299b54c2",
+                "listingId": "90caee6c-8a08-4059-a067-2041cbbf6f74",
+                "merchantName": "CİLAKUTUSU",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 0,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "kredi-karti-3-taksit-300-600-tl-arasi,54942786-500-tl-ye-50-tl-indirim,54942836-500-tl-ye-50-tl-indirim,58604080-cilakutusu-saticili-urunlerde-5-indirim,bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar,nivea-deneme,oto-aksesuarlarinda-indirim",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 379,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 379,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 360.05,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 315.83,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/assets/marketplace/fc358407-16c9-4485-a88b-d98c299b54c2-46536.png",
+                "ratingSummary": {
+                    "lifetimeRating": 9.4,
+                    "ratingQuantity": 117
+                },
+                "merchantCity": "KOCAELİ",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "fc358407-16c9-4485-a88b-d98c299b54c2",
+                    "name": "CİLAKUTUSU",
+                    "logo": "https://images.hepsiburada.net/assets/marketplace/fc358407-16c9-4485-a88b-d98c299b54c2-46536.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 9.4,
+                        "ratingQuantity": 117
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "cilakutusu"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "379,00",
+                        "value": 379,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "BIRINCIL",
+                "quantity": 22,
+                "buyboxOrder": 1,
+                "tagList": [
+                    {
+                        "tagId": "kredi-karti-3-taksit-300-600-tl-arasi"
+                    },
+                    {
+                        "tagId": "54942786-500-tl-ye-50-tl-indirim"
+                    },
+                    {
+                        "tagId": "54942836-500-tl-ye-50-tl-indirim"
+                    },
+                    {
+                        "tagId": "58604080-cilakutusu-saticili-urunlerde-5-indirim"
+                    },
+                    {
+                        "tagId": "bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar"
+                    },
+                    {
+                        "tagId": "nivea-deneme"
+                    },
+                    {
+                        "tagId": "oto-aksesuarlarinda-indirim"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "124e72a7-cb42-4eab-b998-7a392262e258",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 1
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": false,
+                "aiBasedShipmentDay": 0,
+                "campaigns": [],
+                "pbs": "brzFXa5zDWdHLYHxEwaEJ7gqa9QbiJty7ZeC0OTyH29yFFkNn07K1BU94tOJER99QpgXK07jw9lswg2Q0HrWskRxgen48i8OEGTThtiEjDVFKzYXUMV+kH7yUf3WKrLc0JFvOmz6j4C6L0BlaqcyN3fQhEbT6UW2ZTm9ADdLZca+pBO9yJqCBlhUM29yXGqsd+mS4S9jE3oumdfriv4vWZ9VwiXWvVHez6Q8aMp1p4E147GS/puHk4JuBE6tKkuJumQindNl1dlVz2wFDcPTMo1yHBZOKa24Yp4hMe8HYxUaJgI8kbp6HvMg32jGC23tbKlg1ofDW3t9WOXlSutCWbcAHIukItV+yvXjh2y5hJI="
+            },
+            {
+                "merchantId": "c3cfb819-3337-487e-8d4e-68e153490f73",
+                "listingId": "f618fe90-ecca-45d4-9703-2d8042eba738",
+                "merchantName": "MTS Kimya",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 0,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "kredi-karti-3-taksit-300-600-tl-arasi,51890131-mts-kimya-saticili-urunlerde-2-urune-10-indirim,56403951-mts-kimya-saticili-urunlerde-2-urune-5-indirim,57395963-4000-tl-ye-200-tl-indirim,bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar,nivea-deneme,oto-aksesuarlarinda-indirim",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 379,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 379,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 360.05,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 315.83,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/assets/marketplace/c3cfb819-3337-487e-8d4e-68e153490f73-80885.png",
+                "ratingSummary": {
+                    "lifetimeRating": 9.7,
+                    "ratingQuantity": 170
+                },
+                "merchantCity": "İZMİR",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "c3cfb819-3337-487e-8d4e-68e153490f73",
+                    "name": "MTS Kimya",
+                    "logo": "https://images.hepsiburada.net/assets/marketplace/c3cfb819-3337-487e-8d4e-68e153490f73-80885.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 9.7,
+                        "ratingQuantity": 170
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "mts-kimya"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "379,00",
+                        "value": 379,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "BIRINCIL",
+                "quantity": 5,
+                "buyboxOrder": 2,
+                "tagList": [
+                    {
+                        "tagId": "kredi-karti-3-taksit-300-600-tl-arasi"
+                    },
+                    {
+                        "tagId": "51890131-mts-kimya-saticili-urunlerde-2-urune-10-indirim"
+                    },
+                    {
+                        "tagId": "56403951-mts-kimya-saticili-urunlerde-2-urune-5-indirim"
+                    },
+                    {
+                        "tagId": "57395963-4000-tl-ye-200-tl-indirim"
+                    },
+                    {
+                        "tagId": "bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar"
+                    },
+                    {
+                        "tagId": "nivea-deneme"
+                    },
+                    {
+                        "tagId": "oto-aksesuarlarinda-indirim"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "2eb0902d-7553-11ed-8bac-0e4e4b4b01b9",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 2
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": false,
+                "aiBasedShipmentDay": 1,
+                "campaigns": [],
+                "pbs": "brzFXa5zDWdHLYHxEwaEJ7gqa9QbiJty7ZeC0OTyH29yFFkNn07K1BU94tOJER99QpgXK07jw9lswg2Q0HrWskRxgen48i8OEGTThtiEjDVFKzYXUMV+kH7yUf3WKrLc0JFvOmz6j4C6L0BlaqcyN3fQhEbT6UW2ZTm9ADdLZca+pBO9yJqCBlhUM29yXGqsd+mS4S9jE3oumdfriv4vWZ9VwiXWvVHez6Q8aMp1p4E147GS/puHk4JuBE6tKkuJumQindNl1dlVz2wFDcPTMo1yHBZOKa24Yp4hMe8HYxUaJgI8kbp6HvMg32jGC23tbKlg1ofDW3t9WOXlSutCWbcAHIukItV+yvXjh2y5hJI="
+            },
+            {
+                "merchantId": "b7e0c7b3-eb81-44c5-8d45-377e76831979",
+                "listingId": "93514652-11f5-4f37-9592-95fb24586575",
+                "merchantName": "Detaycım",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 0,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "kredi-karti-3-taksit-300-600-tl-arasi",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 332.5,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/assets/marketplace/b7e0c7b3-eb81-44c5-8d45-377e76831979-25113.png",
+                "ratingSummary": {
+                    "lifetimeRating": 9.3,
+                    "ratingQuantity": 1
+                },
+                "merchantCity": "BURSA",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "b7e0c7b3-eb81-44c5-8d45-377e76831979",
+                    "name": "Detaycım",
+                    "logo": "https://images.hepsiburada.net/assets/marketplace/b7e0c7b3-eb81-44c5-8d45-377e76831979-25113.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 9.3,
+                        "ratingQuantity": 1
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "detaycim"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "399,00",
+                        "value": 399,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "BIRINCIL",
+                "quantity": 4,
+                "buyboxOrder": 3,
+                "tagList": [
+                    {
+                        "tagId": "kredi-karti-3-taksit-300-600-tl-arasi"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "b72893c7-c79c-4ec3-815f-851dcb88e9ca",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 3
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": true,
+                "aiBasedShipmentDay": null,
+                "campaigns": [],
+                "pbs": "brzFXa5zDWdHLYHxEwaEJ7gqa9QbiJty7ZeC0OTyH29yFFkNn07K1BU94tOJER99QpgXK07jw9lswg2Q0HrWskRxgen48i8OEGTThtiEjDVFKzYXUMV+kH7yUf3WKrLc0JFvOmz6j4C6L0BlaqcyN3fQhEbT6UW2ZTm9ADdLZca+pBO9yJqCBlhUM29yXGqsd+mS4S9jE3oumdfriv4vWZ9VwiXWvVHez6Q8aMp1p4E147GS/puHk4JuBE6tKkuJumQindNl1dlVz2wFDcPTMo1yHBZOKa24Yp4hMe8HYxUaJgI8kbp6HvMg32jGC23tbKlg1ofDW3t9WOXlSutCWbcAHIukItV+yvXjh2y5hJI="
+            },
+            {
+                "merchantId": "a766b740-7195-4b0b-8aa6-46472b0c162b",
+                "listingId": "cca3e6ab-3d72-4b07-b92d-14fc8c1e856d",
+                "merchantName": "Tulpar Store Oto Bakım",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 1,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "kredi-karti-3-taksit-300-600-tl-arasi",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 399,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 332.5,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/merchantimages/prod/a766b740-7195-4b0b-8aa6-46472b0c162b-41540.png",
+                "ratingSummary": {
+                    "lifetimeRating": 0,
+                    "ratingQuantity": 0
+                },
+                "merchantCity": "İZMİR",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "a766b740-7195-4b0b-8aa6-46472b0c162b",
+                    "name": "Tulpar Store Oto Bakım",
+                    "logo": "https://images.hepsiburada.net/merchantimages/prod/a766b740-7195-4b0b-8aa6-46472b0c162b-41540.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 0,
+                        "ratingQuantity": 0
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "tulpar-store-oto"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "399,00",
+                        "value": 399,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "BIRINCIL",
+                "quantity": 6,
+                "buyboxOrder": 4,
+                "tagList": [
+                    {
+                        "tagId": "kredi-karti-3-taksit-300-600-tl-arasi"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "599a3828-75d0-416f-8d38-456dd410a44d",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 4
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": true,
+                "aiBasedShipmentDay": null,
+                "campaigns": [],
+                "pbs": "oUjzq0C+1kWon4G5M6T0PYBdUXXJpE4SToLYm3DC9C54DLbJCND4fEIx6ciNeg1oLszW9JUYuB1ONY+prCLUTxL4Vz38c92Aon7UxZKy2FwMzLTGP9BQ/d2uJ+85VgjCbdKlAs7XbRK1KVPeIhO7cCm7A78RTIA29CeL3RvYbSQvCAddUcO+Exsv1u53Qdpv9MArSzeoQRwE4bxOzbfGNzFZv/LAtrNyqq642hkmHL3o/y5D7MRKAfzBoe4Wwyw0nUN7wedpxd8EPJdyuGmcUTB1yvRWdzDlDWWX4FamCF/MqeHUw4vTx3Btgwk5v93YXapJTpFpHM2/N2Q/6NF389AZgW8c8/HUuE7PI6aw4n3bDqNe1AUeg4VoyNMBHt4b"
+            },
+            {
+                "merchantId": "9faf4065-745a-4f88-b457-90d7580f80ac",
+                "listingId": "370e3631-3573-4466-82a1-5d99376b2cda",
+                "merchantName": "Detay Kutusu",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 1,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "kredi-karti-3-taksit-300-600-tl-arasi,54721884-2000-tl-ye-100-tl-indirim",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 469,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 469,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 389,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 390.83,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/assets/marketplace/9faf4065-745a-4f88-b457-90d7580f80ac-21302.png",
+                "ratingSummary": {
+                    "lifetimeRating": 9.6,
+                    "ratingQuantity": 6
+                },
+                "merchantCity": "KOCAELİ",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "9faf4065-745a-4f88-b457-90d7580f80ac",
+                    "name": "Detay Kutusu",
+                    "logo": "https://images.hepsiburada.net/assets/marketplace/9faf4065-745a-4f88-b457-90d7580f80ac-21302.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 9.6,
+                        "ratingQuantity": 6
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "apexdetailing"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "469,00",
+                        "value": 469,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "BIRINCIL",
+                "quantity": 5,
+                "buyboxOrder": 5,
+                "tagList": [
+                    {
+                        "tagId": "kredi-karti-3-taksit-300-600-tl-arasi"
+                    },
+                    {
+                        "tagId": "54721884-2000-tl-ye-100-tl-indirim"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "9dd985ac-aeb4-4b69-87a7-352b151cee15",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 5
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": true,
+                "aiBasedShipmentDay": 1,
+                "campaigns": [],
+                "pbs": "oUjzq0C+1kWon4G5M6T0PYBdUXXJpE4SToLYm3DC9C54DLbJCND4fEIx6ciNeg1oLszW9JUYuB1ONY+prCLUTxL4Vz38c92Aon7UxZKy2FwMzLTGP9BQ/d2uJ+85VgjCbdKlAs7XbRK1KVPeIhO7cCm7A78RTIA29CeL3RvYbSQvCAddUcO+Exsv1u53Qdpv9MArSzeoQRwE4bxOzbfGNzFZv/LAtrNyqq642hkmHL3o/y5D7MRKAfzBoe4Wwyw0nUN7wedpxd8EPJdyuGmcUTB1yvRWdzDlDWWX4FamCF/MqeHUw4vTx3Btgwk5v93YXapJTpFpHM2/N2Q/6NF389AZgW8c8/HUuE7PI6aw4n3bDqNe1AUeg4VoyNMBHt4b"
+            }
+        ]
+    },
+    "redirection": {
+        "url": null,
+        "type": null,
+        "message": null
+    }
+}
