@@ -147,3 +147,70 @@ class SearchSponsoredProduct(Base):
     
     class Config:
         from_attributes = True
+
+
+class MonitoredProduct(Base):
+    """İzlenen ürünler - distribütör olarak takip edilen SKU'lar"""
+    __tablename__ = "monitored_products"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    sku = Column(String(100), nullable=False, unique=True, index=True)
+    product_url = Column(Text, nullable=False)
+    product_name = Column(Text)
+    brand = Column(String(255))
+    image_url = Column(Text)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_fetched_at = Column(DateTime)
+    
+    seller_snapshots = relationship("SellerSnapshot", back_populates="monitored_product", cascade="all, delete-orphan")
+    
+    class Config:
+        from_attributes = True
+
+
+class SellerSnapshot(Base):
+    """Satıcı anlık fiyat verisi - her fetch'te güncellenir"""
+    __tablename__ = "seller_snapshots"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    monitored_product_id = Column(UUID(as_uuid=True), ForeignKey("monitored_products.id"), nullable=False, index=True)
+    merchant_id = Column(String(100), nullable=False)
+    merchant_name = Column(String(255), nullable=False)
+    merchant_logo = Column(Text)
+    merchant_rating = Column(Float)
+    merchant_rating_count = Column(Integer)
+    merchant_city = Column(String(100))
+    price = Column(Numeric(10, 2), nullable=False)
+    original_price = Column(Numeric(10, 2))
+    minimum_price = Column(Numeric(10, 2))
+    discount_rate = Column(Float)
+    stock_quantity = Column(Integer)
+    buybox_order = Column(Integer)
+    free_shipping = Column(Boolean, default=False)
+    fast_shipping = Column(Boolean, default=False)
+    is_fulfilled_by_hb = Column(Boolean, default=False)
+    snapshot_date = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    monitored_product = relationship("MonitoredProduct", back_populates="seller_snapshots")
+    
+    class Config:
+        from_attributes = True
+
+
+class PriceMonitorTask(Base):
+    """Fiyat izleme görevi - toplu SKU çekme işlemi"""
+    __tablename__ = "price_monitor_tasks"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    status = Column(String(20), default="pending")
+    total_products = Column(Integer, default=0)
+    completed_products = Column(Integer, default=0)
+    failed_products = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+    error_message = Column(Text)
+    
+    class Config:
+        from_attributes = True

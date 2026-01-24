@@ -11,6 +11,7 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/products', label: 'Ürünler', icon: '📦' },
     { path: '/ads', label: 'Reklamlar', icon: '📢' },
+    { path: '/price-monitor', label: 'Fiyat Takip', icon: '💰' },
   ];
 
   return (

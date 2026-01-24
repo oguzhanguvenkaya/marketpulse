@@ -7,9 +7,10 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from uuid import UUID
 from app.db.database import get_db, SessionLocal
-from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct
+from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, MonitoredProduct, SellerSnapshot, PriceMonitorTask
 from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
+from app.services.price_monitor_service import price_monitor_service
 
 router = APIRouter()
 
@@ -622,3 +623,285 @@ async def get_stats(db: Session = Depends(get_db)):
 async def get_scraping_status():
     status = get_proxy_status()
     return status
+
+
+class MonitoredProductInput(BaseModel):
+    productUrl: str
+    sku: str
+
+class BulkProductsRequest(BaseModel):
+    products: List[MonitoredProductInput]
+
+class MonitoredProductResponse(BaseModel):
+    id: str
+    sku: str
+    product_url: str
+    product_name: Optional[str] = None
+    brand: Optional[str] = None
+    image_url: Optional[str] = None
+    is_active: bool = True
+    last_fetched_at: Optional[str] = None
+    seller_count: int = 0
+    
+    class Config:
+        from_attributes = True
+
+class SellerSnapshotResponse(BaseModel):
+    merchant_id: str
+    merchant_name: str
+    merchant_logo: Optional[str] = None
+    merchant_rating: Optional[float] = None
+    merchant_rating_count: Optional[int] = None
+    merchant_city: Optional[str] = None
+    price: float
+    original_price: Optional[float] = None
+    minimum_price: Optional[float] = None
+    discount_rate: Optional[float] = None
+    stock_quantity: Optional[int] = None
+    buybox_order: Optional[int] = None
+    free_shipping: bool = False
+    fast_shipping: bool = False
+    is_fulfilled_by_hb: bool = False
+    snapshot_date: str
+    
+    class Config:
+        from_attributes = True
+
+class ProductWithSellersResponse(BaseModel):
+    product: MonitoredProductResponse
+    sellers: List[SellerSnapshotResponse]
+
+class FetchTaskResponse(BaseModel):
+    id: str
+    status: str
+    total_products: int
+    completed_products: int
+    failed_products: int
+    created_at: str
+    completed_at: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+
+@router.post("/price-monitor/products")
+async def add_monitored_products(
+    request: BulkProductsRequest,
+    db: Session = Depends(get_db)
+):
+    """JSON formatında SKU listesi yükle"""
+    added = 0
+    updated = 0
+    errors = []
+    
+    for item in request.products:
+        try:
+            sku = item.sku
+            if sku.startswith('SKU: '):
+                sku = sku.replace('SKU: ', '')
+            
+            existing = db.query(MonitoredProduct).filter(MonitoredProduct.sku == sku).first()
+            
+            if existing:
+                existing.product_url = item.productUrl
+                existing.is_active = True
+                updated += 1
+            else:
+                product = MonitoredProduct(
+                    sku=sku,
+                    product_url=item.productUrl,
+                    is_active=True
+                )
+                db.add(product)
+                added += 1
+        except Exception as e:
+            errors.append({"sku": item.sku, "error": str(e)})
+    
+    db.commit()
+    
+    return {
+        "added": added,
+        "updated": updated,
+        "errors": errors,
+        "total": len(request.products)
+    }
+
+
+@router.get("/price-monitor/products")
+async def get_monitored_products(
+    db: Session = Depends(get_db),
+    active_only: bool = True
+):
+    """İzlenen ürün listesini getir"""
+    query = db.query(MonitoredProduct)
+    if active_only:
+        query = query.filter(MonitoredProduct.is_active == True)
+    
+    products = query.order_by(desc(MonitoredProduct.created_at)).all()
+    
+    result = []
+    for product in products:
+        latest_snapshots = db.query(SellerSnapshot).filter(
+            SellerSnapshot.monitored_product_id == product.id
+        ).order_by(desc(SellerSnapshot.snapshot_date)).limit(20).all()
+        
+        seller_count = len(set(s.merchant_id for s in latest_snapshots))
+        
+        result.append({
+            "id": str(product.id),
+            "sku": product.sku,
+            "product_url": product.product_url,
+            "product_name": product.product_name,
+            "brand": product.brand,
+            "image_url": product.image_url,
+            "is_active": product.is_active,
+            "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
+            "seller_count": seller_count
+        })
+    
+    return {"products": result, "total": len(result)}
+
+
+@router.get("/price-monitor/products/{product_id}")
+async def get_monitored_product_detail(
+    product_id: str,
+    db: Session = Depends(get_db)
+):
+    """Tek bir ürün ve satıcılarını getir"""
+    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+    
+    latest_snapshots = db.query(SellerSnapshot).filter(
+        SellerSnapshot.monitored_product_id == product.id
+    ).order_by(desc(SellerSnapshot.snapshot_date)).all()
+    
+    seen_merchants = set()
+    unique_sellers = []
+    for s in latest_snapshots:
+        if s.merchant_id not in seen_merchants:
+            seen_merchants.add(s.merchant_id)
+            unique_sellers.append({
+                "merchant_id": s.merchant_id,
+                "merchant_name": s.merchant_name,
+                "merchant_logo": s.merchant_logo,
+                "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
+                "merchant_rating_count": s.merchant_rating_count,
+                "merchant_city": s.merchant_city,
+                "price": float(s.price) if s.price else None,
+                "original_price": float(s.original_price) if s.original_price else None,
+                "minimum_price": float(s.minimum_price) if s.minimum_price else None,
+                "discount_rate": s.discount_rate,
+                "stock_quantity": s.stock_quantity,
+                "buybox_order": s.buybox_order,
+                "free_shipping": s.free_shipping,
+                "fast_shipping": s.fast_shipping,
+                "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
+                "snapshot_date": s.snapshot_date.isoformat()
+            })
+    
+    return {
+        "product": {
+            "id": str(product.id),
+            "sku": product.sku,
+            "product_url": product.product_url,
+            "product_name": product.product_name,
+            "brand": product.brand,
+            "image_url": product.image_url,
+            "is_active": product.is_active,
+            "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
+            "seller_count": len(unique_sellers)
+        },
+        "sellers": unique_sellers
+    }
+
+
+@router.delete("/price-monitor/products/{product_id}")
+async def delete_monitored_product(
+    product_id: str,
+    db: Session = Depends(get_db)
+):
+    """İzlenen ürünü sil"""
+    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+    
+    db.delete(product)
+    db.commit()
+    
+    return {"success": True, "message": "Ürün silindi"}
+
+
+async def run_fetch_task(task_id: str, product_ids: List[str] = None):
+    """Arka planda satıcı fiyatlarını çek"""
+    db = SessionLocal()
+    try:
+        task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+        if task:
+            await price_monitor_service.fetch_all_products(db, task, product_ids)
+    finally:
+        db.close()
+
+
+@router.post("/price-monitor/fetch")
+async def start_fetch_task(
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    product_ids: Optional[List[str]] = None
+):
+    """Tüm izlenen ürünler için satıcı fiyatlarını çekmeye başla"""
+    task = PriceMonitorTask(status="pending")
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    background_tasks.add_task(run_fetch_task, str(task.id), product_ids)
+    
+    return {
+        "task_id": str(task.id),
+        "status": "started",
+        "message": "Fiyat çekme işlemi başlatıldı"
+    }
+
+
+@router.get("/price-monitor/fetch/{task_id}")
+async def get_fetch_task_status(
+    task_id: str,
+    db: Session = Depends(get_db)
+):
+    """Fiyat çekme görevinin durumunu getir"""
+    task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+    
+    if not task:
+        raise HTTPException(status_code=404, detail="Görev bulunamadı")
+    
+    return {
+        "id": str(task.id),
+        "status": task.status,
+        "total_products": task.total_products,
+        "completed_products": task.completed_products,
+        "failed_products": task.failed_products,
+        "created_at": task.created_at.isoformat(),
+        "completed_at": task.completed_at.isoformat() if task.completed_at else None
+    }
+
+
+@router.post("/price-monitor/fetch-single/{product_id}")
+async def fetch_single_product(
+    product_id: str,
+    db: Session = Depends(get_db)
+):
+    """Tek bir ürün için satıcı fiyatlarını çek"""
+    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+    
+    success = await price_monitor_service.fetch_and_save_product(db, product)
+    
+    if success:
+        return {"success": True, "message": f"{product.sku} için satıcı verileri güncellendi"}
+    else:
+        raise HTTPException(status_code=500, detail="Satıcı verileri çekilemedi")

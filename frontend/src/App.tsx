@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import Ads from './pages/Ads'
+import PriceMonitor from './pages/PriceMonitor'
 import Layout from './components/Layout'
 import './App.css'
 
@@ -15,6 +16,7 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/ads" element={<Ads />} />
+          <Route path="/price-monitor" element={<PriceMonitor />} />
         </Routes>
       </Layout>
     </Router>

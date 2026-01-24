@@ -183,4 +183,94 @@ export const getSponsoredBrands = async (taskId: string): Promise<SponsoredBrand
   return response.data;
 };
 
+export interface MonitoredProduct {
+  id: string;
+  sku: string;
+  product_url: string;
+  product_name?: string;
+  brand?: string;
+  image_url?: string;
+  is_active: boolean;
+  last_fetched_at?: string;
+  seller_count: number;
+}
+
+export interface SellerSnapshot {
+  merchant_id: string;
+  merchant_name: string;
+  merchant_logo?: string;
+  merchant_rating?: number;
+  merchant_rating_count?: number;
+  merchant_city?: string;
+  price: number;
+  original_price?: number;
+  minimum_price?: number;
+  discount_rate?: number;
+  stock_quantity?: number;
+  buybox_order?: number;
+  free_shipping: boolean;
+  fast_shipping: boolean;
+  is_fulfilled_by_hb: boolean;
+  snapshot_date: string;
+}
+
+export interface MonitoredProductsResponse {
+  products: MonitoredProduct[];
+  total: number;
+}
+
+export interface ProductWithSellers {
+  product: MonitoredProduct;
+  sellers: SellerSnapshot[];
+}
+
+export interface FetchTask {
+  id: string;
+  status: string;
+  total_products: number;
+  completed_products: number;
+  failed_products: number;
+  created_at: string;
+  completed_at?: string;
+}
+
+export interface BulkProductInput {
+  productUrl: string;
+  sku: string;
+}
+
+export const getMonitoredProducts = async (): Promise<MonitoredProductsResponse> => {
+  const response = await api.get('/price-monitor/products');
+  return response.data;
+};
+
+export const getMonitoredProductDetail = async (productId: string): Promise<ProductWithSellers> => {
+  const response = await api.get(`/price-monitor/products/${productId}`);
+  return response.data;
+};
+
+export const addMonitoredProducts = async (products: BulkProductInput[]): Promise<{ added: number; updated: number; errors: any[]; total: number }> => {
+  const response = await api.post('/price-monitor/products', { products });
+  return response.data;
+};
+
+export const deleteMonitoredProduct = async (productId: string): Promise<void> => {
+  await api.delete(`/price-monitor/products/${productId}`);
+};
+
+export const startFetchTask = async (): Promise<{ task_id: string; status: string; message: string }> => {
+  const response = await api.post('/price-monitor/fetch');
+  return response.data;
+};
+
+export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask> => {
+  const response = await api.get(`/price-monitor/fetch/${taskId}`);
+  return response.data;
+};
+
+export const fetchSingleProduct = async (productId: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post(`/price-monitor/fetch-single/${productId}`);
+  return response.data;
+};
+
 export default api;
