@@ -185,7 +185,9 @@ export const getSponsoredBrands = async (taskId: string): Promise<SponsoredBrand
 
 export interface MonitoredProduct {
   id: string;
+  platform: string;
   sku: string;
+  barcode?: string;
   product_url: string;
   product_name?: string;
   brand?: string;
@@ -240,10 +242,12 @@ export interface BulkProductInput {
   productUrl?: string;
   productName?: string;
   sku?: string;
+  barcode?: string;
 }
 
-export const getMonitoredProducts = async (): Promise<MonitoredProductsResponse> => {
-  const response = await api.get('/price-monitor/products');
+export const getMonitoredProducts = async (platform?: string): Promise<MonitoredProductsResponse> => {
+  const params = platform ? { platform } : {};
+  const response = await api.get('/price-monitor/products', { params });
   return response.data;
 };
 
@@ -252,8 +256,8 @@ export const getMonitoredProductDetail = async (productId: string): Promise<Prod
   return response.data;
 };
 
-export const addMonitoredProducts = async (products: BulkProductInput[]): Promise<{ added: number; updated: number; errors: any[]; total: number }> => {
-  const response = await api.post('/price-monitor/products', { products });
+export const addMonitoredProducts = async (products: BulkProductInput[], platform: string = 'hepsiburada'): Promise<{ added: number; updated: number; errors: any[]; total: number; platform: string }> => {
+  const response = await api.post('/price-monitor/products', { products, platform });
   return response.data;
 };
 

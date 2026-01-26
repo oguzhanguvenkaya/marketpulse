@@ -14,7 +14,10 @@ import type {
   BulkProductInput,
 } from '../services/api';
 
+type Platform = 'hepsiburada' | 'trendyol';
+
 export default function PriceMonitor() {
+  const [platform, setPlatform] = useState<Platform>('hepsiburada');
   const [products, setProducts] = useState<MonitoredProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<MonitoredProduct | null>(null);
@@ -29,7 +32,7 @@ export default function PriceMonitor() {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [platform]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -56,7 +59,9 @@ export default function PriceMonitor() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await getMonitoredProducts();
+      setSelectedProduct(null);
+      setSellers([]);
+      const data = await getMonitoredProducts(platform);
       setProducts(data.products);
     } catch (e) {
       console.error('Error loading products:', e);
@@ -84,8 +89,8 @@ export default function PriceMonitor() {
       setImportLoading(true);
       const parsed = JSON.parse(importJson);
       const productList: BulkProductInput[] = Array.isArray(parsed) ? parsed : [parsed];
-      const result = await addMonitoredProducts(productList);
-      alert(`${result.added} ürün eklendi, ${result.updated} ürün güncellendi.`);
+      const result = await addMonitoredProducts(productList, platform);
+      alert(`${result.added} ürün eklendi, ${result.updated} ürün güncellendi (${result.platform}).`);
       setShowImportModal(false);
       setImportJson('');
       loadProducts();
@@ -142,6 +147,27 @@ export default function PriceMonitor() {
     return new Date(dateStr).toLocaleString('tr-TR');
   };
 
+  const getProductUrl = (product: MonitoredProduct) => {
+    if (product.product_url) return product.product_url;
+    if (product.platform === 'trendyol') {
+      return `https://www.trendyol.com/arama?q=${product.sku}`;
+    }
+    return `https://www.hepsiburada.com/ara?q=${product.sku}`;
+  };
+
+  const getImportExample = () => {
+    if (platform === 'trendyol') {
+      return `[
+  { "productUrl": "https://www.trendyol.com/...-p-123456789", "productName": "Ürün Adı 1", "barcode": "8809432676195" },
+  { "productUrl": "https://www.trendyol.com/...-p-987654321", "productName": "Ürün Adı 2", "barcode": "8809432671053" }
+]`;
+    }
+    return `[
+  { "productUrl": "https://www.hepsiburada.com/...-p-SKU123", "productName": "Ürün Adı 1", "sku": "SKU123" },
+  { "productUrl": "https://www.hepsiburada.com/...-p-SKU456", "productName": "Ürün Adı 2", "sku": "SKU456" }
+]`;
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -163,6 +189,29 @@ export default function PriceMonitor() {
         </div>
       </div>
 
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setPlatform('hepsiburada')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            platform === 'hepsiburada'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Hepsiburada
+        </button>
+        <button
+          onClick={() => setPlatform('trendyol')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            platform === 'trendyol'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Trendyol
+        </button>
+      </div>
+
       {fetchStatus === 'running' && (
         <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded mb-4">
           Fiyatlar çekiliyor: {fetchProgress.completed} / {fetchProgress.total} ürün tamamlandı
@@ -171,7 +220,9 @@ export default function PriceMonitor() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">İzlenen Ürünler ({products.length})</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            İzlenen Ürünler - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'} ({products.length})
+          </h2>
           {loading ? (
             <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
           ) : products.length === 0 ? (
@@ -194,7 +245,7 @@ export default function PriceMonitor() {
                     <div className="flex-1 min-w-0">
                       {product.product_name ? (
                         <a
-                          href={product.product_url || `https://www.hepsiburada.com/ara?q=${product.sku}`}
+                          href={getProductUrl(product)}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
@@ -205,7 +256,7 @@ export default function PriceMonitor() {
                         </a>
                       ) : (
                         <a
-                          href={product.product_url || `https://www.hepsiburada.com/ara?q=${product.sku}`}
+                          href={getProductUrl(product)}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
@@ -215,7 +266,9 @@ export default function PriceMonitor() {
                         </a>
                       )}
                       {product.product_name && (
-                        <div className="text-xs text-gray-500">{product.sku}</div>
+                        <div className="text-xs text-gray-500">
+                          {product.barcode ? `Barkod: ${product.barcode}` : `SKU: ${product.sku}`}
+                        </div>
                       )}
                       <div className="text-xs text-gray-400 mt-1">
                         {product.seller_count} satıcı
@@ -249,7 +302,7 @@ export default function PriceMonitor() {
 
         <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-semibold mb-4">
-            {selectedProduct ? `Satıcılar - ${selectedProduct.sku}` : 'Satıcı Detayları'}
+            {selectedProduct ? `Satıcılar - ${selectedProduct.product_name || selectedProduct.sku}` : 'Satıcı Detayları'}
           </h2>
           {!selectedProduct ? (
             <div className="text-center py-8 text-gray-500">
@@ -321,6 +374,11 @@ export default function PriceMonitor() {
                               {formatPrice(seller.original_price)}
                             </div>
                           )}
+                          {seller.discount_rate && seller.discount_rate > 0 && (
+                            <div className="text-xs text-green-600">
+                              %{seller.discount_rate.toFixed(0)} indirim
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2 mt-2 text-xs">
@@ -352,15 +410,14 @@ export default function PriceMonitor() {
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
-            <h3 className="text-lg font-semibold mb-4">Ürün Listesi Ekle (JSON)</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Ürün Listesi Ekle - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'} (JSON)
+            </h3>
             <p className="text-sm text-gray-600 mb-3">
               Aşağıdaki formatta JSON yapıştırın:
             </p>
             <pre className="bg-gray-100 p-2 rounded text-xs mb-3 overflow-x-auto">
-{`[
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU123", "productName": "Ürün Adı 1", "sku": "SKU123" },
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU456", "productName": "Ürün Adı 2", "sku": "SKU456" }
-]`}
+{getImportExample()}
             </pre>
             <textarea
               value={importJson}

@@ -11,6 +11,7 @@ from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview
 from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 from app.services.price_monitor_service import price_monitor_service
+from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
 
 router = APIRouter()
 
@@ -629,13 +630,17 @@ class MonitoredProductInput(BaseModel):
     productUrl: Optional[str] = None
     productName: Optional[str] = None
     sku: Optional[str] = None
+    barcode: Optional[str] = None
 
 class BulkProductsRequest(BaseModel):
     products: List[MonitoredProductInput]
+    platform: str = "hepsiburada"  # hepsiburada veya trendyol
 
 class MonitoredProductResponse(BaseModel):
     id: str
+    platform: str = "hepsiburada"
     sku: str
+    barcode: Optional[str] = None
     product_url: str
     product_name: Optional[str] = None
     brand: Optional[str] = None
@@ -685,12 +690,17 @@ class FetchTaskResponse(BaseModel):
         from_attributes = True
 
 
-def extract_sku_from_url(url: str) -> Optional[str]:
-    """URL'den SKU çıkar: -p-SKU veya -pm-SKU formatından"""
+def extract_sku_from_url(url: str, platform: str = "hepsiburada") -> Optional[str]:
+    """URL'den SKU çıkar"""
     import re
-    match = re.search(r'-p[m]?-([A-Z0-9]+)', url, re.IGNORECASE)
-    if match:
-        return match.group(1).upper()
+    if platform == "hepsiburada":
+        match = re.search(r'-p[m]?-([A-Z0-9]+)', url, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+    elif platform == "trendyol":
+        match = re.search(r'-p-(\d+)', url)
+        if match:
+            return match.group(1)
     return None
 
 
@@ -699,10 +709,11 @@ async def add_monitored_products(
     request: BulkProductsRequest,
     db: Session = Depends(get_db)
 ):
-    """JSON formatında SKU listesi yükle - sadece URL verilse bile SKU çıkarır"""
+    """JSON formatında SKU listesi yükle - platform: hepsiburada veya trendyol"""
     added = 0
     updated = 0
     errors = []
+    platform = request.platform.lower()
     
     for item in request.products:
         try:
@@ -711,24 +722,31 @@ async def add_monitored_products(
                 if sku.startswith('SKU: '):
                     sku = sku.replace('SKU: ', '')
             else:
-                sku = extract_sku_from_url(item.productUrl) if item.productUrl else None
+                sku = extract_sku_from_url(item.productUrl, platform) if item.productUrl else None
             
             if not sku:
                 errors.append({"url": item.productUrl, "error": "SKU bulunamadı"})
                 continue
             
-            existing = db.query(MonitoredProduct).filter(MonitoredProduct.sku == sku).first()
+            existing = db.query(MonitoredProduct).filter(
+                MonitoredProduct.sku == sku,
+                MonitoredProduct.platform == platform
+            ).first()
             
             if existing:
                 if item.productUrl:
                     existing.product_url = item.productUrl
                 if item.productName:
                     existing.product_name = item.productName
+                if item.barcode:
+                    existing.barcode = item.barcode
                 existing.is_active = True
                 updated += 1
             else:
                 product = MonitoredProduct(
+                    platform=platform,
                     sku=sku,
+                    barcode=item.barcode,
                     product_url=item.productUrl,
                     product_name=item.productName,
                     is_active=True
@@ -744,19 +762,23 @@ async def add_monitored_products(
         "added": added,
         "updated": updated,
         "errors": errors,
-        "total": len(request.products)
+        "total": len(request.products),
+        "platform": platform
     }
 
 
 @router.get("/price-monitor/products")
 async def get_monitored_products(
     db: Session = Depends(get_db),
-    active_only: bool = True
+    active_only: bool = True,
+    platform: Optional[str] = None
 ):
-    """İzlenen ürün listesini getir"""
+    """İzlenen ürün listesini getir - platform filtresi ile"""
     query = db.query(MonitoredProduct)
     if active_only:
         query = query.filter(MonitoredProduct.is_active == True)
+    if platform:
+        query = query.filter(MonitoredProduct.platform == platform.lower())
     
     products = query.order_by(desc(MonitoredProduct.created_at)).all()
     
@@ -770,7 +792,9 @@ async def get_monitored_products(
         
         result.append({
             "id": str(product.id),
+            "platform": product.platform,
             "sku": product.sku,
+            "barcode": product.barcode,
             "product_url": product.product_url,
             "product_name": product.product_name,
             "brand": product.brand,
@@ -803,7 +827,12 @@ async def get_monitored_product_detail(
     for s in latest_snapshots:
         if s.merchant_id not in seen_merchants:
             seen_merchants.add(s.merchant_id)
-            merchant_url = f"https://www.hepsiburada.com/magaza/{s.merchant_url_postfix}" if s.merchant_url_postfix else None
+            if product.platform == "hepsiburada":
+                merchant_url = f"https://www.hepsiburada.com/magaza/{s.merchant_url_postfix}" if s.merchant_url_postfix else None
+            elif product.platform == "trendyol":
+                merchant_url = f"https://www.trendyol.com{s.merchant_url_postfix}" if s.merchant_url_postfix else None
+            else:
+                merchant_url = None
             unique_sellers.append({
                 "merchant_id": s.merchant_id,
                 "merchant_name": s.merchant_name,
@@ -828,7 +857,9 @@ async def get_monitored_product_detail(
     return {
         "product": {
             "id": str(product.id),
+            "platform": product.platform,
             "sku": product.sku,
+            "barcode": product.barcode,
             "product_url": product.product_url,
             "product_name": product.product_name,
             "brand": product.brand,
@@ -917,15 +948,18 @@ async def fetch_single_product(
     product_id: str,
     db: Session = Depends(get_db)
 ):
-    """Tek bir ürün için satıcı fiyatlarını çek"""
+    """Tek bir ürün için satıcı fiyatlarını çek - platform otomatik belirlenir"""
     product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
     
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     
-    success = await price_monitor_service.fetch_and_save_product(db, product)
+    if product.platform == "trendyol":
+        success = await trendyol_price_monitor_service.fetch_and_save_product(db, product)
+    else:
+        success = await price_monitor_service.fetch_and_save_product(db, product)
     
     if success:
-        return {"success": True, "message": f"{product.sku} için satıcı verileri güncellendi"}
+        return {"success": True, "message": f"{product.sku} için satıcı verileri güncellendi", "platform": product.platform}
     else:
         raise HTTPException(status_code=500, detail="Satıcı verileri çekilemedi")

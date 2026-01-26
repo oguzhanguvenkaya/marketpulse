@@ -154,7 +154,9 @@ class MonitoredProduct(Base):
     __tablename__ = "monitored_products"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    sku = Column(String(100), nullable=False, unique=True, index=True)
+    platform = Column(String(20), nullable=False, default='hepsiburada', index=True)  # hepsiburada, trendyol
+    sku = Column(String(100), nullable=False, index=True)  # unique kaldırıldı - platform ile birlikte unique olacak
+    barcode = Column(String(50))  # Trendyol için barkod
     product_url = Column(Text, nullable=False)
     product_name = Column(Text)
     brand = Column(String(255))
@@ -192,6 +194,8 @@ class SellerSnapshot(Base):
     free_shipping = Column(Boolean, default=False)
     fast_shipping = Column(Boolean, default=False)
     is_fulfilled_by_hb = Column(Boolean, default=False)
+    delivery_info = Column(Text)  # Trendyol: teslimat bilgisi
+    campaign_info = Column(Text)  # Trendyol: kampanya bilgisi (Sepette %5 indirim vb.)
     snapshot_date = Column(DateTime, default=datetime.utcnow, index=True)
     
     monitored_product = relationship("MonitoredProduct", back_populates="seller_snapshots")
