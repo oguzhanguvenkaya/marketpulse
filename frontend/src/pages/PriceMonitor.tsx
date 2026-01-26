@@ -352,14 +352,14 @@ export default function PriceMonitor() {
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
-            <h3 className="text-lg font-semibold mb-4">SKU Listesi Ekle (JSON)</h3>
+            <h3 className="text-lg font-semibold mb-4">Ürün Listesi Ekle (JSON)</h3>
             <p className="text-sm text-gray-600 mb-3">
               Aşağıdaki formatta JSON yapıştırın:
             </p>
             <pre className="bg-gray-100 p-2 rounded text-xs mb-3 overflow-x-auto">
 {`[
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU123", "sku": "SKU123" },
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU456", "sku": "SKU456" }
+  { "productUrl": "https://www.hepsiburada.com/...-p-SKU123", "productName": "Ürün Adı 1", "sku": "SKU123" },
+  { "productUrl": "https://www.hepsiburada.com/...-p-SKU456", "productName": "Ürün Adı 2", "sku": "SKU456" }
 ]`}
             </pre>
             <textarea

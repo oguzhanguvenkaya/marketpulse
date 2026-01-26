@@ -626,8 +626,9 @@ async def get_scraping_status():
 
 
 class MonitoredProductInput(BaseModel):
-    productUrl: str
-    sku: str
+    productUrl: Optional[str] = None
+    productName: Optional[str] = None
+    sku: Optional[str] = None
 
 class BulkProductsRequest(BaseModel):
     products: List[MonitoredProductInput]
@@ -721,12 +722,15 @@ async def add_monitored_products(
             if existing:
                 if item.productUrl:
                     existing.product_url = item.productUrl
+                if item.productName:
+                    existing.product_name = item.productName
                 existing.is_active = True
                 updated += 1
             else:
                 product = MonitoredProduct(
                     sku=sku,
                     product_url=item.productUrl,
+                    product_name=item.productName,
                     is_active=True
                 )
                 db.add(product)

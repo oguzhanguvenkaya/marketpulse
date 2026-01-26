@@ -238,6 +238,7 @@ export interface FetchTask {
 
 export interface BulkProductInput {
   productUrl?: string;
+  productName?: string;
   sku?: string;
 }
 
