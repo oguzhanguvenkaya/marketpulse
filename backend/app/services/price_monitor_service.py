@@ -32,21 +32,16 @@ class PriceMonitorService:
         return None
     
     async def fetch_listings(self, sku: str) -> Optional[Dict[str, Any]]:
-        """Tek bir SKU için listings API'sinden satıcı verilerini çek"""
-        api_url = self.LISTINGS_API_URL.format(sku=sku)
+        """Tek bir SKU için listings API'sinden satıcı verilerini çek - ScraperAPI HTTP API"""
+        import urllib.parse
         
-        session_num = random.randint(1, 999999)
-        proxy_url = 'http://proxy-server.scraperapi.com:8001'
-        proxy_user = f'scraperapi.country_code=tr.device_type=desktop.session_number={session_num}'
-        proxy_pass = self.api_key
-        
-        proxy_auth = aiohttp.BasicAuth(proxy_user, proxy_pass)
+        target_url = self.LISTINGS_API_URL.format(sku=sku)
+        encoded_url = urllib.parse.quote(target_url, safe='')
+        api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
         
         headers = {
             'Accept': 'application/json, text/plain, */*',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
-            'Referer': 'https://www.hepsiburada.com/',
-            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7'
         }
         
         ssl_context = ssl.create_default_context()
@@ -58,9 +53,7 @@ class PriceMonitorService:
         try:
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(
-                    api_url, 
-                    proxy=proxy_url, 
-                    proxy_auth=proxy_auth, 
+                    api_url,
                     headers=headers, 
                     timeout=aiohttp.ClientTimeout(total=60)
                 ) as resp:
