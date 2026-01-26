@@ -1,189 +1,7 @@
 # Pazaryeri Veri Analiz Platformu
 
 ## Overview
-A Marketplace Data Analysis Platform that helps marketplace sellers and marketing agencies make data-driven decisions. The platform scrapes product data from Turkish marketplaces (starting with Hepsiburada), analyzes trends, and provides AI-powered insights.
-
-## Current State
-- **Status**: MVP Phase 6 - Price Monitoring for Distributors
-- **Backend**: FastAPI with PostgreSQL, BackgroundTasks for async scraping
-- **Frontend**: React + Vite + TailwindCSS v4
-- **Features**: Product search, two-stage scraping, rich product data, price/rating charts, AI analysis, sponsored product tracking, brand advertiser analysis, basket campaign prices, **Reklamlar sayfası**, **Fiyat Takip sayfası**
-- **Proxy System**: Modular multi-provider (ScraperAPI + Bright Data with auto-fallback)
-
-## Price Monitoring System (NEW)
-
-### Purpose
-Distributors can track seller prices across 800+ SKUs to verify minimum price compliance.
-
-### Technical Approach
-- Uses Hepsiburada's listings API: `/api/v1/product/listings/{SKU}`
-- ScraperAPI proxy port method with SSL verification disabled
-- No Playwright needed - direct JSON API responses
-
-### Database Tables
-- **MonitoredProduct**: id, sku, product_url, product_name, brand, image_url, is_active, last_fetched_at
-- **SellerSnapshot**: id, product_id, merchant_id, merchant_name, price, original_price, minimum_price, stock_quantity, buybox_order, free_shipping, fast_shipping, snapshot_date
-- **PriceMonitorTask**: id, status, total_products, completed_products, started_at, completed_at
-
-### API Endpoints
-- `GET /api/price-monitor/products` - List monitored products
-- `POST /api/price-monitor/products` - Bulk add products (JSON format: {productUrl, productName, sku})
-- `GET /api/price-monitor/products/{id}` - Get product with sellers (includes merchant_url for seller links)
-- `POST /api/price-monitor/fetch-single/{id}` - Fetch prices for single product
-- `POST /api/price-monitor/fetch` - Start bulk price fetch task
-- `DELETE /api/price-monitor/products/{id}` - Delete monitored product
-
-### JSON Import Format
-```json
-[
-  { "productUrl": "https://...-p-SKU123", "productName": "Ürün Adı", "sku": "SKU123" }
-]
-```
-- All fields optional, but at least sku or productUrl required
-- SKU can be auto-extracted from productUrl if not provided
-
-## Proxy Architecture
-
-### Provider Hierarchy (Auto Mode)
-1. **ScraperAPI** (Primary) - Ucuz, 3M istek/ay $249, PROXY PORT metodu ile
-2. **Bright Data** (Fallback) - Premium, Playwright proxy ile
-3. **Direct** (Last resort) - Proxy yok
-
-### Implementation Details - WORKING METHOD
-- **ScraperAPI**: **PROXY PORT** metodu kullanılır (HTTP API bot kontrolünü geçemiyor)
-  - Proxy URL: `http://proxy-server.scraperapi.com:8001`
-  - Username: `scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={random}`
-  - Password: API Key
-  - aiohttp ile async istek, proxy üzerinden
-  - BeautifulSoup ile HTML parse
-- **Bright Data**: Playwright proxy olarak kullanılır (fallback)
-
-### Configuration
-```python
-PROXY_PROVIDER = "auto"  # Options: auto, scraperapi, brightdata
-DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
-```
-
-### Fallback Logic
-- If ScraperAPI PROXY returns homepage/error -> Auto-switch to Bright Data
-- Debug HTML saved to `/tmp/scraping_debug/` for analysis
-
-## Scraping Strategy
-**Two-Stage Scraping Approach:**
-1. **Stage 1**: Get product URLs from search/listing page
-2. **Stage 2**: Visit each product detail page to extract comprehensive data
-
-**Data Sources from Product Detail Pages:**
-- `utagData` JavaScript object: product name, brand, category hierarchy, price, SKU, barcode, seller name, rating, review count, stock status
-- JSON-LD Schema: aggregateRating, brand, description, image
-- HTML elements: discounted price, coupons, campaigns, other sellers, reviews, stock count, origin country
-
-**Limits:**
-- MAX_PRODUCTS_PER_SEARCH = 8 (to manage proxy costs)
-
-## Project Structure
-```
-.
-├── backend/
-│   ├── app/
-│   │   ├── api/routes.py           # API endpoints
-│   │   ├── core/config.py          # Configuration (proxy settings)
-│   │   ├── db/
-│   │   │   ├── database.py         # SQLAlchemy setup
-│   │   │   └── models.py           # Product, Snapshot, Seller, Review models
-│   │   ├── services/
-│   │   │   ├── scraping.py         # Two-stage Playwright scraping
-│   │   │   ├── proxy_providers.py  # Modular proxy provider system
-│   │   │   └── llm_service.py      # OpenAI integration
-│   │   └── main.py                 # FastAPI app entry
-│   ├── run.py                      # Backend runner
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/Layout.tsx
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx       # Main dashboard with search
-│   │   │   ├── Products.tsx        # Product list
-│   │   │   ├── ProductDetail.tsx   # Product details with tabs
-│   │   │   └── Ads.tsx             # Reklamlar - sponsorlu ürünler ve marka reklamları
-│   │   └── services/api.ts         # API client with extended types
-│   ├── package.json
-│   └── vite.config.ts
-└── replit.md
-```
-
-## Database Schema
-
-### Products Table
-- id, platform, external_id, sku, barcode, name, url
-- brand, seller_name, seller_rating
-- category_path, category_hierarchy
-- image_url, description, origin_country
-- created_at, updated_at
-
-### ProductSnapshots Table
-- id, product_id, snapshot_date
-- price, discounted_price, discount_percentage
-- rating, reviews_count, stock_count, in_stock
-- is_sponsored, coupons (JSON), campaigns (JSON)
-
-### ProductSellers Table
-- id, product_id, seller_name, seller_rating
-- price, is_authorized, shipping_info, snapshot_date
-
-### ProductReviews Table
-- id, product_id, author, rating, review_text
-- review_date, seller_name, is_helpful_count
-
-### SponsoredBrandAds Table
-- id, search_task_id, seller_name, seller_id
-- position, products (JSON with url, name per product)
-- snapshot_date
-
-## Sponsored Ads Tracking
-
-**Individual Sponsored Products:**
-- Detected by `advertisement-module_adRoot` class in product cards
-- `adservice.hepsiburada.com` tracking URLs parsed to extract real product URL
-- `magaza=` parameter in redirect URL provides seller name
-- Products marked with `is_sponsored=true` in snapshots
-
-**Brand Advertisers:**
-- Grouped from individual sponsored products by seller name
-- Stored in `sponsored_brand_ads` table with product list
-- API endpoint: `GET /api/search/{task_id}/sponsored-brands`
-
-## Running the Project
-- **Frontend**: Runs on port 5000 (webview)
-- **Backend**: Runs on port 8000 (localhost)
-
-## Environment Variables Required
-- `DATABASE_URL` - PostgreSQL connection (auto-configured by Replit)
-- `OPENAI_API_KEY` - For AI analysis features
-- `SCRAPPER_API` - ScraperAPI key (primary proxy)
-- `BRIGHT_DATA_ACCOUNT_ID` - Bright Data account ID (fallback)
-- `BRIGHT_DATA_ZONE_NAME` - Bright Data Residential Proxy zone name
-- `BRIGHT_DATA_ZONE_PASSWORD` - Bright Data zone password
-- `PROXY_PROVIDER` - Provider selection: auto, scraperapi, brightdata (default: auto)
-
-## Tech Stack
-- **Frontend**: React 18, TypeScript, TailwindCSS v4, Plotly.js, React Router
-- **Backend**: Python 3.11, FastAPI, SQLAlchemy, BackgroundTasks
-- **Scraping**: Playwright, playwright-stealth, BeautifulSoup4
-- **Proxy**: ScraperAPI (primary), Bright Data Residential (fallback)
-- **Database**: PostgreSQL (Replit built-in)
-- **AI**: OpenAI GPT-4o-mini
-
-## API Endpoints
-- `POST /api/search` - Start a new search task (scrapes up to 8 products)
-- `GET /api/search/{id}` - Get task status
-- `GET /api/tasks` - List recent tasks
-- `GET /api/products` - List products with latest snapshot data
-- `GET /api/products/{id}` - Get product details including other sellers and reviews
-- `GET /api/products/{id}/snapshots` - Get price/rating history
-- `POST /api/analyze` - AI analysis of products
-- `GET /api/stats` - Dashboard statistics
-- `GET /api/scraping/status` - Proxy provider status and availability
+The Marketplace Data Analysis Platform is designed to empower marketplace sellers and marketing agencies with data-driven decision-making capabilities. It achieves this by scraping product data from major Turkish marketplaces, analyzing market trends, and delivering AI-powered insights. The platform's vision is to become a crucial tool for competitive analysis, strategic pricing, and understanding market dynamics within the e-commerce landscape.
 
 ## User Preferences
 - Turkish language UI
@@ -191,67 +9,48 @@ DEBUG_SAVE_HTML = true   # Save HTML on errors for debugging
 - Limit to 8 products per search to manage costs
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
-## Recent Changes
-- January 24, 2026: Phase 6 - Price Monitoring for Distributors (COMPLETE!)
-  - New feature: Fiyat Takip (Price Monitor) page for tracking seller prices across 800+ SKUs
-  - Uses Hepsiburada's listings API instead of Playwright scraping (faster, cheaper)
-  - Database: MonitoredProduct, SellerSnapshot, PriceMonitorTask tables
-  - API: Bulk product import, single/batch price fetching, seller data with buybox order
-  - Frontend: Product list with seller counts, seller details panel, JSON import modal
-  - Successfully tested: 5 sellers retrieved for test SKU with complete pricing data
-- December 13, 2025: Phase 4.2 - Basket Campaign Price from Search Page (COMPLETE!)
-  - Discovered: `isBasketCampaign` class exists in SEARCH PAGE HTML (not product detail page)
-  - New method: `_extract_basket_campaign_prices()` extracts prices from search page
-  - Prices mapped by product URL and applied during scraping
-  - Removed Playwright fallback for discounted_price (no longer needed, much faster)
-  - CSS selectors updated: `[class*="isBasketCampaign"]`, `[class*="priceAreaRoot"]`
-  - Scraping now 3-4x faster without Playwright timeout waits
-- December 12, 2025: Phase 4.1 - "Sepete Özel" Dynamic Price Capture
-  - ScraperAPI proxy now supports JS rendering with `render_js` parameter
-  - Enhanced CSS selectors (8 patterns) and regex patterns (6 patterns) for discounted_price
-  - Two-level fallback: ScraperAPI render → ScraperAPI standard → Playwright with Bright Data
-  - Playwright fallback properly initializes Bright Data proxy when ScraperAPI fails
-  - Fixed context initialization bug for Playwright fallback
-  - Playwright fallback merges discounted_price, coupons, campaigns, and stock_count
-- December 12, 2025: Phase 4 - Sponsored Ads Tracking (COMPLETE!)
-  - Sponsored product detection via `advertisement-module_adRoot` class in product cards
-  - Tracking URL parsing: `adservice.hepsiburada.com` redirect URLs decoded for real product URLs
-  - Seller extraction from `magaza=` parameter in ad URLs
-  - Products marked with `is_sponsored=true` when they have "Reklam" badge
-  - Brand advertisers grouped from sponsored products and stored in `sponsored_brand_ads` table
-  - New endpoint: `GET /api/search/{task_id}/sponsored-brands` for competitive analysis
-  - Working example: TULPAR KİMYA with 4 sponsored products, MTS Kimya, AutoGleam, etc.
-- December 11, 2025: Phase 3.2 - Other Sellers Complete Data
-  - Fixed other sellers extraction: now extracts seller_name, seller_rating, AND price
-  - merchantInfo JSON blocks parsed with regex pattern to extract complete data
-  - Prices extracted from nested "prices" array within merchantInfo blocks
-  - All other sellers now saved with complete pricing (e.g., DS Detailing Store 9.9★ 799.00 TL)
-  - Known limitation: "Sepete özel fiyat" (cart special price) is dynamically loaded via JS, not in static HTML
-- December 11, 2025: Phase 3.1 - Complete Data Extraction
-  - Added _parse_float and _parse_int helper methods with Turkish number format support
-  - Fixed product description extraction from HTML (productDescriptionContent selector)
-  - Reviews now correctly extracted from JSON-LD structured data
-  - All product fields working: name, brand, price, rating, reviews, description, seller, category
-- December 11, 2025: Phase 3 - ScraperAPI Proxy Port Method (WORKING!)
-  - Fixed ScraperAPI: HTTP API method doesn't work, PROXY PORT method works
-  - Proxy URL: `http://proxy-server.scraperapi.com:8001`
-  - Username format: `scraperapi.output_format=json.autoparse=true.country_code=tr.device_type=desktop.max_cost=200.session_number={random}`
-  - Fixed utagData extraction with brace-counting algorithm
-  - Fixed Turkish number format price parsing (1,234.05 → 1234.05)
-  - Added snapshot update logic: existing snapshots now get updated with new data
-  - All product data now correctly parsed: price, rating, brand, seller, category
-- December 11, 2025: Phase 2.5 - Modular Proxy Architecture
-  - Added ScraperAPI as primary proxy provider (cheaper)
-  - Bright Data moved to fallback role
-  - ProxyManager class with auto-fallback logic
-  - DebugLogger for detailed error tracking
-  - Debug HTML saving on 403/429/503 errors
-  - /api/scraping/status endpoint for monitoring
-- December 11, 2025: Phase 2 - Enhanced Data Collection
-  - Two-stage scraping: URL collection + product detail page scraping
-  - utagData parser: extracts rich data from JavaScript object
-  - JSON-LD parser: extracts structured data
-  - HTML parser: extracts discounted prices, coupons, campaigns, other sellers
-  - Extended database schema: new columns and tables for sellers/reviews
-- December 10, 2025: Bright Data Residential Proxies integration
-- December 10, 2025: Initial MVP implementation
+## System Architecture
+The platform is built with a clear separation of concerns, featuring a FastAPI backend and a React frontend. It employs a robust, two-stage scraping strategy for comprehensive data collection and a modular proxy architecture for reliable data acquisition.
+
+**UI/UX Decisions:**
+The frontend utilizes React, Vite, and TailwindCSS for a modern, responsive, and efficient user experience. Key UI components include:
+- A dashboard for overall market insights.
+- Product listings and detailed product pages with tabs for various data points.
+- Dedicated pages for "Reklamlar" (sponsored products) and "Fiyat Takip" (price monitoring).
+- Data visualization through charts for price and rating trends (Plotly.js).
+
+**Technical Implementations & Feature Specifications:**
+- **Two-Stage Scraping:** Products are first identified from search/listing pages, then individual product detail pages are visited to extract extensive data. This includes parsing `utagData` JavaScript objects, JSON-LD schema, and various HTML elements to gather product name, brand, category, price, SKU, barcode, seller information, ratings, reviews, stock status, discounted prices, coupons, and campaign details.
+- **Price Monitoring System:** Allows distributors to track seller prices across multiple platforms (Hepsiburada, Trendyol) for specific SKUs. It supports bulk product imports and initiates tasks for fetching price data, capturing details like merchant name, price, stock, buybox order, and shipping information.
+- **Sponsored Ads Tracking:** Identifies individual sponsored products and groups them to track brand advertisers. This involves parsing advertisement-specific HTML classes and decoding tracking URLs to extract real product information and associated seller data.
+- **AI Analysis:** Integrates OpenAI's GPT-4o-mini for generating insights from collected product data.
+- **Modular Proxy System:** Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass) if ScraperAPI fails. This system includes debug logging and HTML saving for troubleshooting scraping issues.
+- **Database Schema:** Designed to store rich product information, including `Products`, `ProductSnapshots`, `ProductSellers`, `ProductReviews`, and `SponsoredBrandAds`. This allows for historical tracking of prices, ratings, and seller activities.
+- **Backend Services:** Implemented with FastAPI, utilizing background tasks for asynchronous operations like scraping. SQLAlchemy is used for ORM with PostgreSQL.
+- **Frontend Services:** Uses React with TypeScript, TailwindCSS, and a custom API client for interacting with the backend.
+
+**System Design Choices:**
+- **Containerization Readiness:** Though not explicitly stated, the project structure implies a readiness for containerization with separate frontend and backend folders.
+- **Asynchronous Operations:** Leverages FastAPI's background tasks for non-blocking operations, crucial for long-running scraping processes.
+- **Robust Error Handling:** The proxy system incorporates fallback logic and debug logging to ensure resilience against scraping failures and bot detection.
+- **Extensible Data Model:** The database schema is designed to accommodate various product attributes and relationships, supporting future expansions.
+
+## External Dependencies
+- **Database:** PostgreSQL (Replit built-in)
+- **AI Service:** OpenAI (GPT-4o-mini)
+- **Proxy Services:**
+    - ScraperAPI (Primary for cost-effective scraping)
+    - Bright Data Residential Proxy (Fallback for advanced bot protection bypass, especially with Playwright)
+- **Frontend Libraries:**
+    - React 18
+    - TypeScript
+    - TailwindCSS v4
+    - Plotly.js (for charting)
+    - React Router
+- **Backend Libraries:**
+    - Python 3.11
+    - FastAPI
+    - SQLAlchemy
+    - Playwright (for advanced web scraping, often with Bright Data)
+    - playwright-stealth (for bot detection evasion)
+    - BeautifulSoup4 (for HTML parsing)
