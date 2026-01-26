@@ -27,11 +27,20 @@ Distributors can track seller prices across 800+ SKUs to verify minimum price co
 
 ### API Endpoints
 - `GET /api/price-monitor/products` - List monitored products
-- `POST /api/price-monitor/products` - Bulk add products (JSON format: {productUrl, sku})
-- `GET /api/price-monitor/products/{id}` - Get product with sellers
+- `POST /api/price-monitor/products` - Bulk add products (JSON format: {productUrl, productName, sku})
+- `GET /api/price-monitor/products/{id}` - Get product with sellers (includes merchant_url for seller links)
 - `POST /api/price-monitor/fetch-single/{id}` - Fetch prices for single product
 - `POST /api/price-monitor/fetch` - Start bulk price fetch task
 - `DELETE /api/price-monitor/products/{id}` - Delete monitored product
+
+### JSON Import Format
+```json
+[
+  { "productUrl": "https://...-p-SKU123", "productName": "Ürün Adı", "sku": "SKU123" }
+]
+```
+- All fields optional, but at least sku or productUrl required
+- SKU can be auto-extracted from productUrl if not provided
 
 ## Proxy Architecture
 
