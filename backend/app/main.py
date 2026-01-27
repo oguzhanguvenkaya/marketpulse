@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -6,7 +7,14 @@ from fastapi.responses import FileResponse
 from app.api.routes import router
 from app.db.database import engine, Base
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+logger = logging.getLogger(__name__)
+
+logger.info("Starting Pazaryeri API...")
+logger.info(f"PORT env: {os.environ.get('PORT', 'not set')}")
+
 Base.metadata.create_all(bind=engine)
+logger.info("Database tables created/verified")
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",
@@ -24,6 +32,7 @@ app.add_middleware(
 
 @app.get("/health")
 async def health():
+    logger.info("Health check called")
     return {"status": "healthy"}
 
 app.include_router(router, prefix="/api")
