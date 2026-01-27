@@ -9,6 +9,7 @@ import {
   getFetchTaskStatus,
   fetchSingleProduct,
   exportPriceMonitorData,
+  getBrands,
 } from '../services/api';
 import type {
   MonitoredProduct,
@@ -36,13 +37,22 @@ export default function PriceMonitor() {
   const [showExportMenu, setShowExportMenu] = useState(false);
   type ExportFilter = 'all' | 'active' | 'inactive';
   const [exportFilter, setExportFilter] = useState<ExportFilter>('all');
+  const [brands, setBrands] = useState<string[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [priceAlertOnly, setPriceAlertOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const activeProducts = products.filter(p => p.is_active !== false && p.seller_count > 0);
   const inactiveProducts = products.filter(p => p.is_active === false || p.seller_count === 0);
 
   useEffect(() => {
     loadProducts();
+    loadBrands();
   }, [platform]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [selectedBrand, priceAlertOnly, searchQuery]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -66,12 +76,25 @@ export default function PriceMonitor() {
     };
   }, [fetchTaskId]);
 
+  const loadBrands = async () => {
+    try {
+      const data = await getBrands(platform);
+      setBrands(data.brands);
+    } catch (e) {
+      console.error('Error loading brands:', e);
+    }
+  };
+
   const loadProducts = async () => {
     try {
       setLoading(true);
       setSelectedProduct(null);
       setSellers([]);
-      const data = await getMonitoredProducts(platform);
+      const params: Record<string, any> = {};
+      if (selectedBrand) params.brand = selectedBrand;
+      if (priceAlertOnly) params.price_alert_only = true;
+      if (searchQuery) params.search = searchQuery;
+      const data = await getMonitoredProducts(platform, params);
       setProducts(data.products);
     } catch (e) {
       console.error('Error loading products:', e);
@@ -192,13 +215,25 @@ export default function PriceMonitor() {
   const getImportExample = () => {
     if (platform === 'trendyol') {
       return `[
-  { "productUrl": "https://www.trendyol.com/...-p-123456789", "productName": "Ürün Adı 1", "barcode": "8809432676195" },
-  { "productUrl": "https://www.trendyol.com/...-p-987654321", "productName": "Ürün Adı 2", "barcode": "8809432671053" }
+  {
+    "productUrl": "https://www.trendyol.com/...-p-123456789",
+    "productName": "Ürün Adı 1",
+    "barcode": "8809432676195",
+    "brand": "Marka Adı",
+    "price": 299.99,
+    "sellerStockCode": "STK001"
+  }
 ]`;
     }
     return `[
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU123", "productName": "Ürün Adı 1", "sku": "SKU123" },
-  { "productUrl": "https://www.hepsiburada.com/...-p-SKU456", "productName": "Ürün Adı 2", "sku": "SKU456" }
+  {
+    "productUrl": "https://www.hepsiburada.com/...-p-SKU123",
+    "productName": "Ürün Adı 1",
+    "sku": "SKU123",
+    "brand": "Marka Adı",
+    "price": 299.99,
+    "sellerStockCode": "STK001"
+  }
 ]`;
   };
 
@@ -329,6 +364,36 @@ export default function PriceMonitor() {
               </button>
             </div>
           </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="SKU, barkod, stok kodu veya ürün adı ile ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <select
+              value={selectedBrand}
+              onChange={(e) => setSelectedBrand(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Tüm Markalar</option>
+              {brands.map(brand => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => setPriceAlertOnly(!priceAlertOnly)}
+              className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors whitespace-nowrap ${
+                priceAlertOnly
+                  ? 'bg-red-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Price Alert
+            </button>
+          </div>
           {loading ? (
             <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
           ) : (showInactive ? inactiveProducts : activeProducts).length === 0 ? (
@@ -353,11 +418,23 @@ export default function PriceMonitor() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      {showInactive && (
-                        <span className="inline-block bg-gray-500 text-white text-xs px-2 py-0.5 rounded mb-1">
-                          Pasif
-                        </span>
-                      )}
+                      <div className="flex gap-1 mb-1 flex-wrap">
+                        {showInactive && (
+                          <span className="inline-block bg-gray-500 text-white text-xs px-2 py-0.5 rounded">
+                            Pasif
+                          </span>
+                        )}
+                        {product.has_price_alert && (
+                          <span className="inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded">
+                            Price Alert ({product.price_alert_count})
+                          </span>
+                        )}
+                        {product.brand && (
+                          <span className="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">
+                            {product.brand}
+                          </span>
+                        )}
+                      </div>
                       {product.product_name ? (
                         showInactive ? (
                           <span className="font-medium text-sm text-gray-500 truncate block" title={product.product_name}>
@@ -428,9 +505,28 @@ export default function PriceMonitor() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">
+          <h2 className="text-lg font-semibold mb-2">
             {selectedProduct ? `Satıcılar - ${selectedProduct.product_name || selectedProduct.sku}` : 'Satıcı Detayları'}
           </h2>
+          {selectedProduct && (
+            <div className="flex flex-wrap gap-2 mb-4 text-sm">
+              {selectedProduct.threshold_price && (
+                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                  Eşik Fiyat: {selectedProduct.threshold_price.toLocaleString('tr-TR')} TL
+                </span>
+              )}
+              {selectedProduct.seller_stock_code && (
+                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                  Stok Kodu: {selectedProduct.seller_stock_code}
+                </span>
+              )}
+              {selectedProduct.brand && (
+                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                  Marka: {selectedProduct.brand}
+                </span>
+              )}
+            </div>
+          )}
           {!selectedProduct ? (
             <div className="text-center py-8 text-gray-500">
               Satıcıları görmek için sol taraftan bir ürün seçin
@@ -446,8 +542,12 @@ export default function PriceMonitor() {
               {sellers.map((seller, idx) => (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-3 rounded-lg border ${
-                    seller.buybox_order === 1 ? 'border-green-300 bg-green-50' : 'border-gray-200'
+                  className={`p-3 rounded-lg border-2 ${
+                    seller.price_alert 
+                      ? 'border-red-400 bg-red-50' 
+                      : seller.buybox_order === 1 
+                        ? 'border-green-300 bg-green-50' 
+                        : 'border-gray-200'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -477,6 +577,11 @@ export default function PriceMonitor() {
                             {seller.buybox_order === 1 && (
                               <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
                                 Buybox
+                              </span>
+                            )}
+                            {seller.price_alert && (
+                              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
+                                Eşik Altı
                               </span>
                             )}
                           </div>

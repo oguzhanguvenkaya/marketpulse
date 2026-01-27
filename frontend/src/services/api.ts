@@ -191,10 +191,14 @@ export interface MonitoredProduct {
   product_url: string;
   product_name?: string;
   brand?: string;
+  seller_stock_code?: string;
+  threshold_price?: number;
   image_url?: string;
   is_active: boolean;
   last_fetched_at?: string;
   seller_count: number;
+  has_price_alert: boolean;
+  price_alert_count: number;
 }
 
 export interface SellerSnapshot {
@@ -216,6 +220,7 @@ export interface SellerSnapshot {
   fast_shipping: boolean;
   is_fulfilled_by_hb: boolean;
   snapshot_date: string;
+  price_alert: boolean;
 }
 
 export interface MonitoredProductsResponse {
@@ -243,11 +248,28 @@ export interface BulkProductInput {
   productName?: string;
   sku?: string;
   barcode?: string;
+  brand?: string;
+  price?: number;
+  sellerStockCode?: string;
 }
 
-export const getMonitoredProducts = async (platform?: string): Promise<MonitoredProductsResponse> => {
+export interface GetProductsParams {
+  platform?: string;
+  brand?: string;
+  price_alert_only?: boolean;
+  search?: string;
+}
+
+export const getMonitoredProducts = async (platform?: string, params?: Partial<GetProductsParams>): Promise<MonitoredProductsResponse> => {
+  const queryParams: Record<string, any> = { ...params };
+  if (platform) queryParams.platform = platform;
+  const response = await api.get('/price-monitor/products', { params: queryParams });
+  return response.data;
+};
+
+export const getBrands = async (platform?: string): Promise<{ brands: string[] }> => {
   const params = platform ? { platform } : {};
-  const response = await api.get('/price-monitor/products', { params });
+  const response = await api.get('/price-monitor/brands', { params });
   return response.data;
 };
 
