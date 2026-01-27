@@ -1,0 +1,56 @@
+2026-01-26T19:53:24Z info: Deployment: 686eaf7f-e09d-4bcf-bf8b-d010df643c52
+2026-01-26T19:53:24Z info: Build: ab70f8b2-e378-496d-902e-e29a175e7910
+2026-01-26T19:53:24Z info: Running Security Scan
+2026-01-26T19:53:47Z info: Security Scan Complete
+2026-01-26T19:53:51Z info: Preparing development database schema
+2026-01-26T19:54:22Z info: Successfully copied development database schema to production database
+2026-01-26T19:54:22Z info: Connecting to builder
+2026-01-26T19:54:23Z info: Builder connected
+2026-01-26T19:54:24Z info: Installing packages
+2026-01-26T19:54:26Z info: Starting Build
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+
+vite v7.2.7 building client environment for production...
+
+transforming...
+
+✓ 110 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                     0.46 kB │ gzip:     0.29 kB
+
+dist/assets/index-BpYEmo5J.css     22.19 kB │ gzip:     5.00 kB
+
+dist/assets/index-B8E2DWPr.js   5,185.66 kB │ gzip: 1,569.00 kB
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+✓ built in 30.31s
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.8.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+npm notice To update run: npm install -g npm@11.8.0
+npm notice
+
+2026-01-26T19:55:02Z info: Pushing pid1 binary layer...
+2026-01-26T19:55:13Z info: Pushing Repl layer...
+2026-01-26T19:55:13Z info: Pushing hosting layer...
+2026-01-26T19:55:14Z info: Nix layers for this Repl are uncached.
+2026-01-26T19:55:14Z info: Pushing nix-0 layer...
+2026-01-26T19:55:17Z info: Created hosting layer
+2026-01-26T19:55:29Z info: Created pid1 binary layer
+2026-01-26T19:57:55Z info: Created Repl layer
+2026-01-26T19:57:55Z info: Pushing Repl (cache) layer...
+2026-01-26T19:57:58Z info: Created Repl (cache) layer
+Deployment timed out. Check the Logs tab for more details. - 2026-01-26T20:02:24.072Z
