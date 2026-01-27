@@ -564,12 +564,12 @@ export default function PriceMonitor() {
                 return (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-dark-400/60 ${
+                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-[#555555] ${
                     seller.price_alert
-                      ? 'bg-danger/15'
+                      ? 'bg-red-900/40'
                       : seller.buybox_order === 1
-                        ? 'bg-success/15'
-                        : 'bg-dark-500'
+                        ? 'bg-green-900/40'
+                        : 'bg-[#3a3a3a]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -589,12 +589,12 @@ export default function PriceMonitor() {
                                 href={seller.merchant_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-white hover:text-accent-primary transition-colors"
+                                className="text-white hover:text-accent-primary transition-colors font-semibold"
                               >
                                 {seller.merchant_name}
                               </a>
                             ) : (
-                              <span className="text-white">{seller.merchant_name}</span>
+                              <span className="text-white font-semibold">{seller.merchant_name}</span>
                             )}
                             {seller.buybox_order === 1 && (
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/20 text-success">Buybox</span>
@@ -606,9 +606,9 @@ export default function PriceMonitor() {
                               <span className="badge badge-danger text-[10px]">Below Threshold</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
+                          <div className="flex items-center gap-2 mt-1 text-xs text-neutral-300">
                             {seller.merchant_rating && (
-                              <span className="px-1.5 py-0.5 rounded bg-warning/10 text-warning">
+                              <span className="px-1.5 py-0.5 rounded bg-warning/20 text-warning font-medium">
                                 {seller.merchant_rating.toFixed(1)}
                               </span>
                             )}
@@ -619,16 +619,16 @@ export default function PriceMonitor() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-lg text-accent-primary">
+                          <div className="font-bold text-lg text-white">
                             {formatPrice(seller.price)}
                           </div>
                           {seller.original_price && seller.original_price !== seller.price && (
-                            <div className="text-xs text-neutral-500 line-through">
+                            <div className="text-xs text-neutral-400 line-through">
                               {formatPrice(seller.original_price)}
                             </div>
                           )}
                           {seller.discount_rate && seller.discount_rate > 0 && (
-                            <div className="text-xs text-success">
+                            <div className="text-xs text-success font-medium">
                               %{seller.discount_rate.toFixed(0)} off
                             </div>
                           )}
