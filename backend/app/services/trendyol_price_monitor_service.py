@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
+from app.core.logger import price_monitor_logger as logger
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
 
@@ -77,22 +78,22 @@ class TrendyolPriceMonitorService:
                     if resp.status == 200:
                         html = await resp.text()
                         if 'other-merchant' in html or 'slider__slide' in html:
-                            print(f"Trendyol page fetched successfully with proxy port")
+                            logger.debug("Trendyol page fetched successfully")
                             return html
                         else:
-                            print(f"Trendyol page fetched but no other-merchants section found")
+                            logger.debug("Trendyol page fetched but no other-merchants section found")
                             debug_path = f"/tmp/scraping_debug/trendyol_{random.randint(1000,9999)}.html"
                             import os
                             os.makedirs('/tmp/scraping_debug', exist_ok=True)
                             with open(debug_path, 'w', encoding='utf-8') as f:
                                 f.write(html[:100000])
-                            print(f"Debug HTML saved to {debug_path}")
+                            logger.debug(f"Debug HTML saved to {debug_path}")
                             return html
                     else:
-                        print(f"Trendyol page error: status {resp.status}")
+                        logger.warning(f"Trendyol page error: status {resp.status}")
                         return None
         except Exception as e:
-            print(f"Error fetching Trendyol page: {e}")
+            logger.error(f"Error fetching Trendyol page: {e}")
             return None
     
     def parse_other_merchants(self, html: str) -> List[Dict[str, Any]]:
@@ -103,7 +104,7 @@ class TrendyolPriceMonitorService:
         
         other_merchants = soup.find(id='other-merchants')
         if not other_merchants:
-            print("other-merchants bölümü bulunamadı")
+            logger.debug("other-merchants bölümü bulunamadı")
             return sellers
         
         slides = other_merchants.find_all('div', {'data-testid': 'slide'})
@@ -182,7 +183,7 @@ class TrendyolPriceMonitorService:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
-            print(f"No HTML for Trendyol SKU {product.sku} - marked as inactive")
+            logger.warning(f"No HTML for Trendyol SKU {product.sku} - marked as inactive")
             return False
         
         sellers = self.parse_other_merchants(html)
@@ -190,12 +191,12 @@ class TrendyolPriceMonitorService:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
-            print(f"No sellers found for Trendyol SKU {product.sku} - marked as inactive")
+            logger.warning(f"No sellers found for Trendyol SKU {product.sku} - marked as inactive")
             return False
         
         if not product.is_active:
             product.is_active = True
-            print(f"Trendyol SKU {product.sku} reactivated - sellers found")
+            logger.info(f"Trendyol SKU {product.sku} reactivated - sellers found")
         
         for seller in sellers:
             snapshot = SellerSnapshot(
@@ -219,7 +220,7 @@ class TrendyolPriceMonitorService:
         product.last_fetched_at = datetime.utcnow()
         db.commit()
         
-        print(f"Saved {len(sellers)} sellers for Trendyol SKU {product.sku}")
+        logger.info(f"Saved {len(sellers)} sellers for Trendyol SKU {product.sku}")
         return True
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "trendyol"):
@@ -244,7 +245,7 @@ class TrendyolPriceMonitorService:
         for product in products:
             db.refresh(task)
             if task.stop_requested:
-                print(f"Stop requested, finishing after {completed} Trendyol products")
+                logger.info(f"Stop requested, finishing after {completed} Trendyol products")
                 task.status = "stopped"
                 task.completed_at = datetime.utcnow()
                 db.commit()
@@ -257,7 +258,7 @@ class TrendyolPriceMonitorService:
                 else:
                     failed += 1
             except Exception as e:
-                print(f"Error processing Trendyol product {product.sku}: {e}")
+                logger.error(f"Error processing Trendyol product {product.sku}: {e}")
                 failed += 1
             
             task.completed_products = completed
@@ -270,7 +271,7 @@ class TrendyolPriceMonitorService:
         task.completed_at = datetime.utcnow()
         db.commit()
         
-        print(f"Trendyol fetch task completed: {completed} success, {failed} failed")
+        logger.info(f"Trendyol fetch task completed: {completed} success, {failed} failed")
 
 
 trendyol_price_monitor_service = TrendyolPriceMonitorService()

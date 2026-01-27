@@ -152,7 +152,7 @@ async def run_scraping_background(task_id: str):
                     db.add(new_ad)
             
             if sponsored_brands:
-                print(f"Saved {len(sponsored_brands)} brand ads to database")
+                logger.info(f"Saved {len(sponsored_brands)} brand ads to database")
             
             for sp in sponsored_products:
                 product_url = sp.get('url') or sp.get('product_url', '')
@@ -178,7 +178,7 @@ async def run_scraping_background(task_id: str):
             
             if sponsored_products:
                 task.total_sponsored_products = len(sponsored_products)
-                print(f"Saved {len(sponsored_products)} sponsored products to database")
+                logger.info(f"Saved {len(sponsored_products)} sponsored products to database")
             
             for p_data in products_data:
                 existing = db.query(Product).filter(
