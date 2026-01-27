@@ -4,10 +4,17 @@
 The Marketplace Data Analysis Platform is designed to empower marketplace sellers and marketing agencies with data-driven decision-making capabilities. It achieves this by scraping product data from major Turkish marketplaces, analyzing market trends, and delivering AI-powered insights. The platform's vision is to become a crucial tool for competitive analysis, strategic pricing, and understanding market dynamics within the e-commerce landscape.
 
 ## User Preferences
-- Turkish language UI
+- English language UI with Palantir-style dark theme
 - Focus on Hepsiburada marketplace initially
 - Limit to 8 products per search to manage costs
 - ScraperAPI as primary (cheaper), Bright Data for fallback
+
+## UI Theme
+- Dark color palette: dark-900 (#0a0b0d) to dark-300 (#3d434e)
+- Accent color: Cyan (#00d4ff) for primary actions and highlights
+- Status colors: Success green, Warning orange, Danger red with glow variants
+- Reusable components: card-dark, btn-primary/secondary, input-dark, table-dark, badges, stat-card
+- Subtle animations: fade-in, slide-in, pulse-glow effects
 
 ## System Architecture
 The platform is built with a clear separation of concerns, featuring a FastAPI backend and a React frontend. It employs a robust, two-stage scraping strategy for comprehensive data collection and a modular proxy architecture for reliable data acquisition.
