@@ -1,0 +1,78 @@
+2026-01-27T15:36:08Z info: Deployment: 686eaf7f-e09d-4bcf-bf8b-d010df643c52
+2026-01-27T15:36:08Z info: Build: bd02741b-6d46-499f-936c-435074096eff
+2026-01-27T15:36:08Z info: Running Security Scan
+2026-01-27T15:36:09Z info: Security Scan Complete
+2026-01-27T15:36:11Z info: Preparing development database
+2026-01-27T15:36:13Z info: Copying development database to production database
+2026-01-27T15:36:59Z info: Successfully copied development database to production database
+2026-01-27T15:36:59Z info: Connecting to builder
+2026-01-27T15:37:00Z info: Builder connected
+2026-01-27T15:37:01Z info: Installing packages
+--> npm install
+
+
+up to date, audited 1 package in 369ms
+
+
+found 0 vulnerabilities
+
+2026-01-27T15:37:04Z info: Starting Build
+
+> pazaryeri-platform@1.0.0 build
+> cd frontend && npm install && npm run build
+
+
+
+added 2 packages, and audited 490 packages in 3s
+
+
+74 packages are looking for funding
+  run `npm fund` for details
+
+
+2 vulnerabilities (1 moderate, 1 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+
+vite v7.2.7 building client environment for production...
+
+transforming...
+
+✓ 112 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                     0.46 kB │ gzip:     0.29 kB
+
+dist/assets/index-DJbA5hUq.css     26.11 kB │ gzip:     5.91 kB
+
+dist/assets/index-C4wG3aql.js   5,222.43 kB │ gzip: 1,575.79 kB
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+✓ built in 33.49s
+
+2026-01-27T15:37:47Z info: Pushing pid1 binary layer...
+2026-01-27T15:37:56Z info: Pushing Repl layer...
+2026-01-27T15:37:56Z info: Pushing hosting layer...
+2026-01-27T15:37:56Z info: Nix layers for this Repl are uncached.
+2026-01-27T15:37:56Z info: Pushing nix-0 layer...
+2026-01-27T15:37:57Z info: Created hosting layer
+2026-01-27T15:37:58Z info: Created pid1 binary layer
+2026-01-27T15:40:24Z info: Created Repl layer
+2026-01-27T15:40:24Z info: Pushing Repl (cache) layer...
+2026-01-27T15:40:26Z info: Created Repl (cache) layer
