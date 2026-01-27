@@ -482,13 +482,13 @@ export default function PriceMonitor() {
                     <div className="flex gap-1 flex-shrink-0">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleFetchSingle(product.id); }}
-                        className="text-accent-primary hover:text-accent-primary/80 text-xs px-2 py-1 rounded hover:bg-accent-primary/10 transition-colors"
+                        className="text-accent-primary hover:text-accent-primary/80 text-xs px-2 py-1 rounded hover:bg-accent-primary/10 transition-colors cursor-pointer"
                       >
                         Refresh
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                        className="text-danger hover:text-danger/80 text-xs px-2 py-1 rounded hover:bg-danger/10 transition-colors"
+                        className="text-danger hover:text-danger/80 text-xs px-2 py-1 rounded hover:bg-danger/10 transition-colors cursor-pointer"
                       >
                         Delete
                       </button>
@@ -558,15 +558,18 @@ export default function PriceMonitor() {
             </div>
           ) : (
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              {sellers.map((seller, idx) => (
+              {sellers.map((seller, idx) => {
+                const lowestPrice = Math.min(...sellers.map(s => s.price));
+                const isLowestPrice = seller.price === lowestPrice;
+                return (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-4 rounded-lg border transition-all ${
+                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-dark-500/50 ${
                     seller.price_alert
-                      ? 'border-danger/50 bg-danger/5'
+                      ? 'bg-danger/10'
                       : seller.buybox_order === 1
-                        ? 'border-success/50 bg-success/5'
-                        : 'border-white/5 bg-dark-700/30'
+                        ? 'bg-success/10'
+                        : 'bg-dark-600/80'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -594,7 +597,10 @@ export default function PriceMonitor() {
                               <span className="text-white">{seller.merchant_name}</span>
                             )}
                             {seller.buybox_order === 1 && (
-                              <span className="badge badge-success text-[10px]">Buybox</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/20 text-success">Buybox</span>
+                            )}
+                            {isLowestPrice && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-primary/20 text-accent-primary">Lowest Price</span>
                             )}
                             {seller.price_alert && (
                               <span className="badge badge-danger text-[10px]">Below Threshold</span>
@@ -660,7 +666,8 @@ export default function PriceMonitor() {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>
