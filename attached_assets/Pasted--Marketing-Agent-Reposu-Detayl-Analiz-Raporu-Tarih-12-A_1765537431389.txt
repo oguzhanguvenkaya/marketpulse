@@ -1,0 +1,155 @@
+# Marketing Agent Reposu Detaylı Analiz Raporu
+
+**Tarih:** 12 Aralık 2025
+**Hazırlayan:** Manus AI
+
+---
+
+## 1. Yönetici Özeti
+
+Bu rapor, `oguzhanguvenkaya/marketing_agent` adlı GitHub reposunun kapsamlı bir teknik analizini sunmaktadır. Proje, pazar yeri verilerini (başlangıç olarak Hepsiburada) kazıyarak, bu verileri analiz edip yapay zeka destekli içgörüler sunan bir **Pazaryeri Veri Analiz Platformu** olarak tanımlanmıştır. Analiz, projenin mimarisini, kod yapısını, harici API kullanımlarını, güçlü yönlerini ve iyileştirme potansiyeli taşıyan alanlarını detaylandırmaktadır.
+
+Proje, **FastAPI** (Python) tabanlı bir backend ve **React** (TypeScript) tabanlı bir frontend ile modern bir teknoloji yığını kullanmaktadır. Veri kazıma işlemleri için **Playwright**, **ScraperAPI** ve **Bright Data** gibi güçlü araçlardan faydalanan modüler bir proxy yönetimi mimarisi geliştirilmiştir. Veri analizi ve anahtar kelime önerileri için ise **OpenAI GPT-4o-mini** modeli kullanılmaktadır.
+
+**Temel Bulgular:**
+
+*   **Güçlü Yönler:** Modüler proxy mimarisi, esnek veritabanı şeması ve modern teknoloji seçimi projenin en güçlü yanlarıdır.
+*   **Ana İyileştirme Alanı:** Backend'deki `scraping.py` dosyası 1000 satırı aşan boyutuyla oldukça karmaşık bir yapıdadır. Bu dosyanın sorumluluklarına göre daha küçük modüllere ayrılması, kodun okunabilirliğini ve bakımını önemli ölçüde artıracaktır.
+*   **Alternatif Yaklaşımlar:** Asenkron görev yönetimi için mevcut `BackgroundTasks` yerine, daha ölçeklenebilir ve esnek bir çözüm olan **Celery**'nin kullanılması ve veri ayrıştırma (parsing) işlemleri için **Scrapy Selectors**'a geçilmesi önerilmektedir.
+
+Bu rapor, projenin mevcut durumunu sağlam bir temel olarak kabul etmekle birlikte, gelecekteki geliştirme süreçlerini daha verimli ve sürdürülebilir kılacak somut öneriler sunmaktadır.
+
+---
+
+## 2. Proje ve Mimari Genel Bakış
+
+Proje, bir frontend, bir backend ve bir veri katmanından oluşan klasik üç katmanlı bir mimari üzerine kurulmuştur. Dokümantasyona göre sistem, asenkron görevler için Celery kullanmayı planlarken, mevcut implementasyonda FastAPI'nin dahili `BackgroundTasks` özelliği tercih edilmiştir.
+
+### 2.1. Teknoloji Yığını
+
+| Katman | Teknoloji | Kütüphaneler/Araçlar |
+| :--- | :--- | :--- |
+| **Frontend** | React, TypeScript | Vite, TailwindCSS, Plotly.js, Axios, React Router |
+| **Backend** | Python, FastAPI | SQLAlchemy, Pydantic, Uvicorn |
+| **Veri Kazıma** | Tarayıcı Otomasyonu & Proxy | Playwright, ScraperAPI, Bright Data, BeautifulSoup4, aiohttp |
+| **Veritabanı** | PostgreSQL (İlişkisel) | psycopg2-binary, Redis (dokümantasyonda belirtilmiş) |
+| **Yapay Zeka** | OpenAI | `openai` kütüphanesi (GPT-4o-mini modeli) |
+| **Asenkron Görevler** | FastAPI BackgroundTasks | `routes.py` içinde `run_scraping_background` fonksiyonu ile |
+
+### 2.2. Sistem Mimarisi
+
+Veri akışı, kullanıcının arayüzden bir arama yapmasıyla başlar. Bu istek, FastAPI backend'ine iletilir ve bir arka plan görevi olarak veri kazıma sürecini tetikler. Kazıma servisi, modüler proxy yöneticisi aracılığıyla ScraperAPI veya Bright Data kullanarak hedef siteden (Hepsiburada) HTML içeriğini çeker. Çekilen veri ayrıştırılır, işlenir ve PostgreSQL veritabanına kaydedilir. Frontend, görev durumunu ve sonuçları periyodik olarak sorgulayarak kullanıcıya sunar.
+
+![Mevcut Proje Mimarisi](https://private-us-east-1.manuscdn.com/sessionFile/TusredzxeBBaFAGB9x3KiM/sandbox/gwGrnW6gDJV3csfH0uCUcP-images_1765535660662_na1fn_L2hvbWUvdWJ1bnR1L21hcmtldGluZ19hZ2VudC9jdXJyZW50X3Byb2plY3RfYXJjaGl0ZWN0dXJl.png?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvVHVzcmVkenhlQkJhRkFHQjl4M0tpTS9zYW5kYm94L2d3R3JuVzZnREpWM2NzZkgwdUNVY1AtaW1hZ2VzXzE3NjU1MzU2NjA2NjJfbmExZm5fTDJodmJXVXZkV0oxYm5SMUwyMWhjbXRsZEdsdVoxOWhaMlZ1ZEM5amRYSnlaVzUwWDNCeWIycGxZM1JmWVhKamFHbDBaV04wZFhKbC5wbmciLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UooVfMT9jpW3WVTAC3JGyFFkR-Bt7LGdeuodJb1IUZRXGsYAZ86ZkQ3Z34stWJuXZvCD0tB3Ntb~av281GcNf4nMjF1zo6C2VtALNeFdLpYdckyrck2ONZAQT6dVmWNZwazwIb7Tp6mmrPk5E99y~JvhqOv8tGrJZqbtOOE5XOrdDBHE5SLrS-IP8DTx3lGsotoEhukOA00nUW4ayFrntWGByA0YtK8Jkjf5EO5zY2~jo6uPJkLP7E3Drd3r1JxFyLCGJmv6d16Cuy42dubsXpGmSD7N807Wmld-3A5aHrH8AJPhrTE3y631ZpcvIysKqmfcQWWL4wGl~0cWfKywJQ__)
+*Repo'da bulunan mevcut mimari şeması.*
+
+---
+
+## 3. API Kullanımı ve Entegrasyonlar
+
+Proje, temel işlevselliğini harici API'ler üzerine kurmuştur. Özellikle veri kazıma ve yapay zeka analizinde bu servisler kritik rol oynamaktadır.
+
+### 3.1. Proxy Servisleri (ScraperAPI & Bright Data)
+
+Projenin en güçlü yanlarından biri, `proxy_providers.py` dosyasında tanımlanan modüler proxy yönetimi sistemidir. Bu sistem, farklı proxy sağlayıcıları arasında kolayca geçiş yapmayı ve maliyet/performans optimizasyonu sağlamayı hedefler.
+
+*   **Yapı:** `ProxyManager` sınıfı, `ScraperAPIProvider` ve `BrightDataProvider` gibi somut sağlayıcı sınıflarını yönetir. Bu yapı, yeni sağlayıcıların sisteme kolayca eklenmesine olanak tanır.
+*   **Fallback (Yedekleme) Mantığı:** Sistem, `PROXY_PROVIDER="auto"` ayarı ile varsayılan olarak **ScraperAPI**'yi kullanır. Bir hata veya başarısızlık durumunda otomatik olarak **Bright Data**'ya, son çare olarak da doğrudan bağlantıya geçer. Bu, sistemin direncini (resilience) artırır.
+*   **Kullanım Yöntemleri:**
+    *   **ScraperAPI:** Maliyet avantajı nedeniyle birincil sağlayıcı olarak seçilmiştir. Özellikle Hepsiburada için bot korumasını aşmada daha başarılı olduğu belirtilen **Proxy Port metodu** (`_fetch_with_scraperapi_proxy`) `aiohttp` ile asenkron olarak kullanılır.
+    *   **Bright Data:** Daha maliyetli ancak güvenilir bir yedek olarak konumlandırılmıştır. **Playwright** tarayıcı otomasyonu ile entegre edilerek kullanılır.
+
+### 3.2. Yapay Zeka Servisi (OpenAI)
+
+`llm_service.py` dosyası, OpenAI API'si ile olan tüm etkileşimi yönetir. `gpt-4o-mini` modeli, hem maliyet etkinliği hem de yeterli performansı nedeniyle tercih edilmiştir.
+
+*   **Ürün Analizi (`analyze_products`):** Toplanan ürün verilerini (fiyat, satıcı, puan vb.) analiz ederek, pazar trendleri, rekabet durumu ve stratejik öneriler sunan bir rapor oluşturur. Sisteme verilen prompt, onu bir 
+**pazaryeri veri analiz uzmanı**" olarak konumlandırarak, çıktının kalitesini artırmayı hedefler.
+*   **Anahtar Kelime Önerileri (`generate_keyword_suggestions`):** Verilen bir temel anahtar kelimeye dayalı olarak, e-ticaret aramaları için ilgili ve alternatif anahtar kelimeler üretir.
+
+---
+
+## 4. Kod Yapısı ve Kalitesi
+
+### 4.1. Backend (FastAPI)
+
+*   **Genel Yapı:** Kod, `api`, `core`, `db`, `services` gibi standart FastAPI proje klasör yapısını takip eder. Bu, projenin anlaşılırlığını ve bakımını kolaylaştırır.
+*   **`scraping.py` (1074 satır):** Bu dosya, projenin en karmaşık ve en büyük bileşenidir. İçerisinde tarayıcı yönetimi, farklı proxy sağlayıcıları ile veri çekme mantığı, birden fazla HTML ayrıştırma fonksiyonu (`_extract_utag_data`, `_extract_json_ld_data`, `_extract_other_sellers` vb.) ve veri temizleme (`_parse_float`, `_parse_int`) gibi çok sayıda farklı sorumluluk barındırmaktadır. Bu durum, "Single Responsibility Principle" (Tek Sorumluluk Prensibi) ile çelişir ve dosyanın yönetimini zorlaştırır.
+*   **`routes.py` (517 satır):** API endpoint tanımlarının yanı sıra, veri kazıma sonrası veritabanı işlemlerinin (ürün ve snapshot kaydetme/güncelleme) tamamını içeren `run_scraping_background` fonksiyonunu barındırır. Bu iş mantığının önemli bir kısmı, kendi servis katmanına veya bir veri işleme modülüne taşınabilir.
+*   **Veritabanı Modelleri (`models.py`):** `Product` ve `ProductSnapshot` olarak ikiye ayrılan yapı, statik ve dinamik verilerin ayrıştırılması için mükemmel bir yaklaşımdır. Bu, zaman serisi analizleri ve sorgu performansı için oldukça etkilidir. `ProductSeller` ve `ProductReview` tabloları da veri modelini zenginleştirmektedir.
+
+### 4.2. Frontend (React)
+
+*   **Yapı:** `pages`, `components`, `services` klasör yapısı, standart React uygulamaları için iyi bir başlangıç noktasıdır.
+*   **`api.ts`:** Backend API'si ile olan tüm iletişimi merkezileştiren bu dosya, kod tekrarını önler ve API çağrılarının yönetimini kolaylaştırır. TypeScript arayüzleri (`Product`, `Snapshot` vb.) backend Pydantic modelleriyle tutarlıdır, bu da tip güvenliği sağlar.
+*   **Bileşenler:** `ProductDetail.tsx` (378 satır) en büyük bileşendir ve ürün detayları, satıcılar, yorumlar ve fiyat grafikleri gibi birçok farklı bölümü içerir. Bu bileşenin daha küçük ve yeniden kullanılabilir alt bileşenlere (örneğin, `PriceChart`, `SellerList`, `ReviewList`) bölünmesi, kodun okunabilirliğini ve test edilebilirliğini artırabilir.
+
+### 4.3. Dokümantasyon
+
+Repo, `replit.md`, `1. Sistem Mimarisi.md` ve `Scraping_Modular_Architecture_Plan.md` gibi çok sayıda Markdown dosyası içermektedir. Bu dokümanlar, projenin mimarisini, teknoloji seçimlerini ve gelişim sürecindeki kararları anlamak için son derece değerlidir. Özellikle proxy mimarisi ve veri kazıma stratejileri üzerine detaylı notlar bulunması, projenin kalitesini artıran önemli bir unsurdur.
+
+---
+
+## 5. İyileştirme Fırsatları ve Öneriler
+
+### 5.1. `scraping.py` Dosyasının Yeniden Yapılandırılması (Refactoring)
+
+**Sorun:** 1000 satırı aşan bu dosya, bakım ve geliştirmeler için en büyük engeli teşkil etmektedir.
+
+**Öneri:** Bu dosya aşağıdaki gibi daha küçük ve odaklanmış modüllere ayrılmalıdır:
+
+*   `browser_manager.py`: Playwright tarayıcısının başlatılması, kapatılması ve `stealth` ayarlarının uygulanmasından sorumlu bir modül.
+*   `html_fetcher.py`: `aiohttp` ve proxy mantığını kullanarak, verilen bir URL'nin HTML içeriğini getiren bir modül. ScraperAPI'nin farklı metotları (`proxy_port`, `http_api`) burada yönetilebilir.
+*   `hepsiburada_parser.py`: Sadece Hepsiburada sayfa yapısına özel ayrıştırma fonksiyonlarını (`_extract_utag_data`, `_extract_product_urls_from_soup` vb.) içeren bir modül. Gelecekte farklı bir pazar yeri (örn: Trendyol) eklendiğinde, `trendyol_parser.py` gibi yeni bir modül oluşturmak yeterli olacaktır.
+*   `data_cleaner.py`: `_parse_float`, `_parse_int` gibi genel veri temizleme ve formatlama yardımcı fonksiyonlarını barındıran bir modül.
+
+### 5.2. İş Mantığının Servis Katmanına Taşınması
+
+**Sorun:** `routes.py` içerisindeki `run_scraping_background` fonksiyonu, API rotası tanımının ötesinde, veri işleme ve veritabanı kaydı gibi karmaşık iş mantığı içermektedir.
+
+**Öneri:** Veritabanı işlemleri (`product` ve `snapshot` oluşturma/güncelleme) `db` katmanında kendi fonksiyonlarına (`crud.py` gibi bir dosyada) veya `services` katmanında yeni bir `product_service.py` dosyasına taşınmalıdır. Bu, `routes.py` dosyasını daha temiz ve sadece HTTP istek/yanıt yönetimine odaklanmış halde tutar.
+
+### 5.3. Frontend Bileşenlerinin Ayrıştırılması
+
+**Sorun:** `ProductDetail.tsx` gibi büyük bileşenlerin yönetimi zordur.
+
+**Öneri:** Bu bileşen, aşağıdaki gibi daha küçük, yeniden kullanılabilir bileşenlere ayrılabilir:
+
+*   `ProductHeader.tsx`: Ürünün başlığı, markası ve temel bilgilerini gösterir.
+*   `PriceHistoryChart.tsx`: `Plotly.js` grafiğini içeren ve sadece snapshot verilerini alan bir bileşen.
+*   `OtherSellersTable.tsx`: Diğer satıcıları listeleyen bir tablo.
+*   `ReviewsList.tsx`: Ürün yorumlarını listeleyen bir bileşen.
+
+---
+
+## 6. Alternatif Yaklaşımlar
+
+### 6.1. Asenkron Görevler için Celery Kullanımı
+
+Mevcut `BackgroundTasks` çözümü basit görevler için yeterli olsa da, proje ölçeklendikçe yetersiz kalabilir. Dokümantasyonda da belirtildiği gibi **Celery**'ye geçiş yapmak aşağıdaki avantajları sağlar:
+
+*   **Ölçeklenebilirlik:** Görevleri birden fazla worker (işçi) arasında dağıtarak performansı artırır.
+*   **İzleme ve Yönetim:** Flower gibi araçlarla görevlerin durumunu izleme, yeniden deneme ve iptal etme gibi gelişmiş yetenekler sunar.
+*   **Dayanıklılık:** Redis veya RabbitMQ gibi bir message broker kullanarak, backend yeniden başlasa bile görevlerin kaybolmamasını sağlar.
+
+### 6.2. Veri Ayrıştırma için Scrapy Selectors
+
+**BeautifulSoup**, esnek ve kullanımı kolay bir kütüphane olsa da, büyük ve karmaşık HTML dokümanlarında performans sorunları yaşayabilir. **Scrapy**, özellikle web kazıma için tasarlanmış bir framework'tür ve kendi `Selector` mekanizması şu avantajları sunar:
+
+*   **Performans:** Arka planda `lxml` kullanarak çok daha hızlı ayrıştırma yapar.
+*   **XPath Desteği:** CSS selector'lerin yetersiz kaldığı durumlarda, karmaşık DOM ağaçlarında gezinmek için güçlü bir alternatif olan XPath'i destekler.
+*   **Entegre Regex:** Selector'ler içinde doğrudan `re()` fonksiyonu ile düzenli ifadeler kullanma imkanı tanır.
+
+**Geçiş Stratejisi:** Projenin tamamını Scrapy'e geçirmek yerine, sadece `BeautifulSoup`'un kullanıldığı ayrıştırma mantığı, `scrapy.selector.Selector` sınıfı ile değiştirilebilir. Bu, minimum eforla maksimum performans artışı sağlayabilir.
+
+### 6.3. Veritabanı Optimizasyonu
+
+`product_snapshots` tablosu zamanla çok büyük boyutlara ulaşacaktır. Dokümantasyonda belirtilen **partitioning (bölümleme)** stratejisi, sorgu performansını korumak için hayati öneme sahiptir. PostgreSQL'in declarative partitioning özelliğinden faydalanarak, bu tablonun `snapshot_date` sütununa göre aylık veya haftalık olarak bölümlenmesi şiddetle tavsiye edilir.
+
+---
+
+## 7. Sonuç
+
+`marketing_agent` projesi, modern teknolojileri akıllıca bir araya getiren, iyi dokümante edilmiş ve sağlam bir temele sahip bir projedir. Özellikle modüler proxy mimarisi, projenin en dikkat çekici ve başarılı kısmıdır.
+
+Projenin bir sonraki seviyeye taşınması için en önemli adım, kod tabanındaki karmaşıklığı azaltmaktır. `scraping.py` ve `routes.py` dosyalarının yeniden yapılandırılması, projenin uzun vadeli sürdürülebilirliği ve geliştirici verimliliği için kritik bir yatırım olacaktır. Celery ve Scrapy Selectors gibi daha uzmanlaşmış araçların benimsenmesi ise projenin ölçeklenebilirliğini ve performansını önemli ölçüde artırma potansiyeli taşımaktadır.

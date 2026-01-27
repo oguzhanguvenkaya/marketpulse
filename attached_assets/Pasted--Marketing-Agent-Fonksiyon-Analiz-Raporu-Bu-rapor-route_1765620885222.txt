@@ -1,0 +1,246 @@
+# Marketing Agent - Fonksiyon Analiz Raporu
+
+Bu rapor, `routes.py`, `scraping.py` ve `proxy_providers.py` dosyalarındaki tüm fonksiyonları detaylı bir şekilde analiz eder.
+
+## 1. `backend/app/api/routes.py`
+
+Bu dosya, uygulamanın dış dünyaya açılan kapısıdır. FastAPI endpoint'lerini tanımlar.
+
+### Fonksiyonlar
+
+#### 1.1. `async def scrape_product(request: ScrapingRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db))`
+
+- **Amacı:** Bir ürünün scraping işlemini başlatmak için ana API endpoint'i.
+- **Girdi Parametreleri:**
+  - `request: ScrapingRequest`: Pydantic modeli. `url` (str) ve `marketplace` (str) alanlarını içerir.
+  - `background_tasks: BackgroundTasks`: FastAPI'nin arkaplan görevi yöneticisi.
+  - `db: Session`: Veritabanı oturumu.
+- **Çıktı:** `{"message": "Scraping job started in the background"}`
+- **Ne İşe Yarıyor:** Kullanıcıdan gelen scraping isteğini alır, `HepsiburadaScraper`'ı başlatır ve `scrape_and_save` işlemini arkaplanda çalıştırır. Bu sayede kullanıcı uzun süren scraping işlemini beklemez.
+- **Neden Kullanılıyor:** Asenkron ve non-blocking bir yapı kurmak için.
+
+#### 1.2. `def get_proxy_status()`
+
+- **Amacı:** Mevcut proxy sağlayıcılarının durumunu kontrol etmek için bir endpoint.
+- **Girdi Parametreleri:** Yok.
+- **Çıktı:** `Dict[str, Any]` - Proxy sağlayıcılarının durumu hakkında bilgi içeren bir dictionary.
+- **Ne İşe Yarıyor:** `ProxyManager`'dan mevcut proxy'lerin (ScraperAPI, BrightData) durumunu alır ve JSON olarak döner.
+- **Neden Kullanılıyor:** Sistemin sağlığını ve proxy'lerin çalışıp çalışmadığını kontrol etmek için bir "health check" endpoint'i olarak.
+
+## 2. `backend/app/services/proxy_providers.py`
+
+Bu dosya, farklı proxy sağlayıcılarını (ScraperAPI, BrightData) yöneten modüler ve esnek bir yapı sunar.
+
+### Sınıflar ve Fonksiyonlar
+
+#### 2.1. `ProxyProvider` (Abstract Base Class)
+
+- **Amacı:** Tüm proxy sağlayıcıları için bir arayüz (interface) tanımlamak.
+- **Metotlar:**
+  - `get_proxy_config(premium: bool)`: Proxy konfigürasyonunu döner.
+  - `is_available()`: Sağlayıcının kullanılabilir olup olmadığını kontrol eder.
+  - `get_description()`: Sağlayıcının açıklamasını döner.
+
+#### 2.2. `ScraperAPIProvider(ProxyProvider)` ve `BrightDataProvider(ProxyProvider)`
+
+- **Amacı:** `ProxyProvider` arayüzünü implemente eden somut sınıflar. Her biri kendi sağlayıcısına özel proxy URL'sini ve konfigürasyonunu oluşturur.
+- **Ne İşe Yarıyor:** Yeni bir proxy sağlayıcısı eklemek gerektiğinde, sadece bu arayüzü implemente eden yeni bir sınıf yazmak yeterlidir. Bu, kodun genişletilebilirliğini artırır.
+
+#### 2.3. `ProxyManager`
+
+- **Amacı:** Tüm proxy sağlayıcılarını yöneten, aralarında geçiş yapan ve en uygun olanı seçen merkezi sınıf.
+- **Metotlar:**
+  - `get_primary_provider()`: Öncelikli (primary) proxy sağlayıcısını (ScraperAPI) döner.
+  - `get_fallback_provider()`: Birincil sağlayıcı başarısız olduğunda kullanılacak yedek (fallback) sağlayıcıyı (BrightData) döner.
+  - `get_proxy_config()`: İstenen sağlayıcıdan proxy konfigürasyonunu alır.
+
+#### 2.4. `ProxyLogger`
+
+- **Amacı:** Proxy kullanımını, başarı/hata durumlarını ve debug bilgilerini loglamak.
+- **Metotlar:**
+  - `log_request()`: Her proxy isteğini loglar.
+  - `save_debug_html()`: Hata durumunda debug için HTML içeriğini kaydeder.
+  - `log_error()`: Hataları loglar.
+
+## 3. `backend/app/services/scraping.py`
+
+Bu dosya, projenin kalbidir. Tüm scraping, parsing ve veri çıkarma mantığını içerir.
+
+### Sınıflar ve Fonksiyonlar
+
+#### 3.1. `HepsiburadaScraper`
+
+- **Amacı:** Hepsiburada'ya özel scraping işlemlerini yürüten ana sınıf.
+
+- **Ana Metotlar:**
+
+  - **`async def scrape_and_save(self, url: str, marketplace: str)`**
+    - **Amacı:** Ana scraping akışını yönetir. HTML'i alır, parse eder, veritabanına kaydeder.
+    - **Girdi:** `url` (str), `marketplace` (str)
+    - **Çıktı:** Yok (veritabanına yazar).
+
+  - **`async def _fetch_with_playwright(self, url: str) -> str`**
+    - **Amacı:** Playwright kullanarak bir URL'den HTML içeriğini alır. Anti-detection ve insan davranışı simülasyonu uygular.
+    - **Girdi:** `url` (str)
+    - **Çıktı:** Sayfanın HTML içeriği (str).
+
+  - **`def _parse_product_data(self, html_content: str, url: str) -> Dict`**
+    - **Amacı:** Ham HTML'i alır ve içindeki tüm ürün verilerini (fiyat, satıcı, yorumlar vb.) çıkartan ana parse fonksiyonu.
+    - **Girdi:** `html_content` (str), `url` (str)
+    - **Çıktı:** Yapılandırılmış ürün verilerini içeren bir dictionary.
+
+- **Yardımcı Parse Metotları:**
+
+  - `_extract_utag_data`, `_extract_json_ld_data`, `_extract_html_data`: Farklı veri kaynaklarından (JavaScript tag'leri, JSON-LD script'leri, ham HTML) veri çıkartır.
+  - `_extract_other_sellers`, `_extract_reviews`, `_extract_coupons`, `_extract_campaigns`: Sayfanın belirli bölümlerinden (diğer satıcılar, yorumlar vb.) veri çıkartır.
+
+- **Anti-Detection Metotları:**
+
+  - `_apply_anti_detection`, `_simulate_human_behavior`: Bot tespit sistemlerini atlatmak için Playwright üzerinde çeşitli teknikler uygular (user-agent değiştirme, rastgele bekleme, fare hareketleri vb.).
+
+
+## 4. Detaylı Fonksiyon Tablosu
+
+### 4.1. `scraping.py` - Tüm Fonksiyonlar
+
+| Fonksiyon Adı | Tip | Girdi Parametreleri | Çıktı | Amacı |
+|---------------|-----|---------------------|-------|-------|
+| `scrape_and_save` | async | `url: str`, `marketplace: str` | None | Ana scraping akışını yönetir, veritabanına kaydeder |
+| `_fetch_with_playwright` | async | `url: str` | `str` (HTML) | Playwright ile sayfa içeriğini alır |
+| `_parse_product_data` | sync | `html_content: str`, `url: str` | `Dict` | HTML'i parse edip yapılandırılmış veri döner |
+| `_extract_external_id` | sync | `url: str` | `str` | URL'den ürün ID'sini çıkartır |
+| `_extract_utag_data` | sync | `html_content: str` | `Optional[Dict]` | `utag_data` JavaScript objesini çıkartır |
+| `_extract_json_ld_data` | sync | `soup: BeautifulSoup` | `Optional[Dict]` | JSON-LD script tag'inden veri çıkartır |
+| `_parse_float` | sync | `value: Any` | `Optional[float]` | Güvenli float parsing |
+| `_parse_int` | sync | `value: Any` | `Optional[int]` | Güvenli int parsing |
+| `_parse_utag_data` | sync | `utag: Dict` | `Dict[str, Any]` | `utag_data`'yı yapılandırılmış formata çevirir |
+| `_parse_json_ld_data` | sync | `json_ld: Dict` | `Dict[str, Any]` | JSON-LD verisini yapılandırılmış formata çevirir |
+| `_extract_html_data` | sync | `soup: BeautifulSoup` | `Dict[str, Any]` | Ham HTML'den CSS selector'larla veri çıkartır |
+| `_extract_other_sellers` | sync | `soup: BeautifulSoup` | `List[Dict]` | Diğer satıcılar bölümünü parse eder (**İlk 10 ile sınırlı**) |
+| `_extract_reviews` | sync | `soup: BeautifulSoup` | `List[Dict]` | Yorumları parse eder (**İlk 20 ile sınırlı**) |
+| `_extract_coupons` | sync | `soup: BeautifulSoup` | `List[Dict]` | Kupon bilgilerini çıkartır |
+| `_extract_campaigns` | sync | `soup: BeautifulSoup` | `List[Dict]` | Kampanya bilgilerini çıkartır |
+| `_apply_anti_detection` | async | `page: Page` | None | Bot tespit önleme teknikleri uygular |
+| `_simulate_human_behavior` | async | `page: Page` | None | İnsan davranışını simüle eder (scroll, fare hareketi) |
+| `_random_delay` | async | `min_ms: int`, `max_ms: int` | None | Rastgele bekleme yapar |
+
+### 4.2. `proxy_providers.py` - Tüm Fonksiyonlar
+
+| Sınıf/Fonksiyon | Tip | Girdi | Çıktı | Amacı |
+|-----------------|-----|-------|-------|-------|
+| `ProxyProvider.get_proxy_config` | abstract | `premium: bool` | `Optional[Dict[str, str]]` | Proxy konfigürasyonunu döner (abstract) |
+| `ProxyProvider.is_available` | abstract | - | `bool` | Sağlayıcının kullanılabilir olup olmadığını kontrol eder |
+| `ProxyProvider.get_description` | abstract | - | `str` | Sağlayıcı açıklaması |
+| `ScraperAPIProvider.get_proxy_config` | sync | `premium: bool` | `Optional[Dict]` | ScraperAPI proxy URL'sini oluşturur |
+| `BrightDataProvider.get_proxy_config` | sync | `premium: bool` | `Optional[Dict]` | BrightData proxy URL'sini oluşturur |
+| `ProxyManager.get_primary_provider` | sync | - | `ProxyProvider` | Birincil proxy sağlayıcısını (ScraperAPI) döner |
+| `ProxyManager.get_fallback_provider` | sync | `current: str` | `Optional[ProxyProvider]` | Yedek proxy sağlayıcısını (BrightData) döner |
+| `ProxyManager.get_proxy_config` | sync | `provider_name: Optional[str]`, `premium: bool` | `Optional[Dict]` | İstenen sağlayıcıdan proxy konfigürasyonunu alır |
+| `ProxyLogger.log_request` | sync | `url, provider, status, message` | None | İsteği loglar |
+| `ProxyLogger.save_debug_html` | sync | `url, html_content, status, provider` | None | Debug için HTML kaydeder |
+| `ProxyLogger.log_error` | sync | `url, provider, error` | None | Hataları loglar |
+
+## 5. Veri Akış Diyagramı
+
+Sistemin çalışma mantığını anlamak için veri akışı şu şekildedir:
+
+```
+[Kullanıcı] 
+    ↓ POST /scrape
+[routes.py: scrape_product()]
+    ↓ Background Task
+[HepsiburadaScraper.scrape_and_save()]
+    ↓
+[ProxyManager.get_primary_provider()] → ScraperAPI
+    ↓
+[_fetch_with_playwright()] → Playwright + Proxy
+    ↓ HTML
+[_parse_product_data()]
+    ├→ [_extract_utag_data()]
+    ├→ [_extract_json_ld_data()]
+    ├→ [_extract_html_data()]
+    ├→ [_extract_other_sellers()]  ⚠️ Limit: 10
+    ├→ [_extract_reviews()]        ⚠️ Limit: 20
+    ├→ [_extract_coupons()]
+    └→ [_extract_campaigns()]
+    ↓ Yapılandırılmış Veri
+[Veritabanına Kaydet]
+```
+
+## 6. Kritik Bulgular ve İyileştirme Önerileri
+
+### 6.1. Veri Sınırlamaları
+
+**Sorun:** `_extract_other_sellers` ve `_extract_reviews` fonksiyonları, verileri sınırlı bir şekilde alıyor.
+
+```python
+# scraping.py satır 937
+sellers = soup.select(".other-seller-item")[:10]  # Sadece ilk 10
+
+# scraping.py satır 993
+reviews = soup.select(".review-item")[:20]  # Sadece ilk 20
+```
+
+**Öneri:** Eğer "tüm satıcılar" ve "tüm yorumlar" gerekiyorsa, bu limitleri kaldırın veya Playwright ile "Daha Fazla Göster" butonlarına tıklayın.
+
+### 6.2. Reklam Verisi Eksikliği
+
+**Sorun:** `is_sponsored` alanı veritabanında var ama scraping tarafında **hiç set edilmiyor**.
+
+**Öneri:** Fetch isteklerini yakalayarak veya HTML'de "Sponsorlu" metnini arayarak bu alanı doldurun.
+
+### 6.3. Kod Tekrarı
+
+**Sorun:** `_extract_utag_data`, `_extract_json_ld_data` ve `_extract_html_data` fonksiyonları benzer verileri farklı kaynaklardan almaya çalışıyor.
+
+**Öneri:** Bu fonksiyonları bir "fallback chain" olarak düzenleyin. Önce `utag_data`'yı dene, yoksa `json_ld`'ye bak, o da yoksa HTML parse et.
+
+### 6.4. Proxy Yönetimi
+
+**Güçlü Yan:** Modüler proxy mimarisi çok başarılı. Yeni bir proxy eklemek için sadece `ProxyProvider` arayüzünü implemente etmek yeterli.
+
+**Öneri:** Proxy rotation stratejisini daha akıllı hale getirin. Örneğin, başarı oranına göre dinamik olarak proxy seçimi yapın.
+
+## 7. Fonksiyon Kullanım Senaryoları
+
+### Senaryo 1: Yeni Bir Ürün Scrape Etme
+
+1. Kullanıcı frontend'den bir Hepsiburada URL'si gönderir.
+2. `routes.py:scrape_product()` isteği alır.
+3. `HepsiburadaScraper.scrape_and_save()` arkaplanda başlatılır.
+4. `ProxyManager` ScraperAPI'yi seçer.
+5. `_fetch_with_playwright()` Playwright ile sayfayı açar, anti-detection uygular.
+6. `_parse_product_data()` HTML'i parse eder, tüm veri çıkarma fonksiyonlarını çağırır.
+7. Veriler veritabanına kaydedilir.
+
+### Senaryo 2: Proxy Başarısız Olduğunda
+
+1. ScraperAPI ile istek atılır.
+2. Hata alınır (timeout, 403 vb.).
+3. `ProxyManager.get_fallback_provider()` BrightData'yı döner.
+4. İstek BrightData ile tekrar denenir.
+5. Başarılı olursa devam edilir, değilse hata loglanır.
+
+### Senaryo 3: Reklam Verilerini Yakalama (Yeni Özellik)
+
+1. Playwright sayfayı açar.
+2. `page.on("response", handler)` ile fetch istekleri dinlenir.
+3. `sponsored-brand` veya `voltran` URL'leri yakalanır.
+4. JSON response parse edilir.
+5. Reklam verileri ayrı bir tabloya kaydedilir.
+
+## 8. Sonuç
+
+Bu analiz, marketing_agent projesinin backend katmanının tüm fonksiyonlarını mercek altına aldı. Projenin güçlü yönleri şunlardır:
+
+- **Modüler proxy mimarisi:** Yeni sağlayıcı eklemek çok kolay.
+- **Asenkron yapı:** Scraping işlemleri arkaplanda çalışarak kullanıcı deneyimini iyileştiriyor.
+- **Çoklu veri kaynağı:** `utag_data`, JSON-LD ve HTML parsing ile veri kaybı minimize ediliyor.
+
+İyileştirme gerektiren alanlar:
+
+- Veri sınırlamalarını kaldırma (tüm satıcılar/yorumlar).
+- Reklam verilerini yakalama.
+- Kod tekrarını azaltma.
+
+Bu rapor, projenin her fonksiyonunun ne yaptığını, neden kullanıldığını ve nasıl iyileştirilebileceğini detaylı bir şekilde açıklamaktadır.

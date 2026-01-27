@@ -8,27 +8,13 @@ from urllib.parse import quote_plus, unquote, urlparse, parse_qs
 from datetime import date
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright, Browser, Page
+from playwright_stealth import Stealth
 from app.core.config import settings
 from app.core.logger import scraping_logger as logger
 from app.services.proxy_providers import proxy_manager, debug_logger, ProxyProvider
 
-# Playwright is optional - may not be available in some deployment environments
-PLAYWRIGHT_AVAILABLE = False
-async_playwright = None
-Browser = None
-Page = None
-stealth = None
-
-try:
-    from playwright.async_api import async_playwright, Browser, Page
-    from playwright_stealth import Stealth
-    stealth = Stealth()
-    PLAYWRIGHT_AVAILABLE = True
-    logger.info("Playwright loaded successfully")
-except ImportError as e:
-    logger.warning(f"Playwright not available: {e}. Browser-based scraping disabled.")
-except Exception as e:
-    logger.warning(f"Playwright initialization error: {e}. Browser-based scraping disabled.")
+stealth = Stealth()
 
 MAX_PRODUCTS_PER_SEARCH = 8
 MAX_RETRIES = 2
@@ -44,8 +30,6 @@ class ScrapingService:
         self.current_provider_name: str = "direct"
     
     async def init_browser(self, provider_name: Optional[str] = None, premium: bool = False):
-        if not PLAYWRIGHT_AVAILABLE:
-            raise RuntimeError("Playwright is not available. Browser-based scraping is disabled.")
         self.playwright = await async_playwright().start()
         
         if provider_name:

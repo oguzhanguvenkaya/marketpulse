@@ -1,0 +1,742 @@
+# Bright Data Python Entegrasyon Rehberi
+
+**Tarih:** 10 Aralık 2025
+**Dil:** Python
+**Kapsam:** Faz 1 için gerekli tüm entegrasyonlar
+
+---
+
+## 1. Kurulum ve Konfigürasyon
+
+### 1.1 Gerekli Kütüphaneleri Yükle
+
+```bash
+# Temel kütüphaneler
+pip install playwright beautifulsoup4 requests asyncio
+
+# Playwright tarayıcılarını yükle
+playwright install chromium
+
+# Opsiyonel (veri işleme için)
+pip install pandas sqlalchemy psycopg2-binary
+```
+
+### 1.2 Bright Data Credentials Hazırla
+
+```python
+# config.py
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Bright Data Credentials
+BRIGHT_DATA_ACCOUNT_ID = os.getenv("BRIGHT_DATA_ACCOUNT_ID")  # hl_###
+BRIGHT_DATA_ZONE_NAME = os.getenv("BRIGHT_DATA_ZONE_NAME")    # marketplace_scraper
+BRIGHT_DATA_ZONE_PASSWORD = os.getenv("BRIGHT_DATA_ZONE_PASSWORD")
+
+# Proxy URL
+BRIGHT_DATA_PROXY_URL = f"http://brd-customer-{BRIGHT_DATA_ACCOUNT_ID}-zone-{BRIGHT_DATA_ZONE_NAME}:{BRIGHT_DATA_ZONE_PASSWORD}@brd.superproxy.io:33335"
+
+# Proxy Dictionary (requests için)
+BRIGHT_DATA_PROXY_DICT = {
+    "http": BRIGHT_DATA_PROXY_URL,
+    "https": BRIGHT_DATA_PROXY_URL
+}
+
+# Proxy Dictionary (Playwright için)
+BRIGHT_DATA_PROXY_PLAYWRIGHT = {
+    "server": "http://brd.superproxy.io:33335",
+    "username": f"brd-customer-{BRIGHT_DATA_ACCOUNT_ID}-zone-{BRIGHT_DATA_ZONE_NAME}",
+    "password": BRIGHT_DATA_ZONE_PASSWORD
+}
+```
+
+### 1.3 .env Dosyası Oluştur
+
+```bash
+# .env
+BRIGHT_DATA_ACCOUNT_ID=hl_abc123
+BRIGHT_DATA_ZONE_NAME=marketplace_scraper
+BRIGHT_DATA_ZONE_PASSWORD=your_zone_password
+```
+
+---
+
+## 2. Bright Data Residential Proxies ile Requests Kullanımı
+
+### 2.1 Basit HTTP Request
+
+```python
+# bright_data_requests.py
+import requests
+from config import BRIGHT_DATA_PROXY_DICT
+
+class BrightDataRequests:
+    def __init__(self, proxy_dict=None):
+        self.proxy_dict = proxy_dict or BRIGHT_DATA_PROXY_DICT
+        self.session = requests.Session()
+        self.session.proxies.update(self.proxy_dict)
+    
+    def get(self, url, **kwargs):
+        """
+        Bright Data proxy'si ile GET request gönder
+        
+        Args:
+            url (str): Hedef URL
+            **kwargs: requests.get() için ek parametreler
+        
+        Returns:
+            requests.Response: Response nesnesi
+        """
+        headers = kwargs.pop('headers', {})
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        
+        try:
+            response = self.session.get(url, headers=headers, timeout=15, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Request hatası: {e}")
+            return None
+    
+    def post(self, url, **kwargs):
+        """
+        Bright Data proxy'si ile POST request gönder
+        """
+        headers = kwargs.pop('headers', {})
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        
+        try:
+            response = self.session.post(url, headers=headers, timeout=15, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Request hatası: {e}")
+            return None
+
+# Kullanım
+bd_requests = BrightDataRequests()
+response = bd_requests.get("https://www.hepsiburada.com/arama?q=laptop")
+print(response.status_code)
+```
+
+---
+
+## 3. Bright Data Residential Proxies ile Playwright Kullanımı
+
+### 3.1 Basit Playwright Örneği
+
+```python
+# bright_data_playwright.py
+import asyncio
+from playwright.async_api import async_playwright
+from config import BRIGHT_DATA_PROXY_PLAYWRIGHT
+from bs4 import BeautifulSoup
+
+class BrightDataPlaywright:
+    def __init__(self, proxy_config=None):
+        self.proxy_config = proxy_config or BRIGHT_DATA_PROXY_PLAYWRIGHT
+        self.browser = None
+    
+    async def launch(self):
+        """Tarayıcıyı başlat"""
+        p = await async_playwright().start()
+        self.browser = await p.chromium.launch(proxy=self.proxy_config)
+    
+    async def close(self):
+        """Tarayıcıyı kapat"""
+        if self.browser:
+            await self.browser.close()
+    
+    async def scrape_page(self, url, wait_until="networkidle"):
+        """
+        Sayfayı açıp HTML'sini döndür
+        
+        Args:
+            url (str): Hedef URL
+            wait_until (str): Bekleme stratejisi (load, domcontentloaded, networkidle)
+        
+        Returns:
+            str: Sayfanın HTML'si
+        """
+        if not self.browser:
+            await self.launch()
+        
+        page = await self.browser.new_page()
+        
+        try:
+            await page.goto(url, wait_until=wait_until, timeout=30000)
+            content = await page.content()
+            return content
+        except Exception as e:
+            print(f"Sayfaya erişim hatası: {e}")
+            return None
+        finally:
+            await page.close()
+
+# Kullanım
+async def main():
+    bd_playwright = BrightDataPlaywright()
+    
+    try:
+        content = await bd_playwright.scrape_page("https://www.hepsiburada.com/arama?q=laptop")
+        if content:
+            soup = BeautifulSoup(content, 'html.parser')
+            print(f"Sayfa başarıyla yüklendi. Boyut: {len(content)} byte")
+    finally:
+        await bd_playwright.close()
+
+asyncio.run(main())
+```
+
+---
+
+## 4. Hepsiburada Scraping: Tam Implementasyon
+
+### 4.1 Basit Arama Scraper
+
+```python
+# hepsiburada_scraper.py
+import asyncio
+from bs4 import BeautifulSoup
+from bright_data_playwright import BrightDataPlaywright
+import time
+
+class HepsiburadaScraper:
+    def __init__(self):
+        self.bd_playwright = BrightDataPlaywright()
+    
+    async def scrape_search_results(self, keyword, max_products=100):
+        """
+        Hepsiburada'da keyword arayıp ürünleri çek
+        
+        Args:
+            keyword (str): Aranacak kelime
+            max_products (int): Çekilecek maksimum ürün sayısı
+        
+        Returns:
+            list: Ürün listesi
+        """
+        url = f"https://www.hepsiburada.com/arama?q={keyword}"
+        
+        try:
+            await self.bd_playwright.launch()
+            page = await self.bd_playwright.browser.new_page()
+            
+            await page.goto(url, wait_until="networkidle", timeout=30000)
+            
+            products = []
+            last_height = 0
+            
+            while len(products) < max_products:
+                # Sayfanın HTML'sini al
+                content = await page.content()
+                soup = BeautifulSoup(content, 'html.parser')
+                
+                # Ürün kartlarını bul
+                product_cards = soup.find_all('div', class_='productCard')
+                
+                for card in product_cards:
+                    if len(products) >= max_products:
+                        break
+                    
+                    try:
+                        # Ürün bilgilerini çıkar
+                        product_data = self._extract_product_data(card)
+                        
+                        # Duplicate check
+                        if not any(p['name'] == product_data['name'] for p in products):
+                            products.append(product_data)
+                    except Exception as e:
+                        print(f"Ürün çıkarma hatası: {e}")
+                        continue
+                
+                # Sayfanın sonuna kaydır
+                new_height = await page.evaluate("document.body.scrollHeight")
+                
+                if new_height == last_height or len(products) >= max_products:
+                    break
+                
+                last_height = new_height
+                
+                # Sayfayı aşağı kaydır
+                await page.evaluate("window.scrollBy(0, window.innerHeight)")
+                
+                # Yeni ürünlerin yüklenmesini bekle
+                await page.wait_for_timeout(2000)
+            
+            await page.close()
+            return products
+        
+        except Exception as e:
+            print(f"Scraping hatası: {e}")
+            return []
+        
+        finally:
+            await self.bd_playwright.close()
+    
+    def _extract_product_data(self, card):
+        """Ürün kartından veri çıkar"""
+        try:
+            name = card.find('h3').text.strip()
+            price_elem = card.find('span', class_='price')
+            price = price_elem.text.strip() if price_elem else "N/A"
+            
+            rating_elem = card.find('span', class_='rating')
+            rating = rating_elem.text.strip() if rating_elem else "N/A"
+            
+            reviews_elem = card.find('span', class_='reviewCount')
+            reviews = reviews_elem.text.strip() if reviews_elem else "0"
+            
+            return {
+                'name': name,
+                'price': price,
+                'rating': rating,
+                'reviews': reviews
+            }
+        except Exception as e:
+            print(f"Veri çıkarma hatası: {e}")
+            return None
+
+# Kullanım
+async def main():
+    scraper = HepsiburadaScraper()
+    products = await scraper.scrape_search_results("laptop", max_products=50)
+    
+    print(f"Toplam {len(products)} ürün bulundu")
+    for product in products[:5]:
+        print(product)
+
+asyncio.run(main())
+```
+
+---
+
+## 5. Günlük Güncelleme: Playwright Ücretsiz (Proxy Olmadan)
+
+### 5.1 Ürün Detay Güncelleme
+
+```python
+# product_updater.py
+import asyncio
+from playwright.async_api import async_playwright
+from bs4 import BeautifulSoup
+
+class ProductUpdater:
+    async def update_product_details(self, product_url):
+        """
+        Ürün detay sayfasından fiyat ve yorum bilgisini güncelle
+        
+        Args:
+            product_url (str): Ürün URL'si
+        
+        Returns:
+            dict: Güncellenmiş ürün bilgileri
+        """
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()  # Proxy YOK
+            page = await browser.new_page()
+            
+            try:
+                await page.goto(product_url, wait_until="networkidle", timeout=15000)
+                
+                content = await page.content()
+                soup = BeautifulSoup(content, 'html.parser')
+                
+                # Fiyat çıkar
+                price_elem = soup.find('span', class_='price')
+                price = price_elem.text.strip() if price_elem else "N/A"
+                
+                # Yorum sayısı çıkar
+                reviews_elem = soup.find('span', class_='reviewCount')
+                reviews = reviews_elem.text.strip() if reviews_elem else "0"
+                
+                # Puan çıkar
+                rating_elem = soup.find('span', class_='rating')
+                rating = rating_elem.text.strip() if rating_elem else "N/A"
+                
+                return {
+                    'price': price,
+                    'reviews': reviews,
+                    'rating': rating,
+                    'updated_at': time.time()
+                }
+            
+            except Exception as e:
+                print(f"Güncelleme hatası: {e}")
+                return None
+            
+            finally:
+                await browser.close()
+    
+    async def batch_update_products(self, product_urls, batch_size=10):
+        """
+        Birden fazla ürünü toplu olarak güncelle
+        
+        Args:
+            product_urls (list): Ürün URL'leri listesi
+            batch_size (int): Bir seferde kaç ürün işlenecek
+        
+        Returns:
+            list: Güncellenmiş ürün bilgileri
+        """
+        results = []
+        
+        for i in range(0, len(product_urls), batch_size):
+            batch = product_urls[i:i+batch_size]
+            
+            # Batch'teki ürünleri paralel olarak işle
+            tasks = [self.update_product_details(url) for url in batch]
+            batch_results = await asyncio.gather(*tasks)
+            
+            results.extend(batch_results)
+            
+            # Rate limiting
+            await asyncio.sleep(1)
+        
+        return results
+
+# Kullanım
+async def main():
+    updater = ProductUpdater()
+    
+    product_urls = [
+        "https://www.hepsiburada.com/product/123",
+        "https://www.hepsiburada.com/product/456",
+    ]
+    
+    results = await updater.batch_update_products(product_urls)
+    
+    for result in results:
+        if result:
+            print(result)
+
+asyncio.run(main())
+```
+
+---
+
+## 6. Hata Yönetimi ve Retry Mekanizması
+
+### 6.1 Retry Dekoratörü
+
+```python
+# utils.py
+import asyncio
+import functools
+import time
+
+def retry(max_attempts=3, delay=2, backoff=2):
+    """
+    Başarısız işlemleri otomatik olarak retry et
+    
+    Args:
+        max_attempts (int): Maksimum deneme sayısı
+        delay (int): İlk deneme arasındaki bekleme (saniye)
+        backoff (float): Her deneme sonrası bekleme çarpanı
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            attempt = 0
+            current_delay = delay
+            
+            while attempt < max_attempts:
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    attempt += 1
+                    
+                    if attempt >= max_attempts:
+                        print(f"Maksimum deneme sayısına ulaşıldı: {e}")
+                        raise
+                    
+                    print(f"Deneme {attempt} başarısız. {current_delay} saniye sonra tekrar deneyelim...")
+                    await asyncio.sleep(current_delay)
+                    current_delay *= backoff
+            
+            return None
+        
+        return wrapper
+    return decorator
+
+# Kullanım
+@retry(max_attempts=3, delay=2, backoff=2)
+async def scrape_with_retry(url):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.goto(url)
+        content = await page.content()
+        await browser.close()
+        return content
+```
+
+---
+
+## 7. Veritabanı Entegrasyonu
+
+### 7.1 PostgreSQL ile Veri Saklama
+
+```python
+# database.py
+from sqlalchemy import create_engine, Column, String, Float, DateTime, Integer
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+
+DATABASE_URL = "postgresql://user:password@localhost/marketplace_db"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+class Product(Base):
+    __tablename__ = "products"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(500), unique=True)
+    price = Column(Float)
+    rating = Column(Float)
+    reviews = Column(Integer)
+    url = Column(String(1000))
+    category = Column(String(200))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ProductSnapshot(Base):
+    __tablename__ = "product_snapshots"
+    
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer)
+    price = Column(Float)
+    rating = Column(Float)
+    reviews = Column(Integer)
+    snapshot_date = Column(DateTime, default=datetime.utcnow)
+
+# Tablo oluştur
+Base.metadata.create_all(bind=engine)
+
+# Veri kaydetme
+def save_product(product_data):
+    session = SessionLocal()
+    try:
+        product = Product(**product_data)
+        session.add(product)
+        session.commit()
+        return product.id
+    except Exception as e:
+        session.rollback()
+        print(f"Kayıt hatası: {e}")
+        return None
+    finally:
+        session.close()
+
+# Veri güncelleme
+def update_product_snapshot(product_id, price, rating, reviews):
+    session = SessionLocal()
+    try:
+        snapshot = ProductSnapshot(
+            product_id=product_id,
+            price=price,
+            rating=rating,
+            reviews=reviews
+        )
+        session.add(snapshot)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        print(f"Snapshot kayıt hatası: {e}")
+    finally:
+        session.close()
+```
+
+---
+
+## 8. Tam Faz 1 Pipeline
+
+### 8.1 Ana Script
+
+```python
+# main.py
+import asyncio
+import logging
+from hepsiburada_scraper import HepsiburadaScraper
+from product_updater import ProductUpdater
+from database import save_product, update_product_snapshot
+from utils import retry
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class MarketplacePipeline:
+    def __init__(self):
+        self.scraper = HepsiburadaScraper()
+        self.updater = ProductUpdater()
+    
+    async def initial_scrape(self, keywords):
+        """
+        İlk veri toplama (Bright Data + Playwright)
+        Maliyet: ~$1.36 (bir kez)
+        """
+        logger.info(f"{len(keywords)} kelime için ilk scraping başlıyor...")
+        
+        all_products = []
+        
+        for keyword in keywords:
+            logger.info(f"Scraping: {keyword}")
+            
+            products = await self.scraper.scrape_search_results(keyword, max_products=100)
+            
+            for product in products:
+                product_id = save_product(product)
+                if product_id:
+                    all_products.append(product_id)
+            
+            # Rate limiting
+            await asyncio.sleep(2)
+        
+        logger.info(f"Toplam {len(all_products)} ürün kaydedildi")
+        return all_products
+    
+    async def daily_update(self, product_urls):
+        """
+        Günlük güncelleme (Playwright ücretsiz)
+        Maliyet: $0
+        """
+        logger.info(f"{len(product_urls)} ürün güncelleniyor...")
+        
+        updated = 0
+        failed = []
+        
+        for url in product_urls:
+            try:
+                result = await self.updater.update_product_details(url)
+                
+                if result:
+                    update_product_snapshot(
+                        product_id=url,
+                        price=result['price'],
+                        rating=result['rating'],
+                        reviews=result['reviews']
+                    )
+                    updated += 1
+                else:
+                    failed.append(url)
+            
+            except Exception as e:
+                logger.error(f"Güncelleme hatası {url}: {e}")
+                failed.append(url)
+        
+        logger.info(f"Güncelleme tamamlandı: {updated} başarılı, {len(failed)} başarısız")
+        return failed
+
+# Kullanım
+async def main():
+    pipeline = MarketplacePipeline()
+    
+    # Faz 1: İlk Veri Toplama
+    keywords = ["laptop", "telefon", "tablet", ...]  # 500 kelime
+    await pipeline.initial_scrape(keywords)
+    
+    # Faz 2: Günlük Güncelleme (cron job ile çalışacak)
+    # product_urls = get_all_product_urls()
+    # failed_urls = await pipeline.daily_update(product_urls)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
+## 9. Cron Job ile Otomatik Güncelleme
+
+### 9.1 APScheduler ile Planlama
+
+```python
+# scheduler.py
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import asyncio
+from main import MarketplacePipeline
+
+scheduler = BackgroundScheduler()
+pipeline = MarketplacePipeline()
+
+def daily_update_job():
+    """Günlük güncelleme işi"""
+    # Veritabanından tüm ürün URL'lerini al
+    product_urls = get_all_product_urls()
+    
+    # Async işlemi çalıştır
+    asyncio.run(pipeline.daily_update(product_urls))
+
+# Günlük 02:00'de çalışacak
+scheduler.add_job(
+    daily_update_job,
+    CronTrigger(hour=2, minute=0),
+    id='daily_update',
+    name='Günlük Ürün Güncelleme'
+)
+
+# Haftalık pazartesi 03:00'te başarısız ürünleri retry et
+scheduler.add_job(
+    weekly_retry_job,
+    CronTrigger(day_of_week='mon', hour=3, minute=0),
+    id='weekly_retry',
+    name='Haftalık Başarısız Ürün Retry'
+)
+
+scheduler.start()
+```
+
+---
+
+## 10. Özet: Faz 1 Entegrasyon
+
+| Bileşen | Teknoloji | Maliyet | Amaç |
+| :--- | :--- | :--- | :--- |
+| **İlk Veri** | Playwright + Bright Data | $1.36 | 50K ürün scrape |
+| **Günlük Güncelleme** | Playwright | $0 | Fiyat + yorum güncelle |
+| **Haftalık Retry** | Playwright + Bright Data | $5/ay | Başarısız ürünleri retry |
+| **Veritabanı** | PostgreSQL | Sabit | Veri saklama |
+| **Otomasyon** | APScheduler | $0 | Cron job'lar |
+
+**Toplam Aylık Maliyet:** $7-12/ay
+
+---
+
+## 11. Troubleshooting
+
+### Hata: 407 Auth Failed
+
+```
+Çözüm: Bright Data credentials'ını kontrol et
+- Account ID doğru mu? (hl_### formatında)
+- Zone name doğru mu?
+- Zone password doğru mu?
+```
+
+### Hata: Timeout
+
+```
+Çözüm: Bekleme süresini artır
+await page.goto(url, wait_until="networkidle", timeout=30000)
+```
+
+### Hata: Rate Limiting
+
+```
+Çözüm: Bekleme süresi ekle
+await asyncio.sleep(2)  # Her request arasında 2 saniye
+```
+
+---
+
+## 12. Kaynaklar
+
+- Bright Data Docs: https://docs.brightdata.com
+- Playwright Docs: https://playwright.dev/python/
+- BeautifulSoup Docs: https://www.crummy.com/software/BeautifulSoup/
+- SQLAlchemy Docs: https://docs.sqlalchemy.org/

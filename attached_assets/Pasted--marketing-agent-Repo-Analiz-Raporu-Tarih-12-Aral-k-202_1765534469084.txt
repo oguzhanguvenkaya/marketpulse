@@ -1,0 +1,128 @@
+# marketing_agent Repo Analiz Raporu
+
+**Tarih:** 12 Aralık 2024
+
+---
+
+## 1. Genel Bakış ve Mimari
+
+Proje, modern ve ölçeklenebilir bir teknoloji yığını üzerine kurulmuş: **FastAPI** (backend), **React/TypeScript** (frontend) ve **PostgreSQL** (veritabanı). Bu, sektör standardı ve doğru bir seçim.
+
+### ✅ Güçlü Yönler
+
+- **Modern Teknoloji Yığını:** FastAPI ve React/Vite, yüksek performans ve iyi bir geliştirici deneyimi sunar.
+- **Asenkron Altyapı:** `BackgroundTasks` (veya Celery) kullanımı, scraping gibi uzun süren işlemlerin kullanıcı arayüzünü bloklamasını engeller.
+- **İyi Veritabanı Modeli:** `Product`, `ProductSnapshot`, `ProductSeller` ve `ProductReview` tabloları, veri geçmişini ve ilişkilerini saklamak için çok iyi tasarlanmış.
+- **Ayrık Frontend/Backend:** Kodun iki ayrı klasörde olması, ekiplerin bağımsız çalışmasına olanak tanır.
+
+### ⚠️ Zayıf Yönler
+
+- **Monolitik Scraping Servisi:** `scraping.py` dosyası, projenin "Aşil topuğu". Tüm mantık tek bir class içinde, Bright Data ve Playwright'a sıkı sıkıya bağlı.
+- **Verimsiz Veri Toplama:** Ürünler `for` döngüsü içinde tek tek çekiliyor. Bu, 100 ürün için bile dakikalar sürecek ve sistemi tamamen yavaşlatacaktır.
+- **Veritabanı Mantığının Sızması:** Veritabanı işlemleri (ürün yaratma/güncelleme) doğrudan API rotaları (`routes.py`) içinde yapılıyor. Bu, kod tekrarına ve bakım zorluğuna yol açar.
+- **N+1 Query Problemi:** Ürün listesi çekilirken, her ürünün son snapshot'ı için ayrı bir veritabanı sorgusu atılıyor. Bu, 100 ürün için 101 sorgu demek ve çok verimsiz.
+
+---
+
+## 2. API Kullanımları
+
+| API | Kullanım Yeri | Analiz |
+|---|---|---|
+| **Bright Data** | `scraping.py` | ✅ **Çalışıyor ama...** Projeyi tek bir pahalı servise bağlıyor. Modüler değil. |
+| **OpenAI** | `llm_service.py` | ✅ **İyi başlangıç.** `gpt-4o-mini` modeli hardcoded, prompt'lar basit. Geliştirilebilir. |
+| **Kendi API'niz** | `routes.py` / `api.ts` | ✅ **Standart.** FastAPI rotaları ve frontend'de `axios` ile tüketimi doğru. |
+
+---
+
+## 3. Kritik İyileştirme Alanları ve Çözüm Önerileri
+
+### 1. Scraping Altyapısını Tamamen Değiştirin (En Yüksek Öncelik)
+
+**Sorun:** Mevcut `scraping.py` yavaş, pahalı ve bakımı zor.
+
+**Çözüm:** Daha önce detaylı planladığımız **Scrapy + Modüler Provider** mimarisine geçin.
+
+- **Scrapy:** `for` döngüsü yerine Scrapy'nin asenkron motorunu kullanarak **10-20 kat hız artışı** sağlayın.
+- **Modüler Provider:** `BaseProxyProvider` arayüzü ile Bright Data, ScraperAPI (HTTP) ve ScraperAPI (Proxy) arasında `.env` dosyasından tek satırla geçiş yapın.
+- **Playwright'ı Sadece Gerektiğinde Kullanın:** Yorumlar ve diğer satıcılar gibi dinamik içerikler için `meta={"playwright": True}` flag'i ile Playwright'ı sadece gerektiğinde devreye sokun.
+
+### 2. Veritabanı Mantığını Merkezileştirin
+
+**Sorun:** `routes.py` içinde dağınık halde bulunan veritabanı kodları.
+
+**Çözüm:** Bir **Repository Pattern** uygulayın.
+
+- `backend/app/db/repository.py` adında bir dosya oluşturun.
+- `create_or_update_product_with_snapshot` gibi fonksiyonlar yazın.
+- `routes.py` içindeki tüm `db.add`, `db.commit`, `db.query` gibi kodları bu repository fonksiyonlarına taşıyın.
+
+**Avantaj:** Kod tekrarı önlenir, test etmesi kolaylaşır, API rotaları temiz kalır.
+
+### 3. N+1 Query Problemini Çözün
+
+**Sorun:** `/products` endpoint'i yavaş çalışacak.
+
+**Çözüm:** Tek bir SQL sorgusu ile hem ürünleri hem de en son snapshot'larını çekin.
+
+**SQL Örneği (SQLAlchemy ile):**
+```python
+# SQLAlchemy'de Window Function kullanarak tek sorguda çözün
+from sqlalchemy import func
+
+subquery = db.query(
+    ProductSnapshot,
+    func.row_number().over(
+        partition_by=ProductSnapshot.product_id,
+        order_by=ProductSnapshot.snapshot_date.desc()
+    ).label('row_num')
+).subquery()
+
+query = db.query(Product, subquery.c).join(
+    subquery, Product.id == subquery.c.product_id
+).filter(subquery.c.row_num == 1)
+
+# Bu sorgu size her ürünün en son snapshot'ını tek seferde verir.
+```
+
+### 4. Arka Plan Görevleri için Celery Kullanın
+
+**Sorun:** `requirements.txt`'de Celery var ama `BackgroundTasks` kullanılıyor.
+
+**Çözüm:** Scraping gibi ağır ve uzun süren görevler için **Celery** kullanın. `BackgroundTasks` sadece e-posta göndermek gibi hızlı işler için uygundur.
+
+- `tasks.py` dosyasını Celery task'ları ile doldurun.
+- `run_scraping_background` fonksiyonunu bir Celery task'ı yapın.
+- API rotasından `my_task.delay(task_id)` ile çağırın.
+
+**Avantaj:** Daha sağlam, ölçeklenebilir ve izlenebilir (Flower gibi araçlarla) bir görev kuyruğu sistemi.
+
+### 5. LLM Servisini Geliştirin
+
+**Sorun:** `llm_service.py` basit ve potansiyelini tam kullanmıyor.
+
+**Çözüm:**
+- **Modeli Config'e Taşıyın:** `OPENAI_MODEL_NAME` olarak `.env` dosyasına ekleyin.
+- **Daha Gelişmiş Prompt'lar:** Reklam metni oluşturma, kategori önerme, fiyat optimizasyonu gibi spesifik görevler için ayrı prompt'lar ve fonksiyonlar yazın.
+- **LangChain veya LlamaIndex Entegrasyonu:** Gelecekte, daha karmaşık RAG (Retrieval-Augmented Generation) senaryoları için bu kütüphaneleri entegre etmeyi düşünün.
+
+---
+
+## 4. Yol Haritası Önerisi
+
+**Faz 1 (0-2 Hafta) - Temeli Sağlamlaştırın:**
+1.  **Scrapy + Modüler Provider** mimarisini implemente edin. (En kritik adım)
+2.  Veritabanı mantığını **Repository Pattern** ile merkezileştirin.
+
+**Faz 2 (2-4 Hafta) - Performans ve Ölçeklenebilirlik:**
+3.  **N+1 Query** problemini çözün.
+4.  Arka plan görevlerini **Celery**'ye taşıyın.
+
+**Faz 3 (4+ Hafta) - Akıllı Özellikler:**
+5.  **LLM Servisi**'ni geliştirin, yeni yetenekler ekleyin.
+6.  Frontend'de daha detaylı veri görselleştirmeleri (grafikler, tablolar) ekleyin.
+
+---
+
+## 5. Sonuç
+
+Projenin temeli çok sağlam, ancak **scraping motoru** şu anki haliyle projenin en zayıf halkası ve büyümenizin önündeki en büyük engel. Yukarıdaki yol haritasını izleyerek, özellikle **ilk fazdaki adımları atarak**, uygulamanızı hem teknik olarak çok daha üst bir seviyeye taşıyabilir hem de uzun vadede bakım ve geliştirme maliyetlerinizi ciddi ölçüde düşürebilirsiniz.

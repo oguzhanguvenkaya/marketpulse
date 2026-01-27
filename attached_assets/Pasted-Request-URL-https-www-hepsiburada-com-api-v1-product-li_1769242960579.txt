@@ -1,0 +1,104 @@
+Request URL
+https://www.hepsiburada.com/api/v1/product/listings/HBCV000047OEFF
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+2.17.226.43:443
+Referrer Policy
+no-referrer-when-downgrade
+access-control-allow-credentials
+true
+cache-control
+max-age=0, no-cache, no-store
+content-encoding
+br
+content-length
+2311
+content-type
+application/json; charset=utf-8
+country-code
+TR
+date
+Sat, 24 Jan 2026 08:21:11 GMT
+expires
+Sat, 24 Jan 2026 08:21:11 GMT
+hb-age
+47
+hb_adult
+hit-time
+Sat, 24 Jan 2026 08:20:24 GMT
+long-location
+pragma
+no-cache
+server
+hepsiburada
+server-timing
+cdn-cache; desc=MISS
+server-timing
+edge; dur=101
+server-timing
+origin; dur=5
+server-timing
+ak_p; desc="1769242871111_3283071303_570831343_10665_36890_19_0_219";dur=1
+set-cookie
+set-cookie
+hbCountryCode=TR; Secure;
+statsig_brand
+statsig_category
+statsig_merchant
+statsig_pdp
+statsig_searchresults
+statsig_taggedproduct
+strict-transport-security
+max-age=31536000
+vha6-origin
+av-sf-varnish-04
+vhit
+1
+x-content-type-options
+nosniff
+x-content-type-options
+nosniff
+x-download-options
+noopen
+x-varnish-cache-control
+x-xss-protection
+1; mode=block
+x-xss-protection
+1; mode=block
+:authority
+www.hepsiburada.com
+:method
+GET
+:path
+/api/v1/product/listings/HBCV000047OEFF
+:scheme
+https
+accept
+application/json, text/plain, */*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7
+cookie
+hbCountryCode=TR; hbCountryCode=TR; hbCountryCode=TR; _gcl_au=1.1.835603513.1769242661; leo=%7B%22anon_id%22%3A%22019bef14-9054-77de-b647-731afb0bbadb%22%7D; _gid=GA1.2.285037527.1769242661; _pin_unauth=dWlkPVpHTTVOR0l5T0dZdE1qTmlNUzAwTWpjM0xXRmtZemt0TlRrMk9UTTBZekppTmpoag; hbus_anonymousId=e479742f-7a01-4415-ab31-805bb814e7bf; _p2s_uvi=49492361.9354822648600148.1769242662746; _tt_enable_cookie=1; _ttp=01KFQH96K18V1ZH2ZKCPAKTDK0_.tt.1; hbCountryCode=TR; _gcl_aw=GCL.1769242784.Cj0KCQiA-NHLBhDSARIsAIhe9X1LPXj4bEFk8cmcDaqZLLxKeVpT_2KKFyD5lPay1pYoHKp9WzilqEcaAsYEEALw_wcB; _gcl_gs=2.1.k1$i1769242783$u145019053; useinternal=true; _gac_UA-834379-1=1.1769242784.Cj0KCQiA-NHLBhDSARIsAIhe9X1LPXj4bEFk8cmcDaqZLLxKeVpT_2KKFyD5lPay1pYoHKp9WzilqEcaAsYEEALw_wcB; wt3_sid=%3B289941511384204; __gads=ID=0002c41be437a1cd:T=1769242785:RT=1769242785:S=ALNI_MbdEK4YtOjtBGBzF_Cb_w6e9zRT2g; __gpi=UID=00001330239a71d8:T=1769242785:RT=1769242785:S=ALNI_Ma0VtyHMDElUyPpMqqIRPxTvQ3osw; __eoi=ID=556faf14f514fd9e:T=1769242785:RT=1769242785:S=AA-AfjYYySx8OVVcpw9fKM1fK0hA; _abck=8C998693B74505AA42B19EB97BD47A01~0~YAAQR7Gvw0+JWrubAQAAD5YW7w9rbPFER705yVnylAxJ2QvMAfHnRRaHJhzvKGNa89zZTB4uTQ8wMxQers6s3pO7YhWMSd0w2+1s6eN9E7jpA4AD0Wp9DgpGkNv7bl+8oq1S4uJ3JjUzqumaemcNROwpJs0gGf/pQbbyuKta5F47KuINYpegtpbqV50/oXklR3kVLaYwrRrU1nhIa6Ha0LvSTyDDis5ZU8QN5rzOKDinS+ru5EAt5fS05ddZnM9qAnhIOA3r7HbiCXiJCLPwOykDro1Rz+kiQZ/BD5gEolJZsejueNTYrN1ZMrMsZkoSUuztKrEsp8yZVwRQEILwUKdi/Xuu0X/qkCzXhZMggvD3TbiDvoN3v/5RzeQlv/BLwGsISFujzCADL4bmCPWL7e8xAvtH/oxy5GrnHu4lIuy+lGYkOAf+jTHJojgL+i9A2HH8BtpPDDtpqUYXIqjFO+luvXeUBphcicLJvTvsh4hfijLAakM1fTfcJ9BeBJ12D5/pJvR2Xfv4jTL0j1rgzeoOcOirO4g8D25vz7+G0ra2pPBfFJR/TdfvLlxdxCBxFdKuJKBwy1KHItEgvfidcyRGTN9p1Ec8f136H59Ua0NQ+wl9v2sjww9wpPcN0d3xRXF44uifebMb~-1~-1~-1~AAQAAAAF%2f%2f%2f%2f%2f8EMDDBDppeBj0T60sb3FdJc5FTDbJ7B4C4aFnnCDUR7vYj4K1w4SgxsVEKPLu1DPBGSKplRFl%2fwrYuaXhwcZU9D9X12FVlKKnzR~-1; _hjSession_216130=eyJpZCI6Ijg1NmUxMzQ0LTU3ZDMtNDQxNi1iMjYzLTlkY2MwYTg1M2E2ZCIsImMiOjE3NjkyNDI3OTQ1MzksInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MX0=; OptanonAlertBoxClosed=2026-01-24T08:19:54.631Z; _p2s_cc=grant; _fbp=fb.1.1769242795675.125207114511632488; _hjSessionUser_216130=eyJpZCI6IjU2NTI5MGM4LTkwOTYtNWZkNy1iMTdhLTNkYWVmNWQ1ZWJiMCIsImNyZWF0ZWQiOjE3NjkyNDI3OTQ1MzksImV4aXN0aW5nIjp0cnVlfQ==; bm_sz=012BD2576B4BB24A55F57C1239C9D5C8~YAAQR7Gvw/2LWrubAQAAPCAX7x4xGpNC2f767WPtF/T7Iy1EEbYaeed3ahSDRBOSZYpbnayj0tuCWL5kBjmJUm7gTGd/FyoKJWP4d33LzjywdQYq87iE7T6AzzGmu+ZE7TNyyDH/O7ZzrkRu6sxoPMkOUgeiaIMwDVaHxQ9kpC8D1CYzggRPrmNvC4HZxlGO2ZSz5Kod65uQQQZn2p2p9iiDzNxoOeX5wXDuDkJtK5RR7tA10PDmRgPDMdnijqZBEusaCDKyQpE6Fq8FvsZeg5xYhilUufZCS9LhvRjFrTP0bMXdOEcoBc3mG/udyiqi+j3ENwg4Cv7DgSKl09VI/8ab6k5/6BoaeFd9bKVIu0iD7qv0jmwLIfjY2Eh47QXvmWlsruzqVnY3ywpJirsuHWaU/XUtRoRG+rJCX/UMzGAgmCop5u+S4emM1pRd3upZC0p1pkoGPJEKu9916S5pCZiKK8Zt+1i2Vs3yRhEfh9l/v5CJsRM=~4404023~3752257; RT="z=1&dm=hepsiburada.com&si=hdk83fcsr4c&ss=mks1h0rj&sl=0&tt=0"; __rtbh.lid=%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22ZoC2zkoajo3f0UnWwcRM%22%2C%22expiryDate%22%3A%222027-01-24T08%3A20%3A29.264Z%22%7D; _ga=GA1.2.1363462006.1769242661; FCCDCF=%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%2203fc6972-8990-4465-8d8f-338692310648%5C%22%2C%5B1769242661%2C133000000%5D%5D%22%5D%5D%5D; __rtbh.uid=%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%22e479742f-7a01-4415-ab31-805bb814e7bf%22%2C%22expiryDate%22%3A%222027-01-24T08%3A20%3A30.071Z%22%7D; wt3_eid=%3B289941511384204%7C2176924278500041806%232176924283000964215; OptanonConsent=isGpcEnabled=0&datestamp=Sat+Jan+24+2026+11%3A20%3A30+GMT%2B0300+(GMT%2B03%3A00)&version=6.38.0&isIABGlobal=false&hosts=&consentId=e15d2112-cf83-468f-be70-e036da30c5de&interactionCount=1&landingPath=NotLandingPage&groups=C0004%3A1%2CC0001%3A1%2CC0003%3A1%2CC0002%3A1&AwaitingReconsent=false&geolocation=TR%3B35; cto_bundle=w_Wvx181M0pWS0NZRzBoMjZFU3U1VWw2TThpRmVzTCUyQnlwb05MVk9vYzJKZnRzV3dBUWhiQ3Z0NnNZd01ObGlZczklMkZtT2tERlVaVVp5NSUyRm5rUjUwcDFlOEwyQUlrcXhmMU9KREcwZmpMUm5HY1V6WnFrRUF1enZpNXNiN3laMDJCd2J1Y20lMkI2RWk3NnczWXZ2SGdmSmhtRFVMdyUzRCUzRA; FCNEC=%5B%5B%22AKsRol9J7AZ1rut68cEj00P1k7Y5G_3MMY_dHZ0KFPRCAkEBS4w7T-eDK9RQoK3N22yWYF7zZx9sDNSbpKmwCKS7GOxZzxKdoERrNXogZ5xV3oAE29_HWVVAHeT_aPRQN32iz-r25AResw72yFvajrTRm1NClWN8Xg%3D%3D%22%5D%5D; _ga_44CSPTX731=GS2.1.s1769242661$o1$g1$t1769242869$j51$l0$h0; ttcsid=1769242794882::uBYa47EtyGsX4Uyyq1m_.1.1769242870923.0; ttcsid_C3VQBK9U9OSLU1GC7G7G=1769242794881::MA1raNh8PDNQJnTOSvJ1.1.1769242870923.1; hbus_sessionId=0a69c6c2-fc6a-4286-a2e0-03175336ac1b%7C1769244670956
+priority
+u=1, i
+referer
+https://www.hepsiburada.com/fra-ber-bersolux-cilali-kopuklu-manuel-arac-yikama-sampuani-1000-ml-p-HBCV000047OEFF?magaza=MTS%20Kimya&
+sec-ch-ua
+"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
