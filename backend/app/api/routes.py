@@ -1159,3 +1159,247 @@ async def fetch_single_product(
         return {"success": True, "message": f"{product.sku} için satıcı verileri güncellendi", "platform": product.platform}
     else:
         raise HTTPException(status_code=500, detail="Satıcı verileri çekilemedi")
+
+
+@router.get("/sellers")
+async def get_sellers(
+    platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
+    db: Session = Depends(get_db)
+):
+    """Tüm satıcıları listele - her satıcının ürün sayısı ve price alert sayısı ile"""
+    from sqlalchemy import func, distinct, case
+    
+    products = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform,
+        MonitoredProduct.is_active == True
+    ).all()
+    
+    product_ids = [p.id for p in products]
+    product_thresholds = {str(p.id): float(p.threshold_price) if p.threshold_price else None for p in products}
+    
+    if not product_ids:
+        return {"sellers": [], "total": 0}
+    
+    latest_snapshots_subq = db.query(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id,
+        func.max(SellerSnapshot.snapshot_date).label('max_date')
+    ).filter(
+        SellerSnapshot.monitored_product_id.in_(product_ids)
+    ).group_by(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id
+    ).subquery()
+    
+    snapshots = db.query(SellerSnapshot).join(
+        latest_snapshots_subq,
+        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
+        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
+        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
+    ).all()
+    
+    sellers_data = {}
+    for s in snapshots:
+        if s.merchant_id not in sellers_data:
+            sellers_data[s.merchant_id] = {
+                'merchant_id': s.merchant_id,
+                'merchant_name': s.merchant_name,
+                'merchant_logo': s.merchant_logo,
+                'merchant_url_postfix': s.merchant_url_postfix,
+                'merchant_rating': float(s.merchant_rating) if s.merchant_rating else None,
+                'product_count': 0,
+                'price_alert_count': 0,
+                'products': []
+            }
+        
+        sellers_data[s.merchant_id]['product_count'] += 1
+        
+        threshold = product_thresholds.get(str(s.monitored_product_id))
+        seller_price = float(s.price) if s.price else None
+        if threshold and seller_price and seller_price < threshold:
+            sellers_data[s.merchant_id]['price_alert_count'] += 1
+    
+    sellers_list = sorted(
+        sellers_data.values(), 
+        key=lambda x: x['price_alert_count'], 
+        reverse=True
+    )
+    
+    return {"sellers": sellers_list, "total": len(sellers_list)}
+
+
+@router.get("/sellers/{merchant_id}/products")
+async def get_seller_products(
+    merchant_id: str,
+    platform: str = Query("hepsiburada", description="Platform"),
+    price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri göster"),
+    db: Session = Depends(get_db)
+):
+    """Satıcının sattığı ürünleri listele - price alert filtresi ile"""
+    from sqlalchemy import func
+    
+    products = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform,
+        MonitoredProduct.is_active == True
+    ).all()
+    
+    product_ids = [p.id for p in products]
+    product_map = {str(p.id): p for p in products}
+    
+    if not product_ids:
+        return {"products": [], "total": 0, "merchant_name": ""}
+    
+    latest_snapshots_subq = db.query(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id,
+        func.max(SellerSnapshot.snapshot_date).label('max_date')
+    ).filter(
+        SellerSnapshot.monitored_product_id.in_(product_ids),
+        SellerSnapshot.merchant_id == merchant_id
+    ).group_by(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id
+    ).subquery()
+    
+    snapshots = db.query(SellerSnapshot).join(
+        latest_snapshots_subq,
+        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
+        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
+        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
+    ).all()
+    
+    result = []
+    merchant_name = ""
+    
+    for s in snapshots:
+        if not merchant_name:
+            merchant_name = s.merchant_name
+        
+        product = product_map.get(str(s.monitored_product_id))
+        if not product:
+            continue
+        
+        threshold = float(product.threshold_price) if product.threshold_price else None
+        seller_price = float(s.price) if s.price else None
+        has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+        
+        if price_alert_only and not has_alert:
+            continue
+        
+        result.append({
+            "product_id": str(product.id),
+            "sku": product.sku,
+            "barcode": product.barcode,
+            "product_name": product.product_name,
+            "product_url": product.product_url,
+            "brand": product.brand,
+            "seller_stock_code": product.seller_stock_code,
+            "image_url": product.image_url,
+            "threshold_price": threshold,
+            "seller_price": seller_price,
+            "original_price": float(s.original_price) if s.original_price else None,
+            "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+            "campaigns": s.campaigns if s.campaigns else [],
+            "price_alert": has_alert,
+            "price_difference": round(threshold - seller_price, 2) if threshold and seller_price else None,
+            "snapshot_date": s.snapshot_date.isoformat()
+        })
+    
+    result.sort(key=lambda x: (not x['price_alert'], x['product_name'] or ''))
+    
+    return {"products": result, "total": len(result), "merchant_name": merchant_name}
+
+
+@router.get("/sellers/{merchant_id}/export")
+async def export_seller_products(
+    merchant_id: str,
+    platform: str = Query("hepsiburada", description="Platform"),
+    price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri indir"),
+    db: Session = Depends(get_db)
+):
+    """Satıcının ürünlerini CSV olarak indir"""
+    from fastapi.responses import StreamingResponse
+    import csv
+    import io
+    from sqlalchemy import func
+    
+    products = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform,
+        MonitoredProduct.is_active == True
+    ).all()
+    
+    product_ids = [p.id for p in products]
+    product_map = {str(p.id): p for p in products}
+    
+    latest_snapshots_subq = db.query(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id,
+        func.max(SellerSnapshot.snapshot_date).label('max_date')
+    ).filter(
+        SellerSnapshot.monitored_product_id.in_(product_ids),
+        SellerSnapshot.merchant_id == merchant_id
+    ).group_by(
+        SellerSnapshot.merchant_id,
+        SellerSnapshot.monitored_product_id
+    ).subquery()
+    
+    snapshots = db.query(SellerSnapshot).join(
+        latest_snapshots_subq,
+        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
+        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
+        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
+    ).all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow([
+        'SKU', 'Barcode', 'Product Name', 'Brand', 'Stock Code',
+        'Product URL', 'Threshold Price', 'Seller Price', 
+        'Price Difference', 'Price Alert', 'Campaigns', 'Snapshot Date'
+    ])
+    
+    merchant_name = ""
+    for s in snapshots:
+        if not merchant_name:
+            merchant_name = s.merchant_name
+            
+        product = product_map.get(str(s.monitored_product_id))
+        if not product:
+            continue
+        
+        threshold = float(product.threshold_price) if product.threshold_price else None
+        seller_price = float(s.price) if s.price else None
+        has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+        
+        if price_alert_only and not has_alert:
+            continue
+        
+        price_diff = round(threshold - seller_price, 2) if threshold and seller_price else None
+        campaigns_str = ", ".join(s.campaigns) if s.campaigns else ""
+        
+        writer.writerow([
+            product.sku or '',
+            product.barcode or '',
+            product.product_name or '',
+            product.brand or '',
+            product.seller_stock_code or '',
+            product.product_url or '',
+            threshold or '',
+            seller_price or '',
+            price_diff or '',
+            'YES' if has_alert else 'NO',
+            campaigns_str,
+            s.snapshot_date.isoformat()
+        ])
+    
+    output.seek(0)
+    
+    safe_merchant_name = "".join(c for c in merchant_name if c.isalnum() or c in (' ', '-', '_')).strip()
+    filename = f"{safe_merchant_name}_products{'_alerts' if price_alert_only else ''}.csv"
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

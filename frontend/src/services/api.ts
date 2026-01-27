@@ -339,4 +339,74 @@ export const exportPriceMonitorData = async (
   window.URL.revokeObjectURL(url);
 };
 
+export interface SellerInfo {
+  merchant_id: string;
+  merchant_name: string;
+  merchant_logo?: string;
+  merchant_url_postfix?: string;
+  merchant_rating?: number;
+  product_count: number;
+  price_alert_count: number;
+}
+
+export interface SellerProduct {
+  product_id: string;
+  sku?: string;
+  barcode?: string;
+  product_name?: string;
+  product_url?: string;
+  brand?: string;
+  seller_stock_code?: string;
+  image_url?: string;
+  threshold_price?: number;
+  seller_price?: number;
+  original_price?: number;
+  campaign_price?: number;
+  campaigns?: string[];
+  price_alert: boolean;
+  price_difference?: number;
+  snapshot_date: string;
+}
+
+export const getSellers = async (platform: string): Promise<{ sellers: SellerInfo[]; total: number }> => {
+  const response = await api.get(`/sellers?platform=${platform}`);
+  return response.data;
+};
+
+export const getSellerProducts = async (
+  merchantId: string,
+  platform: string,
+  priceAlertOnly: boolean = false
+): Promise<{ products: SellerProduct[]; total: number; merchant_name: string }> => {
+  const response = await api.get(`/sellers/${merchantId}/products?platform=${platform}&price_alert_only=${priceAlertOnly}`);
+  return response.data;
+};
+
+export const exportSellerProducts = async (
+  merchantId: string,
+  platform: string,
+  priceAlertOnly: boolean = false
+): Promise<void> => {
+  const response = await api.get(
+    `/sellers/${merchantId}/export?platform=${platform}&price_alert_only=${priceAlertOnly}`,
+    { responseType: 'blob' }
+  );
+  
+  const contentDisposition = response.headers['content-disposition'];
+  let filename = 'seller_products.csv';
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename=(.+)/);
+    if (match) filename = match[1];
+  }
+  
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 export default api;
