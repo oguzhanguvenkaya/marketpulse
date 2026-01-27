@@ -32,6 +32,10 @@ export default function PriceMonitor() {
   const [fetchStatus, setFetchStatus] = useState<string>('');
   const [fetchProgress, setFetchProgress] = useState({ completed: 0, total: 0 });
   const [exportLoading, setExportLoading] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
+
+  const activeProducts = products.filter(p => p.product_url && p.product_url.trim() !== '');
+  const inactiveProducts = products.filter(p => !p.product_url || p.product_url.trim() === '');
 
   useEffect(() => {
     loadProducts();
@@ -270,50 +274,95 @@ export default function PriceMonitor() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            İzlenen Ürünler - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'} ({products.length})
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">
+              İzlenen Ürünler - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'}
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowInactive(false)}
+                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
+                  !showInactive
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Aktif ({activeProducts.length})
+              </button>
+              <button
+                onClick={() => setShowInactive(true)}
+                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
+                  showInactive
+                    ? 'bg-gray-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Pasif ({inactiveProducts.length})
+              </button>
+            </div>
+          </div>
           {loading ? (
             <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
-          ) : products.length === 0 ? (
+          ) : (showInactive ? inactiveProducts : activeProducts).length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              Henüz izlenen ürün yok. SKU eklemek için yukarıdaki butonu kullanın.
+              {showInactive 
+                ? 'Pasif ürün bulunmuyor.' 
+                : 'Henüz izlenen ürün yok. SKU eklemek için yukarıdaki butonu kullanın.'}
             </div>
           ) : (
             <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {products.map((product) => (
+              {(showInactive ? inactiveProducts : activeProducts).map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product)}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedProduct?.id === product.id
                       ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      : showInactive 
+                        ? 'border-gray-300 bg-gray-100 hover:bg-gray-200' 
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
+                      {showInactive && (
+                        <span className="inline-block bg-gray-500 text-white text-xs px-2 py-0.5 rounded mb-1">
+                          Pasif
+                        </span>
+                      )}
                       {product.product_name ? (
-                        <a
-                          href={getProductUrl(product)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline truncate block"
-                          title={product.product_name}
-                        >
-                          {product.product_name}
-                        </a>
+                        showInactive ? (
+                          <span className="font-medium text-sm text-gray-500 truncate block" title={product.product_name}>
+                            {product.product_name}
+                          </span>
+                        ) : (
+                          <a
+                            href={getProductUrl(product)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline truncate block"
+                            title={product.product_name}
+                          >
+                            {product.product_name}
+                          </a>
+                        )
                       ) : (
-                        <a
-                          href={getProductUrl(product)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
-                        >
-                          {product.sku}
-                        </a>
+                        showInactive ? (
+                          <span className="font-medium text-sm text-gray-500">
+                            {product.sku}
+                          </span>
+                        ) : (
+                          <a
+                            href={getProductUrl(product)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                          >
+                            {product.sku}
+                          </a>
+                        )
                       )}
                       {product.product_name && (
                         <div className="text-xs text-gray-500">
