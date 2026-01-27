@@ -1,10 +1,13 @@
 import os
+import re
 import ssl
 import random
 import asyncio
 import aiohttp
+import urllib.parse
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
@@ -31,9 +34,121 @@ class PriceMonitorService:
             return match.group(1)
         return None
     
+    async def fetch_seller_campaign_price(self, product_url: str, seller_name: str) -> Optional[Dict[str, Any]]:
+        """Satıcıya özel ürün sayfasından kampanyalı fiyatı kazı
+        
+        URL format: {product_url}?magaza={url_encoded_seller_name}
+        Hedef element: data-test-id="checkout-price" veya data-test-id="price"
+        """
+        encoded_seller = urllib.parse.quote(seller_name, safe='')
+        seller_url = f"{product_url}?magaza={encoded_seller}"
+        
+        encoded_url = urllib.parse.quote(seller_url, safe='')
+        api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
+        
+        headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+        }
+        
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context)
+        
+        try:
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.get(
+                    api_url,
+                    headers=headers,
+                    timeout=aiohttp.ClientTimeout(total=60)
+                ) as resp:
+                    if resp.status == 200:
+                        html = await resp.text()
+                        return self._parse_campaign_price_from_html(html, seller_name)
+                    else:
+                        print(f"Campaign price fetch error for {seller_name}: status {resp.status}")
+                        return None
+        except Exception as e:
+            print(f"Error fetching campaign price for {seller_name}: {e}")
+            return None
+    
+    def _parse_campaign_price_from_html(self, html: str, seller_name: str) -> Optional[Dict[str, Any]]:
+        """HTML'den kampanyalı fiyatı parse et
+        
+        Hedef elementler:
+        - data-test-id="checkout-price" -> Sepete özel fiyat
+        - data-test-id="prev-price" -> Orijinal fiyat
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        result = {
+            'campaign_price': None,
+            'original_price': None,
+            'has_campaign': False
+        }
+        
+        checkout_price_div = soup.find('div', {'data-test-id': 'checkout-price'})
+        if checkout_price_div:
+            price_divs = checkout_price_div.find_all('div')
+            for div in price_divs:
+                text = div.get_text(strip=True)
+                if 'TL' in text and not 'özel' in text.lower():
+                    price = self._parse_price_text(text)
+                    if price:
+                        result['campaign_price'] = price
+                        result['has_campaign'] = True
+                        break
+        
+        prev_price_div = soup.find('div', {'data-test-id': 'prev-price'})
+        if prev_price_div:
+            price_span = prev_price_div.find('span')
+            if price_span:
+                text = price_span.get_text(strip=True)
+                price = self._parse_price_text(text)
+                if price:
+                    result['original_price'] = price
+        
+        if not result['campaign_price']:
+            price_div = soup.find('div', {'data-test-id': 'price'})
+            if price_div:
+                price_spans = price_div.find_all('span')
+                for span in price_spans:
+                    text = span.get_text(strip=True)
+                    if 'TL' in text:
+                        price = self._parse_price_text(text)
+                        if price:
+                            result['campaign_price'] = price
+                            result['has_campaign'] = True
+                            break
+        
+        if result['campaign_price']:
+            print(f"Campaign price found for {seller_name}: {result['campaign_price']} TL (original: {result['original_price']} TL)")
+            return result
+        
+        return None
+    
+    def _parse_price_text(self, text: str) -> Optional[float]:
+        """Fiyat metnini float'a çevir: '1.139,05 TL' -> 1139.05"""
+        try:
+            clean = re.sub(r'[^\d.,]', '', text)
+            clean = clean.replace('.', '').replace(',', '.')
+            return float(clean)
+        except:
+            return None
+    
+    def _has_campaign_in_tags(self, tag_list: List[Dict[str, Any]]) -> bool:
+        """tagList'te indirim veya kampanya var mı kontrol et"""
+        keywords = ['indirim', 'kampanya', 'sepet']
+        for tag in tag_list:
+            tag_id = tag.get('tagId', '').lower()
+            if any(kw in tag_id for kw in keywords):
+                return True
+        return False
+
     async def fetch_listings(self, sku: str) -> Optional[Dict[str, Any]]:
         """Tek bir SKU için listings API'sinden satıcı verilerini çek - ScraperAPI HTTP API"""
-        import urllib.parse
         
         target_url = self.LISTINGS_API_URL.format(sku=sku)
         encoded_url = urllib.parse.quote(target_url, safe='')
@@ -143,6 +258,8 @@ class PriceMonitorService:
                 seller['merchant_rating_count'] = rating_summary.get('ratingQuantity')
             
             tag_list = listing.get('tagList', [])
+            seller['raw_tag_list'] = tag_list
+            seller['has_campaign_tag'] = self._has_campaign_in_tags(tag_list)
             if tag_list:
                 seller['campaigns'] = self._parse_campaign_tags(tag_list)
             else:
@@ -178,6 +295,24 @@ class PriceMonitorService:
             product.is_active = True
             print(f"SKU {sku} reactivated - sellers found")
         
+        campaign_sellers = [s for s in sellers if s.get('has_campaign_tag', False)]
+        if campaign_sellers and product.product_url:
+            print(f"Found {len(campaign_sellers)} sellers with campaigns - fetching real prices...")
+            for seller in campaign_sellers:
+                try:
+                    campaign_data = await self.fetch_seller_campaign_price(
+                        product.product_url, 
+                        seller['merchant_name']
+                    )
+                    if campaign_data and campaign_data.get('campaign_price'):
+                        seller['campaign_price'] = campaign_data['campaign_price']
+                        seller['original_price_from_page'] = campaign_data.get('original_price')
+                        seller['price'] = campaign_data['campaign_price']
+                        print(f"Updated {seller['merchant_name']} price to campaign price: {campaign_data['campaign_price']} TL")
+                    await asyncio.sleep(0.5)
+                except Exception as e:
+                    print(f"Error fetching campaign price for {seller['merchant_name']}: {e}")
+        
         for seller in sellers:
             snapshot = SellerSnapshot(
                 monitored_product_id=product.id,
@@ -198,6 +333,7 @@ class PriceMonitorService:
                 fast_shipping=seller.get('fast_shipping', False),
                 is_fulfilled_by_hb=seller.get('is_fulfilled_by_hb', False),
                 campaigns=seller.get('campaigns', []),
+                campaign_price=seller.get('campaign_price'),
                 snapshot_date=datetime.utcnow()
             )
             db.add(snapshot)

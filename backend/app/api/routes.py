@@ -677,6 +677,7 @@ class SellerSnapshotResponse(BaseModel):
     price_alert: bool = False  # Eşik fiyatın altında mı
     is_fulfilled_by_hb: bool = False
     campaigns: List[str] = []  # Kampanya ve indirim etiketleri
+    campaign_price: Optional[float] = None  # Sepete özel/kampanyalı fiyat
     snapshot_date: str
     
     class Config:
@@ -1012,6 +1013,7 @@ async def get_monitored_product_detail(
                 "fast_shipping": s.fast_shipping,
                 "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
                 "campaigns": s.campaigns if s.campaigns else [],
+                "campaign_price": float(s.campaign_price) if s.campaign_price else None,
                 "snapshot_date": s.snapshot_date.isoformat(),
                 "price_alert": has_alert
             })

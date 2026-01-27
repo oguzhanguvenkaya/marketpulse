@@ -220,6 +220,7 @@ export interface SellerSnapshot {
   fast_shipping: boolean;
   is_fulfilled_by_hb: boolean;
   campaigns?: string[];
+  campaign_price?: number;
   snapshot_date: string;
   price_alert: boolean;
 }

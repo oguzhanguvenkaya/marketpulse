@@ -619,8 +619,13 @@ export default function PriceMonitor() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-lg text-white">
+                          <div className="font-bold text-lg text-white flex items-center gap-2 justify-end">
                             {formatPrice(seller.price)}
+                            {seller.campaign_price && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
+                                Sepete Özel
+                              </span>
+                            )}
                           </div>
                           {seller.original_price && seller.original_price !== seller.price && (
                             <div className="text-xs text-neutral-400 line-through">
