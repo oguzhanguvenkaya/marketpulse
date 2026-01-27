@@ -564,12 +564,12 @@ export default function PriceMonitor() {
                 return (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-dark-500/50 ${
+                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-dark-400/60 ${
                     seller.price_alert
-                      ? 'bg-danger/10'
+                      ? 'bg-danger/15'
                       : seller.buybox_order === 1
-                        ? 'bg-success/10'
-                        : 'bg-dark-600/80'
+                        ? 'bg-success/15'
+                        : 'bg-dark-500'
                   }`}
                 >
                   <div className="flex items-start gap-3">
