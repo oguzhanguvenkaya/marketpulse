@@ -631,6 +631,9 @@ class MonitoredProductInput(BaseModel):
     productName: Optional[str] = None
     sku: Optional[str] = None
     barcode: Optional[str] = None
+    brand: Optional[str] = None
+    price: Optional[float] = None  # threshold_price olarak kaydedilecek
+    sellerStockCode: Optional[str] = None
 
 class BulkProductsRequest(BaseModel):
     products: List[MonitoredProductInput]
@@ -644,10 +647,14 @@ class MonitoredProductResponse(BaseModel):
     product_url: str
     product_name: Optional[str] = None
     brand: Optional[str] = None
+    seller_stock_code: Optional[str] = None
+    threshold_price: Optional[float] = None
     image_url: Optional[str] = None
     is_active: bool = True
     last_fetched_at: Optional[str] = None
     seller_count: int = 0
+    has_price_alert: bool = False  # Eşik altı satıcı var mı
+    price_alert_count: int = 0  # Eşik altı satıcı sayısı
     
     class Config:
         from_attributes = True
@@ -667,6 +674,7 @@ class SellerSnapshotResponse(BaseModel):
     buybox_order: Optional[int] = None
     free_shipping: bool = False
     fast_shipping: bool = False
+    price_alert: bool = False  # Eşik fiyatın altında mı
     is_fulfilled_by_hb: bool = False
     snapshot_date: str
     
@@ -740,6 +748,12 @@ async def add_monitored_products(
                     existing.product_name = item.productName
                 if item.barcode:
                     existing.barcode = item.barcode
+                if item.brand:
+                    existing.brand = item.brand
+                if item.price is not None:
+                    existing.threshold_price = item.price
+                if item.sellerStockCode:
+                    existing.seller_stock_code = item.sellerStockCode
                 existing.is_active = True
                 updated += 1
             else:
@@ -749,6 +763,9 @@ async def add_monitored_products(
                     barcode=item.barcode,
                     product_url=item.productUrl,
                     product_name=item.productName,
+                    brand=item.brand,
+                    threshold_price=item.price,
+                    seller_stock_code=item.sellerStockCode,
                     is_active=True
                 )
                 db.add(product)
@@ -771,14 +788,19 @@ async def add_monitored_products(
 async def get_monitored_products(
     db: Session = Depends(get_db),
     active_only: bool = False,
-    platform: Optional[str] = None
+    platform: Optional[str] = None,
+    brand: Optional[str] = None,
+    price_alert_only: bool = False,
+    search: Optional[str] = None
 ):
-    """İzlenen ürün listesini getir - platform filtresi ile"""
+    """İzlenen ürün listesini getir - platform, marka, price alert ve arama filtresi ile"""
     query = db.query(MonitoredProduct)
     if active_only:
         query = query.filter(MonitoredProduct.is_active == True)
     if platform:
         query = query.filter(MonitoredProduct.platform == platform.lower())
+    if brand:
+        query = query.filter(MonitoredProduct.brand == brand)
     
     products = query.order_by(desc(MonitoredProduct.created_at)).all()
     
@@ -790,6 +812,23 @@ async def get_monitored_products(
         
         seller_count = len(set(s.merchant_id for s in latest_snapshots))
         
+        threshold = float(product.threshold_price) if product.threshold_price else None
+        price_alert_count = 0
+        if threshold and latest_snapshots:
+            for s in latest_snapshots:
+                if float(s.price) < threshold:
+                    price_alert_count += 1
+        has_price_alert = price_alert_count > 0
+        
+        if price_alert_only and not has_price_alert:
+            continue
+        
+        if search:
+            search_lower = search.lower()
+            searchable = f"{product.sku or ''} {product.barcode or ''} {product.product_name or ''} {product.seller_stock_code or ''}".lower()
+            if search_lower not in searchable:
+                continue
+        
         result.append({
             "id": str(product.id),
             "platform": product.platform,
@@ -798,10 +837,14 @@ async def get_monitored_products(
             "product_url": product.product_url,
             "product_name": product.product_name,
             "brand": product.brand,
+            "seller_stock_code": product.seller_stock_code,
+            "threshold_price": float(product.threshold_price) if product.threshold_price else None,
             "image_url": product.image_url,
             "is_active": product.is_active,
             "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
-            "seller_count": seller_count
+            "seller_count": seller_count,
+            "has_price_alert": has_price_alert,
+            "price_alert_count": price_alert_count
         })
     
     return {"products": result, "total": len(result)}
@@ -902,6 +945,20 @@ async def export_price_monitor_data(
         )
 
 
+@router.get("/price-monitor/brands")
+async def get_monitored_product_brands(
+    db: Session = Depends(get_db),
+    platform: Optional[str] = None
+):
+    """Platform için marka listesini getir"""
+    from sqlalchemy import distinct
+    query = db.query(distinct(MonitoredProduct.brand)).filter(MonitoredProduct.brand.isnot(None))
+    if platform:
+        query = query.filter(MonitoredProduct.platform == platform.lower())
+    brands = [b[0] for b in query.all() if b[0]]
+    return {"brands": sorted(brands)}
+
+
 @router.get("/price-monitor/products/{product_id}")
 async def get_monitored_product_detail(
     product_id: str,
@@ -913,12 +970,15 @@ async def get_monitored_product_detail(
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     
+    threshold = float(product.threshold_price) if product.threshold_price else None
+    
     latest_snapshots = db.query(SellerSnapshot).filter(
         SellerSnapshot.monitored_product_id == product.id
     ).order_by(desc(SellerSnapshot.snapshot_date)).all()
     
     seen_merchants = set()
     unique_sellers = []
+    price_alert_count = 0
     for s in latest_snapshots:
         if s.merchant_id not in seen_merchants:
             seen_merchants.add(s.merchant_id)
@@ -928,6 +988,10 @@ async def get_monitored_product_detail(
                 merchant_url = f"https://www.trendyol.com{s.merchant_url_postfix}" if s.merchant_url_postfix else None
             else:
                 merchant_url = None
+            seller_price = float(s.price) if s.price else None
+            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+            if has_alert:
+                price_alert_count += 1
             unique_sellers.append({
                 "merchant_id": s.merchant_id,
                 "merchant_name": s.merchant_name,
@@ -937,7 +1001,7 @@ async def get_monitored_product_detail(
                 "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
                 "merchant_rating_count": s.merchant_rating_count,
                 "merchant_city": s.merchant_city,
-                "price": float(s.price) if s.price else None,
+                "price": seller_price,
                 "original_price": float(s.original_price) if s.original_price else None,
                 "minimum_price": float(s.minimum_price) if s.minimum_price else None,
                 "discount_rate": s.discount_rate,
@@ -946,7 +1010,8 @@ async def get_monitored_product_detail(
                 "free_shipping": s.free_shipping,
                 "fast_shipping": s.fast_shipping,
                 "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
-                "snapshot_date": s.snapshot_date.isoformat()
+                "snapshot_date": s.snapshot_date.isoformat(),
+                "price_alert": has_alert
             })
     
     return {
@@ -958,10 +1023,14 @@ async def get_monitored_product_detail(
             "product_url": product.product_url,
             "product_name": product.product_name,
             "brand": product.brand,
+            "seller_stock_code": product.seller_stock_code,
+            "threshold_price": threshold,
             "image_url": product.image_url,
             "is_active": product.is_active,
             "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
-            "seller_count": len(unique_sellers)
+            "seller_count": len(unique_sellers),
+            "has_price_alert": price_alert_count > 0,
+            "price_alert_count": price_alert_count
         },
         "sellers": unique_sellers
     }

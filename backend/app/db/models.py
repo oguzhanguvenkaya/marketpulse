@@ -159,7 +159,9 @@ class MonitoredProduct(Base):
     barcode = Column(String(50))  # Trendyol için barkod
     product_url = Column(Text, nullable=False)
     product_name = Column(Text)
-    brand = Column(String(255))
+    brand = Column(String(255), index=True)
+    seller_stock_code = Column(String(100), index=True)  # Satıcı stok kodu
+    threshold_price = Column(Numeric(10, 2))  # Eşik fiyat - bu fiyatın altında satış yapan satıcılar için uyarı
     image_url = Column(Text)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
