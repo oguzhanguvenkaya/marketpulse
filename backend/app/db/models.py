@@ -198,6 +198,7 @@ class SellerSnapshot(Base):
     is_fulfilled_by_hb = Column(Boolean, default=False)
     delivery_info = Column(Text)  # Trendyol: teslimat bilgisi
     campaign_info = Column(Text)  # Trendyol: kampanya bilgisi (Sepette %5 indirim vb.)
+    campaigns = Column(JSON)  # Hepsiburada: kampanya ve indirim tag'leri (tagList'ten filtrelenen)
     snapshot_date = Column(DateTime, default=datetime.utcnow, index=True)
     
     monitored_product = relationship("MonitoredProduct", back_populates="seller_snapshots")

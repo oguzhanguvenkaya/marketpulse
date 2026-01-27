@@ -676,6 +676,7 @@ class SellerSnapshotResponse(BaseModel):
     fast_shipping: bool = False
     price_alert: bool = False  # Eşik fiyatın altında mı
     is_fulfilled_by_hb: bool = False
+    campaigns: List[str] = []  # Kampanya ve indirim etiketleri
     snapshot_date: str
     
     class Config:
@@ -1010,6 +1011,7 @@ async def get_monitored_product_detail(
                 "free_shipping": s.free_shipping,
                 "fast_shipping": s.fast_shipping,
                 "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
+                "campaigns": s.campaigns if s.campaigns else [],
                 "snapshot_date": s.snapshot_date.isoformat(),
                 "price_alert": has_alert
             })

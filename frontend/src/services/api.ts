@@ -219,6 +219,7 @@ export interface SellerSnapshot {
   free_shipping: boolean;
   fast_shipping: boolean;
   is_fulfilled_by_hb: boolean;
+  campaigns?: string[];
   snapshot_date: string;
   price_alert: boolean;
 }

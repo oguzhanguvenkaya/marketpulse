@@ -68,6 +68,51 @@ class PriceMonitorService:
             print(f"Error fetching listings for {sku}: {e}")
             return None
     
+    def _parse_campaign_tags(self, tag_list: List[Dict[str, Any]]) -> List[str]:
+        """tagList'ten indirim ve kampanya tag'lerini filtrele ve okunabilir formata çevir"""
+        campaigns = []
+        keywords = ['indirim', 'kampanya']
+        
+        for tag in tag_list:
+            tag_id = tag.get('tagId', '')
+            tag_lower = tag_id.lower()
+            
+            if any(kw in tag_lower for kw in keywords):
+                readable = self._make_tag_readable(tag_id)
+                if readable and readable not in campaigns:
+                    campaigns.append(readable)
+        
+        return campaigns
+    
+    def _make_tag_readable(self, tag_id: str) -> str:
+        """Tag ID'yi okunabilir formata çevir"""
+        import re
+        
+        clean_tag = re.sub(r'^[0-9]+-', '', tag_id)
+        
+        readable = clean_tag.replace('-', ' ')
+        
+        readable = re.sub(r'(\d+)\s*tl\s*ye\s*(\d+)\s*tl', r'\1 TL üzeri \2 TL', readable, flags=re.IGNORECASE)
+        
+        readable = re.sub(r'(\d+)\s*indirim', r'%\1 İndirim', readable, flags=re.IGNORECASE)
+        readable = re.sub(r'(\d+)\s*kampanya', r'%\1 Kampanya', readable, flags=re.IGNORECASE)
+        
+        words = readable.split()
+        result_words = []
+        for word in words:
+            if word.upper() == 'TL' or word.startswith('%'):
+                result_words.append(word)
+            elif word.lower() in ['ve', 'ile', 'için', 'den', 'dan']:
+                result_words.append(word.lower())
+            else:
+                result_words.append(word.capitalize())
+        
+        readable = ' '.join(result_words)
+        readable = readable.replace('Indirim', 'İndirim')
+        readable = readable.replace('Tl', 'TL')
+        
+        return readable.strip()
+    
     def parse_listings(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """API yanıtından satıcı bilgilerini parse et"""
         sellers = []
@@ -96,6 +141,12 @@ class PriceMonitorService:
             if rating_summary:
                 seller['merchant_rating'] = rating_summary.get('lifetimeRating')
                 seller['merchant_rating_count'] = rating_summary.get('ratingQuantity')
+            
+            tag_list = listing.get('tagList', [])
+            if tag_list:
+                seller['campaigns'] = self._parse_campaign_tags(tag_list)
+            else:
+                seller['campaigns'] = []
             
             sellers.append(seller)
         
@@ -146,6 +197,7 @@ class PriceMonitorService:
                 free_shipping=seller.get('free_shipping', False),
                 fast_shipping=seller.get('fast_shipping', False),
                 is_fulfilled_by_hb=seller.get('is_fulfilled_by_hb', False),
+                campaigns=seller.get('campaigns', []),
                 snapshot_date=datetime.utcnow()
             )
             db.add(snapshot)

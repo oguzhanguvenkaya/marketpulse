@@ -613,7 +613,7 @@ export default function PriceMonitor() {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2 mt-2 text-xs">
+                      <div className="flex flex-wrap gap-2 mt-2 text-xs">
                         {seller.free_shipping && (
                           <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
                             Ücretsiz Kargo
@@ -630,6 +630,18 @@ export default function PriceMonitor() {
                           </span>
                         )}
                       </div>
+                      {seller.campaigns && seller.campaigns.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {seller.campaigns.map((campaign, idx) => (
+                            <span
+                              key={idx}
+                              className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded border border-yellow-300"
+                            >
+                              {campaign}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
