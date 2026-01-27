@@ -810,16 +810,23 @@ async def get_monitored_products(
 @router.get("/price-monitor/export")
 async def export_price_monitor_data(
     platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
+    active_filter: str = Query("all", description="Filtre: all, active, inactive"),
     db: Session = Depends(get_db)
 ):
     """SKU bazlı gruplandırılmış JSON olarak indir"""
     from fastapi.responses import StreamingResponse
     import json
     
-    products = db.query(MonitoredProduct).filter(
-        MonitoredProduct.platform == platform.lower(),
-        MonitoredProduct.is_active == True
-    ).all()
+    query = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform.lower()
+    )
+    
+    if active_filter == "active":
+        query = query.filter(MonitoredProduct.is_active == True)
+    elif active_filter == "inactive":
+        query = query.filter(MonitoredProduct.is_active == False)
+    
+    products = query.all()
     
     export_data = []
     
@@ -877,6 +884,7 @@ async def export_price_monitor_data(
             "barcode": product.barcode or "",
             "product_name": product.product_name or "",
             "product_url": product.product_url or "",
+            "is_active": product.is_active,
             "min_price": min_price_seller["price"] if min_price_seller else None,
             "min_price_seller": min_price_seller,
             "seller_count": len(sellers),

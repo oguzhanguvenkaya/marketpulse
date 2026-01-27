@@ -179,12 +179,23 @@ class TrendyolPriceMonitorService:
         """Tek bir ürün için satıcı verilerini çek ve kaydet"""
         html = await self.fetch_product_page(product.product_url)
         if not html:
+            product.is_active = False
+            product.last_fetched_at = datetime.utcnow()
+            db.commit()
+            print(f"No HTML for Trendyol SKU {product.sku} - marked as inactive")
             return False
         
         sellers = self.parse_other_merchants(html)
         if not sellers:
-            print(f"No sellers found for {product.sku}")
+            product.is_active = False
+            product.last_fetched_at = datetime.utcnow()
+            db.commit()
+            print(f"No sellers found for Trendyol SKU {product.sku} - marked as inactive")
             return False
+        
+        if not product.is_active:
+            product.is_active = True
+            print(f"Trendyol SKU {product.sku} reactivated - sellers found")
         
         for seller in sellers:
             snapshot = SellerSnapshot(

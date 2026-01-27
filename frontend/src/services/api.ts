@@ -287,11 +287,14 @@ export const fetchSingleProduct = async (productId: string): Promise<{ success: 
   return response.data;
 };
 
+export type ExportActiveFilter = 'all' | 'active' | 'inactive';
+
 export const exportPriceMonitorData = async (
-  platform: string
+  platform: string,
+  activeFilter: ExportActiveFilter = 'all'
 ): Promise<void> => {
   const response = await api.get('/price-monitor/export', {
-    params: { platform },
+    params: { platform, active_filter: activeFilter },
     responseType: 'blob'
   });
   

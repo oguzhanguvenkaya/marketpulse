@@ -109,11 +109,23 @@ class PriceMonitorService:
         
         data = await self.fetch_listings(sku)
         if not data:
+            product.is_active = False
+            product.last_fetched_at = datetime.utcnow()
+            db.commit()
+            print(f"No data for SKU {sku} - marked as inactive")
             return False
         
         sellers = self.parse_listings(data)
         if not sellers:
+            product.is_active = False
+            product.last_fetched_at = datetime.utcnow()
+            db.commit()
+            print(f"No sellers for SKU {sku} - marked as inactive")
             return False
+        
+        if not product.is_active:
+            product.is_active = True
+            print(f"SKU {sku} reactivated - sellers found")
         
         for seller in sellers:
             snapshot = SellerSnapshot(
