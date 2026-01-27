@@ -770,7 +770,7 @@ async def add_monitored_products(
 @router.get("/price-monitor/products")
 async def get_monitored_products(
     db: Session = Depends(get_db),
-    active_only: bool = True,
+    active_only: bool = False,
     platform: Optional[str] = None
 ):
     """İzlenen ürün listesini getir - platform filtresi ile"""

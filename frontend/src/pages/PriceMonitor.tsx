@@ -37,8 +37,8 @@ export default function PriceMonitor() {
   type ExportFilter = 'all' | 'active' | 'inactive';
   const [exportFilter, setExportFilter] = useState<ExportFilter>('all');
 
-  const activeProducts = products.filter(p => p.is_active !== false);
-  const inactiveProducts = products.filter(p => p.is_active === false);
+  const activeProducts = products.filter(p => p.is_active !== false && p.seller_count > 0);
+  const inactiveProducts = products.filter(p => p.is_active === false || p.seller_count === 0);
 
   useEffect(() => {
     loadProducts();
