@@ -73,73 +73,92 @@ export default function Ads() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Reklamlar</h1>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Ads</h1>
+          <p className="text-neutral-400 mt-1">Analyze sponsored products and brand advertisements</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-wrap gap-4 items-center">
+      <div className="card-dark p-5">
+        <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-64">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Arama Kelimesi
+            <label className="block text-sm font-medium text-neutral-400 mb-2">
+              Search Keyword
             </label>
             <select
               value={selectedTaskId}
               onChange={(e) => handleTaskChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="input-dark w-full"
             >
-              <option value="">Kelime Seçin</option>
+              <option value="">Select a keyword</option>
               {tasks.map((task) => (
                 <option key={task.id} value={task.id}>
-                  {task.keyword} ({new Date(task.created_at).toLocaleDateString('tr-TR')})
+                  {task.keyword} ({new Date(task.created_at).toLocaleDateString('en-US')})
                 </option>
               ))}
             </select>
           </div>
 
           {selectedKeyword && (
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Seçili:</span> "{selectedKeyword}"
+            <div className="px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20">
+              <span className="text-sm text-neutral-400">Selected:</span>
+              <span className="ml-2 text-accent-primary font-medium">"{selectedKeyword}"</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex">
+      <div className="card-dark overflow-hidden">
+        <div className="border-b border-white/5">
+          <nav className="flex">
             <button
               onClick={() => setActiveTab('sponsored')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-all ${
                 activeTab === 'sponsored'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-accent-primary text-accent-primary'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Sponsorlu Ürünler ({sponsoredProducts.length})
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                </svg>
+                Sponsored Products ({sponsoredProducts.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('brands')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-6 py-4 text-sm font-medium border-b-2 transition-all ${
                 activeTab === 'brands'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-accent-primary text-accent-primary'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Marka Reklamları ({sponsoredBrands.length})
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Brand Ads ({sponsoredBrands.length})
+              </span>
             </button>
           </nav>
         </div>
 
-        <div className="p-4">
+        <div className="p-5">
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin" />
             </div>
           ) : !selectedTaskId ? (
-            <div className="text-center py-12 text-gray-500">
-              Lütfen bir arama kelimesi seçin
+            <div className="text-center py-12">
+              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-neutral-400">Please select a search keyword</p>
             </div>
           ) : activeTab === 'sponsored' ? (
             <SponsoredProductsTab products={sponsoredProducts} formatPrice={formatPrice} />
@@ -165,8 +184,13 @@ interface SponsoredProductsTabProps {
 function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabProps) {
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        Bu arama için sponsorlu ürün bulunamadı
+      <div className="text-center py-12">
+        <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <p className="text-neutral-400">No sponsored products found for this search</p>
       </div>
     );
   }
@@ -174,47 +198,49 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {products.map((product, index) => (
-        <div key={index} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+        <div key={index} className="card-dark border border-white/5 overflow-hidden hover:border-accent-primary/30 transition-all group">
           <div className="relative">
             {product.image_url ? (
               <img 
                 src={product.image_url} 
-                alt={product.product_name || 'Ürün'} 
-                className="w-full h-48 object-contain bg-gray-50"
+                alt={product.product_name || 'Product'} 
+                className="w-full h-48 object-contain bg-dark-900 p-2"
               />
             ) : (
-              <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400">Resim Yok</span>
+              <div className="w-full h-48 bg-dark-700 flex items-center justify-center">
+                <svg className="w-12 h-12 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
             )}
-            <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
-              #{product.order_index + 1} Pozisyon
+            <div className="absolute top-2 left-2 badge badge-warning text-[10px]">
+              #{product.order_index + 1} Position
             </div>
-            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-              Reklam
+            <div className="absolute top-2 right-2 badge badge-danger text-[10px]">
+              Ad
             </div>
           </div>
-          <div className="p-3">
-            <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-2">
-              {product.product_name || 'İsimsiz Ürün'}
+          <div className="p-4">
+            <h3 className="font-medium text-sm text-neutral-200 line-clamp-2 mb-2 min-h-[2.5rem]">
+              {product.product_name || 'Unnamed Product'}
             </h3>
             {product.seller_name && (
-              <p className="text-xs text-gray-500 mb-2">
-                Satıcı: {product.seller_name}
+              <p className="text-xs text-neutral-500 mb-3">
+                Seller: {product.seller_name}
               </p>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-3">
               {product.discounted_price ? (
                 <>
-                  <span className="text-lg font-bold text-green-600">
+                  <span className="text-lg font-bold text-success">
                     {formatPrice(product.discounted_price)}
                   </span>
-                  <span className="text-sm text-gray-400 line-through">
+                  <span className="text-sm text-neutral-500 line-through">
                     {formatPrice(product.price)}
                   </span>
                 </>
               ) : (
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-neutral-200">
                   {formatPrice(product.price)}
                 </span>
               )}
@@ -223,9 +249,9 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
               href={product.product_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="mt-3 block text-center text-sm text-indigo-600 hover:text-indigo-800"
+              className="block text-center text-sm text-accent-primary hover:text-accent-primary/80 transition-colors"
             >
-              Ürüne Git →
+              View Product →
             </a>
           </div>
         </div>
@@ -244,32 +270,37 @@ interface BrandAdsTabProps {
 function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: BrandAdsTabProps) {
   if (brands.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <p>Bu arama için marka reklamı bulunamadı</p>
-        <p className="text-sm mt-2">Not: Marka reklamları dinamik olarak yüklenir ve henüz yakalanamamaktadır</p>
+      <div className="text-center py-12">
+        <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <p className="text-neutral-400">No brand ads found for this search</p>
+        <p className="text-sm text-neutral-500 mt-1">Brand ads are loaded dynamically and may not be captured</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {brands.map((brand, index) => (
-        <div key={index} className="border rounded-lg overflow-hidden">
+        <div key={index} className="rounded-lg border border-white/5 overflow-hidden">
           <button
             onClick={() => setExpandedBrand(expandedBrand === brand.seller_name ? null : brand.seller_name)}
-            className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+            className="w-full px-4 py-4 flex items-center justify-between bg-dark-700/50 hover:bg-dark-600/50 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">
+              <span className="badge badge-info text-[10px]">
                 #{brand.position || index + 1}
               </span>
-              <span className="font-medium text-gray-900">{brand.seller_name}</span>
-              <span className="text-sm text-gray-500">
-                ({brand.products?.length || 0} ürün)
+              <span className="font-medium text-neutral-200">{brand.seller_name}</span>
+              <span className="text-sm text-neutral-500">
+                ({brand.products?.length || 0} products)
               </span>
             </div>
             <svg 
-              className={`w-5 h-5 text-gray-400 transition-transform ${expandedBrand === brand.seller_name ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-neutral-400 transition-transform ${expandedBrand === brand.seller_name ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -279,45 +310,45 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
           </button>
           
           {expandedBrand === brand.seller_name && brand.products && brand.products.length > 0 && (
-            <div className="p-4 border-t bg-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="p-4 border-t border-white/5 bg-dark-800/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {brand.products.map((product, pIndex) => (
-                  <div key={pIndex} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="relative bg-gray-50 h-32">
+                  <div key={pIndex} className="rounded-lg border border-white/5 overflow-hidden hover:border-accent-primary/20 transition-all bg-dark-700/30">
+                    <div className="relative bg-dark-900 h-28">
                       {product.image_url ? (
                         <img 
                           src={product.image_url} 
-                          alt={product.name || 'Ürün'} 
-                          className="w-full h-full object-contain"
+                          alt={product.name || 'Product'} 
+                          className="w-full h-full object-contain p-2"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
                       )}
                     </div>
                     <div className="p-3">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]">
-                        {product.name || 'Ürün'}
+                      <p className="text-xs font-medium text-neutral-300 line-clamp-2 mb-2 min-h-[2rem]">
+                        {product.name || 'Product'}
                       </p>
                       <div className="flex items-center gap-2 mb-2">
                         {product.discounted_price ? (
                           <>
-                            <span className="text-sm font-bold text-green-600">
+                            <span className="text-sm font-bold text-success">
                               {formatPrice(product.discounted_price)}
                             </span>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="text-xs text-neutral-500 line-through">
                               {formatPrice(product.price)}
                             </span>
                           </>
                         ) : product.price ? (
-                          <span className="text-sm font-bold text-gray-900">
+                          <span className="text-sm font-bold text-neutral-200">
                             {formatPrice(product.price)}
                           </span>
                         ) : (
-                          <span className="text-sm text-gray-400">Fiyat yok</span>
+                          <span className="text-xs text-neutral-500">No price</span>
                         )}
                       </div>
                       {product.url && (
@@ -325,9 +356,9 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
                           href={product.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-indigo-600 hover:text-indigo-800"
+                          className="text-xs text-accent-primary hover:text-accent-primary/80 transition-colors"
                         >
-                          Ürüne Git →
+                          View →
                         </a>
                       )}
                     </div>

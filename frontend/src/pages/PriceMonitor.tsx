@@ -121,12 +121,12 @@ export default function PriceMonitor() {
       const parsed = JSON.parse(importJson);
       const productList: BulkProductInput[] = Array.isArray(parsed) ? parsed : [parsed];
       const result = await addMonitoredProducts(productList, platform);
-      alert(`${result.added} ürün eklendi, ${result.updated} ürün güncellendi (${result.platform}).`);
+      alert(`${result.added} products added, ${result.updated} updated (${result.platform}).`);
       setShowImportModal(false);
       setImportJson('');
       loadProducts();
     } catch (e: any) {
-      alert('JSON parse hatası: ' + e.message);
+      alert('JSON parse error: ' + e.message);
     } finally {
       setImportLoading(false);
     }
@@ -139,7 +139,7 @@ export default function PriceMonitor() {
       setFetchStatus('started');
     } catch (e) {
       console.error('Error starting fetch:', e);
-      alert('Fiyat çekme başlatılamadı');
+      alert('Could not start price fetch');
     }
   };
 
@@ -150,7 +150,7 @@ export default function PriceMonitor() {
       setFetchStatus('stopping');
     } catch (e) {
       console.error('Error stopping fetch:', e);
-      alert('Durdurma isteği gönderilemedi');
+      alert('Could not stop fetch');
     }
   };
 
@@ -163,12 +163,12 @@ export default function PriceMonitor() {
       loadProducts();
     } catch (e) {
       console.error('Error fetching single product:', e);
-      alert('Fiyat çekilemedi');
+      alert('Could not fetch price');
     }
   };
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to delete this product?')) return;
     try {
       await deleteMonitoredProduct(productId);
       if (selectedProduct?.id === productId) {
@@ -188,7 +188,7 @@ export default function PriceMonitor() {
       await exportPriceMonitorData(platform, filter);
     } catch (e) {
       console.error('Error exporting data:', e);
-      alert('Veri indirme hatası');
+      alert('Export failed');
     } finally {
       setExportLoading(false);
     }
@@ -199,7 +199,7 @@ export default function PriceMonitor() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('tr-TR');
+    return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   const getProductUrl = (product: MonitoredProduct) => {
@@ -215,9 +215,9 @@ export default function PriceMonitor() {
       return `[
   {
     "productUrl": "https://www.trendyol.com/...-p-123456789",
-    "productName": "Ürün Adı 1",
+    "productName": "Product Name",
     "barcode": "8809432676195",
-    "brand": "Marka Adı",
+    "brand": "Brand Name",
     "price": 299.99,
     "sellerStockCode": "STK001"
   }
@@ -226,9 +226,9 @@ export default function PriceMonitor() {
     return `[
   {
     "productUrl": "https://www.hepsiburada.com/...-p-SKU123",
-    "productName": "Ürün Adı 1",
+    "productName": "Product Name",
     "sku": "SKU123",
-    "brand": "Marka Adı",
+    "brand": "Brand Name",
     "price": 299.99,
     "sellerStockCode": "STK001"
   }
@@ -236,67 +236,58 @@ export default function PriceMonitor() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Fiyat Takip</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-          >
-            SKU Ekle
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Price Monitor</h1>
+          <p className="text-neutral-400 mt-1">Track seller prices and identify violations</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => setShowImportModal(true)} className="btn-secondary flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add SKU
           </button>
           {fetchTaskId ? (
             <>
-              <span className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
-                {fetchStatus === 'stopping' ? 'Durduruluyor...' : `Çekiliyor... (${fetchProgress.completed}/${fetchProgress.total})`}
-              </span>
-              <button
-                onClick={handleStopFetch}
-                disabled={fetchStatus === 'stopping'}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                Durdur
+              <div className="px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-accent-primary text-sm flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
+                {fetchStatus === 'stopping' ? 'Stopping...' : `Fetching... (${fetchProgress.completed}/${fetchProgress.total})`}
+              </div>
+              <button onClick={handleStopFetch} disabled={fetchStatus === 'stopping'} className="btn-danger">
+                Stop
               </button>
             </>
           ) : (
-            <button
-              onClick={handleFetchAll}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-            >
-              {platform === 'hepsiburada' ? 'Hepsiburada Fiyatları Çek' : 'Trendyol Fiyatları Çek'}
+            <button onClick={handleFetchAll} className="btn-primary flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Fetch Prices
             </button>
           )}
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
               disabled={exportLoading || products.length === 0}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2"
             >
-              {exportLoading ? 'İndiriliyor...' : 'JSON İndir'}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {exportLoading ? 'Exporting...' : 'Export'}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-10">
-                <button
-                  onClick={() => handleExport('all')}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-t-lg"
-                >
-                  Tümü ({products.length})
+              <div className="absolute right-0 mt-2 w-48 card-dark border border-white/10 z-20 overflow-hidden">
+                <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+                  All ({products.length})
                 </button>
-                <button
-                  onClick={() => handleExport('active')}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  Sadece Aktif ({activeProducts.length})
+                <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+                  Active Only ({activeProducts.length})
                 </button>
-                <button
-                  onClick={() => handleExport('inactive')}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-b-lg"
-                >
-                  Sadece Pasif ({inactiveProducts.length})
+                <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+                  Inactive Only ({inactiveProducts.length})
                 </button>
               </div>
             )}
@@ -304,23 +295,23 @@ export default function PriceMonitor() {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2">
         <button
           onClick={() => setPlatform('hepsiburada')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'hepsiburada'
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-[#ff6000] text-white shadow-glow-orange'
+              : 'bg-dark-600 text-neutral-300 hover:bg-dark-500'
           }`}
         >
           Hepsiburada
         </button>
         <button
           onClick={() => setPlatform('trendyol')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'trendyol'
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-[#ff6000] text-white shadow-glow-orange'
+              : 'bg-dark-600 text-neutral-300 hover:bg-dark-500'
           }`}
         >
           Trendyol
@@ -328,37 +319,44 @@ export default function PriceMonitor() {
       </div>
 
       {fetchStatus === 'running' && (
-        <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded mb-4">
-          Fiyatlar çekiliyor: {fetchProgress.completed} / {fetchProgress.total} ürün tamamlandı
+        <div className="p-4 rounded-lg bg-accent-primary/5 border border-accent-primary/20">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
+            <span className="text-accent-primary">Fetching prices: {fetchProgress.completed} / {fetchProgress.total} products completed</span>
+          </div>
+          <div className="mt-2 progress-bar">
+            <div className="progress-bar-fill" style={{ width: `${(fetchProgress.completed / fetchProgress.total) * 100}%` }} />
+          </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="card-dark p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              İzlenen Ürünler - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'}
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-semibold text-white">Monitored Products</h2>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowInactive(false)}
-                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
-                  !showInactive
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                  !showInactive ? 'bg-success/20 text-success border border-success/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
                 }`}
               >
-                Aktif ({activeProducts.length})
+                Active ({activeProducts.length})
               </button>
               <button
                 onClick={() => setShowInactive(true)}
-                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
-                  showInactive
-                    ? 'bg-gray-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                  showInactive ? 'bg-neutral-500/20 text-neutral-300 border border-neutral-500/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
                 }`}
               >
-                Pasif ({inactiveProducts.length})
+                Inactive ({inactiveProducts.length})
               </button>
             </div>
           </div>
@@ -366,133 +364,133 @@ export default function PriceMonitor() {
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <input
               type="text"
-              placeholder="SKU, barkod, stok kodu veya ürün adı ile ara..."
+              placeholder="Search by SKU, barcode, stock code or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="input-dark flex-1 text-sm"
             />
             <select
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="input-dark text-sm min-w-[140px]"
             >
-              <option value="">Tüm Markalar</option>
+              <option value="">All Brands</option>
               {brands.map(brand => (
                 <option key={brand} value={brand}>{brand}</option>
               ))}
             </select>
             <button
               onClick={() => setPriceAlertOnly(!priceAlertOnly)}
-              className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
                 priceAlertOnly
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-danger/20 text-danger border border-danger/30'
+                  : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
               }`}
             >
-              Price Alert
+              Price Alerts
             </button>
           </div>
+
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mx-auto" />
+              <p className="text-neutral-500 mt-3">Loading products...</p>
+            </div>
           ) : (showInactive ? inactiveProducts : activeProducts).length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              {showInactive 
-                ? 'Pasif ürün bulunmuyor.' 
-                : 'Henüz izlenen ürün yok. SKU eklemek için yukarıdaki butonu kullanın.'}
+            <div className="text-center py-12">
+              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <p className="text-neutral-400">{showInactive ? 'No inactive products' : 'No monitored products yet'}</p>
+              <p className="text-sm text-neutral-500 mt-1">{showInactive ? '' : 'Click "Add SKU" to start monitoring'}</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
               {(showInactive ? inactiveProducts : activeProducts).map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`p-4 rounded-lg border cursor-pointer transition-all ${
                     selectedProduct?.id === product.id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : showInactive 
-                        ? 'border-gray-300 bg-gray-100 hover:bg-gray-200' 
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-accent-primary/50 bg-accent-primary/5'
+                      : showInactive
+                        ? 'border-white/5 bg-dark-700/50 hover:bg-dark-600/50'
+                        : 'border-white/5 bg-dark-700/30 hover:border-white/10 hover:bg-dark-600/30'
                   }`}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      <div className="flex gap-1 mb-1 flex-wrap">
+                      <div className="flex gap-1.5 mb-2 flex-wrap">
                         {showInactive && (
-                          <span className="inline-block bg-gray-500 text-white text-xs px-2 py-0.5 rounded">
-                            Pasif
-                          </span>
+                          <span className="badge badge-neutral">Inactive</span>
                         )}
                         {product.has_price_alert && (
-                          <span className="inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded">
-                            Price Alert ({product.price_alert_count})
+                          <span className="badge badge-danger">
+                            Alert ({product.price_alert_count})
                           </span>
                         )}
                         {product.brand && (
-                          <span className="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">
-                            {product.brand}
-                          </span>
+                          <span className="badge badge-info">{product.brand}</span>
                         )}
                       </div>
                       {product.product_name ? (
                         showInactive ? (
-                          <span className="font-medium text-sm text-gray-500 truncate block" title={product.product_name}>
-                            {product.product_name}
-                          </span>
+                          <span className="font-medium text-sm text-neutral-500 truncate block">{product.product_name}</span>
                         ) : (
                           <a
                             href={getProductUrl(product)}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline truncate block"
-                            title={product.product_name}
+                            className="font-medium text-sm text-accent-primary hover:text-accent-primary/80 truncate block"
                           >
                             {product.product_name}
                           </a>
                         )
                       ) : (
                         showInactive ? (
-                          <span className="font-medium text-sm text-gray-500">
-                            {product.sku}
-                          </span>
+                          <span className="font-medium text-sm text-neutral-500">{product.sku}</span>
                         ) : (
                           <a
                             href={getProductUrl(product)}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="font-medium text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                            className="font-medium text-sm text-accent-primary hover:text-accent-primary/80"
                           >
                             {product.sku}
                           </a>
                         )
                       )}
                       {product.product_name && (
-                        <div className="text-xs text-gray-500">
-                          {product.barcode ? `Barkod: ${product.barcode}` : `SKU: ${product.sku}`}
+                        <div className="text-xs text-neutral-500 mt-1">
+                          {product.barcode ? `Barcode: ${product.barcode}` : `SKU: ${product.sku}`}
                         </div>
                       )}
-                      <div className="text-xs text-gray-400 mt-1">
-                        {product.seller_count} satıcı
+                      <div className="text-xs text-neutral-500 mt-1 flex items-center gap-2">
+                        <span>{product.seller_count} sellers</span>
                         {product.last_fetched_at && (
-                          <span className="ml-2">• Son: {formatDate(product.last_fetched_at)}</span>
+                          <>
+                            <span className="text-neutral-600">•</span>
+                            <span>Last: {formatDate(product.last_fetched_at)}</span>
+                          </>
                         )}
                       </div>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleFetchSingle(product.id); }}
-                        className="text-indigo-600 hover:text-indigo-800 text-xs px-2 py-1"
-                        title="Fiyat Çek"
+                        className="text-accent-primary hover:text-accent-primary/80 text-xs px-2 py-1 rounded hover:bg-accent-primary/10 transition-colors"
                       >
-                        Güncelle
+                        Refresh
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                        className="text-red-600 hover:text-red-800 text-xs px-2 py-1"
-                        title="Sil"
+                        className="text-danger hover:text-danger/80 text-xs px-2 py-1 rounded hover:bg-danger/10 transition-colors"
                       >
-                        Sil
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -502,50 +500,73 @@ export default function PriceMonitor() {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-2">
-            {selectedProduct ? `Satıcılar - ${selectedProduct.product_name || selectedProduct.sku}` : 'Satıcı Detayları'}
-          </h2>
+        <div className="card-dark p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
+              <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-white">
+              {selectedProduct ? `Sellers - ${selectedProduct.product_name || selectedProduct.sku}` : 'Seller Details'}
+            </h2>
+          </div>
+
           {selectedProduct && (
-            <div className="flex flex-wrap gap-2 mb-4 text-sm">
+            <div className="flex flex-wrap gap-2 mb-4">
               {selectedProduct.threshold_price && (
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                  Eşik Fiyat: {selectedProduct.threshold_price.toLocaleString('tr-TR')} TL
+                <span className="badge badge-warning">
+                  Threshold: {selectedProduct.threshold_price.toLocaleString('tr-TR')} TL
                 </span>
               )}
               {selectedProduct.seller_stock_code && (
-                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                  Stok Kodu: {selectedProduct.seller_stock_code}
+                <span className="badge badge-neutral">
+                  Stock Code: {selectedProduct.seller_stock_code}
                 </span>
               )}
               {selectedProduct.brand && (
-                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                  Marka: {selectedProduct.brand}
+                <span className="badge badge-info">
+                  Brand: {selectedProduct.brand}
                 </span>
               )}
             </div>
           )}
+
           {!selectedProduct ? (
-            <div className="text-center py-8 text-gray-500">
-              Satıcıları görmek için sol taraftan bir ürün seçin
+            <div className="text-center py-12">
+              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+              </div>
+              <p className="text-neutral-400">Select a product to view sellers</p>
             </div>
           ) : sellersLoading ? (
-            <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mx-auto" />
+              <p className="text-neutral-500 mt-3">Loading sellers...</p>
+            </div>
           ) : sellers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              Henüz satıcı verisi yok. "Güncelle" butonuna tıklayarak fiyatları çekin.
+            <div className="text-center py-12">
+              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <p className="text-neutral-400">No seller data yet</p>
+              <p className="text-sm text-neutral-500 mt-1">Click "Refresh" to fetch prices</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
               {sellers.map((seller, idx) => (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-3 rounded-lg border-2 ${
-                    seller.price_alert 
-                      ? 'border-red-400 bg-red-50' 
-                      : seller.buybox_order === 1 
-                        ? 'border-green-300 bg-green-50' 
-                        : 'border-gray-200'
+                  className={`p-4 rounded-lg border transition-all ${
+                    seller.price_alert
+                      ? 'border-danger/50 bg-danger/5'
+                      : seller.buybox_order === 1
+                        ? 'border-success/50 bg-success/5'
+                        : 'border-white/5 bg-dark-700/30'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -553,78 +574,74 @@ export default function PriceMonitor() {
                       <img
                         src={seller.merchant_logo}
                         alt={seller.merchant_name}
-                        className="w-10 h-10 rounded object-contain bg-white border"
+                        className="w-10 h-10 rounded-lg object-contain bg-white border border-white/10"
                       />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-medium text-sm flex items-center gap-2">
+                          <div className="font-medium text-sm flex items-center gap-2 flex-wrap">
                             {seller.merchant_url ? (
                               <a
                                 href={seller.merchant_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                                className="text-white hover:text-accent-primary transition-colors"
                               >
                                 {seller.merchant_name}
                               </a>
                             ) : (
-                              seller.merchant_name
+                              <span className="text-white">{seller.merchant_name}</span>
                             )}
                             {seller.buybox_order === 1 && (
-                              <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                Buybox
-                              </span>
+                              <span className="badge badge-success text-[10px]">Buybox</span>
                             )}
                             {seller.price_alert && (
-                              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                Eşik Altı
-                              </span>
+                              <span className="badge badge-danger text-[10px]">Below Threshold</span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                          <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
                             {seller.merchant_rating && (
-                              <span className="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
+                              <span className="px-1.5 py-0.5 rounded bg-warning/10 text-warning">
                                 {seller.merchant_rating.toFixed(1)}
                               </span>
                             )}
                             {seller.merchant_city && <span>{seller.merchant_city}</span>}
                             {seller.stock_quantity !== undefined && (
-                              <span>Stok: {seller.stock_quantity}</span>
+                              <span>Stock: {seller.stock_quantity}</span>
                             )}
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-lg text-indigo-600">
+                          <div className="font-bold text-lg text-accent-primary">
                             {formatPrice(seller.price)}
                           </div>
                           {seller.original_price && seller.original_price !== seller.price && (
-                            <div className="text-xs text-gray-400 line-through">
+                            <div className="text-xs text-neutral-500 line-through">
                               {formatPrice(seller.original_price)}
                             </div>
                           )}
                           {seller.discount_rate && seller.discount_rate > 0 && (
-                            <div className="text-xs text-green-600">
-                              %{seller.discount_rate.toFixed(0)} indirim
+                            <div className="text-xs text-success">
+                              %{seller.discount_rate.toFixed(0)} off
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2 text-xs">
+                      <div className="flex flex-wrap gap-1.5 mt-3">
                         {seller.free_shipping && (
-                          <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                            Ücretsiz Kargo
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-primary/10 text-accent-primary border border-accent-primary/20">
+                            Free Shipping
                           </span>
                         )}
                         {seller.fast_shipping && (
-                          <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                            Hızlı Teslimat
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                            Fast Delivery
                           </span>
                         )}
                         {seller.is_fulfilled_by_hb && (
-                          <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
-                            HepsiBurada Lojistik
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/20">
+                            HB Logistics
                           </span>
                         )}
                       </div>
@@ -633,7 +650,7 @@ export default function PriceMonitor() {
                           {seller.campaigns.map((campaign, idx) => (
                             <span
                               key={idx}
-                              className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded border border-yellow-300"
+                              className="text-[10px] px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/30"
                             >
                               {campaign}
                             </span>
@@ -650,36 +667,44 @@ export default function PriceMonitor() {
       </div>
 
       {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
-            <h3 className="text-lg font-semibold mb-4">
-              Ürün Listesi Ekle - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'} (JSON)
-            </h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Aşağıdaki formatta JSON yapıştırın:
-            </p>
-            <pre className="bg-gray-100 p-2 rounded text-xs mb-3 overflow-x-auto">
-{getImportExample()}
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="card-dark border border-white/10 p-6 w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">
+                Import Products - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'}
+              </h3>
+              <button
+                onClick={() => { setShowImportModal(false); setImportJson(''); }}
+                className="text-neutral-400 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-neutral-400 mb-3">Paste JSON in the following format:</p>
+            <pre className="bg-dark-900 p-3 rounded-lg text-xs text-neutral-300 mb-4 overflow-x-auto border border-white/5">
+              {getImportExample()}
             </pre>
             <textarea
               value={importJson}
               onChange={(e) => setImportJson(e.target.value)}
-              className="w-full h-48 border rounded-lg p-3 font-mono text-sm"
+              className="input-dark w-full h-48 font-mono text-sm resize-none"
               placeholder='[{"productUrl": "...", "sku": "..."}]'
             />
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => { setShowImportModal(false); setImportJson(''); }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                className="btn-secondary"
               >
-                İptal
+                Cancel
               </button>
               <button
                 onClick={handleImport}
                 disabled={importLoading || !importJson.trim()}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="btn-primary"
               >
-                {importLoading ? 'Ekleniyor...' : 'Ekle'}
+                {importLoading ? 'Importing...' : 'Import'}
               </button>
             </div>
           </div>

@@ -56,58 +56,104 @@ export default function Dashboard() {
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      running: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
+      pending: 'badge-warning',
+      running: 'badge-info',
+      completed: 'badge-success',
+      failed: 'badge-danger',
     };
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>
+      <span className={`badge ${styles[status] || 'badge-neutral'}`}>
         {status}
       </span>
     );
   };
 
+  const statCards = [
+    { label: 'Total Products', value: stats?.total_products || 0, color: '#00d4ff', icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    )},
+    { label: 'Data Points', value: stats?.total_snapshots || 0, color: '#00e676', icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+      </svg>
+    )},
+    { label: 'Total Searches', value: stats?.total_tasks || 0, color: '#7c4dff', icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    )},
+    { label: 'Completed', value: stats?.completed_tasks || 0, color: '#ffab00', icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )},
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">🔍 Anahtar Kelime Araması</h2>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-neutral-400 mt-1">Monitor marketplace data and analytics</p>
+        </div>
+      </div>
+
+      <div className="card-dark p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
+            <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-white">Keyword Search</h2>
+        </div>
         <form onSubmit={handleSearch} className="flex gap-4">
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Anahtar kelime girin..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Enter keyword to search..."
+            className="input-dark flex-1"
           />
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="input-dark min-w-[160px]"
           >
             <option value="hepsiburada">Hepsiburada</option>
-            <option value="trendyol" disabled>Trendyol (Yakında)</option>
-            <option value="amazon" disabled>Amazon (Yakında)</option>
+            <option value="trendyol" disabled>Trendyol (Soon)</option>
+            <option value="amazon" disabled>Amazon (Soon)</option>
           </select>
           <button
             type="submit"
             disabled={loading || !keyword.trim()}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary"
           >
-            {loading ? 'Aranıyor...' : 'Ara'}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Searching...
+              </span>
+            ) : 'Search'}
           </button>
         </form>
         
         {currentTask && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-4 p-4 rounded-lg bg-accent-primary/5 border border-accent-primary/20">
             <div className="flex items-center justify-between">
-              <div>
-                <span className="font-medium">"{currentTask.keyword}"</span> için arama
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
+                <span className="text-white">Searching for "<span className="text-accent-primary">{currentTask.keyword}</span>"</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {getStatusBadge(currentTask.status)}
                 {currentTask.status === 'completed' && (
-                  <span className="text-sm text-gray-600">{currentTask.total_products} ürün bulundu</span>
+                  <span className="text-sm text-neutral-400">{currentTask.total_products} products found</span>
                 )}
               </div>
             </div>
@@ -115,43 +161,77 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-indigo-600">{stats?.total_products || 0}</div>
-          <div className="text-gray-500">Toplam Ürün</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-green-600">{stats?.total_snapshots || 0}</div>
-          <div className="text-gray-500">Veri Noktası</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-blue-600">{stats?.total_tasks || 0}</div>
-          <div className="text-gray-500">Toplam Arama</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-3xl font-bold text-purple-600">{stats?.completed_tasks || 0}</div>
-          <div className="text-gray-500">Tamamlanan</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, index) => (
+          <div 
+            key={index} 
+            className="stat-card"
+            style={{ '--stat-color': stat.color } as React.CSSProperties}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-3xl font-bold text-white mb-1" style={{ color: stat.color }}>
+                  {stat.value.toLocaleString()}
+                </div>
+                <div className="text-sm text-neutral-400">{stat.label}</div>
+              </div>
+              <div className="p-2 rounded-lg" style={{ backgroundColor: `${stat.color}15` }}>
+                <span style={{ color: stat.color }}>{stat.icon}</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-bold text-gray-800">📋 Son Aramalar</h2>
+      <div className="card-dark overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/5 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
+            <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-white">Recent Searches</h2>
         </div>
-        <div className="divide-y">
+        <div className="divide-y divide-white/5">
           {tasks.length === 0 ? (
-            <div className="px-6 py-8 text-center text-gray-500">
-              Henüz arama yapılmadı
+            <div className="px-6 py-12 text-center">
+              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <p className="text-neutral-400">No searches yet</p>
+              <p className="text-sm text-neutral-500 mt-1">Start by entering a keyword above</p>
             </div>
           ) : (
-            tasks.map((task) => (
-              <div key={task.id} className="px-6 py-4 flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{task.keyword}</div>
-                  <div className="text-sm text-gray-500">{task.platform} • {new Date(task.created_at).toLocaleString('tr-TR')}</div>
+            tasks.map((task, index) => (
+              <div 
+                key={task.id} 
+                className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-dark-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-white">{task.keyword}</div>
+                    <div className="text-sm text-neutral-500 flex items-center gap-2">
+                      <span className="capitalize">{task.platform}</span>
+                      <span className="text-neutral-600">•</span>
+                      <span>{new Date(task.created_at).toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600">{task.total_products} ürün</span>
+                  <span className="text-sm text-neutral-400">{task.total_products} products</span>
                   {getStatusBadge(task.status)}
                 </div>
               </div>
