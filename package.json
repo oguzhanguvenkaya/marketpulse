@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "playwright install chromium --with-deps && cd frontend && npm install && npm run build"
+    "build": "playwright install chromium && cd frontend && npm install && npm run build"
   }
 }
