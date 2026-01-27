@@ -807,6 +807,92 @@ async def get_monitored_products(
     return {"products": result, "total": len(result)}
 
 
+@router.get("/price-monitor/export")
+async def export_price_monitor_data(
+    platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
+    format: str = Query("json", description="Format: json veya csv"),
+    db: Session = Depends(get_db)
+):
+    """Ürün ve satıcı verilerini JSON veya CSV olarak indir"""
+    from fastapi.responses import StreamingResponse
+    import csv
+    import io
+    import json
+    
+    products = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform.lower(),
+        MonitoredProduct.is_active == True
+    ).all()
+    
+    export_data = []
+    
+    for product in products:
+        snapshots = db.query(SellerSnapshot).filter(
+            SellerSnapshot.monitored_product_id == product.id
+        ).order_by(desc(SellerSnapshot.snapshot_date)).all()
+        
+        seen_merchants = set()
+        for s in snapshots:
+            if s.merchant_id not in seen_merchants:
+                seen_merchants.add(s.merchant_id)
+                
+                if platform.lower() == "hepsiburada":
+                    merchant_url = f"https://www.hepsiburada.com/magaza/{s.merchant_url_postfix}" if s.merchant_url_postfix else ""
+                elif platform.lower() == "trendyol":
+                    merchant_url = f"https://www.trendyol.com{s.merchant_url_postfix}" if s.merchant_url_postfix else ""
+                else:
+                    merchant_url = ""
+                
+                export_data.append({
+                    "platform": product.platform,
+                    "sku": product.sku,
+                    "barcode": product.barcode or "",
+                    "product_name": product.product_name or "",
+                    "product_url": product.product_url or "",
+                    "merchant_name": s.merchant_name,
+                    "merchant_id": s.merchant_id,
+                    "merchant_url": merchant_url,
+                    "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
+                    "merchant_city": s.merchant_city or "",
+                    "price": float(s.price) if s.price else None,
+                    "original_price": float(s.original_price) if s.original_price else None,
+                    "minimum_price": float(s.minimum_price) if s.minimum_price else None,
+                    "discount_rate": float(s.discount_rate) if s.discount_rate else None,
+                    "stock_quantity": s.stock_quantity,
+                    "buybox_order": s.buybox_order,
+                    "free_shipping": s.free_shipping,
+                    "fast_shipping": s.fast_shipping,
+                    "delivery_info": s.delivery_info or "",
+                    "campaign_info": s.campaign_info or "",
+                    "snapshot_date": s.snapshot_date.isoformat() if s.snapshot_date else ""
+                })
+    
+    if format.lower() == "csv":
+        output = io.StringIO()
+        if export_data:
+            writer = csv.DictWriter(output, fieldnames=export_data[0].keys())
+            writer.writeheader()
+            writer.writerows(export_data)
+        
+        output.seek(0)
+        filename = f"price_monitor_{platform}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    else:
+        output = json.dumps(export_data, ensure_ascii=False, indent=2)
+        filename = f"price_monitor_{platform}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+        
+        return StreamingResponse(
+            iter([output]),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+
+
 @router.get("/price-monitor/products/{product_id}")
 async def get_monitored_product_detail(
     product_id: str,

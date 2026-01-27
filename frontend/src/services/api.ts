@@ -280,4 +280,30 @@ export const fetchSingleProduct = async (productId: string): Promise<{ success: 
   return response.data;
 };
 
+export const exportPriceMonitorData = async (
+  platform: string,
+  format: 'json' | 'csv'
+): Promise<void> => {
+  const response = await api.get('/price-monitor/export', {
+    params: { platform, format },
+    responseType: 'blob'
+  });
+  
+  const blob = new Blob([response.data], {
+    type: format === 'csv' ? 'text/csv' : 'application/json'
+  });
+  
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  link.download = `price_monitor_${platform}_${timestamp}.${format}`;
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 export default api;

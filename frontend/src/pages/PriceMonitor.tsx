@@ -7,6 +7,7 @@ import {
   startFetchTask,
   getFetchTaskStatus,
   fetchSingleProduct,
+  exportPriceMonitorData,
 } from '../services/api';
 import type {
   MonitoredProduct,
@@ -29,6 +30,8 @@ export default function PriceMonitor() {
   const [fetchTaskId, setFetchTaskId] = useState<string | null>(null);
   const [fetchStatus, setFetchStatus] = useState<string>('');
   const [fetchProgress, setFetchProgress] = useState({ completed: 0, total: 0 });
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -139,6 +142,19 @@ export default function PriceMonitor() {
     }
   };
 
+  const handleExport = async (format: 'json' | 'csv') => {
+    try {
+      setExportLoading(true);
+      setShowExportMenu(false);
+      await exportPriceMonitorData(platform, format);
+    } catch (e) {
+      console.error('Error exporting data:', e);
+      alert('Veri indirme hatası');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(price);
   };
@@ -186,6 +202,36 @@ export default function PriceMonitor() {
           >
             {fetchTaskId ? `Çekiliyor... (${fetchProgress.completed}/${fetchProgress.total})` : 'Tüm Fiyatları Çek'}
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={exportLoading || products.length === 0}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            >
+              {exportLoading ? 'İndiriliyor...' : 'Veriyi İndir'}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
+                <button
+                  onClick={() => handleExport('json')}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg flex items-center gap-2"
+                >
+                  <span className="text-blue-600 font-mono text-sm">JSON</span>
+                  <span className="text-gray-600 text-sm">formatında indir</span>
+                </button>
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg flex items-center gap-2"
+                >
+                  <span className="text-green-600 font-mono text-sm">CSV</span>
+                  <span className="text-gray-600 text-sm">formatında indir</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
