@@ -22,6 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
 app.include_router(router, prefix="/api")
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
@@ -38,7 +42,3 @@ else:
     @app.get("/")
     async def root():
         return {"message": "Pazaryeri Veri Analiz API", "status": "running"}
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
