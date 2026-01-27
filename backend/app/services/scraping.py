@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright, Browser, Page
 from playwright_stealth import Stealth
 from app.core.config import settings
+from app.core.logger import scraping_logger as logger
 from app.services.proxy_providers import proxy_manager, debug_logger, ProxyProvider
 
 stealth = Stealth()
@@ -42,16 +43,15 @@ class ScrapingService:
         proxy_config = provider.get_proxy_config(premium) if provider else None
         
         if proxy_config:
-            print(f"Launching browser with {self.current_provider_name.upper()} proxy...")
-            print(f"Proxy server: {proxy_config['server']}")
-            print(f"Proxy username: {proxy_config['username'][:50]}...")
+            logger.info(f"Launching browser with {self.current_provider_name.upper()} proxy")
+            logger.debug(f"Proxy server: {proxy_config['server']}")
             self.browser = await self.playwright.chromium.launch(
                 headless=True,
                 proxy=proxy_config
             )
-            print(f"Browser launched with {self.current_provider_name} proxy!")
+            logger.info(f"Browser launched with {self.current_provider_name} proxy")
         else:
-            print("No proxy configured, using direct connection")
+            logger.info("No proxy configured, using direct connection")
             self.browser = await self.playwright.chromium.launch(headless=True)
         
         self.context = await self.browser.new_context(
@@ -89,19 +89,19 @@ class ScrapingService:
             try:
                 await self.context.close()
             except Exception as e:
-                print(f"Error closing context: {e}")
+                logger.warning(f"Error closing context: {e}")
             self.context = None
         if self.browser:
             try:
                 await self.browser.close()
             except Exception as e:
-                print(f"Error closing browser: {e}")
+                logger.warning(f"Error closing browser: {e}")
             self.browser = None
         if self.playwright:
             try:
                 await self.playwright.stop()
             except Exception as e:
-                print(f"Error stopping playwright: {e}")
+                logger.warning(f"Error stopping playwright: {e}")
             self.playwright = None
         
         if reset_provider:
@@ -113,11 +113,11 @@ class ScrapingService:
         
         fallback = proxy_manager.get_fallback_provider(self.current_provider_name)
         if fallback:
-            print(f"Switching to fallback provider: {fallback.name}")
+            logger.info(f"Switching to fallback provider: {fallback.name}")
             await self.init_browser(fallback.name)
             return True
         
-        print("No fallback provider available")
+        logger.warning("No fallback provider available")
         return False
     
     async def _fetch_with_scraperapi_proxy(self, url: str, session_number: int = 1, render_js: bool = False, wait_for_selector: str = None, premium: bool = True) -> Optional[str]:
@@ -151,8 +151,8 @@ class ScrapingService:
         
         proxy_username = ".".join(username_parts)
         
-        print(f"ScraperAPI PROXY PORT request: {url[:60]}...")
-        print(f"Using session_number: {session_number}, render_js: {render_js}")
+        logger.debug(f"ScraperAPI PROXY PORT request: {url[:60]}...")
+        logger.debug(f"Using session_number: {session_number}, render_js: {render_js}")
         
         try:
             timeout = aiohttp.ClientTimeout(total=180)
@@ -176,7 +176,7 @@ class ScrapingService:
                         }
                     ]
                     headers['x-sapi-instruction_set'] = json.dumps(instruction_set)
-                    print(f"Waiting for selector: {wait_for_selector}")
+                    logger.debug(f"Waiting for selector: {wait_for_selector}")
             
             async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
                 async with session.get(
@@ -187,28 +187,28 @@ class ScrapingService:
                     ssl=False
                 ) as response:
                     status = response.status
-                    print(f"ScraperAPI PROXY response status: {status}")
+                    logger.debug(f"ScraperAPI PROXY response status: {status}")
                     
                     debug_logger.log_request(url, "scraperapi-proxy", status)
                     
                     if status == 200:
                         html = await response.text()
-                        print(f"ScraperAPI PROXY returned {len(html)} bytes")
+                        logger.debug(f"ScraperAPI PROXY returned {len(html)} bytes")
                         return html
                     elif status in [403, 429, 500, 503]:
                         content = await response.text()
                         debug_logger.save_debug_html(url, content, status, "scraperapi-proxy")
-                        print(f"ScraperAPI PROXY error {status}: {content[:200]}")
+                        logger.warning(f"ScraperAPI PROXY error {status}: {content[:200]}")
                         return None
                     else:
-                        print(f"ScraperAPI PROXY unexpected status: {status}")
+                        logger.warning(f"ScraperAPI PROXY unexpected status: {status}")
                         return None
         except asyncio.TimeoutError:
-            print(f"ScraperAPI PROXY timeout for {url}")
+            logger.error(f"ScraperAPI PROXY timeout for {url[:60]}...")
             debug_logger.log_error(url, "scraperapi-proxy", Exception("Timeout"))
             return None
         except Exception as e:
-            print(f"ScraperAPI PROXY error: {e}")
+            logger.error(f"ScraperAPI PROXY error: {e}")
             debug_logger.log_error(url, "scraperapi-proxy", e)
             return None
     
@@ -229,35 +229,35 @@ class ScrapingService:
         
         api_url = f"{SCRAPERAPI_BASE_URL}?" + "&".join([f"{k}={quote_plus(str(v))}" for k, v in params.items()])
         
-        print(f"ScraperAPI HTTP request: {url[:60]}...")
+        logger.debug(f"ScraperAPI HTTP request: {url[:60]}...")
         
         try:
             timeout = aiohttp.ClientTimeout(total=120)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(api_url) as response:
                     status = response.status
-                    print(f"ScraperAPI response status: {status}")
+                    logger.debug(f"ScraperAPI response status: {status}")
                     
                     debug_logger.log_request(url, "scraperapi", status)
                     
                     if status == 200:
                         html = await response.text()
-                        print(f"ScraperAPI returned {len(html)} bytes")
+                        logger.debug(f"ScraperAPI returned {len(html)} bytes")
                         return html
                     elif status in [403, 429, 500, 503]:
                         content = await response.text()
                         debug_logger.save_debug_html(url, content, status, "scraperapi")
-                        print(f"ScraperAPI error {status}: {content[:200]}")
+                        logger.warning(f"ScraperAPI error {status}: {content[:200]}")
                         return None
                     else:
-                        print(f"ScraperAPI unexpected status: {status}")
+                        logger.warning(f"ScraperAPI unexpected status: {status}")
                         return None
         except asyncio.TimeoutError:
-            print(f"ScraperAPI timeout for {url}")
+            logger.error(f"ScraperAPI timeout for {url[:60]}...")
             debug_logger.log_error(url, "scraperapi", Exception("Timeout"))
             return None
         except Exception as e:
-            print(f"ScraperAPI error: {e}")
+            logger.error(f"ScraperAPI error: {e}")
             debug_logger.log_error(url, "scraperapi", e)
             return None
     
@@ -272,7 +272,7 @@ class ScrapingService:
                     if '-p-' in redirect_url or '-pm-' in redirect_url:
                         return redirect_url.split('?')[0]
             except Exception as e:
-                print(f"Error parsing tracking URL: {e}")
+                logger.debug(f"Error parsing tracking URL: {e}")
         return None
     
     def _extract_sponsored_brands_from_search(self, html: str) -> List[Dict[str, Any]]:
@@ -361,9 +361,7 @@ class ScrapingService:
         
         if sponsored_brands:
             total_products = sum(len(b['products']) for b in sponsored_brands)
-            print(f"Extracted {len(sponsored_brands)} brand ads with {total_products} total products")
-            for brand in sponsored_brands:
-                print(f"  - {brand['seller_name']}: {len(brand['products'])} products")
+            logger.info(f"Extracted {len(sponsored_brands)} brand ads with {total_products} total products")
         
         return sponsored_brands
     
@@ -429,7 +427,7 @@ class ScrapingService:
                 })
         
         if sponsored_products:
-            print(f"Found {len(sponsored_products)} sponsored products in search results at positions: {[p['order_index'] for p in sponsored_products]}")
+            logger.info(f"Found {len(sponsored_products)} sponsored products at positions: {[p['order_index'] for p in sponsored_products]}")
         
         return sponsored_products
     
@@ -476,7 +474,7 @@ class ScrapingService:
                     pass
         
         if basket_prices:
-            print(f"Extracted {len(basket_prices)} basket campaign prices from search page")
+            logger.info(f"Extracted {len(basket_prices)} basket campaign prices from search page")
         
         return basket_prices
     
@@ -498,7 +496,7 @@ class ScrapingService:
         product_cards = soup.select('article[class*="productCard-module_article"]')
         
         if product_cards:
-            print(f"Found {len(product_cards)} product cards via article selector")
+            logger.debug(f"Found {len(product_cards)} product cards via article selector")
             cards_with_links = []
             for card in product_cards:
                 card_str = str(card)
@@ -509,17 +507,17 @@ class ScrapingService:
         else:
             product_links = soup.select('a[class*="productCardLink"][href*="-p-"], a[class*="productCardLink"][href*="-pm-"]')
             if product_links:
-                print(f"Found {len(product_links)} product links via productCardLink selector")
+                logger.debug(f"Found {len(product_links)} product links via productCardLink selector")
             else:
                 product_containers = soup.select('ul[class*="productListContent"], div[class*="productListContent"]')
                 if product_containers:
                     for container in product_containers:
                         links = container.select('a[href*="-p-"], a[href*="-pm-"]')
                         product_links.extend(links)
-                    print(f"Found {len(product_links)} links in {len(product_containers)} product containers")
+                    logger.debug(f"Found {len(product_links)} links in {len(product_containers)} product containers")
                 else:
                     product_links = soup.select('a[href*="-p-"], a[href*="-pm-"]')
-                    print(f"Using fallback: found {len(product_links)} total product links")
+                    logger.debug(f"Using fallback: found {len(product_links)} total product links")
             cards_with_links = [(link, False) for link in product_links]
         
         organic_count = 0
@@ -567,9 +565,7 @@ class ScrapingService:
             if organic_count >= max_products:
                 break
         
-        print(f"Extracted {len(urls)} ORGANIC product URLs (skipped {sponsored_count} sponsored)")
-        if urls:
-            print(f"First 3 URLs: {urls[:3]}")
+        logger.info(f"Extracted {len(urls)} organic product URLs (skipped {sponsored_count} sponsored)")
         
         return urls
     
@@ -583,7 +579,7 @@ class ScrapingService:
         """
         
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
-        print(f"Fetching search results via ScraperAPI PROXY PORT: {search_url}")
+        logger.info(f"Fetching search results: {search_url[:60]}...")
         
         session_number = random.randint(1, 10000)
         html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
@@ -594,18 +590,18 @@ class ScrapingService:
             title_text = title.get_text() if title else ""
             
             if "En Çok Tavsiye Edilen" in title_text or "Anasayfa" in title_text:
-                print(f"WARNING: Got homepage instead of search results (title: {title_text[:50]})")
-                print("Retrying with new session...")
+                logger.warning(f"Got homepage instead of search results (title: {title_text[:50]})")
+                logger.info("Retrying with new session...")
                 session_number = random.randint(10001, 20000)
                 html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
         
         if not html:
-            print("ScraperAPI PROXY failed, trying Bright Data fallback...")
+            logger.warning("ScraperAPI PROXY failed, trying Bright Data fallback...")
             self.current_provider_name = "brightdata"
             if self.browser:
-                print("Closing existing browser before switching to Bright Data...")
+                logger.debug("Closing existing browser before switching to Bright Data...")
                 await self.close_browser()
-            print("Initializing Bright Data browser with Playwright...")
+            logger.info("Initializing Bright Data browser with Playwright...")
             await self.init_browser("brightdata")
             urls = await self._get_product_urls_from_search(keyword, max_products)
             return {'urls': urls, 'sponsored_brands': [], 'sponsored_product_urls': set()}
@@ -614,7 +610,7 @@ class ScrapingService:
         
         title = soup.find('title')
         title_text = title.get_text() if title else "No title"
-        print(f"Page title: {title_text[:80]}")
+        logger.debug(f"Page title: {title_text[:80]}")
         
         if settings.DEBUG_SAVE_HTML:
             import os
@@ -623,7 +619,7 @@ class ScrapingService:
             debug_file = f"{debug_dir}/search_{keyword.replace(' ', '_')}.html"
             with open(debug_file, 'w', encoding='utf-8') as f:
                 f.write(html)
-            print(f"Saved search HTML to {debug_file}")
+            logger.debug(f"Saved search HTML to {debug_file}")
         
         sponsored_brands = self._extract_sponsored_brands_from_search(html)
         
@@ -661,7 +657,7 @@ class ScrapingService:
         )
         
         if not html:
-            print("JS render failed, trying standard ScraperAPI...")
+            logger.debug("JS render failed, trying standard ScraperAPI...")
             html = await self._fetch_with_scraperapi_proxy(url, session_number=session_number)
         product_data = None
         
@@ -724,14 +720,12 @@ class ScrapingService:
                 debug_file = f"{debug_dir}/product_{external_id}.html"
                 with open(debug_file, 'w', encoding='utf-8') as f:
                     f.write(html)
-                print(f"Saved product HTML to {debug_file}")
-                print(f"  -> Extracted {len(product_data.get('other_sellers', []))} other sellers")
-                print(f"  -> Extracted {len(product_data.get('reviews', []))} reviews")
-                print(f"  -> Discounted price: {product_data.get('discounted_price', 'NOT FOUND')}")
+                logger.debug(f"Saved product HTML to {debug_file}")
+                logger.debug(f"Extracted {len(product_data.get('other_sellers', []))} sellers, {len(product_data.get('reviews', []))} reviews, discount: {product_data.get('discounted_price', 'N/A')}")
             
             return product_data
         
-        print(f"ScraperAPI failed for product: {url}")
+        logger.warning(f"ScraperAPI failed for product: {url[:60]}...")
         return None
     
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> Dict[str, Any]:
@@ -762,13 +756,13 @@ class ScrapingService:
                 await self.init_browser()
             product_urls = await self._get_product_urls_from_search(keyword, max_products)
         
-        print(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
+        logger.info(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
         if basket_campaign_prices:
-            print(f"Found {len(basket_campaign_prices)} basket campaign prices from search page")
+            logger.info(f"Found {len(basket_campaign_prices)} basket campaign prices from search page")
         
         products = []
         for i, url in enumerate(product_urls[:max_products]):
-            print(f"Scraping product {i+1}/{len(product_urls[:max_products])}: {url[:80]}...")
+            logger.info(f"Scraping product {i+1}/{len(product_urls[:max_products])}: {url[:60]}...")
             try:
                 product_data = await self.scrape_product_detail_page(url)
                 if product_data:
@@ -779,17 +773,16 @@ class ScrapingService:
                         product_data['discounted_price'] = basket_campaign_prices[url]
                         if product_data.get('price') and basket_campaign_prices[url]:
                             product_data['discount_percentage'] = round((1 - basket_campaign_prices[url] / product_data['price']) * 100, 1)
-                        print(f"  -> Applied basket campaign price from search: {basket_campaign_prices[url]} TL")
+                        logger.debug(f"Applied basket campaign price from search: {basket_campaign_prices[url]} TL")
                     
                     products.append(product_data)
-                    print(f"  -> Successfully scraped: {product_data.get('name', 'Unknown')[:50]}")
+                    logger.debug(f"Scraped: {product_data.get('name', 'Unknown')[:50]}")
                 await self._random_delay(1000, 3000)
             except Exception as e:
                 debug_logger.log_error(url, self.current_provider_name, e)
                 continue
         
-        print(f"Successfully scraped {len(products)} ORGANIC products with full details")
-        print(f"Found {len(sponsored_products)} sponsored products, {len(sponsored_brands)} brand ads")
+        logger.info(f"Scraped {len(products)} organic products, {len(sponsored_products)} sponsored, {len(sponsored_brands)} brand ads")
         return {
             'products': products,
             'sponsored_brands': sponsored_brands,
@@ -805,23 +798,23 @@ class ScrapingService:
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         
         try:
-            print(f"Fetching search results: {search_url}")
-            print(f"Using provider: {self.current_provider_name}")
+            logger.info(f"Fetching search results: {search_url[:60]}...")
+            logger.debug(f"Using provider: {self.current_provider_name}")
             
             response = await page.goto(search_url, timeout=90000, wait_until="domcontentloaded")
             status = response.status if response else 0
-            print(f"Search page response: {status}")
+            logger.debug(f"Search page response: {status}")
             
             debug_logger.log_request(search_url, self.current_provider_name, status)
             
             if status in [403, 429, 503]:
                 content = await page.content()
                 debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
-                print(f"ERROR: Received {status} status - possible bot detection or rate limiting")
+                logger.error(f"Received {status} status - possible bot detection or rate limiting")
                 await page.close()
                 
                 if retry_count < MAX_RETRIES and self.current_provider_name != "direct":
-                    print(f"Attempting fallback (retry {retry_count + 1}/{MAX_RETRIES})...")
+                    logger.info(f"Attempting fallback (retry {retry_count + 1}/{MAX_RETRIES})...")
                     if await self.reinit_with_fallback():
                         return await self._get_product_urls_from_search(keyword, max_products, retry_count + 1)
                 return []
@@ -833,7 +826,7 @@ class ScrapingService:
             
             if "captcha" in content.lower() or "robot" in content.lower():
                 debug_logger.save_debug_html(search_url, content, status, self.current_provider_name)
-                print("WARNING: CAPTCHA or robot detection detected!")
+                logger.warning("CAPTCHA or robot detection detected!")
                 return []
             
             soup = BeautifulSoup(content, 'html.parser')
@@ -868,12 +861,12 @@ class ScrapingService:
         await self._apply_anti_detection(page)
         
         try:
-            print(f"Playwright scraping: {url[:60]}...")
+            logger.debug(f"Playwright scraping: {url[:60]}...")
             response = await page.goto(url, timeout=45000, wait_until="domcontentloaded")
             status = response.status if response else 0
             
             if status not in [200, 301, 302]:
-                print(f"Playwright bad response for {url}: {status}")
+                logger.warning(f"Playwright bad response for {url[:50]}: {status}")
                 return None
             
             try:
@@ -894,12 +887,12 @@ class ScrapingService:
                 debug_file = f"{debug_dir}/playwright_{self._extract_external_id(url)}.html"
                 with open(debug_file, 'w', encoding='utf-8') as f:
                     f.write(content)
-                print(f"Saved Playwright HTML to {debug_file}")
+                logger.debug(f"Saved Playwright HTML to {debug_file}")
             
             return html_data
             
         except Exception as e:
-            print(f"Playwright error for {url}: {e}")
+            logger.error(f"Playwright error for {url[:50]}: {e}")
             return None
         finally:
             await page.close()
@@ -909,7 +902,7 @@ class ScrapingService:
             product_data = await self._scrape_product_via_http_api(url)
             
             if not product_data:
-                print(f"ScraperAPI failed completely, falling back to Playwright for full scrape: {url[:60]}...")
+                logger.info(f"ScraperAPI failed, falling back to Playwright: {url[:50]}...")
                 self.current_provider_name = "brightdata"
                 if self.browser:
                     await self.close_browser()
@@ -932,7 +925,7 @@ class ScrapingService:
             debug_logger.log_request(url, self.current_provider_name, status)
             
             if status not in [200, 301, 302]:
-                print(f"Bad response for {url}: {status}")
+                logger.warning(f"Bad response for {url[:50]}: {status}")
                 content = await page.content()
                 debug_logger.save_debug_html(url, content, status, self.current_provider_name)
                 return None
@@ -1010,10 +1003,10 @@ class ScrapingService:
             json_str = re.sub(r',\s*]', ']', json_str)
             
             result = json.loads(json_str)
-            print(f"utagData extracted: {list(result.keys())[:10]}...")
+            logger.debug(f"utagData extracted: {list(result.keys())[:10]}...")
             return result
         except Exception as e:
-            print(f"Error extracting utagData: {e}")
+            logger.debug(f"Error extracting utagData: {e}")
         return None
     
     def _extract_json_ld_data(self, soup: BeautifulSoup) -> Optional[Dict]:
@@ -1032,7 +1025,7 @@ class ScrapingService:
                 except:
                     continue
         except Exception as e:
-            print(f"Error extracting JSON-LD: {e}")
+            logger.debug(f"Error extracting JSON-LD: {e}")
         return None
     
     def _parse_float(self, value) -> Optional[float]:
@@ -1126,11 +1119,11 @@ class ScrapingService:
                 elif ',' in price_str:
                     price_str = price_str.replace(',', '.')
                 data['price'] = float(price_str)
-                print(f"Parsed price: {data['price']} from {utag['product_prices'][0]}")
+                logger.debug(f"Parsed price: {data['price']} from {utag['product_prices'][0]}")
             except Exception as e:
-                print(f"Error parsing price: {e}")
+                logger.debug(f"Error parsing price: {e}")
         
-        print(f"_parse_utag_data result: name={data.get('name', 'N/A')[:30] if data.get('name') else 'N/A'}, price={data.get('price')}, rating={data.get('rating')}, brand={data.get('brand')}")
+        logger.debug(f"utag result: name={data.get('name', 'N/A')[:30] if data.get('name') else 'N/A'}, price={data.get('price')}")
         
         return data
     
@@ -1211,7 +1204,7 @@ class ScrapingService:
                     try:
                         price_str = price_match.group(1).replace('.', '').replace(',', '.')
                         discounted_price = float(price_str)
-                        print(f"Found sepete özel price via {selector}: {discounted_price}")
+                        logger.debug(f"Found sepete özel price via {selector}: {discounted_price}")
                         break
                     except:
                         pass
@@ -1232,7 +1225,7 @@ class ScrapingService:
                     try:
                         price_str = match.group(1).replace('.', '').replace(',', '.')
                         discounted_price = float(price_str)
-                        print(f"Found sepete özel price via pattern '{pattern[:30]}': {discounted_price}")
+                        logger.debug(f"Found sepete özel price: {discounted_price}")
                         break
                     except:
                         pass
@@ -1249,7 +1242,7 @@ class ScrapingService:
                             try:
                                 price_str = price_match.group(1).replace('.', '').replace(',', '.')
                                 discounted_price = float(price_str)
-                                print(f"Found sepete özel price via parent traversal: {discounted_price}")
+                                logger.debug(f"Found sepete özel price via parent: {discounted_price}")
                                 break
                             except:
                                 pass
@@ -1369,10 +1362,10 @@ class ScrapingService:
                     sellers.append(seller_data)
                 
                 if sellers:
-                    print(f"Extracted {len(sellers)} other sellers from JSON")
+                    logger.debug(f"Extracted {len(sellers)} other sellers from JSON")
                     return sellers
         except Exception as e:
-            print(f"Error extracting sellers from JSON: {e}")
+            logger.debug(f"Error extracting sellers from JSON: {e}")
         
         seller_links = soup.select('a[href*="/magaza/"]')
         seen_sellers = set()
@@ -1434,7 +1427,7 @@ class ScrapingService:
                             }
                             reviews.append(review)
             except Exception as e:
-                print(f"Error parsing JSON-LD for reviews: {e}")
+                logger.debug(f"Error parsing JSON-LD for reviews: {e}")
                 continue
         
         if not reviews:

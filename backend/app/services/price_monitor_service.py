@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
+from app.core.logger import price_monitor_logger as logger
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
 
@@ -68,10 +69,10 @@ class PriceMonitorService:
                         html = await resp.text()
                         return self._parse_campaign_price_from_html(html, seller_name)
                     else:
-                        print(f"Campaign price fetch error for {seller_name}: status {resp.status}")
+                        logger.warning(f"Campaign price fetch error for {seller_name}: status {resp.status}")
                         return None
         except Exception as e:
-            print(f"Error fetching campaign price for {seller_name}: {e}")
+            logger.error(f"Error fetching campaign price for {seller_name}: {e}")
             return None
     
     def _parse_campaign_price_from_html(self, html: str, seller_name: str) -> Optional[Dict[str, Any]]:
@@ -124,7 +125,7 @@ class PriceMonitorService:
                             break
         
         if result['campaign_price']:
-            print(f"Campaign price found for {seller_name}: {result['campaign_price']} TL (original: {result['original_price']} TL)")
+            logger.info(f"Campaign price found for {seller_name}: {result['campaign_price']} TL (original: {result['original_price']} TL)")
             return result
         
         return None
@@ -177,10 +178,10 @@ class PriceMonitorService:
                         if data.get('statusCode') == 200 and 'data' in data:
                             return data['data']
                     else:
-                        print(f"Listings API error for {sku}: status {resp.status}")
+                        logger.warning(f"Listings API error for {sku}: status {resp.status}")
                         return None
         except Exception as e:
-            print(f"Error fetching listings for {sku}: {e}")
+            logger.error(f"Error fetching listings for {sku}: {e}")
             return None
     
     def _parse_campaign_tags(self, tag_list: List[Dict[str, Any]]) -> List[str]:
@@ -280,7 +281,7 @@ class PriceMonitorService:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
-            print(f"No data for SKU {sku} - marked as inactive")
+            logger.warning(f"No data for SKU {sku} - marked as inactive")
             return False
         
         sellers = self.parse_listings(data)
@@ -288,16 +289,16 @@ class PriceMonitorService:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
-            print(f"No sellers for SKU {sku} - marked as inactive")
+            logger.warning(f"No sellers for SKU {sku} - marked as inactive")
             return False
         
         if not product.is_active:
             product.is_active = True
-            print(f"SKU {sku} reactivated - sellers found")
+            logger.info(f"SKU {sku} reactivated - sellers found")
         
         campaign_sellers = [s for s in sellers if s.get('has_campaign_tag', False)]
         if campaign_sellers and product.product_url:
-            print(f"Found {len(campaign_sellers)} sellers with campaigns - fetching real prices...")
+            logger.info(f"Found {len(campaign_sellers)} sellers with campaigns - fetching real prices...")
             for seller in campaign_sellers:
                 try:
                     campaign_data = await self.fetch_seller_campaign_price(
@@ -308,10 +309,10 @@ class PriceMonitorService:
                         seller['campaign_price'] = campaign_data['campaign_price']
                         seller['original_price_from_page'] = campaign_data.get('original_price')
                         seller['price'] = campaign_data['campaign_price']
-                        print(f"Updated {seller['merchant_name']} price to campaign price: {campaign_data['campaign_price']} TL")
+                        logger.debug(f"Updated {seller['merchant_name']} price to campaign price: {campaign_data['campaign_price']} TL")
                     await asyncio.sleep(0.5)
                 except Exception as e:
-                    print(f"Error fetching campaign price for {seller['merchant_name']}: {e}")
+                    logger.error(f"Error fetching campaign price for {seller['merchant_name']}: {e}")
         
         for seller in sellers:
             snapshot = SellerSnapshot(
@@ -341,7 +342,7 @@ class PriceMonitorService:
         product.last_fetched_at = datetime.utcnow()
         db.commit()
         
-        print(f"Saved {len(sellers)} sellers for SKU {sku}")
+        logger.info(f"Saved {len(sellers)} sellers for SKU {sku}")
         return True
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "hepsiburada"):
@@ -368,7 +369,7 @@ class PriceMonitorService:
         for product in products:
             db.refresh(task)
             if task.stop_requested:
-                print(f"Stop requested, finishing after {completed} products")
+                logger.info(f"Stop requested, finishing after {completed} products")
                 task.status = "stopped"
                 task.completed_at = datetime.utcnow()
                 db.commit()
@@ -381,7 +382,7 @@ class PriceMonitorService:
                 else:
                     failed += 1
             except Exception as e:
-                print(f"Error processing product {product.sku}: {e}")
+                logger.error(f"Error processing product {product.sku}: {e}")
                 failed += 1
             
             task.completed_products = completed
@@ -394,7 +395,7 @@ class PriceMonitorService:
         task.completed_at = datetime.utcnow()
         db.commit()
         
-        print(f"Fetch task completed: {completed} success, {failed} failed")
+        logger.info(f"Fetch task completed: {completed} success, {failed} failed")
 
 
 price_monitor_service = PriceMonitorService()

@@ -12,6 +12,7 @@ from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 from app.services.price_monitor_service import price_monitor_service
 from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
+from app.core.logger import api_logger as logger
 
 router = APIRouter()
 
@@ -306,8 +307,7 @@ async def run_scraping_background(task_id: str):
         finally:
             await scraper.close_browser()
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Search task {task_id} failed: {e}")
         task = db.query(SearchTask).filter(SearchTask.id == task_id).first()
         if task:
             task.status = "failed"
@@ -773,6 +773,7 @@ async def add_monitored_products(
                 db.add(product)
                 added += 1
         except Exception as e:
+            logger.warning(f"Import error for SKU {item.sku}: {e}")
             errors.append({"sku": item.sku or item.productUrl, "error": str(e)})
     
     db.commit()

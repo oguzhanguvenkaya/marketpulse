@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from app.core.config import settings
+from app.core.logger import proxy_logger as logger
 import os
 from datetime import datetime
 
@@ -131,13 +132,21 @@ class DebugLogger:
         os.makedirs(self.debug_path, exist_ok=True)
     
     def log_request(self, url: str, provider: str, status: int, message: str = ""):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"[{timestamp}] Provider: {provider} | URL: {url[:80]}... | Status: {status} | {message}"
-        print(log_entry)
+        log_msg = f"Provider: {provider} | URL: {url[:80]}... | Status: {status}"
+        if message:
+            log_msg += f" | {message}"
+        
+        if status == 200:
+            logger.info(log_msg)
+        elif status >= 400:
+            logger.warning(log_msg)
+        else:
+            logger.debug(log_msg)
         
         log_file = os.path.join(self.debug_path, "scraping.log")
         with open(log_file, "a") as f:
-            f.write(log_entry + "\n")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"[{timestamp}] {log_msg}\n")
     
     def save_debug_html(self, url: str, html_content: str, status: int, provider: str):
         if not self.save_html:
@@ -155,17 +164,17 @@ class DebugLogger:
             f.write(f"<!-- Timestamp: {timestamp} -->\n")
             f.write(html_content)
         
-        print(f"Debug HTML saved: {filepath}")
+        logger.debug(f"Debug HTML saved: {filepath}")
         return filepath
     
     def log_error(self, url: str, provider: str, error: Exception):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"[{timestamp}] ERROR | Provider: {provider} | URL: {url[:80]}... | Error: {str(error)}"
-        print(log_entry)
+        log_msg = f"Provider: {provider} | URL: {url[:80]}... | Error: {str(error)}"
+        logger.error(log_msg)
         
         log_file = os.path.join(self.debug_path, "scraping_errors.log")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, "a") as f:
-            f.write(log_entry + "\n")
+            f.write(f"[{timestamp}] {log_msg}\n")
 
 
 proxy_manager = ProxyManager()
