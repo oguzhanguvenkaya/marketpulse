@@ -5,6 +5,7 @@ import {
   addMonitoredProducts,
   deleteMonitoredProduct,
   startFetchTask,
+  stopFetchTask,
   getFetchTaskStatus,
   fetchSingleProduct,
   exportPriceMonitorData,
@@ -30,7 +31,6 @@ export default function PriceMonitor() {
   const [fetchTaskId, setFetchTaskId] = useState<string | null>(null);
   const [fetchStatus, setFetchStatus] = useState<string>('');
   const [fetchProgress, setFetchProgress] = useState({ completed: 0, total: 0 });
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function PriceMonitor() {
           const status = await getFetchTaskStatus(fetchTaskId);
           setFetchStatus(status.status);
           setFetchProgress({ completed: status.completed_products, total: status.total_products });
-          if (status.status === 'completed') {
+          if (status.status === 'completed' || status.status === 'stopped' || status.status === 'failed') {
             setFetchTaskId(null);
             loadProducts();
           }
@@ -106,12 +106,23 @@ export default function PriceMonitor() {
 
   const handleFetchAll = async () => {
     try {
-      const result = await startFetchTask();
+      const result = await startFetchTask(platform);
       setFetchTaskId(result.task_id);
       setFetchStatus('started');
     } catch (e) {
       console.error('Error starting fetch:', e);
       alert('Fiyat çekme başlatılamadı');
+    }
+  };
+
+  const handleStopFetch = async () => {
+    if (!fetchTaskId) return;
+    try {
+      await stopFetchTask(fetchTaskId);
+      setFetchStatus('stopping');
+    } catch (e) {
+      console.error('Error stopping fetch:', e);
+      alert('Durdurma isteği gönderilemedi');
     }
   };
 
@@ -142,11 +153,10 @@ export default function PriceMonitor() {
     }
   };
 
-  const handleExport = async (format: 'json' | 'csv') => {
+  const handleExport = async () => {
     try {
       setExportLoading(true);
-      setShowExportMenu(false);
-      await exportPriceMonitorData(platform, format);
+      await exportPriceMonitorData(platform);
     } catch (e) {
       console.error('Error exporting data:', e);
       alert('Veri indirme hatası');
@@ -195,43 +205,37 @@ export default function PriceMonitor() {
           >
             SKU Ekle
           </button>
-          <button
-            onClick={handleFetchAll}
-            disabled={!!fetchTaskId}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {fetchTaskId ? `Çekiliyor... (${fetchProgress.completed}/${fetchProgress.total})` : 'Tüm Fiyatları Çek'}
-          </button>
-          <div className="relative">
+          {fetchTaskId ? (
+            <>
+              <span className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">
+                {fetchStatus === 'stopping' ? 'Durduruluyor...' : `Çekiliyor... (${fetchProgress.completed}/${fetchProgress.total})`}
+              </span>
+              <button
+                onClick={handleStopFetch}
+                disabled={fetchStatus === 'stopping'}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                Durdur
+              </button>
+            </>
+          ) : (
             <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              disabled={exportLoading || products.length === 0}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              onClick={handleFetchAll}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
             >
-              {exportLoading ? 'İndiriliyor...' : 'Veriyi İndir'}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              {platform === 'hepsiburada' ? 'Hepsiburada Fiyatları Çek' : 'Trendyol Fiyatları Çek'}
             </button>
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
-                <button
-                  onClick={() => handleExport('json')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg flex items-center gap-2"
-                >
-                  <span className="text-blue-600 font-mono text-sm">JSON</span>
-                  <span className="text-gray-600 text-sm">formatında indir</span>
-                </button>
-                <button
-                  onClick={() => handleExport('csv')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg flex items-center gap-2"
-                >
-                  <span className="text-green-600 font-mono text-sm">CSV</span>
-                  <span className="text-gray-600 text-sm">formatında indir</span>
-                </button>
-              </div>
-            )}
-          </div>
+          )}
+          <button
+            onClick={handleExport}
+            disabled={exportLoading || products.length === 0}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {exportLoading ? 'İndiriliyor...' : 'JSON İndir'}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
         </div>
       </div>
 

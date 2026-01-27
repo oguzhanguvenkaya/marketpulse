@@ -265,8 +265,15 @@ export const deleteMonitoredProduct = async (productId: string): Promise<void> =
   await api.delete(`/price-monitor/products/${productId}`);
 };
 
-export const startFetchTask = async (): Promise<{ task_id: string; status: string; message: string }> => {
-  const response = await api.post('/price-monitor/fetch');
+export const startFetchTask = async (platform: string = 'hepsiburada'): Promise<{ task_id: string; platform: string; status: string; message: string }> => {
+  const response = await api.post('/price-monitor/fetch', null, {
+    params: { platform }
+  });
+  return response.data;
+};
+
+export const stopFetchTask = async (taskId: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post(`/price-monitor/fetch/${taskId}/stop`);
   return response.data;
 };
 
@@ -281,16 +288,15 @@ export const fetchSingleProduct = async (productId: string): Promise<{ success: 
 };
 
 export const exportPriceMonitorData = async (
-  platform: string,
-  format: 'json' | 'csv'
+  platform: string
 ): Promise<void> => {
   const response = await api.get('/price-monitor/export', {
-    params: { platform, format },
+    params: { platform },
     responseType: 'blob'
   });
   
   const blob = new Blob([response.data], {
-    type: format === 'csv' ? 'text/csv' : 'application/json'
+    type: 'application/json'
   });
   
   const url = window.URL.createObjectURL(blob);
@@ -298,7 +304,7 @@ export const exportPriceMonitorData = async (
   link.href = url;
   
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  link.download = `price_monitor_${platform}_${timestamp}.${format}`;
+  link.download = `price_monitor_${platform}_${timestamp}.json`;
   
   document.body.appendChild(link);
   link.click();

@@ -810,13 +810,10 @@ async def get_monitored_products(
 @router.get("/price-monitor/export")
 async def export_price_monitor_data(
     platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
-    format: str = Query("json", description="Format: json veya csv"),
     db: Session = Depends(get_db)
 ):
-    """Ürün ve satıcı verilerini JSON veya CSV olarak indir"""
+    """SKU bazlı gruplandırılmış JSON olarak indir"""
     from fastapi.responses import StreamingResponse
-    import csv
-    import io
     import json
     
     products = db.query(MonitoredProduct).filter(
@@ -831,7 +828,10 @@ async def export_price_monitor_data(
             SellerSnapshot.monitored_product_id == product.id
         ).order_by(desc(SellerSnapshot.snapshot_date)).all()
         
+        sellers = []
+        min_price_seller = None
         seen_merchants = set()
+        
         for s in snapshots:
             if s.merchant_id not in seen_merchants:
                 seen_merchants.add(s.merchant_id)
@@ -843,12 +843,7 @@ async def export_price_monitor_data(
                 else:
                     merchant_url = ""
                 
-                export_data.append({
-                    "platform": product.platform,
-                    "sku": product.sku,
-                    "barcode": product.barcode or "",
-                    "product_name": product.product_name or "",
-                    "product_url": product.product_url or "",
+                seller_data = {
                     "merchant_name": s.merchant_name,
                     "merchant_id": s.merchant_id,
                     "merchant_url": merchant_url,
@@ -865,28 +860,34 @@ async def export_price_monitor_data(
                     "delivery_info": s.delivery_info or "",
                     "campaign_info": s.campaign_info or "",
                     "snapshot_date": s.snapshot_date.isoformat() if s.snapshot_date else ""
-                })
+                }
+                sellers.append(seller_data)
+                
+                if s.buybox_order == 1:
+                    min_price_seller = {
+                        "merchant_name": s.merchant_name,
+                        "merchant_url": merchant_url,
+                        "price": float(s.price) if s.price else None,
+                        "buybox_order": 1
+                    }
+        
+        product_data = {
+            "platform": product.platform,
+            "sku": product.sku,
+            "barcode": product.barcode or "",
+            "product_name": product.product_name or "",
+            "product_url": product.product_url or "",
+            "min_price": min_price_seller["price"] if min_price_seller else None,
+            "min_price_seller": min_price_seller,
+            "seller_count": len(sellers),
+            "sellers": sellers
+        }
+        export_data.append(product_data)
     
-    if format.lower() == "csv":
-        output = io.StringIO()
-        if export_data:
-            writer = csv.DictWriter(output, fieldnames=export_data[0].keys())
-            writer.writeheader()
-            writer.writerows(export_data)
-        
-        output.seek(0)
-        filename = f"price_monitor_{platform}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
-        
-        return StreamingResponse(
-            iter([output.getvalue()]),
-            media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        )
-    else:
-        output = json.dumps(export_data, ensure_ascii=False, indent=2)
-        filename = f"price_monitor_{platform}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
-        
-        return StreamingResponse(
+    output = json.dumps(export_data, ensure_ascii=False, indent=2)
+    filename = f"price_monitor_{platform}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+    
+    return StreamingResponse(
             iter([output]),
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename={filename}"}
@@ -975,13 +976,16 @@ async def delete_monitored_product(
     return {"success": True, "message": "Ürün silindi"}
 
 
-async def run_fetch_task(task_id: str, product_ids: List[str] = None):
+async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = None):
     """Arka planda satıcı fiyatlarını çek"""
     db = SessionLocal()
     try:
         task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
         if task:
-            await price_monitor_service.fetch_all_products(db, task, product_ids)
+            if platform == "trendyol":
+                await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform)
+            else:
+                await price_monitor_service.fetch_all_products(db, task, product_ids, platform)
     finally:
         db.close()
 
@@ -989,21 +993,46 @@ async def run_fetch_task(task_id: str, product_ids: List[str] = None):
 @router.post("/price-monitor/fetch")
 async def start_fetch_task(
     background_tasks: BackgroundTasks,
+    platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
     db: Session = Depends(get_db),
     product_ids: Optional[List[str]] = None
 ):
-    """Tüm izlenen ürünler için satıcı fiyatlarını çekmeye başla"""
-    task = PriceMonitorTask(status="pending")
+    """Belirli platform için satıcı fiyatlarını çekmeye başla"""
+    task = PriceMonitorTask(platform=platform, status="pending")
     db.add(task)
     db.commit()
     db.refresh(task)
     
-    background_tasks.add_task(run_fetch_task, str(task.id), product_ids)
+    background_tasks.add_task(run_fetch_task, str(task.id), platform, product_ids)
     
     return {
         "task_id": str(task.id),
+        "platform": platform,
         "status": "started",
-        "message": "Fiyat çekme işlemi başlatıldı"
+        "message": f"{platform.capitalize()} için fiyat çekme işlemi başlatıldı"
+    }
+
+
+@router.post("/price-monitor/fetch/{task_id}/stop")
+async def stop_fetch_task(
+    task_id: str,
+    db: Session = Depends(get_db)
+):
+    """Fiyat çekme görevini durdur"""
+    task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+    
+    if not task:
+        raise HTTPException(status_code=404, detail="Görev bulunamadı")
+    
+    if task.status not in ["pending", "running"]:
+        raise HTTPException(status_code=400, detail="Görev zaten tamamlanmış veya durdurulmuş")
+    
+    task.stop_requested = True
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": "Durdurma isteği gönderildi, mevcut ürün tamamlandıktan sonra duracak"
     }
 
 

@@ -144,15 +144,17 @@ class PriceMonitorService:
         print(f"Saved {len(sellers)} sellers for SKU {sku}")
         return True
     
-    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None):
-        """Tüm izlenen ürünler için satıcı verilerini çek"""
+    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "hepsiburada"):
+        """Belirli platform için izlenen ürünlerin satıcı verilerini çek"""
         if product_ids:
             products = db.query(MonitoredProduct).filter(
                 MonitoredProduct.id.in_(product_ids),
+                MonitoredProduct.platform == platform,
                 MonitoredProduct.is_active == True
             ).all()
         else:
             products = db.query(MonitoredProduct).filter(
+                MonitoredProduct.platform == platform,
                 MonitoredProduct.is_active == True
             ).all()
         
@@ -164,6 +166,14 @@ class PriceMonitorService:
         failed = 0
         
         for product in products:
+            db.refresh(task)
+            if task.stop_requested:
+                print(f"Stop requested, finishing after {completed} products")
+                task.status = "stopped"
+                task.completed_at = datetime.utcnow()
+                db.commit()
+                return
+            
             try:
                 success = await self.fetch_and_save_product(db, product)
                 if success:

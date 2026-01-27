@@ -211,7 +211,7 @@ class TrendyolPriceMonitorService:
         print(f"Saved {len(sellers)} sellers for Trendyol SKU {product.sku}")
         return True
     
-    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None):
+    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "trendyol"):
         """Tüm Trendyol izlenen ürünler için satıcı verilerini çek"""
         query = db.query(MonitoredProduct).filter(
             MonitoredProduct.platform == 'trendyol',
@@ -231,6 +231,14 @@ class TrendyolPriceMonitorService:
         failed = 0
         
         for product in products:
+            db.refresh(task)
+            if task.stop_requested:
+                print(f"Stop requested, finishing after {completed} Trendyol products")
+                task.status = "stopped"
+                task.completed_at = datetime.utcnow()
+                db.commit()
+                return
+            
             try:
                 success = await self.fetch_and_save_product(db, product)
                 if success:

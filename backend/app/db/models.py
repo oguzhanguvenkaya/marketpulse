@@ -209,7 +209,9 @@ class PriceMonitorTask(Base):
     __tablename__ = "price_monitor_tasks"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    platform = Column(String(50), default="hepsiburada")
     status = Column(String(20), default="pending")
+    stop_requested = Column(Boolean, default=False)
     total_products = Column(Integer, default=0)
     completed_products = Column(Integer, default=0)
     failed_products = Column(Integer, default=0)
