@@ -1286,12 +1286,22 @@ async def get_seller_products(
         if price_alert_only and not has_alert:
             continue
         
+        base_url = product.product_url or ""
+        if platform == "hepsiburada" and merchant_id:
+            if "?" in base_url:
+                seller_url = f"{base_url}&magaza={merchant_id}"
+            else:
+                seller_url = f"{base_url}?magaza={merchant_id}"
+        else:
+            seller_url = base_url
+        
         result.append({
             "product_id": str(product.id),
             "sku": product.sku,
             "barcode": product.barcode,
             "product_name": product.product_name,
             "product_url": product.product_url,
+            "seller_url": seller_url,
             "brand": product.brand,
             "seller_stock_code": product.seller_stock_code,
             "image_url": product.image_url,

@@ -175,9 +175,9 @@ export default function SellerDetail() {
                           <div className="text-white font-medium truncate" title={product.product_name}>
                             {product.product_name || 'Unnamed Product'}
                           </div>
-                          {product.product_url && (
+                          {(product.seller_url || product.product_url) && (
                             <a
-                              href={product.product_url}
+                              href={product.seller_url || product.product_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-accent-primary hover:underline"

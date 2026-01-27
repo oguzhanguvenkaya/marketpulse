@@ -355,6 +355,7 @@ export interface SellerProduct {
   barcode?: string;
   product_name?: string;
   product_url?: string;
+  seller_url?: string;
   brand?: string;
   seller_stock_code?: string;
   image_url?: string;
