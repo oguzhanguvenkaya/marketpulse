@@ -35,8 +35,6 @@ export default function PriceMonitor() {
   const [exportLoading, setExportLoading] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  type ExportFilter = 'all' | 'active' | 'inactive';
-  const [exportFilter, setExportFilter] = useState<ExportFilter>('all');
   const [brands, setBrands] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
@@ -183,7 +181,7 @@ export default function PriceMonitor() {
     }
   };
 
-  const handleExport = async (filter: ExportFilter = 'all') => {
+  const handleExport = async (filter: 'all' | 'active' | 'inactive' = 'all') => {
     try {
       setExportLoading(true);
       setShowExportMenu(false);
