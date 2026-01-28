@@ -1,0 +1,126 @@
+"listings": [
+            {
+                "merchantId": "fc358407-16c9-4485-a88b-d98c299b54c2",
+                "listingId": "8f6dc6d2-e48b-4a29-9efb-f5bfc064508e",
+                "merchantName": "CİLAKUTUSU",
+                "freeShipping": false,
+                "fastShipping": false,
+                "availableWarehouses": [],
+                "campaignIds": [],
+                "isBundle": false,
+                "shipmentDay": 0,
+                "shipmentType": "businessDays",
+                "isSalable": true,
+                "womanEntrepreneur": false,
+                "paymentTag": "bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar,kredi-karti-3-taksit,kuponlu-urunler-2,nivea-deneme,oto-aksesuarlarinda-indirim,pft-3-tagi-2,54942786-500-tl-ye-50-tl-indirim,54942836-500-tl-ye-50-tl-indirim,58604080-cilakutusu-saticili-urunlerde-5-indirim,59199875-cilakutusu-saticili-urunlerde-5-indirim,59333400-cilakutusu-saticili-urunlerde-5-indirim,59333527-500-tl-ye-50-tl-indirim,59458991-cilakutusu-saticili-urunlerde-5-indirim,ucuzunu-bulursan-farki-iade",
+                "campaignText": null,
+                "consumerFinanceTagList": "",
+                "price": {
+                    "value": 1139.05,
+                    "currency": 0
+                },
+                "originalPrice": {
+                    "value": 1199,
+                    "currency": 0
+                },
+                "minimumPrice": {
+                    "value": 1139.05,
+                    "currency": 0
+                },
+                "vatExcludedPrice": {
+                    "value": 949.21,
+                    "currency": 0
+                },
+                "unitPrice": null,
+                "logo": "https://images.hepsiburada.net/assets/marketplace/fc358407-16c9-4485-a88b-d98c299b54c2-46536.png",
+                "ratingSummary": {
+                    "lifetimeRating": 9.5,
+                    "ratingQuantity": 126
+                },
+                "merchantCity": "KOCAELİ",
+                "merchantCountry": "TÜRKİYE",
+                "merchantLabels": null,
+                "merchantInfo": {
+                    "id": "fc358407-16c9-4485-a88b-d98c299b54c2",
+                    "name": "CİLAKUTUSU",
+                    "logo": "https://images.hepsiburada.net/assets/marketplace/fc358407-16c9-4485-a88b-d98c299b54c2-46536.png",
+                    "ratingSummary": {
+                        "lifetimeRating": 9.5,
+                        "ratingQuantity": 126
+                    },
+                    "merchantLabels": null,
+                    "urlPostfix": "cilakutusu"
+                },
+                "prices": [
+                    {
+                        "formattedPrice": "1.139,05",
+                        "value": 1139.05,
+                        "currency": 0,
+                        "discountRate": 0
+                    }
+                ],
+                "discountRate": 0,
+                "warehouseId": "yeniadres",
+                "quantity": 1,
+                "buyboxOrder": 1,
+                "tagList": [
+                    {
+                        "tagId": "bakim-temizlik-urunlerinde-kacirilmayacak-firsatlar"
+                    },
+                    {
+                        "tagId": "kredi-karti-3-taksit"
+                    },
+                    {
+                        "tagId": "kuponlu-urunler-2"
+                    },
+                    {
+                        "tagId": "nivea-deneme"
+                    },
+                    {
+                        "tagId": "oto-aksesuarlarinda-indirim"
+                    },
+                    {
+                        "tagId": "pft-3-tagi-2"
+                    },
+                    {
+                        "tagId": "54942786-500-tl-ye-50-tl-indirim"
+                    },
+                    {
+                        "tagId": "54942836-500-tl-ye-50-tl-indirim"
+                    },
+                    {
+                        "tagId": "58604080-cilakutusu-saticili-urunlerde-5-indirim"
+                    },
+                    {
+                        "tagId": "59199875-cilakutusu-saticili-urunlerde-5-indirim"
+                    },
+                    {
+                        "tagId": "59333400-cilakutusu-saticili-urunlerde-5-indirim"
+                    },
+                    {
+                        "tagId": "59333527-500-tl-ye-50-tl-indirim"
+                    },
+                    {
+                        "tagId": "59458991-cilakutusu-saticili-urunlerde-5-indirim"
+                    },
+                    {
+                        "tagId": "ucuzunu-bulursan-farki-iade"
+                    }
+                ],
+                "jetDeliveryCities": [],
+                "isFulfilledByHB": false,
+                "shippingProfileId": "7d3e29a7-64a0-4e30-8c79-e90f49b38626",
+                "inStockDate": null,
+                "minimumPurchasableQuantity": 0,
+                "buyboxAlternatives": [
+                    {
+                        "algorithmName": "mdc_model_v2",
+                        "buyboxOrder": 1
+                    }
+                ],
+                "customizationConfiguration": [],
+                "isCampaignParticipationClosed": false,
+                "aiBasedShipmentDay": 0,
+                "campaigns": [],
+                "pbs": "rliZnIq8IfIB8fj3yZEE8aVHXhmqj/St6rOsp1RTEYh44n1y7jf+UIjt29EiIR61YI6f5/34gMcSTNVTqcMxaHYJBvdHX19AnzorwVi1vVXnupRR1Y/OqSnOtxbBnkZyFazGMkiHQrGnqUlNjt7xETwtFphosJghZrDAUa3I1OCu1CKLH19dLNUbl1mYaAw8ZuDUb1YGbkeac8fbBkd6t1Fw/ijJlxqyyj0QomktQht0jk7pZxJR9ZsKmQk4UaKUwmUCK5ngNL2TefqF9KqziwLkQ2lJXNx3Kv2kvIMQt1nV5o6f1jc92sKgE0p024uhsFq791O8ogAWaGBv2/q0BGVOLjbfzQsbKV/5kRsKgioVpNtMFgL1AzcC7QTJ1o1S"
+            },
