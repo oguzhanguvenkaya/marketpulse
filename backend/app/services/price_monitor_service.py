@@ -397,16 +397,22 @@ class PriceMonitorService:
         
         percentage_discount_sellers = [s for s in sellers if s.get('has_percentage_discount', False)]
         if percentage_discount_sellers:
-            logger.info(f"[SKU: {sku}] {len(percentage_discount_sellers)} satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...")
+            seller_details = [f"{s.get('merchant_name')} (%{s.get('discount_percentage', '?')} - {s.get('discount_tag_id', 'N/A')})" for s in percentage_discount_sellers]
+            logger.info(f"[SKU: {sku}] {len(percentage_discount_sellers)} satıcıda yüzde indirim bulundu: {', '.join(seller_details)}")
+            
+            success_count = 0
+            fail_count = 0
             for seller in percentage_discount_sellers:
                 try:
                     listing_id = seller.get('listing_id')
                     merchant_id = seller.get('merchant_id')
                     merchant_name = seller.get('merchant_name')
                     price = seller.get('price')
+                    discount_tag = seller.get('discount_tag_id', 'N/A')
                     
                     if not all([listing_id, merchant_id, merchant_name, price]):
-                        logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API için gerekli bilgiler eksik")
+                        logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API için gerekli bilgiler eksik (listing_id={listing_id}, merchant_id={merchant_id}, price={price})")
+                        fail_count += 1
                         continue
                     
                     campaign_data = await self.fetch_campaign_price(
@@ -422,8 +428,16 @@ class PriceMonitorService:
                         seller['original_price_from_page'] = seller['price']
                         seller['price'] = campaign_data['discounted_price']
                         seller['campaign_text'] = campaign_data.get('campaign_text', '')
+                        success_count += 1
+                    else:
+                        logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API başarısız - discounted_price yok (tag: {discount_tag})")
+                        fail_count += 1
                 except Exception as e:
                     logger.error(f"[SKU: {sku}] [Mağaza: {seller.get('merchant_name', 'N/A')}] Campaign API hatası: {type(e).__name__}: {e}")
+                    fail_count += 1
+            
+            if fail_count > 0:
+                logger.info(f"[SKU: {sku}] Campaign API sonuç: {success_count} başarılı, {fail_count} başarısız")
         
         for seller in sellers:
             snapshot = SellerSnapshot(
