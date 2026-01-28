@@ -15,8 +15,11 @@ from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 class TrendyolPriceMonitorService:
     """Trendyol ürün sayfasından other-merchants bölümündeki satıcı verilerini çeken servis"""
     
+    MAX_CONCURRENT_REQUESTS = 17
+    
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')
+        self._semaphore = None
         if not self.api_key:
             try:
                 with open('/etc/secrets/SCRAPPER_API', 'r') as f:
@@ -44,54 +47,41 @@ class TrendyolPriceMonitorService:
             return match.group(1)
         return None
     
-    async def fetch_product_page(self, url: str) -> Optional[str]:
-        """ScraperAPI ile Trendyol ürün sayfasını çek - proxy port ile render"""
+    async def fetch_product_page(self, url: str, session: aiohttp.ClientSession) -> Optional[str]:
+        """ScraperAPI ile Trendyol ürün sayfasını çek - basic mod (en hızlı ve güvenilir)"""
         session_num = random.randint(1, 999999)
         proxy_url = 'http://proxy-server.scraperapi.com:8001'
-        proxy_user = f'scraperapi.render=true.country_code=tr.device_type=desktop.premium=true.session_number={session_num}'
+        proxy_user = f'scraperapi.session_number={session_num}'
         proxy_pass = self.api_key
         
         proxy_auth = aiohttp.BasicAuth(proxy_user, proxy_pass)
         
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
             'Referer': 'https://www.trendyol.com/'
         }
         
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        connector = aiohttp.TCPConnector(ssl=ssl_context)
-        
         try:
-            async with aiohttp.ClientSession(connector=connector) as session:
-                async with session.get(
-                    url, 
-                    proxy=proxy_url, 
-                    proxy_auth=proxy_auth, 
-                    headers=headers, 
-                    timeout=aiohttp.ClientTimeout(total=120)
-                ) as resp:
-                    if resp.status == 200:
-                        html = await resp.text()
-                        if 'other-merchant' in html or 'slider__slide' in html:
-                            logger.debug("Trendyol page fetched successfully")
-                            return html
-                        else:
-                            logger.debug("Trendyol page fetched but no other-merchants section found")
-                            debug_path = f"/tmp/scraping_debug/trendyol_{random.randint(1000,9999)}.html"
-                            import os
-                            os.makedirs('/tmp/scraping_debug', exist_ok=True)
-                            with open(debug_path, 'w', encoding='utf-8') as f:
-                                f.write(html[:100000])
-                            logger.debug(f"Debug HTML saved to {debug_path}")
-                            return html
+            async with session.get(
+                url, 
+                proxy=proxy_url, 
+                proxy_auth=proxy_auth, 
+                headers=headers, 
+                timeout=aiohttp.ClientTimeout(total=60)
+            ) as resp:
+                if resp.status == 200:
+                    html = await resp.text()
+                    if 'other-merchant' in html or 'slider__slide' in html:
+                        logger.debug("Trendyol page fetched successfully")
+                        return html
                     else:
-                        logger.warning(f"Trendyol page error: status {resp.status}")
-                        return None
+                        logger.debug("Trendyol page fetched but no other-merchants section found")
+                        return html
+                else:
+                    logger.warning(f"Trendyol page error: status {resp.status}")
+                    return None
         except Exception as e:
             logger.error(f"Error fetching Trendyol page: {e}")
             return None
@@ -176,9 +166,19 @@ class TrendyolPriceMonitorService:
         
         return sellers
     
-    async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
-        """Tek bir ürün için satıcı verilerini çek ve kaydet"""
-        html = await self.fetch_product_page(product.product_url)
+    async def fetch_single_product(self, product: MonitoredProduct, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Tek bir ürün için HTTP isteği yap ve sonucu döndür (thread-safe)"""
+        async with self._semaphore:
+            html = await self.fetch_product_page(product.product_url, http_session)
+            return {
+                "product_id": str(product.id),
+                "sku": product.sku,
+                "html": html,
+                "success": html is not None
+            }
+    
+    def save_product_result(self, db: Session, product: MonitoredProduct, html: Optional[str]) -> bool:
+        """Ürün sonucunu veritabanına kaydet (sequential - thread-safe)"""
         if not html:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
@@ -224,7 +224,7 @@ class TrendyolPriceMonitorService:
         return True
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "trendyol"):
-        """Tüm Trendyol izlenen ürünler için satıcı verilerini çek"""
+        """Tüm Trendyol izlenen ürünler için satıcı verilerini çek - 17 concurrent threads"""
         query = db.query(MonitoredProduct).filter(
             MonitoredProduct.platform == 'trendyol',
             MonitoredProduct.is_active == True
@@ -239,33 +239,54 @@ class TrendyolPriceMonitorService:
         task.status = "running"
         db.commit()
         
+        if not products:
+            task.status = "completed"
+            task.completed_at = datetime.utcnow()
+            db.commit()
+            logger.info("No active Trendyol products to fetch")
+            return
+        
+        self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+        
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=self.MAX_CONCURRENT_REQUESTS)
+        
         completed = 0
         failed = 0
         
-        for product in products:
-            db.refresh(task)
-            if task.stop_requested:
-                logger.info(f"Stop requested, finishing after {completed} Trendyol products")
-                task.status = "stopped"
-                task.completed_at = datetime.utcnow()
-                db.commit()
-                return
+        product_map = {str(p.id): p for p in products}
+        
+        async with aiohttp.ClientSession(connector=connector) as http_session:
+            tasks = [self.fetch_single_product(p, http_session) for p in products]
             
-            try:
-                success = await self.fetch_and_save_product(db, product)
-                if success:
-                    completed += 1
-                else:
+            for coro in asyncio.as_completed(tasks):
+                db.refresh(task)
+                if task.stop_requested:
+                    logger.info(f"Stop requested, finishing after {completed} Trendyol products")
+                    task.status = "stopped"
+                    task.completed_at = datetime.utcnow()
+                    db.commit()
+                    return
+                
+                try:
+                    result = await coro
+                    product = product_map.get(result["product_id"])
+                    if product:
+                        success = self.save_product_result(db, product, result["html"])
+                        if success:
+                            completed += 1
+                        else:
+                            failed += 1
+                except Exception as e:
+                    logger.error(f"Error processing Trendyol product: {e}")
                     failed += 1
-            except Exception as e:
-                logger.error(f"Error processing Trendyol product {product.sku}: {e}")
-                failed += 1
-            
-            task.completed_products = completed
-            task.failed_products = failed
-            db.commit()
-            
-            await asyncio.sleep(2)
+                
+                task.completed_products = completed
+                task.failed_products = failed
+                db.commit()
         
         task.status = "completed"
         task.completed_at = datetime.utcnow()
