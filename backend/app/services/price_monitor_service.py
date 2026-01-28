@@ -542,14 +542,12 @@ class PriceMonitorService:
                 products = db.query(MonitoredProduct).filter(
                     MonitoredProduct.id.in_(product_ids),
                     MonitoredProduct.platform == platform,
-                    MonitoredProduct.is_active == True,
-                    has_sellers_subquery
+                    MonitoredProduct.is_active == True
                 ).all()
             else:
                 products = db.query(MonitoredProduct).filter(
                     MonitoredProduct.platform == platform,
-                    MonitoredProduct.is_active == True,
-                    has_sellers_subquery
+                    MonitoredProduct.is_active == True
                 ).all()
         
         task.total_products = len(products)

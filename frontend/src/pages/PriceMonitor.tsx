@@ -50,8 +50,8 @@ export default function PriceMonitor() {
   const [showDeleteModal, setShowDeleteModal] = useState<'all' | 'inactive' | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const activeProducts = products.filter(p => p.is_active !== false && p.seller_count > 0);
-  const inactiveProducts = products.filter(p => p.is_active === false || p.seller_count === 0);
+  const activeProducts = products.filter(p => p.is_active !== false);
+  const inactiveProducts = products.filter(p => p.is_active === false);
 
   useEffect(() => {
     loadProducts();
