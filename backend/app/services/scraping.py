@@ -287,11 +287,12 @@ class ScrapingService:
         logger.info(f"ScraperAPI Async Job oluşturuluyor: {url[:60]}...")
         
         try:
-            timeout = aiohttp.ClientTimeout(total=30)
+            # Session timeout, max_wait'ten büyük olmalı
+            timeout = aiohttp.ClientTimeout(total=max_wait + 30)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 # Create async job
                 async with session.post(async_api_url, json=payload) as response:
-                    if response.status != 200:
+                    if response.status not in [200, 201, 202]:
                         error_text = await response.text()
                         logger.error(f"Async job oluşturulamadı: {error_text[:200]}")
                         return None
@@ -301,7 +302,7 @@ class ScrapingService:
                     status_url = job_data.get("statusUrl")
                     
                     if not status_url:
-                        logger.error("Async job status URL alınamadı")
+                        logger.warning("Async job status URL alınamadı")
                         return None
                     
                     logger.debug(f"Async job oluşturuldu: {job_id}")

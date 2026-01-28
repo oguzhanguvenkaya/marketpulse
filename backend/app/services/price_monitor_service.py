@@ -17,9 +17,12 @@ class PriceMonitorService:
     """Hepsiburada listings API'den satıcı fiyatlarını çeken servis"""
     
     LISTINGS_API_URL = "https://www.hepsiburada.com/api/v1/product/listings/{sku}"
+    ASYNC_API_URL = "https://async.scraperapi.com/jobs"
+    MAX_CONCURRENT_REQUESTS = 10  # ScraperAPI 20 thread izin veriyor, güvenli sınır
     
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')
+        self._semaphore = None  # Lazy initialization
         if not self.api_key:
             try:
                 with open('/etc/secrets/SCRAPPER_API', 'r') as f:
@@ -96,6 +99,85 @@ class PriceMonitorService:
             return None
         except Exception as e:
             logger.error(f"{log_context} Hata: {type(e).__name__}: {e} | URL: {seller_url}")
+            return None
+    
+    async def fetch_seller_campaign_price_async(self, product_url: str, seller_name: str, sku: str = None, merchant_url_postfix: str = None) -> Optional[Dict[str, Any]]:
+        """Async Jobs ile kampanya fiyatını çek - JavaScript sayfaları için daha iyi çalışır"""
+        if merchant_url_postfix:
+            seller_url = f"{product_url}?magaza={merchant_url_postfix}"
+        else:
+            encoded_seller = urllib.parse.quote(seller_name, safe='')
+            seller_url = f"{product_url}?magaza={encoded_seller}"
+        
+        log_context = f"[SKU: {sku or 'N/A'}] [Mağaza: {seller_name}]"
+        logger.debug(f"{log_context} Async job ile kampanya fiyatı çekiliyor")
+        
+        payload = {
+            "apiKey": self.api_key,
+            "url": seller_url,
+            "render": True,
+            "premium": True
+        }
+        
+        max_wait = 45
+        try:
+            # Session timeout, max_wait'ten büyük olmalı
+            timeout = aiohttp.ClientTimeout(total=max_wait + 30)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                # Create async job
+                async with session.post(self.ASYNC_API_URL, json=payload) as response:
+                    if response.status not in [200, 201, 202]:
+                        error_text = await response.text()
+                        logger.error(f"{log_context} Async job oluşturulamadı: {error_text[:100]}")
+                        return None
+                    
+                    job_data = await response.json()
+                    status_url = job_data.get("statusUrl")
+                    job_id = job_data.get("id")
+                    if not status_url:
+                        logger.warning(f"{log_context} Async job statusUrl alınamadı")
+                        return None
+                    
+                    logger.debug(f"{log_context} Async job oluşturuldu: {job_id}")
+                
+                # Poll for completion
+                poll_interval = 3
+                elapsed = 0
+                
+                while elapsed < max_wait:
+                    await asyncio.sleep(poll_interval)
+                    elapsed += poll_interval
+                    
+                    async with session.get(status_url) as status_response:
+                        if status_response.status != 200:
+                            logger.debug(f"{log_context} Async job status check failed: {status_response.status}")
+                            continue
+                        
+                        status_data = await status_response.json()
+                        status = status_data.get("status")
+                        
+                        if status == "finished":
+                            body = status_data.get("response", {}).get("body", "")
+                            if body:
+                                result = self._parse_campaign_price_from_html(body, seller_name)
+                                if result and result.get('campaign_price'):
+                                    logger.info(f"{log_context} Async: Kampanya fiyatı bulundu: {result['campaign_price']} TL")
+                                return result
+                            return None
+                        
+                        elif status == "failed":
+                            error_msg = status_data.get("error", "Bilinmeyen hata")
+                            logger.warning(f"{log_context} Async job başarısız: {error_msg}")
+                            return None
+                        
+                        # Still running
+                        logger.debug(f"{log_context} Async job çalışıyor... ({elapsed}s/{max_wait}s)")
+                
+                logger.warning(f"{log_context} Async job zaman aşımı ({max_wait}s)")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{log_context} Async hata: {e}")
             return None
     
     def _parse_campaign_price_from_html(self, html: str, seller_name: str) -> Optional[Dict[str, Any]]:
@@ -323,17 +405,28 @@ class PriceMonitorService:
             logger.info(f"[SKU: {sku}] {len(campaign_sellers)} satıcıda kampanya bulundu, gerçek fiyatlar çekiliyor...")
             for seller in campaign_sellers:
                 try:
+                    # Önce normal metod dene
                     campaign_data = await self.fetch_seller_campaign_price(
                         product.product_url, 
                         seller['merchant_name'],
                         sku=sku,
                         merchant_url_postfix=seller.get('merchant_url_postfix')
                     )
+                    
+                    # Normal metod başarısız olduysa async jobs dene
+                    if not campaign_data or not campaign_data.get('campaign_price'):
+                        logger.debug(f"[SKU: {sku}] [Mağaza: {seller['merchant_name']}] Normal metod başarısız, async jobs deneniyor...")
+                        campaign_data = await self.fetch_seller_campaign_price_async(
+                            product.product_url,
+                            seller['merchant_name'],
+                            sku=sku,
+                            merchant_url_postfix=seller.get('merchant_url_postfix')
+                        )
+                    
                     if campaign_data and campaign_data.get('campaign_price'):
                         seller['campaign_price'] = campaign_data['campaign_price']
                         seller['original_price_from_page'] = campaign_data.get('original_price')
                         seller['price'] = campaign_data['campaign_price']
-                    await asyncio.sleep(0.5)
                 except Exception as e:
                     logger.error(f"[SKU: {sku}] [Mağaza: {seller['merchant_name']}] Beklenmeyen hata: {type(e).__name__}: {e}")
         
@@ -386,17 +479,23 @@ class PriceMonitorService:
         task.status = "running"
         db.commit()
         
+        logger.info(f"İşleme başlıyor: {len(products)} ürün")
+        
         completed = 0
         failed = 0
         
-        for product in products:
-            db.refresh(task)
-            if task.stop_requested:
-                logger.info(f"Stop requested, finishing after {completed} products")
-                task.status = "stopped"
-                task.completed_at = datetime.utcnow()
-                db.commit()
-                return
+        # Sıralı işleme - DB session paylaşımı sorunlarını önler
+        # HTTP istekleri zaten async, DB işlemleri güvenli şekilde sıralı yapılır
+        for idx, product in enumerate(products):
+            # Her 20 üründe stop kontrolü
+            if idx % 20 == 0:
+                db.refresh(task)
+                if task.stop_requested:
+                    logger.info(f"Stop requested, finishing after {completed} products")
+                    task.status = "stopped"
+                    task.completed_at = datetime.utcnow()
+                    db.commit()
+                    return
             
             try:
                 success = await self.fetch_and_save_product(db, product)
@@ -408,12 +507,18 @@ class PriceMonitorService:
                 logger.error(f"Error processing product {product.sku}: {e}")
                 failed += 1
             
-            task.completed_products = completed
-            task.failed_products = failed
-            db.commit()
+            # Her 10 üründe progress güncelle
+            if (idx + 1) % 10 == 0:
+                task.completed_products = completed
+                task.failed_products = failed
+                db.commit()
+                logger.info(f"İlerleme: {completed + failed}/{len(products)} ({completed} başarılı, {failed} başarısız)")
             
-            await asyncio.sleep(1)
+            # Rate limiting - ScraperAPI aşırı yüklenmesini önle
+            await asyncio.sleep(0.3)
         
+        task.completed_products = completed
+        task.failed_products = failed
         task.status = "completed"
         task.completed_at = datetime.utcnow()
         db.commit()
