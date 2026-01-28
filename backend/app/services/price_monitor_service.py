@@ -17,7 +17,7 @@ class PriceMonitorService:
     
     LISTINGS_API_URL = "https://www.hepsiburada.com/api/v1/product/listings/{sku}"
     CAMPAIGN_API_URL = "https://obiwan-gw.hepsiburada.com/api/v2/Campaign/pdp"
-    MAX_CONCURRENT_REQUESTS = 10
+    MAX_CONCURRENT_REQUESTS = 17
     
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')
