@@ -21,7 +21,7 @@ class TrendyolPriceMonitorService:
     Bu sayede render=true gerekmez, daha hızlı ve ucuz!
     """
     
-    MAX_CONCURRENT_REQUESTS = 10  # Basic mode daha hızlı, concurrent limit artırıldı
+    MAX_CONCURRENT_REQUESTS = 17  # Basic mode hızlı, yüksek concurrent limit
     
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')

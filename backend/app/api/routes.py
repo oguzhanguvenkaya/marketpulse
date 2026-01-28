@@ -758,13 +758,20 @@ async def add_monitored_products(
                     existing.brand = item.brand
                 if item.price is not None:
                     existing.threshold_price = item.price
-                if item.campaignPrice is not None:
+                    if item.campaignPrice is not None:
+                        existing.alert_campaign_price = item.campaignPrice
+                    else:
+                        existing.alert_campaign_price = round(item.price * 0.9, 2)
+                elif item.campaignPrice is not None:
                     existing.alert_campaign_price = item.campaignPrice
                 if item.sellerStockCode:
                     existing.seller_stock_code = item.sellerStockCode
                 existing.is_active = True
                 updated += 1
             else:
+                campaign_price = item.campaignPrice if item.campaignPrice is not None else (
+                    round(item.price * 0.9, 2) if item.price else None
+                )
                 product = MonitoredProduct(
                     platform=platform,
                     sku=sku,
@@ -773,7 +780,7 @@ async def add_monitored_products(
                     product_name=item.productName,
                     brand=item.brand,
                     threshold_price=item.price,
-                    alert_campaign_price=item.campaignPrice,
+                    alert_campaign_price=campaign_price,
                     seller_stock_code=item.sellerStockCode,
                     is_active=True
                 )
@@ -831,14 +838,22 @@ async def get_monitored_products(
         
         if latest_snapshots:
             for s in latest_snapshots:
+                seller_price = float(s.price) if s.price else None
                 orig_price = float(s.original_price) if s.original_price else None
                 camp_price = float(s.campaign_price) if s.campaign_price else None
                 
-                if threshold and orig_price and orig_price < threshold:
-                    price_alert_count += 1
-                
-                if campaign_threshold and camp_price and camp_price < campaign_threshold:
-                    campaign_alert_count += 1
+                if product.platform == 'trendyol':
+                    if orig_price and seller_price:
+                        if campaign_threshold and seller_price < campaign_threshold:
+                            campaign_alert_count += 1
+                    elif threshold and seller_price and seller_price < threshold:
+                        price_alert_count += 1
+                else:
+                    if threshold and orig_price and orig_price < threshold:
+                        price_alert_count += 1
+                    
+                    if campaign_threshold and camp_price and camp_price < campaign_threshold:
+                        campaign_alert_count += 1
         
         has_price_alert = price_alert_count > 0
         has_campaign_alert = campaign_alert_count > 0
@@ -1425,11 +1440,20 @@ async def get_seller_products(
         
         threshold = float(product.threshold_price) if product.threshold_price else None
         seller_price = float(s.price) if s.price else None
-        has_alert = threshold is not None and seller_price is not None and seller_price < threshold
-        
+        orig_price = float(s.original_price) if s.original_price else None
         alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
         campaign_price_val = float(s.campaign_price) if s.campaign_price else None
-        has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+        
+        if platform == 'trendyol':
+            if orig_price and seller_price:
+                has_alert = False
+                has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
+            else:
+                has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                has_campaign_alert = False
+        else:
+            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+            has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
         
         if price_alert_only and not has_alert:
             continue
@@ -1538,11 +1562,20 @@ async def export_seller_products(
         
         threshold = float(product.threshold_price) if product.threshold_price else None
         seller_price = float(s.price) if s.price else None
-        has_alert = threshold is not None and seller_price is not None and seller_price < threshold
-        
+        orig_price = float(s.original_price) if s.original_price else None
         alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
         campaign_price_val = float(s.campaign_price) if s.campaign_price else None
-        has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+        
+        if platform == 'trendyol':
+            if orig_price and seller_price:
+                has_alert = False
+                has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
+            else:
+                has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                has_campaign_alert = False
+        else:
+            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+            has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
         
         if price_alert_only and not has_alert:
             continue
