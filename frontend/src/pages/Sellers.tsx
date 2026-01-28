@@ -35,12 +35,23 @@ export default function Sellers() {
     return rating.toFixed(1);
   };
 
+  const getCardBackground = (seller: SellerInfo) => {
+    if (seller.price_alert_count > 0 && seller.campaign_alert_count > 0) {
+      return 'bg-gradient-to-br from-red-900/30 to-orange-900/30 border border-red-500/30';
+    } else if (seller.price_alert_count > 0) {
+      return 'bg-red-900/30 border border-red-500/30';
+    } else if (seller.campaign_alert_count > 0) {
+      return 'bg-orange-900/30 border border-orange-500/30';
+    }
+    return 'bg-[#3a3a3a]';
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Sellers</h1>
-          <p className="text-neutral-400 mt-1">View all sellers and their price alert products</p>
+          <p className="text-neutral-400 mt-1">View all sellers and their alert products</p>
         </div>
       </div>
 
@@ -96,9 +107,7 @@ export default function Sellers() {
               <div
                 key={seller.merchant_id}
                 onClick={() => navigate(`/sellers/${seller.merchant_id}?platform=${platform}`)}
-                className={`p-4 rounded-lg cursor-pointer transition-all hover:bg-[#555555] ${
-                  seller.price_alert_count > 0 ? 'bg-red-900/30 border border-red-500/30' : 'bg-[#3a3a3a]'
-                }`}
+                className={`p-4 rounded-lg cursor-pointer transition-all hover:bg-[#555555] ${getCardBackground(seller)}`}
               >
                 <div className="flex items-start gap-3">
                   {seller.merchant_logo && (
@@ -125,18 +134,31 @@ export default function Sellers() {
                     <div className="text-xs text-neutral-400">Products</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-success'}`}>
+                    <div className={`text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500'}`}>
                       {seller.price_alert_count}
                     </div>
-                    <div className="text-xs text-neutral-400">Price Alerts</div>
+                    <div className="text-xs text-neutral-400">Price</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500'}`}>
+                      {seller.campaign_alert_count}
+                    </div>
+                    <div className="text-xs text-neutral-400">Campaign</div>
                   </div>
                 </div>
 
-                {seller.price_alert_count > 0 && (
-                  <div className="mt-3 flex items-center justify-center">
-                    <span className="badge badge-danger text-xs animate-pulse">
-                      {seller.price_alert_count} Below Threshold
-                    </span>
+                {(seller.price_alert_count > 0 || seller.campaign_alert_count > 0) && (
+                  <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+                    {seller.price_alert_count > 0 && (
+                      <span className="badge badge-danger text-xs">
+                        {seller.price_alert_count} Price
+                      </span>
+                    )}
+                    {seller.campaign_alert_count > 0 && (
+                      <span className="badge badge-warning text-xs">
+                        {seller.campaign_alert_count} Campaign
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

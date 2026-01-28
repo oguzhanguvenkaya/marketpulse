@@ -1302,7 +1302,7 @@ async def get_sellers(
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
     db: Session = Depends(get_db)
 ):
-    """Tüm satıcıları listele - her satıcının ürün sayısı ve price alert sayısı ile"""
+    """Tüm satıcıları listele - her satıcının ürün sayısı, price alert ve campaign alert sayısı ile"""
     from sqlalchemy import func, distinct, case
     
     products = db.query(MonitoredProduct).filter(
@@ -1312,6 +1312,7 @@ async def get_sellers(
     
     product_ids = [p.id for p in products]
     product_thresholds = {str(p.id): float(p.threshold_price) if p.threshold_price else None for p in products}
+    product_campaign_thresholds = {str(p.id): float(p.alert_campaign_price) if p.alert_campaign_price else None for p in products}
     
     if not product_ids:
         return {"sellers": [], "total": 0}
@@ -1345,6 +1346,7 @@ async def get_sellers(
                 'merchant_rating': float(s.merchant_rating) if s.merchant_rating else None,
                 'product_count': 0,
                 'price_alert_count': 0,
+                'campaign_alert_count': 0,
                 'products': []
             }
         
@@ -1354,10 +1356,15 @@ async def get_sellers(
         seller_price = float(s.price) if s.price else None
         if threshold and seller_price and seller_price < threshold:
             sellers_data[s.merchant_id]['price_alert_count'] += 1
+        
+        campaign_threshold = product_campaign_thresholds.get(str(s.monitored_product_id))
+        campaign_price = float(s.campaign_price) if s.campaign_price else None
+        if campaign_threshold and campaign_price and campaign_price < campaign_threshold:
+            sellers_data[s.merchant_id]['campaign_alert_count'] += 1
     
     sellers_list = sorted(
         sellers_data.values(), 
-        key=lambda x: x['price_alert_count'], 
+        key=lambda x: (x['price_alert_count'] + x['campaign_alert_count']), 
         reverse=True
     )
     

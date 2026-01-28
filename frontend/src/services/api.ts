@@ -386,6 +386,7 @@ export interface SellerInfo {
   merchant_rating?: number;
   product_count: number;
   price_alert_count: number;
+  campaign_alert_count: number;
 }
 
 export interface SellerProduct {
