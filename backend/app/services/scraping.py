@@ -596,15 +596,11 @@ class ScrapingService:
                 html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
         
         if not html:
-            logger.warning("ScraperAPI PROXY failed, trying Bright Data fallback...")
-            self.current_provider_name = "brightdata"
-            if self.browser:
-                logger.debug("Closing existing browser before switching to Bright Data...")
-                await self.close_browser()
-            logger.info("Initializing Bright Data browser with Playwright...")
-            await self.init_browser("brightdata")
-            urls = await self._get_product_urls_from_search(keyword, max_products)
-            return {'urls': urls, 'sponsored_brands': [], 'sponsored_product_urls': set()}
+            # Bright Data fallback devre dışı - bakiye yüklenmedi ve 90sn timeout yapıyor
+            # Sonradan aktif etmek için bu bloğu uncomment yapın
+            logger.error("ScraperAPI başarısız oldu. Bright Data fallback şu an devre dışı.")
+            logger.info("Not: ScraperAPI planınızı kontrol edin veya Bright Data'ya bakiye yükleyin.")
+            return {'urls': [], 'sponsored_brands': [], 'sponsored_product_urls': set(), 'error': 'ScraperAPI başarısız oldu'}
         
         soup = BeautifulSoup(html, 'html.parser')
         
