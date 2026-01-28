@@ -35,14 +35,24 @@ class PriceMonitorService:
             return match.group(1)
         return None
     
-    async def fetch_seller_campaign_price(self, product_url: str, seller_name: str, sku: str = None) -> Optional[Dict[str, Any]]:
+    async def fetch_seller_campaign_price(self, product_url: str, seller_name: str, sku: str = None, merchant_url_postfix: str = None) -> Optional[Dict[str, Any]]:
         """Satıcıya özel ürün sayfasından kampanyalı fiyatı kazı
         
-        URL format: {product_url}?magaza={url_encoded_seller_name}
+        URL format: {product_url}?magaza={merchant_url_postfix veya url_encoded_seller_name}
         Hedef element: data-test-id="checkout-price" veya data-test-id="price"
+        
+        Args:
+            product_url: Ürün sayfası URL'i
+            seller_name: Satıcı adı (loglama için)
+            sku: Ürün SKU'su (loglama için)
+            merchant_url_postfix: Hepsiburada API'den gelen mağaza URL postfix'i (öncelikli)
         """
-        encoded_seller = urllib.parse.quote(seller_name, safe='')
-        seller_url = f"{product_url}?magaza={encoded_seller}"
+        if merchant_url_postfix:
+            seller_url = f"{product_url}?magaza={merchant_url_postfix}"
+        else:
+            encoded_seller = urllib.parse.quote(seller_name, safe='')
+            seller_url = f"{product_url}?magaza={encoded_seller}"
+            logger.debug(f"[SKU: {sku or 'N/A'}] [Mağaza: {seller_name}] URL postfix yok, seller_name encode ediliyor")
         
         encoded_url = urllib.parse.quote(seller_url, safe='')
         api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
@@ -316,7 +326,8 @@ class PriceMonitorService:
                     campaign_data = await self.fetch_seller_campaign_price(
                         product.product_url, 
                         seller['merchant_name'],
-                        sku=sku
+                        sku=sku,
+                        merchant_url_postfix=seller.get('merchant_url_postfix')
                     )
                     if campaign_data and campaign_data.get('campaign_price'):
                         seller['campaign_price'] = campaign_data['campaign_price']
