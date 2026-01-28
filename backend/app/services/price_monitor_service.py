@@ -534,8 +534,7 @@ class PriceMonitorService:
         elif fetch_type == "inactive":
             products = db.query(MonitoredProduct).filter(
                 MonitoredProduct.platform == platform,
-                MonitoredProduct.is_active == False,
-                has_sellers_subquery
+                MonitoredProduct.is_active == False
             ).all()
             logger.info(f"Inactive fetch: {len(products)} ürün")
         else:
