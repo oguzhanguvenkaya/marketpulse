@@ -168,6 +168,8 @@ class TrendyolPriceMonitorService:
     
     async def fetch_single_product(self, product: MonitoredProduct, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
         """Tek bir ürün için HTTP isteği yap ve sonucu döndür (thread-safe)"""
+        if self._semaphore is None:
+            self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
         async with self._semaphore:
             html = await self.fetch_product_page(product.product_url, http_session)
             return {
