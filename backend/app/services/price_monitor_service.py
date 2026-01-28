@@ -51,18 +51,24 @@ class PriceMonitorService:
         """tagList'te yüzde indirim var mı kontrol et
         
         Yüzde indirim pattern: 'X-indirim' (örn: 5-indirim, 2-indirim)
-        Kupon pattern (hariç tutulacak): 'tl-ye' içeren tag'ler (örn: 500-tl-ye-50-tl-indirim)
+        Hariç tutulan pattern'ler:
+        - 'tl-ye': Kuponlar (örn: 500-tl-ye-50-tl-indirim)
+        - 'X-urune': Ürün grubu kampanyaları (örn: 2-urune-1-indirim, 3-urune-2-indirim)
         
         Returns:
             True: Yüzde indirim varsa (Campaign API çağrılmalı)
-            False: Kupon veya indirim yoksa
+            False: Kupon, ürün grubu kampanyası veya indirim yoksa
         """
         percentage_pattern = re.compile(r'-(\d+)-indirim$', re.IGNORECASE)
+        exclude_pattern = re.compile(r'\d+-urune', re.IGNORECASE)
         
         for tag in tag_list:
             tag_id = tag.get('tagId', '').lower()
             
             if 'tl-ye' in tag_id:
+                continue
+            
+            if exclude_pattern.search(tag_id):
                 continue
             
             if percentage_pattern.search(tag_id):
@@ -77,12 +83,16 @@ class PriceMonitorService:
             {'discount_percentage': 5, 'tag_id': '59458991-cilakutusu-saticili-urunlerde-5-indirim'} veya None
         """
         percentage_pattern = re.compile(r'-(\d+)-indirim$', re.IGNORECASE)
+        exclude_pattern = re.compile(r'\d+-urune', re.IGNORECASE)
         
         for tag in tag_list:
             tag_id = tag.get('tagId', '')
             tag_lower = tag_id.lower()
             
             if 'tl-ye' in tag_lower:
+                continue
+            
+            if exclude_pattern.search(tag_lower):
                 continue
             
             match = percentage_pattern.search(tag_lower)
