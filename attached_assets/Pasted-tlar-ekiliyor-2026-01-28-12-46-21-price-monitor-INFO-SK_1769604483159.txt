@@ -1,0 +1,24 @@
+tlar çekiliyor...
+2026-01-28 12:46:21 | price_monitor | INFO | [SKU: HBCV000079VLEO] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 1804.05 TL (orijinal: 1899 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:46:24 | price_monitor | INFO | Saved 2 sellers for SKU HBCV000079VLEO
+2026-01-28 12:46:28 | price_monitor | INFO | [SKU: HBCV000046VHGO] 2 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:46:32 | price_monitor | INFO | [SKU: HBCV000046VHGO] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 654.55 TL (orijinal: 689 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:46:36 | price_monitor | INFO | Saved 3 sellers for SKU HBCV000046VHGO
+2026-01-28 12:46:38 | price_monitor | WARNING | No sellers for SKU HBCV000046T2BI - marked as inactive
+2026-01-28 12:46:40 | price_monitor | INFO | [SKU: HBCV00007PMITV] 2 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:46:44 | price_monitor | INFO | [SKU: HBCV00007PMITV] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 255.55 TL (orijinal: 269 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:46:46 | price_monitor | INFO | Saved 2 sellers for SKU HBCV00007PMITV
+2026-01-28 12:46:50 | price_monitor | INFO | [SKU: HBCV000046T28R] 2 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:46:52 | price_monitor | INFO | [SKU: HBCV000046T28R] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 1234.05 TL (orijinal: 1299 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:46:56 | price_monitor | INFO | Saved 2 sellers for SKU HBCV000046T28R
+2026-01-28 12:47:00 | price_monitor | INFO | [SKU: HBCV000079VL35] 5 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:47:04 | price_monitor | INFO | [SKU: HBCV000079VL35] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 2041.55 TL (orijinal: 2149 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:47:14 | price_monitor | INFO | Saved 6 sellers for SKU HBCV000079VL35
+2026-01-28 12:47:17 | price_monitor | INFO | [SKU: HBCV00006EK6R2] 4 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:47:20 | price_monitor | INFO | [SKU: HBCV00006EK6R2] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 4654.05 TL (orijinal: 4899 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:47:30 | price_monitor | INFO | Saved 4 sellers for SKU HBCV00006EK6R2
+2026-01-28 12:47:32 | price_monitor | WARNING | No sellers for SKU HBV00000HGWFR - marked as inactive
+2026-01-28 12:47:34 | price_monitor | INFO | [SKU: HBCV000079VLX5] 2 satıcıda yüzde indirim bulundu, Campaign API ile gerçek fiyatlar çekiliyor...
+2026-01-28 12:47:37 | price_monitor | INFO | [SKU: HBCV000079VLX5] [Mağaza: CİLAKUTUSU] Campaign API: İndirimli fiyat 474.05 TL (orijinal: 499 TL) - CİLAKUTUSU satıcılı ürünlerde %5 indirim
+2026-01-28 12:47:40 | price_monitor | INFO | Saved 2 sellers for SKU HBCV000079VLX5
+2026-01-28 12:47:40 | price_monitor | INFO | İlerleme: 30/830 (24 başarılı, 6 başarısız)
