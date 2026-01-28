@@ -263,6 +263,91 @@ class ScrapingService:
             debug_logger.log_error(url, "scraperapi", e)
             return None
     
+    async def _fetch_with_scraperapi_async(self, url: str, render: bool = True, premium: bool = True, max_wait: int = 90) -> Optional[str]:
+        """Fetch URL using ScraperAPI Async Jobs - JavaScript sayfaları için daha iyi çalışır
+        
+        Args:
+            url: URL to fetch
+            render: Enable JavaScript rendering
+            premium: Use premium proxies
+            max_wait: Maximum seconds to wait for job completion
+        """
+        if not settings.SCRAPER_API_KEY:
+            return None
+        
+        async_api_url = "https://async.scraperapi.com/jobs"
+        
+        payload = {
+            "apiKey": settings.SCRAPER_API_KEY,
+            "url": url,
+            "render": render,
+            "premium": premium
+        }
+        
+        logger.info(f"ScraperAPI Async Job oluşturuluyor: {url[:60]}...")
+        
+        try:
+            timeout = aiohttp.ClientTimeout(total=30)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                # Create async job
+                async with session.post(async_api_url, json=payload) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        logger.error(f"Async job oluşturulamadı: {error_text[:200]}")
+                        return None
+                    
+                    job_data = await response.json()
+                    job_id = job_data.get("id")
+                    status_url = job_data.get("statusUrl")
+                    
+                    if not status_url:
+                        logger.error("Async job status URL alınamadı")
+                        return None
+                    
+                    logger.debug(f"Async job oluşturuldu: {job_id}")
+                
+                # Poll for completion
+                poll_interval = 3  # seconds
+                elapsed = 0
+                
+                while elapsed < max_wait:
+                    await asyncio.sleep(poll_interval)
+                    elapsed += poll_interval
+                    
+                    async with session.get(status_url) as status_response:
+                        if status_response.status != 200:
+                            continue
+                        
+                        status_data = await status_response.json()
+                        status = status_data.get("status")
+                        
+                        if status == "finished":
+                            body = status_data.get("response", {}).get("body", "")
+                            if body:
+                                logger.info(f"Async job tamamlandı, {len(body)} byte alındı ({elapsed}s)")
+                                debug_logger.log_request(url, "scraperapi-async", 200)
+                                return body
+                            else:
+                                logger.warning("Async job tamamlandı ama body boş")
+                                return None
+                        
+                        elif status == "failed":
+                            error = status_data.get("error", "Unknown error")
+                            logger.error(f"Async job başarısız: {error}")
+                            debug_logger.log_request(url, "scraperapi-async", 500)
+                            return None
+                        
+                        # Still running, continue polling
+                        logger.debug(f"Async job hala çalışıyor... ({elapsed}s)")
+                
+                logger.warning(f"Async job zaman aşımına uğradı ({max_wait}s)")
+                return None
+                
+        except Exception as e:
+            logger.error(f"ScraperAPI Async error: {e}")
+            debug_logger.log_error(url, "scraperapi-async", e)
+            return None
+    
     def _extract_real_url_from_tracking(self, href: str) -> Optional[str]:
         """Extract real product URL from adservice tracking URL"""
         if 'adservice.' in href and 'redirect=' in href:
@@ -572,7 +657,7 @@ class ScrapingService:
         return urls
     
     async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> Dict[str, Any]:
-        """Get product URLs using ScraperAPI HTTP API method
+        """Get product URLs using ScraperAPI Async Jobs method
         
         Returns dict with:
         - urls: List of product URLs to scrape
@@ -583,21 +668,22 @@ class ScrapingService:
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         logger.info(f"Fetching search results: {search_url[:60]}...")
         
-        # HTTP API modunu kullan (proxy port yerine) - country_code=tr ile çalışıyor
-        html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
+        # Async Jobs kullan - JavaScript sayfaları için daha iyi çalışır
+        html = await self._fetch_with_scraperapi_async(search_url, render=True, premium=True, max_wait=60)
         
         if html:
             soup_check = BeautifulSoup(html, 'html.parser')
             title = soup_check.find('title')
             title_text = title.get_text() if title else ""
             
-            if "En Çok Tavsiye Edilen" in title_text or "Anasayfa" in title_text:
-                logger.warning(f"Got homepage instead of search results (title: {title_text[:50]})")
-                logger.info("Retrying with premium=True...")
-                html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
+            # Sayfa doğru yüklendi mi kontrol et
+            if "Loading interface" in title_text or "Anasayfa" in title_text:
+                logger.warning(f"Sayfa tam yüklenmemiş (title: {title_text[:50]})")
+                logger.info("Async job ile tekrar deneniyor...")
+                html = await self._fetch_with_scraperapi_async(search_url, render=True, premium=True, max_wait=90)
         
         if not html:
-            logger.error("ScraperAPI HTTP API başarısız oldu.")
+            logger.error("ScraperAPI Async Jobs başarısız oldu.")
             logger.info("Not: ScraperAPI planınızı ve API key'inizi kontrol edin.")
             return {'urls': [], 'sponsored_brands': [], 'sponsored_product_urls': set(), 'error': 'ScraperAPI başarısız oldu'}
         
