@@ -634,26 +634,19 @@ class ScrapingService:
         }
     
     async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
-        """Scrape product detail page using ScraperAPI PROXY PORT method
+        """Scrape product detail page using ScraperAPI HTTP API method
         
         Strategy:
         1. First try ScraperAPI with JS render (for dynamic content like "sepete özel")
-        2. If render fails (500 = premium required), fallback to standard ScraperAPI
+        2. If render fails, fallback to standard ScraperAPI without render
         3. Parse product data and check for discounted_price
         """
-        if session_number is None:
-            session_number = random.randint(1, 10000)
-        
-        html = await self._fetch_with_scraperapi_proxy(
-            url, 
-            session_number=session_number,
-            render_js=True,
-            wait_for_selector='[data-test-id="price-current-price"]'
-        )
+        # HTTP API modunu kullan (proxy port yerine) - country_code=tr gerekmez
+        html = await self._fetch_with_scraperapi(url, render=True, premium=True)
         
         if not html:
             logger.debug("JS render failed, trying standard ScraperAPI...")
-            html = await self._fetch_with_scraperapi_proxy(url, session_number=session_number)
+            html = await self._fetch_with_scraperapi(url, render=False, premium=True)
         product_data = None
         
         if html:
@@ -897,11 +890,9 @@ class ScrapingService:
             product_data = await self._scrape_product_via_http_api(url)
             
             if not product_data:
-                logger.info(f"ScraperAPI failed, falling back to Playwright: {url[:50]}...")
-                self.current_provider_name = "brightdata"
-                if self.browser:
-                    await self.close_browser()
-                await self.init_browser("brightdata")
+                # Bright Data fallback devre dışı - bakiye yüklenmedi
+                logger.warning(f"ScraperAPI failed for product: {url[:50]}...")
+                return None
             else:
                 return product_data
         
