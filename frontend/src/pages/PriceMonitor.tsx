@@ -10,7 +10,9 @@ import {
   fetchSingleProduct,
   exportPriceMonitorData,
   getBrands,
+  getLastInactiveSkus,
 } from '../services/api';
+import type { FetchType, LastInactiveProduct } from '../services/api';
 import type {
   MonitoredProduct,
   SellerSnapshot,
@@ -39,6 +41,10 @@ export default function PriceMonitor() {
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastInactiveProducts, setLastInactiveProducts] = useState<LastInactiveProduct[]>([]);
+  const [lastInactiveCount, setLastInactiveCount] = useState(0);
+  const [showFetchMenu, setShowFetchMenu] = useState(false);
+  const [currentFetchType, setCurrentFetchType] = useState<FetchType>('active');
 
   const activeProducts = products.filter(p => p.is_active !== false && p.seller_count > 0);
   const inactiveProducts = products.filter(p => p.is_active === false || p.seller_count === 0);
@@ -46,7 +52,27 @@ export default function PriceMonitor() {
   useEffect(() => {
     loadProducts();
     loadBrands();
+    loadLastInactive();
   }, [platform]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowFetchMenu(false);
+      setShowExportMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const loadLastInactive = async () => {
+    try {
+      const data = await getLastInactiveSkus(platform);
+      setLastInactiveProducts(data.products);
+      setLastInactiveCount(data.count);
+    } catch (e) {
+      console.error('Error loading last inactive:', e);
+    }
+  };
 
   useEffect(() => {
     loadProducts();
@@ -63,6 +89,7 @@ export default function PriceMonitor() {
           if (status.status === 'completed' || status.status === 'stopped' || status.status === 'failed') {
             setFetchTaskId(null);
             loadProducts();
+            loadLastInactive();
           }
         } catch (e) {
           console.error('Error checking fetch status:', e);
@@ -132,9 +159,11 @@ export default function PriceMonitor() {
     }
   };
 
-  const handleFetchAll = async () => {
+  const handleFetchAll = async (fetchType: FetchType = 'active') => {
     try {
-      const result = await startFetchTask(platform);
+      setCurrentFetchType(fetchType);
+      setShowFetchMenu(false);
+      const result = await startFetchTask(platform, fetchType);
       setFetchTaskId(result.task_id);
       setFetchStatus('started');
     } catch (e) {
@@ -253,23 +282,60 @@ export default function PriceMonitor() {
             <>
               <div className="px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-accent-primary text-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
-                {fetchStatus === 'stopping' ? 'Stopping...' : `Fetching... (${fetchProgress.completed}/${fetchProgress.total})`}
+                {fetchStatus === 'stopping' ? 'Stopping...' : `Fetching ${currentFetchType === 'last_inactive' ? 'last inactive' : currentFetchType}... (${fetchProgress.completed}/${fetchProgress.total})`}
               </div>
               <button onClick={handleStopFetch} disabled={fetchStatus === 'stopping'} className="btn-danger">
                 Stop
               </button>
             </>
           ) : (
-            <button onClick={handleFetchAll} disabled={activeProducts.length === 0} className="btn-primary flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Fetch Prices ({activeProducts.length})
-            </button>
+            <div className="relative">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowFetchMenu(!showFetchMenu); }} 
+                disabled={activeProducts.length === 0 && inactiveProducts.length === 0 && lastInactiveCount === 0} 
+                className="btn-primary flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Fetch Prices
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showFetchMenu && (
+                <div className="absolute right-0 mt-2 w-56 card-dark border border-white/10 z-20 overflow-hidden">
+                  <button 
+                    onClick={() => handleFetchAll('active')} 
+                    disabled={activeProducts.length === 0}
+                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="font-medium">Active Products</div>
+                    <div className="text-xs text-neutral-400">{activeProducts.length} products</div>
+                  </button>
+                  <button 
+                    onClick={() => handleFetchAll('last_inactive')} 
+                    disabled={lastInactiveCount === 0}
+                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors border-t border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="font-medium text-orange-400">Last Inactive</div>
+                    <div className="text-xs text-neutral-400">{lastInactiveCount} SKUs from last fetch</div>
+                  </button>
+                  <button 
+                    onClick={() => handleFetchAll('inactive')} 
+                    disabled={inactiveProducts.length === 0}
+                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors border-t border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="font-medium text-red-400">All Inactive</div>
+                    <div className="text-xs text-neutral-400">{inactiveProducts.length} products</div>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
           <div className="relative">
             <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
+              onClick={(e) => { e.stopPropagation(); setShowExportMenu(!showExportMenu); }}
               disabled={exportLoading || products.length === 0}
               className="btn-secondary flex items-center gap-2"
             >

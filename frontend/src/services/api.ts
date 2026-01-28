@@ -289,9 +289,11 @@ export const deleteMonitoredProduct = async (productId: string): Promise<void> =
   await api.delete(`/price-monitor/products/${productId}`);
 };
 
-export const startFetchTask = async (platform: string = 'hepsiburada'): Promise<{ task_id: string; platform: string; status: string; message: string }> => {
+export type FetchType = 'active' | 'last_inactive' | 'inactive';
+
+export const startFetchTask = async (platform: string = 'hepsiburada', fetchType: FetchType = 'active'): Promise<{ task_id: string; platform: string; fetch_type: string; status: string; message: string }> => {
   const response = await api.post('/price-monitor/fetch', null, {
-    params: { platform }
+    params: { platform, fetch_type: fetchType }
   });
   return response.data;
 };
@@ -301,8 +303,29 @@ export const stopFetchTask = async (taskId: string): Promise<{ success: boolean;
   return response.data;
 };
 
-export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask> => {
+export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask & { fetch_type?: string; last_inactive_count?: number }> => {
   const response = await api.get(`/price-monitor/fetch/${taskId}`);
+  return response.data;
+};
+
+export interface LastInactiveProduct {
+  id: string;
+  sku: string;
+  product_name: string;
+  brand: string;
+  is_active: boolean;
+}
+
+export const getLastInactiveSkus = async (platform: string = 'hepsiburada'): Promise<{
+  skus: string[];
+  count: number;
+  products: LastInactiveProduct[];
+  task_id: string | null;
+  completed_at: string | null;
+}> => {
+  const response = await api.get('/price-monitor/last-inactive', {
+    params: { platform }
+  });
   return response.data;
 };
 

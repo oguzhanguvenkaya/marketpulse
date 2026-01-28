@@ -380,77 +380,105 @@ class PriceMonitorService:
         
         return sellers
     
-    async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
-        """Tek bir ürün için satıcı verilerini çek ve kaydet"""
+    async def fetch_product_data(self, product: MonitoredProduct) -> Dict[str, Any]:
+        """Tek bir ürün için HTTP isteklerini yap (DB işlemi yok) - Paralel çalışır"""
         sku = product.sku
         if sku.startswith('SKU: '):
             sku = sku.replace('SKU: ', '')
         
-        data = await self.fetch_listings(sku)
-        if not data:
+        result = {
+            'product_id': product.id,
+            'sku': sku,
+            'success': False,
+            'inactive': False,
+            'sellers': [],
+            'error': None
+        }
+        
+        try:
+            data = await self.fetch_listings(sku)
+            if not data:
+                result['inactive'] = True
+                result['error'] = 'no_data'
+                logger.warning(f"No data for SKU {sku} - will be marked inactive")
+                return result
+            
+            sellers = self.parse_listings(data)
+            if not sellers:
+                result['inactive'] = True
+                result['error'] = 'no_sellers'
+                logger.warning(f"No sellers for SKU {sku} - will be marked inactive")
+                return result
+            
+            percentage_discount_sellers = [s for s in sellers if s.get('has_percentage_discount', False)]
+            if percentage_discount_sellers:
+                seller_details = [f"{s.get('merchant_name')} (%{s.get('discount_percentage', '?')} - {s.get('discount_tag_id', 'N/A')})" for s in percentage_discount_sellers]
+                logger.info(f"[SKU: {sku}] {len(percentage_discount_sellers)} satıcıda yüzde indirim bulundu: {', '.join(seller_details)}")
+                
+                success_count = 0
+                fail_count = 0
+                for seller in percentage_discount_sellers:
+                    try:
+                        listing_id = seller.get('listing_id')
+                        merchant_id = seller.get('merchant_id')
+                        merchant_name = seller.get('merchant_name')
+                        price = seller.get('price')
+                        discount_tag = seller.get('discount_tag_id', 'N/A')
+                        
+                        if not all([listing_id, merchant_id, merchant_name, price]):
+                            logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API için gerekli bilgiler eksik")
+                            fail_count += 1
+                            continue
+                        
+                        campaign_data = await self.fetch_campaign_price(
+                            sku=sku,
+                            listing_id=listing_id,
+                            merchant_id=merchant_id,
+                            merchant_name=merchant_name,
+                            price=price
+                        )
+                        
+                        if campaign_data and campaign_data.get('discounted_price'):
+                            seller['campaign_price'] = campaign_data['discounted_price']
+                            seller['original_price_from_page'] = seller['price']
+                            seller['price'] = campaign_data['discounted_price']
+                            seller['campaign_text'] = campaign_data.get('campaign_text', '')
+                            success_count += 1
+                        else:
+                            logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API başarısız - discounted_price yok (tag: {discount_tag})")
+                            fail_count += 1
+                    except Exception as e:
+                        logger.error(f"[SKU: {sku}] [Mağaza: {seller.get('merchant_name', 'N/A')}] Campaign API hatası: {type(e).__name__}: {e}")
+                        fail_count += 1
+                
+                if fail_count > 0:
+                    logger.info(f"[SKU: {sku}] Campaign API sonuç: {success_count} başarılı, {fail_count} başarısız")
+            
+            result['success'] = True
+            result['sellers'] = sellers
+            logger.info(f"Fetched {len(sellers)} sellers for SKU {sku}")
+            
+        except Exception as e:
+            result['error'] = str(e)
+            logger.error(f"Error fetching product {sku}: {e}")
+        
+        return result
+    
+    def save_product_result(self, db: Session, product: MonitoredProduct, result: Dict[str, Any]) -> bool:
+        """Fetch sonucunu DB'ye kaydet (sıralı çalışır)"""
+        if result['inactive']:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
-            db.commit()
-            logger.warning(f"No data for SKU {sku} - marked as inactive")
             return False
         
-        sellers = self.parse_listings(data)
-        if not sellers:
-            product.is_active = False
-            product.last_fetched_at = datetime.utcnow()
-            db.commit()
-            logger.warning(f"No sellers for SKU {sku} - marked as inactive")
+        if not result['success']:
             return False
         
         if not product.is_active:
             product.is_active = True
-            logger.info(f"SKU {sku} reactivated - sellers found")
+            logger.info(f"SKU {result['sku']} reactivated - sellers found")
         
-        percentage_discount_sellers = [s for s in sellers if s.get('has_percentage_discount', False)]
-        if percentage_discount_sellers:
-            seller_details = [f"{s.get('merchant_name')} (%{s.get('discount_percentage', '?')} - {s.get('discount_tag_id', 'N/A')})" for s in percentage_discount_sellers]
-            logger.info(f"[SKU: {sku}] {len(percentage_discount_sellers)} satıcıda yüzde indirim bulundu: {', '.join(seller_details)}")
-            
-            success_count = 0
-            fail_count = 0
-            for seller in percentage_discount_sellers:
-                try:
-                    listing_id = seller.get('listing_id')
-                    merchant_id = seller.get('merchant_id')
-                    merchant_name = seller.get('merchant_name')
-                    price = seller.get('price')
-                    discount_tag = seller.get('discount_tag_id', 'N/A')
-                    
-                    if not all([listing_id, merchant_id, merchant_name, price]):
-                        logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API için gerekli bilgiler eksik (listing_id={listing_id}, merchant_id={merchant_id}, price={price})")
-                        fail_count += 1
-                        continue
-                    
-                    campaign_data = await self.fetch_campaign_price(
-                        sku=sku,
-                        listing_id=listing_id,
-                        merchant_id=merchant_id,
-                        merchant_name=merchant_name,
-                        price=price
-                    )
-                    
-                    if campaign_data and campaign_data.get('discounted_price'):
-                        seller['campaign_price'] = campaign_data['discounted_price']
-                        seller['original_price_from_page'] = seller['price']
-                        seller['price'] = campaign_data['discounted_price']
-                        seller['campaign_text'] = campaign_data.get('campaign_text', '')
-                        success_count += 1
-                    else:
-                        logger.warning(f"[SKU: {sku}] [Mağaza: {merchant_name}] Campaign API başarısız - discounted_price yok (tag: {discount_tag})")
-                        fail_count += 1
-                except Exception as e:
-                    logger.error(f"[SKU: {sku}] [Mağaza: {seller.get('merchant_name', 'N/A')}] Campaign API hatası: {type(e).__name__}: {e}")
-                    fail_count += 1
-            
-            if fail_count > 0:
-                logger.info(f"[SKU: {sku}] Campaign API sonuç: {success_count} başarılı, {fail_count} başarısız")
-        
-        for seller in sellers:
+        for seller in result['sellers']:
             snapshot = SellerSnapshot(
                 monitored_product_id=product.id,
                 merchant_id=seller['merchant_id'],
@@ -476,80 +504,143 @@ class PriceMonitorService:
             db.add(snapshot)
         
         product.last_fetched_at = datetime.utcnow()
-        db.commit()
-        
-        logger.info(f"Saved {len(sellers)} sellers for SKU {sku}")
         return True
     
-    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "hepsiburada"):
-        """Belirli platform için izlenen ürünlerin satıcı verilerini çek"""
+    async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "hepsiburada", fetch_type: str = "active"):
+        """Belirli platform için izlenen ürünlerin satıcı verilerini çek - PARALEL İŞLEME
+        
+        Args:
+            fetch_type: "active" (varsayılan), "last_inactive" (önceki fetch'te inactive olanlar), "inactive" (tüm inaktif ürünler)
+        """
         has_sellers_subquery = exists().where(
             SellerSnapshot.monitored_product_id == MonitoredProduct.id
         )
         
-        if product_ids:
+        if fetch_type == "last_inactive":
+            last_task = db.query(PriceMonitorTask).filter(
+                PriceMonitorTask.platform == platform,
+                PriceMonitorTask.status == "completed"
+            ).order_by(PriceMonitorTask.completed_at.desc()).first()
+            
+            if last_task and last_task.last_inactive_skus:
+                products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.sku.in_(last_task.last_inactive_skus),
+                    MonitoredProduct.platform == platform
+                ).all()
+                logger.info(f"Last inactive fetch: {len(last_task.last_inactive_skus)} SKU hedefleniyor")
+            else:
+                products = []
+                logger.warning("No last inactive SKUs found")
+        elif fetch_type == "inactive":
             products = db.query(MonitoredProduct).filter(
-                MonitoredProduct.id.in_(product_ids),
                 MonitoredProduct.platform == platform,
-                MonitoredProduct.is_active == True,
+                MonitoredProduct.is_active == False,
                 has_sellers_subquery
             ).all()
+            logger.info(f"Inactive fetch: {len(products)} ürün")
         else:
-            products = db.query(MonitoredProduct).filter(
-                MonitoredProduct.platform == platform,
-                MonitoredProduct.is_active == True,
-                has_sellers_subquery
-            ).all()
+            if product_ids:
+                products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.id.in_(product_ids),
+                    MonitoredProduct.platform == platform,
+                    MonitoredProduct.is_active == True,
+                    has_sellers_subquery
+                ).all()
+            else:
+                products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.platform == platform,
+                    MonitoredProduct.is_active == True,
+                    has_sellers_subquery
+                ).all()
         
         task.total_products = len(products)
+        task.fetch_type = fetch_type
         task.status = "running"
+        task.last_inactive_skus = []
         db.commit()
         
-        logger.info(f"İşleme başlıyor: {len(products)} ürün")
+        if not products:
+            task.status = "completed"
+            task.completed_at = datetime.utcnow()
+            db.commit()
+            logger.info("No products to process")
+            return
         
+        logger.info(f"PARALEL İŞLEME BAŞLIYOR: {len(products)} ürün, {self.MAX_CONCURRENT_REQUESTS} eşzamanlı istek")
+        
+        semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
         completed = 0
         failed = 0
+        inactive_skus = []
+        product_map = {str(p.id): p for p in products}
         
-        # Sıralı işleme - DB session paylaşımı sorunlarını önler
-        # HTTP istekleri zaten async, DB işlemleri güvenli şekilde sıralı yapılır
-        for idx, product in enumerate(products):
-            # Her 20 üründe stop kontrolü
-            if idx % 20 == 0:
-                db.refresh(task)
-                if task.stop_requested:
-                    logger.info(f"Stop requested, finishing after {completed} products")
-                    task.status = "stopped"
-                    task.completed_at = datetime.utcnow()
-                    db.commit()
-                    return
+        async def fetch_with_semaphore(product: MonitoredProduct) -> Dict[str, Any]:
+            """Semaphore ile rate-limited paralel fetch"""
+            async with semaphore:
+                result = await self.fetch_product_data(product)
+                await asyncio.sleep(0.3)
+                return result
+        
+        batch_size = 50
+        total_batches = (len(products) + batch_size - 1) // batch_size
+        
+        for batch_idx in range(total_batches):
+            db.refresh(task)
+            if task.stop_requested:
+                logger.info(f"Stop requested at batch {batch_idx + 1}/{total_batches}")
+                task.last_processed_index = batch_idx * batch_size
+                task.status = "stopped"
+                task.completed_at = datetime.utcnow()
+                task.last_inactive_skus = inactive_skus
+                db.commit()
+                return
             
-            try:
-                success = await self.fetch_and_save_product(db, product)
-                if success:
+            start_idx = batch_idx * batch_size
+            end_idx = min(start_idx + batch_size, len(products))
+            batch_products = products[start_idx:end_idx]
+            
+            logger.info(f"Batch {batch_idx + 1}/{total_batches}: {len(batch_products)} ürün paralel işleniyor...")
+            
+            tasks = [fetch_with_semaphore(p) for p in batch_products]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.error(f"Batch exception: {result}")
+                    failed += 1
+                    continue
+                
+                product = product_map.get(str(result['product_id']))
+                if not product:
+                    continue
+                
+                if result['inactive']:
+                    inactive_skus.append(result['sku'])
+                    failed += 1
+                    self.save_product_result(db, product, result)
+                elif result['success']:
                     completed += 1
+                    self.save_product_result(db, product, result)
                 else:
                     failed += 1
-            except Exception as e:
-                logger.error(f"Error processing product {product.sku}: {e}")
-                failed += 1
             
-            # Her 10 üründe progress güncelle
-            if (idx + 1) % 10 == 0:
-                task.completed_products = completed
-                task.failed_products = failed
-                db.commit()
-                logger.info(f"İlerleme: {completed + failed}/{len(products)} ({completed} başarılı, {failed} başarısız)")
+            db.commit()
             
-            # Rate limiting - ScraperAPI aşırı yüklenmesini önle
-            await asyncio.sleep(0.3)
+            task.completed_products = completed
+            task.failed_products = failed
+            task.last_processed_index = end_idx
+            db.commit()
+            
+            logger.info(f"Batch {batch_idx + 1} tamamlandı: toplam {completed} başarılı, {failed} başarısız, {len(inactive_skus)} inactive")
         
         task.completed_products = completed
         task.failed_products = failed
         task.status = "completed"
         task.completed_at = datetime.utcnow()
+        task.last_inactive_skus = inactive_skus
         db.commit()
         
-        logger.info(f"Fetch task completed: {completed} success, {failed} failed")
+        logger.info(f"Fetch task completed: {completed} success, {failed} failed, {len(inactive_skus)} marked inactive")
 
 
 price_monitor_service = PriceMonitorService()

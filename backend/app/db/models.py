@@ -223,5 +223,10 @@ class PriceMonitorTask(Base):
     completed_at = Column(DateTime)
     error_message = Column(Text)
     
+    # Yeni alanlar: Session bazlı inactive takibi ve resume desteği
+    last_inactive_skus = Column(JSON, default=list)  # Bu fetch'te inactive olan SKU'lar
+    last_processed_index = Column(Integer, default=0)  # Resume için son işlenen index
+    fetch_type = Column(String(20), default="active")  # active, last_inactive, inactive
+    
     class Config:
         from_attributes = True

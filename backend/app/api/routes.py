@@ -1058,7 +1058,7 @@ async def delete_monitored_product(
     return {"success": True, "message": "Ürün silindi"}
 
 
-async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = None):
+async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = None, fetch_type: str = "active"):
     """Arka planda satıcı fiyatlarını çek"""
     db = SessionLocal()
     try:
@@ -1067,7 +1067,7 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
             if platform == "trendyol":
                 await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform)
             else:
-                await price_monitor_service.fetch_all_products(db, task, product_ids, platform)
+                await price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
     finally:
         db.close()
 
@@ -1076,22 +1076,30 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
 async def start_fetch_task(
     background_tasks: BackgroundTasks,
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
+    fetch_type: str = Query("active", description="Fetch type: active, last_inactive, inactive"),
     db: Session = Depends(get_db),
     product_ids: Optional[List[str]] = None
 ):
-    """Belirli platform için satıcı fiyatlarını çekmeye başla"""
-    task = PriceMonitorTask(platform=platform, status="pending")
+    """Belirli platform için satıcı fiyatlarını çekmeye başla
+    
+    fetch_type:
+    - active: Aktif ürünleri çek (varsayılan)
+    - last_inactive: Son fetch'te inactive olan ürünleri tekrar dene
+    - inactive: Tüm inactive ürünleri çek
+    """
+    task = PriceMonitorTask(platform=platform, status="pending", fetch_type=fetch_type)
     db.add(task)
     db.commit()
     db.refresh(task)
     
-    background_tasks.add_task(run_fetch_task, str(task.id), platform, product_ids)
+    background_tasks.add_task(run_fetch_task, str(task.id), platform, product_ids, fetch_type)
     
     return {
         "task_id": str(task.id),
         "platform": platform,
+        "fetch_type": fetch_type,
         "status": "started",
-        "message": f"{platform.capitalize()} için fiyat çekme işlemi başlatıldı"
+        "message": f"{platform.capitalize()} için {fetch_type} ürünler çekme işlemi başlatıldı"
     }
 
 
@@ -1135,8 +1143,53 @@ async def get_fetch_task_status(
         "total_products": task.total_products,
         "completed_products": task.completed_products,
         "failed_products": task.failed_products,
+        "fetch_type": task.fetch_type,
+        "last_inactive_count": len(task.last_inactive_skus) if task.last_inactive_skus else 0,
         "created_at": task.created_at.isoformat(),
         "completed_at": task.completed_at.isoformat() if task.completed_at else None
+    }
+
+
+@router.get("/price-monitor/last-inactive")
+async def get_last_inactive_skus(
+    platform: str = Query("hepsiburada"),
+    db: Session = Depends(get_db)
+):
+    """Son tamamlanan fetch görevinde inactive olan SKU'ları getir"""
+    last_task = db.query(PriceMonitorTask).filter(
+        PriceMonitorTask.platform == platform,
+        PriceMonitorTask.status == "completed"
+    ).order_by(PriceMonitorTask.completed_at.desc()).first()
+    
+    if not last_task:
+        return {"skus": [], "count": 0, "task_id": None}
+    
+    skus = last_task.last_inactive_skus or []
+    
+    products = []
+    if skus:
+        product_records = db.query(MonitoredProduct).filter(
+            MonitoredProduct.sku.in_(skus),
+            MonitoredProduct.platform == platform
+        ).all()
+        
+        products = [
+            {
+                "id": str(p.id),
+                "sku": p.sku,
+                "product_name": p.product_name,
+                "brand": p.brand,
+                "is_active": p.is_active
+            }
+            for p in product_records
+        ]
+    
+    return {
+        "skus": skus,
+        "count": len(skus),
+        "products": products,
+        "task_id": str(last_task.id),
+        "completed_at": last_task.completed_at.isoformat() if last_task.completed_at else None
     }
 
 
