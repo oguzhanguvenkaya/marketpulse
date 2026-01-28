@@ -193,12 +193,15 @@ export interface MonitoredProduct {
   brand?: string;
   seller_stock_code?: string;
   threshold_price?: number;
+  alert_campaign_price?: number;
   image_url?: string;
   is_active: boolean;
   last_fetched_at?: string;
   seller_count: number;
   has_price_alert: boolean;
   price_alert_count: number;
+  has_campaign_alert: boolean;
+  campaign_alert_count: number;
 }
 
 export interface SellerSnapshot {
@@ -223,6 +226,7 @@ export interface SellerSnapshot {
   campaign_price?: number;
   snapshot_date: string;
   price_alert: boolean;
+  campaign_alert?: boolean;
 }
 
 export interface MonitoredProductsResponse {
@@ -252,6 +256,7 @@ export interface BulkProductInput {
   barcode?: string;
   brand?: string;
   price?: number;
+  campaignPrice?: number;
   sellerStockCode?: string;
 }
 

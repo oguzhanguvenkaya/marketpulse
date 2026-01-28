@@ -161,7 +161,8 @@ class MonitoredProduct(Base):
     product_name = Column(Text)
     brand = Column(String(255), index=True)
     seller_stock_code = Column(String(100), index=True)  # Satıcı stok kodu
-    threshold_price = Column(Numeric(10, 2))  # Eşik fiyat - bu fiyatın altında satış yapan satıcılar için uyarı
+    threshold_price = Column(Numeric(10, 2))  # Eşik fiyat - original_price üzerinden alert (satıcı indirimine izin verir)
+    alert_campaign_price = Column(Numeric(10, 2))  # Campaign price eşik - Campaign API'den gelen indirimli fiyat için alert
     image_url = Column(Text)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

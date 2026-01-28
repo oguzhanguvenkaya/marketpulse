@@ -632,7 +632,8 @@ class MonitoredProductInput(BaseModel):
     sku: Optional[str] = None
     barcode: Optional[str] = None
     brand: Optional[str] = None
-    price: Optional[float] = None  # threshold_price olarak kaydedilecek
+    price: Optional[float] = None  # threshold_price olarak kaydedilecek (original_price için alert)
+    campaignPrice: Optional[float] = None  # alert_campaign_price olarak kaydedilecek (campaign_price için alert)
     sellerStockCode: Optional[str] = None
 
 class BulkProductsRequest(BaseModel):
@@ -649,12 +650,15 @@ class MonitoredProductResponse(BaseModel):
     brand: Optional[str] = None
     seller_stock_code: Optional[str] = None
     threshold_price: Optional[float] = None
+    alert_campaign_price: Optional[float] = None
     image_url: Optional[str] = None
     is_active: bool = True
     last_fetched_at: Optional[str] = None
     seller_count: int = 0
-    has_price_alert: bool = False  # Eşik altı satıcı var mı
-    price_alert_count: int = 0  # Eşik altı satıcı sayısı
+    has_price_alert: bool = False  # original_price eşik altı satıcı var mı
+    price_alert_count: int = 0  # original_price eşik altı satıcı sayısı
+    has_campaign_alert: bool = False  # campaign_price eşik altı satıcı var mı
+    campaign_alert_count: int = 0  # campaign_price eşik altı satıcı sayısı
     
     class Config:
         from_attributes = True
@@ -754,6 +758,8 @@ async def add_monitored_products(
                     existing.brand = item.brand
                 if item.price is not None:
                     existing.threshold_price = item.price
+                if item.campaignPrice is not None:
+                    existing.alert_campaign_price = item.campaignPrice
                 if item.sellerStockCode:
                     existing.seller_stock_code = item.sellerStockCode
                 existing.is_active = True
@@ -767,6 +773,7 @@ async def add_monitored_products(
                     product_name=item.productName,
                     brand=item.brand,
                     threshold_price=item.price,
+                    alert_campaign_price=item.campaignPrice,
                     seller_stock_code=item.sellerStockCode,
                     is_active=True
                 )
@@ -816,14 +823,26 @@ async def get_monitored_products(
         seller_count = len(set(s.merchant_id for s in latest_snapshots))
         
         threshold = float(product.threshold_price) if product.threshold_price else None
-        price_alert_count = 0
-        if threshold and latest_snapshots:
-            for s in latest_snapshots:
-                if float(s.price) < threshold:
-                    price_alert_count += 1
-        has_price_alert = price_alert_count > 0
+        campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
         
-        if price_alert_only and not has_price_alert:
+        price_alert_count = 0
+        campaign_alert_count = 0
+        
+        if latest_snapshots:
+            for s in latest_snapshots:
+                orig_price = float(s.original_price) if s.original_price else None
+                camp_price = float(s.campaign_price) if s.campaign_price else None
+                
+                if threshold and orig_price and orig_price < threshold:
+                    price_alert_count += 1
+                
+                if campaign_threshold and camp_price and camp_price < campaign_threshold:
+                    campaign_alert_count += 1
+        
+        has_price_alert = price_alert_count > 0
+        has_campaign_alert = campaign_alert_count > 0
+        
+        if price_alert_only and not has_price_alert and not has_campaign_alert:
             continue
         
         if search:
@@ -842,12 +861,15 @@ async def get_monitored_products(
             "brand": product.brand,
             "seller_stock_code": product.seller_stock_code,
             "threshold_price": float(product.threshold_price) if product.threshold_price else None,
+            "alert_campaign_price": float(product.alert_campaign_price) if product.alert_campaign_price else None,
             "image_url": product.image_url,
             "is_active": product.is_active,
             "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
             "seller_count": seller_count,
             "has_price_alert": has_price_alert,
-            "price_alert_count": price_alert_count
+            "price_alert_count": price_alert_count,
+            "has_campaign_alert": has_campaign_alert,
+            "campaign_alert_count": campaign_alert_count
         })
     
     return {"products": result, "total": len(result)}
@@ -974,6 +996,7 @@ async def get_monitored_product_detail(
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     
     threshold = float(product.threshold_price) if product.threshold_price else None
+    campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
     
     latest_snapshots = db.query(SellerSnapshot).filter(
         SellerSnapshot.monitored_product_id == product.id
@@ -982,6 +1005,8 @@ async def get_monitored_product_detail(
     seen_merchants = set()
     unique_sellers = []
     price_alert_count = 0
+    campaign_alert_count = 0
+    
     for s in latest_snapshots:
         if s.merchant_id not in seen_merchants:
             seen_merchants.add(s.merchant_id)
@@ -991,10 +1016,18 @@ async def get_monitored_product_detail(
                 merchant_url = f"https://www.trendyol.com{s.merchant_url_postfix}" if s.merchant_url_postfix else None
             else:
                 merchant_url = None
-            seller_price = float(s.price) if s.price else None
-            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
-            if has_alert:
+            
+            orig_price = float(s.original_price) if s.original_price else None
+            camp_price = float(s.campaign_price) if s.campaign_price else None
+            
+            has_price_alert = threshold is not None and orig_price is not None and orig_price < threshold
+            has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
+            
+            if has_price_alert:
                 price_alert_count += 1
+            if has_campaign_alert:
+                campaign_alert_count += 1
+            
             unique_sellers.append({
                 "merchant_id": s.merchant_id,
                 "merchant_name": s.merchant_name,
@@ -1004,8 +1037,8 @@ async def get_monitored_product_detail(
                 "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
                 "merchant_rating_count": s.merchant_rating_count,
                 "merchant_city": s.merchant_city,
-                "price": seller_price,
-                "original_price": float(s.original_price) if s.original_price else None,
+                "price": float(s.price) if s.price else None,
+                "original_price": orig_price,
                 "minimum_price": float(s.minimum_price) if s.minimum_price else None,
                 "discount_rate": s.discount_rate,
                 "stock_quantity": s.stock_quantity,
@@ -1014,9 +1047,10 @@ async def get_monitored_product_detail(
                 "fast_shipping": s.fast_shipping,
                 "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
                 "campaigns": s.campaigns if s.campaigns else [],
-                "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+                "campaign_price": camp_price,
                 "snapshot_date": s.snapshot_date.isoformat(),
-                "price_alert": has_alert
+                "price_alert": has_price_alert,
+                "campaign_alert": has_campaign_alert
             })
     
     return {
@@ -1030,12 +1064,15 @@ async def get_monitored_product_detail(
             "brand": product.brand,
             "seller_stock_code": product.seller_stock_code,
             "threshold_price": threshold,
+            "alert_campaign_price": campaign_threshold,
             "image_url": product.image_url,
             "is_active": product.is_active,
             "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
             "seller_count": len(unique_sellers),
             "has_price_alert": price_alert_count > 0,
-            "price_alert_count": price_alert_count
+            "price_alert_count": price_alert_count,
+            "has_campaign_alert": campaign_alert_count > 0,
+            "campaign_alert_count": campaign_alert_count
         },
         "sellers": unique_sellers
     }

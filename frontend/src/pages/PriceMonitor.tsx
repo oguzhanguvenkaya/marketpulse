@@ -535,7 +535,12 @@ export default function PriceMonitor() {
                         )}
                         {product.has_price_alert && (
                           <span className="badge badge-danger">
-                            Alert ({product.price_alert_count})
+                            Price ({product.price_alert_count})
+                          </span>
+                        )}
+                        {product.has_campaign_alert && (
+                          <span className="badge badge-warning">
+                            Campaign ({product.campaign_alert_count})
                           </span>
                         )}
                         {product.brand && (
@@ -710,7 +715,10 @@ export default function PriceMonitor() {
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-primary/20 text-accent-primary">Lowest Price</span>
                             )}
                             {seller.price_alert && (
-                              <span className="badge badge-danger text-[10px]">Below Threshold</span>
+                              <span className="badge badge-danger text-[10px]">Price Alert</span>
+                            )}
+                            {seller.campaign_alert && (
+                              <span className="badge badge-warning text-[10px]">Campaign Alert</span>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-1 text-xs text-neutral-300">
