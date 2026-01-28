@@ -7,6 +7,7 @@ import urllib.parse
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import exists
 from app.core.logger import price_monitor_logger as logger
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
@@ -472,16 +473,22 @@ class PriceMonitorService:
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "hepsiburada"):
         """Belirli platform için izlenen ürünlerin satıcı verilerini çek"""
+        has_sellers_subquery = exists().where(
+            SellerSnapshot.monitored_product_id == MonitoredProduct.id
+        )
+        
         if product_ids:
             products = db.query(MonitoredProduct).filter(
                 MonitoredProduct.id.in_(product_ids),
                 MonitoredProduct.platform == platform,
-                MonitoredProduct.is_active == True
+                MonitoredProduct.is_active == True,
+                has_sellers_subquery
             ).all()
         else:
             products = db.query(MonitoredProduct).filter(
                 MonitoredProduct.platform == platform,
-                MonitoredProduct.is_active == True
+                MonitoredProduct.is_active == True,
+                has_sellers_subquery
             ).all()
         
         task.total_products = len(products)
