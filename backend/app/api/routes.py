@@ -801,9 +801,10 @@ async def get_monitored_products(
     platform: Optional[str] = None,
     brand: Optional[str] = None,
     price_alert_only: bool = False,
+    campaign_alert_only: bool = False,
     search: Optional[str] = None
 ):
-    """İzlenen ürün listesini getir - platform, marka, price alert ve arama filtresi ile"""
+    """İzlenen ürün listesini getir - platform, marka, price/campaign alert ve arama filtresi ile"""
     query = db.query(MonitoredProduct)
     if active_only:
         query = query.filter(MonitoredProduct.is_active == True)
@@ -842,7 +843,10 @@ async def get_monitored_products(
         has_price_alert = price_alert_count > 0
         has_campaign_alert = campaign_alert_count > 0
         
-        if price_alert_only and not has_price_alert and not has_campaign_alert:
+        if price_alert_only and not has_price_alert:
+            continue
+        
+        if campaign_alert_only and not has_campaign_alert:
             continue
         
         if search:

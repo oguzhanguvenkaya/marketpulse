@@ -42,6 +42,7 @@ export default function PriceMonitor() {
   const [brands, setBrands] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
+  const [campaignAlertOnly, setCampaignAlertOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastInactiveProducts, setLastInactiveProducts] = useState<LastInactiveProduct[]>([]);
   const [lastInactiveCount, setLastInactiveCount] = useState(0);
@@ -80,7 +81,7 @@ export default function PriceMonitor() {
 
   useEffect(() => {
     loadProducts();
-  }, [selectedBrand, priceAlertOnly, searchQuery]);
+  }, [selectedBrand, priceAlertOnly, campaignAlertOnly, searchQuery]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -122,6 +123,7 @@ export default function PriceMonitor() {
       const params: Record<string, any> = {};
       if (selectedBrand) params.brand = selectedBrand;
       if (priceAlertOnly) params.price_alert_only = true;
+      if (campaignAlertOnly) params.campaign_alert_only = true;
       if (searchQuery) params.search = searchQuery;
       const data = await getMonitoredProducts(platform, params);
       setProducts(data.products);
@@ -495,6 +497,16 @@ export default function PriceMonitor() {
               }`}
             >
               Price Alerts
+            </button>
+            <button
+              onClick={() => setCampaignAlertOnly(!campaignAlertOnly)}
+              className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
+                campaignAlertOnly
+                  ? 'bg-warning/20 text-warning border border-warning/30'
+                  : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+              }`}
+            >
+              Campaign Alerts
             </button>
           </div>
 

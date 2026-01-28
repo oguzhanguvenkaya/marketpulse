@@ -264,6 +264,7 @@ export interface GetProductsParams {
   platform?: string;
   brand?: string;
   price_alert_only?: boolean;
+  campaign_alert_only?: boolean;
   search?: string;
 }
 
