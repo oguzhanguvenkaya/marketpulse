@@ -402,9 +402,12 @@ export interface SellerProduct {
   seller_price?: number;
   original_price?: number;
   campaign_price?: number;
+  alert_campaign_price?: number;
   campaigns?: string[];
   price_alert: boolean;
+  campaign_alert: boolean;
   price_difference?: number;
+  campaign_difference?: number;
   snapshot_date: string;
 }
 
@@ -416,19 +419,21 @@ export const getSellers = async (platform: string): Promise<{ sellers: SellerInf
 export const getSellerProducts = async (
   merchantId: string,
   platform: string,
-  priceAlertOnly: boolean = false
-): Promise<{ products: SellerProduct[]; total: number; merchant_name: string }> => {
-  const response = await api.get(`/sellers/${merchantId}/products?platform=${platform}&price_alert_only=${priceAlertOnly}`);
+  priceAlertOnly: boolean = false,
+  campaignAlertOnly: boolean = false
+): Promise<{ products: SellerProduct[]; total: number; merchant_name: string; price_alert_count: number; campaign_alert_count: number }> => {
+  const response = await api.get(`/sellers/${merchantId}/products?platform=${platform}&price_alert_only=${priceAlertOnly}&campaign_alert_only=${campaignAlertOnly}`);
   return response.data;
 };
 
 export const exportSellerProducts = async (
   merchantId: string,
   platform: string,
-  priceAlertOnly: boolean = false
+  priceAlertOnly: boolean = false,
+  campaignAlertOnly: boolean = false
 ): Promise<void> => {
   const response = await api.get(
-    `/sellers/${merchantId}/export?platform=${platform}&price_alert_only=${priceAlertOnly}`,
+    `/sellers/${merchantId}/export?platform=${platform}&price_alert_only=${priceAlertOnly}&campaign_alert_only=${campaignAlertOnly}`,
     { responseType: 'blob' }
   );
   

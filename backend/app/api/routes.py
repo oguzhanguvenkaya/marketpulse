@@ -1369,9 +1369,10 @@ async def get_seller_products(
     merchant_id: str,
     platform: str = Query("hepsiburada", description="Platform"),
     price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri göster"),
+    campaign_alert_only: bool = Query(False, description="Sadece campaign alert olan ürünleri göster"),
     db: Session = Depends(get_db)
 ):
-    """Satıcının sattığı ürünleri listele - price alert filtresi ile"""
+    """Satıcının sattığı ürünleri listele - price alert ve campaign alert filtresi ile"""
     from sqlalchemy import func
     
     products = db.query(MonitoredProduct).filter(
@@ -1419,7 +1420,13 @@ async def get_seller_products(
         seller_price = float(s.price) if s.price else None
         has_alert = threshold is not None and seller_price is not None and seller_price < threshold
         
+        alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
+        campaign_price_val = float(s.campaign_price) if s.campaign_price else None
+        has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+        
         if price_alert_only and not has_alert:
+            continue
+        if campaign_alert_only and not has_campaign_alert:
             continue
         
         base_url = product.product_url or ""
@@ -1444,16 +1451,22 @@ async def get_seller_products(
             "threshold_price": threshold,
             "seller_price": seller_price,
             "original_price": float(s.original_price) if s.original_price else None,
-            "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+            "campaign_price": campaign_price_val,
+            "alert_campaign_price": alert_campaign_threshold,
             "campaigns": s.campaigns if s.campaigns else [],
             "price_alert": has_alert,
+            "campaign_alert": has_campaign_alert,
             "price_difference": round(threshold - seller_price, 2) if threshold and seller_price else None,
+            "campaign_difference": round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None,
             "snapshot_date": s.snapshot_date.isoformat()
         })
     
-    result.sort(key=lambda x: (not x['price_alert'], x['product_name'] or ''))
+    result.sort(key=lambda x: (not x['price_alert'], not x['campaign_alert'], x['product_name'] or ''))
     
-    return {"products": result, "total": len(result), "merchant_name": merchant_name}
+    price_alert_count = sum(1 for r in result if r['price_alert'])
+    campaign_alert_count = sum(1 for r in result if r['campaign_alert'])
+    
+    return {"products": result, "total": len(result), "merchant_name": merchant_name, "price_alert_count": price_alert_count, "campaign_alert_count": campaign_alert_count}
 
 
 @router.get("/sellers/{merchant_id}/export")
@@ -1461,9 +1474,10 @@ async def export_seller_products(
     merchant_id: str,
     platform: str = Query("hepsiburada", description="Platform"),
     price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri indir"),
+    campaign_alert_only: bool = Query(False, description="Sadece campaign alert olan ürünleri indir"),
     db: Session = Depends(get_db)
 ):
-    """Satıcının ürünlerini CSV olarak indir"""
+    """Satıcının ürünlerini CSV olarak indir - campaign alert dahil"""
     from fastapi.responses import StreamingResponse
     import csv
     import io
@@ -1502,7 +1516,8 @@ async def export_seller_products(
     writer.writerow([
         'SKU', 'Barcode', 'Product Name', 'Brand', 'Stock Code',
         'Product URL', 'Threshold Price', 'Seller Price', 
-        'Price Difference', 'Price Alert', 'Campaigns', 'Snapshot Date'
+        'Price Difference', 'Price Alert', 'Campaign Threshold', 'Campaign Price',
+        'Campaign Difference', 'Campaign Alert', 'Campaigns', 'Snapshot Date'
     ])
     
     merchant_name = ""
@@ -1518,10 +1533,17 @@ async def export_seller_products(
         seller_price = float(s.price) if s.price else None
         has_alert = threshold is not None and seller_price is not None and seller_price < threshold
         
+        alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
+        campaign_price_val = float(s.campaign_price) if s.campaign_price else None
+        has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+        
         if price_alert_only and not has_alert:
+            continue
+        if campaign_alert_only and not has_campaign_alert:
             continue
         
         price_diff = round(threshold - seller_price, 2) if threshold and seller_price else None
+        campaign_diff = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
         campaigns_str = ", ".join(s.campaigns) if s.campaigns else ""
         
         writer.writerow([
@@ -1535,6 +1557,10 @@ async def export_seller_products(
             seller_price or '',
             price_diff or '',
             'YES' if has_alert else 'NO',
+            alert_campaign_threshold or '',
+            campaign_price_val or '',
+            campaign_diff or '',
+            'YES' if has_campaign_alert else 'NO',
             campaigns_str,
             s.snapshot_date.isoformat()
         ])

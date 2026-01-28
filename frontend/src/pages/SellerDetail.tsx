@@ -14,22 +14,27 @@ export default function SellerDetail() {
   const [merchantName, setMerchantName] = useState('');
   const [loading, setLoading] = useState(true);
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
+  const [campaignAlertOnly, setCampaignAlertOnly] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [priceAlertCount, setPriceAlertCount] = useState(0);
+  const [campaignAlertCount, setCampaignAlertCount] = useState(0);
 
   useEffect(() => {
     if (merchantId) {
       fetchProducts();
     }
-  }, [merchantId, platform, priceAlertOnly]);
+  }, [merchantId, platform, priceAlertOnly, campaignAlertOnly]);
 
   const fetchProducts = async () => {
     if (!merchantId) return;
     setLoading(true);
     try {
-      const data = await getSellerProducts(merchantId, platform, priceAlertOnly);
+      const data = await getSellerProducts(merchantId, platform, priceAlertOnly, campaignAlertOnly);
       setProducts(data.products);
       setMerchantName(data.merchant_name);
+      setPriceAlertCount(data.price_alert_count);
+      setCampaignAlertCount(data.campaign_alert_count);
     } catch (error) {
       console.error('Error fetching seller products:', error);
     } finally {
@@ -41,7 +46,7 @@ export default function SellerDetail() {
     if (!merchantId) return;
     setExporting(true);
     try {
-      await exportSellerProducts(merchantId, platform, priceAlertOnly);
+      await exportSellerProducts(merchantId, platform, priceAlertOnly, campaignAlertOnly);
     } catch (error) {
       console.error('Error exporting:', error);
     } finally {
@@ -68,8 +73,6 @@ export default function SellerDetail() {
     );
   });
 
-  const alertCount = products.filter(p => p.price_alert).length;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -84,7 +87,7 @@ export default function SellerDetail() {
         <div>
           <h1 className="text-2xl font-bold text-white">{merchantName || 'Seller'}</h1>
           <p className="text-neutral-400 mt-1">
-            {products.length} products • {alertCount} price alerts
+            {products.length} products • {priceAlertCount} price alerts • {campaignAlertCount} campaign alerts
           </p>
         </div>
       </div>
@@ -99,18 +102,33 @@ export default function SellerDetail() {
             className="input-dark flex-1 min-w-[200px]"
           />
           
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={priceAlertOnly}
-              onChange={(e) => setPriceAlertOnly(e.target.checked)}
-              className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-accent-primary focus:ring-accent-primary"
-            />
-            <span className="text-neutral-300 text-sm">Price Alerts Only</span>
-            {alertCount > 0 && (
-              <span className="badge badge-danger text-xs">{alertCount}</span>
+          <button
+            onClick={() => setPriceAlertOnly(!priceAlertOnly)}
+            className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
+              priceAlertOnly
+                ? 'bg-danger/20 text-danger border border-danger/30'
+                : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+            }`}
+          >
+            Price Alerts
+            {priceAlertCount > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs rounded bg-danger/30">{priceAlertCount}</span>
             )}
-          </label>
+          </button>
+
+          <button
+            onClick={() => setCampaignAlertOnly(!campaignAlertOnly)}
+            className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
+              campaignAlertOnly
+                ? 'bg-warning/20 text-warning border border-warning/30'
+                : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+            }`}
+          >
+            Campaign Alerts
+            {campaignAlertCount > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs rounded bg-warning/30">{campaignAlertCount}</span>
+            )}
+          </button>
 
           <button
             onClick={handleExport}
@@ -140,27 +158,37 @@ export default function SellerDetail() {
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12 text-neutral-400">
-            {priceAlertOnly ? 'No products with price alerts' : 'No products found'}
+            {priceAlertOnly || campaignAlertOnly ? 'No products with selected alerts' : 'No products found'}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="table-dark w-full">
               <thead>
                 <tr>
-                  <th className="text-left">Product</th>
-                  <th className="text-left">SKU / Barcode</th>
-                  <th className="text-left">Brand</th>
-                  <th className="text-right">Threshold</th>
-                  <th className="text-right">Seller Price</th>
-                  <th className="text-right">Difference</th>
-                  <th className="text-center">Status</th>
+                  <th className="text-left" rowSpan={2}>Product</th>
+                  <th className="text-left" rowSpan={2}>SKU / Barcode</th>
+                  <th className="text-left" rowSpan={2}>Brand</th>
+                  <th className="text-center border-l border-dark-600" colSpan={3}>
+                    <span className="text-danger">Price Alert</span>
+                  </th>
+                  <th className="text-center border-l border-dark-600" colSpan={3}>
+                    <span className="text-warning">Campaign Alert</span>
+                  </th>
+                </tr>
+                <tr>
+                  <th className="text-right border-l border-dark-600 text-xs font-normal text-neutral-500">Threshold</th>
+                  <th className="text-right text-xs font-normal text-neutral-500">Seller Price</th>
+                  <th className="text-center text-xs font-normal text-neutral-500">Status</th>
+                  <th className="text-right border-l border-dark-600 text-xs font-normal text-neutral-500">Threshold</th>
+                  <th className="text-right text-xs font-normal text-neutral-500">Campaign</th>
+                  <th className="text-center text-xs font-normal text-neutral-500">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.map((product) => (
                   <tr 
                     key={product.product_id}
-                    className={`${product.price_alert ? 'bg-red-900/20' : ''} hover:bg-dark-600 transition-colors`}
+                    className={`${product.price_alert || product.campaign_alert ? (product.price_alert ? 'bg-red-900/20' : 'bg-orange-900/20') : ''} hover:bg-dark-600 transition-colors`}
                   >
                     <td>
                       <div className="flex items-center gap-3">
@@ -171,7 +199,7 @@ export default function SellerDetail() {
                             className="w-10 h-10 rounded object-cover bg-white"
                           />
                         )}
-                        <div className="max-w-[300px]">
+                        <div className="max-w-[250px]">
                           <div className="text-white font-medium truncate" title={product.product_name}>
                             {product.product_name || 'Unnamed Product'}
                           </div>
@@ -193,27 +221,58 @@ export default function SellerDetail() {
                       <div className="text-neutral-500 text-xs">{product.barcode || '-'}</div>
                     </td>
                     <td className="text-neutral-300">{product.brand || '-'}</td>
-                    <td className="text-right text-neutral-300">{formatPrice(product.threshold_price)}</td>
-                    <td className="text-right">
-                      <div className={`font-semibold ${product.price_alert ? 'text-danger' : 'text-white'}`}>
-                        {formatPrice(product.seller_price)}
-                      </div>
-                      {product.campaign_price && (
-                        <div className="text-xs text-orange-400">Sepete Özel</div>
-                      )}
+                    
+                    {/* Price Alert columns */}
+                    <td className="text-right text-neutral-400 border-l border-dark-600">
+                      {formatPrice(product.threshold_price)}
                     </td>
                     <td className="text-right">
-                      {product.price_difference !== null && product.price_difference !== undefined ? (
-                        <span className={`font-medium ${product.price_difference > 0 ? 'text-danger' : 'text-success'}`}>
+                      <span className={`font-semibold ${product.price_alert ? 'text-danger' : 'text-white'}`}>
+                        {formatPrice(product.seller_price)}
+                      </span>
+                      {product.price_difference !== null && product.price_difference !== undefined && (
+                        <div className={`text-xs ${product.price_difference > 0 ? 'text-danger' : 'text-success'}`}>
                           {product.price_difference > 0 ? '-' : '+'}{Math.abs(product.price_difference).toFixed(2)} TL
-                        </span>
-                      ) : '-'}
+                        </div>
+                      )}
                     </td>
                     <td className="text-center">
                       {product.price_alert ? (
-                        <span className="badge badge-danger text-xs">Below Threshold</span>
-                      ) : (
+                        <span className="badge badge-danger text-xs">Below</span>
+                      ) : product.threshold_price ? (
                         <span className="badge badge-success text-xs">OK</span>
+                      ) : (
+                        <span className="text-neutral-500 text-xs">-</span>
+                      )}
+                    </td>
+                    
+                    {/* Campaign Alert columns */}
+                    <td className="text-right text-neutral-400 border-l border-dark-600">
+                      {formatPrice(product.alert_campaign_price)}
+                    </td>
+                    <td className="text-right">
+                      {product.campaign_price ? (
+                        <>
+                          <span className={`font-semibold ${product.campaign_alert ? 'text-warning' : 'text-white'}`}>
+                            {formatPrice(product.campaign_price)}
+                          </span>
+                          {product.campaign_difference !== null && product.campaign_difference !== undefined && (
+                            <div className={`text-xs ${product.campaign_difference > 0 ? 'text-warning' : 'text-success'}`}>
+                              {product.campaign_difference > 0 ? '-' : '+'}{Math.abs(product.campaign_difference).toFixed(2)} TL
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-neutral-500">-</span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {product.campaign_alert ? (
+                        <span className="badge badge-warning text-xs">Below</span>
+                      ) : product.alert_campaign_price && product.campaign_price ? (
+                        <span className="badge badge-success text-xs">OK</span>
+                      ) : (
+                        <span className="text-neutral-500 text-xs">-</span>
                       )}
                     </td>
                   </tr>
