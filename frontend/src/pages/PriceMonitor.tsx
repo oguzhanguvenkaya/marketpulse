@@ -277,6 +277,7 @@ export default function PriceMonitor() {
     "barcode": "8809432676195",
     "brand": "Brand Name",
     "price": 299.99,
+    "campaignPrice": 284.99,
     "sellerStockCode": "STK001"
   }
 ]`;
@@ -288,6 +289,7 @@ export default function PriceMonitor() {
     "sku": "SKU123",
     "brand": "Brand Name",
     "price": 299.99,
+    "campaignPrice": 284.99,
     "sellerStockCode": "STK001"
   }
 ]`;
