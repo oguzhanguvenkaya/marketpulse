@@ -5,8 +5,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.api.routes import router
 from app.db.database import engine, Base
+from app.core.logger import setup_uvicorn_log_filter
 
 Base.metadata.create_all(bind=engine)
+
+setup_uvicorn_log_filter()
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",

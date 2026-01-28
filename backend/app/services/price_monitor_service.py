@@ -35,7 +35,7 @@ class PriceMonitorService:
             return match.group(1)
         return None
     
-    async def fetch_seller_campaign_price(self, product_url: str, seller_name: str) -> Optional[Dict[str, Any]]:
+    async def fetch_seller_campaign_price(self, product_url: str, seller_name: str, sku: str = None) -> Optional[Dict[str, Any]]:
         """Satıcıya özel ürün sayfasından kampanyalı fiyatı kazı
         
         URL format: {product_url}?magaza={url_encoded_seller_name}
@@ -46,6 +46,9 @@ class PriceMonitorService:
         
         encoded_url = urllib.parse.quote(seller_url, safe='')
         api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
+        
+        log_context = f"[SKU: {sku or 'N/A'}] [Mağaza: {seller_name}]"
+        logger.debug(f"{log_context} Kampanya fiyatı çekiliyor: {seller_url}")
         
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -67,12 +70,22 @@ class PriceMonitorService:
                 ) as resp:
                     if resp.status == 200:
                         html = await resp.text()
-                        return self._parse_campaign_price_from_html(html, seller_name)
+                        result = self._parse_campaign_price_from_html(html, seller_name)
+                        if result and result.get('campaign_price'):
+                            logger.info(f"{log_context} Kampanya fiyatı bulundu: {result['campaign_price']} TL (orijinal: {result.get('original_price', 'N/A')} TL)")
+                        else:
+                            logger.warning(f"{log_context} Sayfa çekildi ama kampanya fiyatı bulunamadı")
+                        return result
                     else:
-                        logger.warning(f"Campaign price fetch error for {seller_name}: status {resp.status}")
+                        error_text = await resp.text()
+                        error_preview = error_text[:200] if error_text else "Boş yanıt"
+                        logger.warning(f"{log_context} ScraperAPI hatası: status {resp.status} | URL: {seller_url} | Yanıt: {error_preview}")
                         return None
+        except asyncio.TimeoutError:
+            logger.error(f"{log_context} Zaman aşımı (60s) | URL: {seller_url}")
+            return None
         except Exception as e:
-            logger.error(f"Error fetching campaign price for {seller_name}: {e}")
+            logger.error(f"{log_context} Hata: {type(e).__name__}: {e} | URL: {seller_url}")
             return None
     
     def _parse_campaign_price_from_html(self, html: str, seller_name: str) -> Optional[Dict[str, Any]]:
@@ -125,7 +138,6 @@ class PriceMonitorService:
                             break
         
         if result['campaign_price']:
-            logger.info(f"Campaign price found for {seller_name}: {result['campaign_price']} TL (original: {result['original_price']} TL)")
             return result
         
         return None
@@ -298,21 +310,21 @@ class PriceMonitorService:
         
         campaign_sellers = [s for s in sellers if s.get('has_campaign_tag', False)]
         if campaign_sellers and product.product_url:
-            logger.info(f"Found {len(campaign_sellers)} sellers with campaigns - fetching real prices...")
+            logger.info(f"[SKU: {sku}] {len(campaign_sellers)} satıcıda kampanya bulundu, gerçek fiyatlar çekiliyor...")
             for seller in campaign_sellers:
                 try:
                     campaign_data = await self.fetch_seller_campaign_price(
                         product.product_url, 
-                        seller['merchant_name']
+                        seller['merchant_name'],
+                        sku=sku
                     )
                     if campaign_data and campaign_data.get('campaign_price'):
                         seller['campaign_price'] = campaign_data['campaign_price']
                         seller['original_price_from_page'] = campaign_data.get('original_price')
                         seller['price'] = campaign_data['campaign_price']
-                        logger.debug(f"Updated {seller['merchant_name']} price to campaign price: {campaign_data['campaign_price']} TL")
                     await asyncio.sleep(0.5)
                 except Exception as e:
-                    logger.error(f"Error fetching campaign price for {seller['merchant_name']}: {e}")
+                    logger.error(f"[SKU: {sku}] [Mağaza: {seller['merchant_name']}] Beklenmeyen hata: {type(e).__name__}: {e}")
         
         for seller in sellers:
             snapshot = SellerSnapshot(
