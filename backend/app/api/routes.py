@@ -1574,8 +1574,11 @@ async def export_seller_products(
     
     output.seek(0)
     
-    safe_merchant_name = "".join(c for c in merchant_name if c.isalnum() or c in (' ', '-', '_')).strip()
-    filename = f"{safe_merchant_name}_products{'_alerts' if price_alert_only else ''}.csv"
+    tr_to_ascii = str.maketrans('İıĞğÜüŞşÖöÇç', 'IiGgUuSsOoCc')
+    safe_merchant_name = merchant_name.translate(tr_to_ascii)
+    safe_merchant_name = "".join(c for c in safe_merchant_name if c.isascii() and (c.isalnum() or c in (' ', '-', '_'))).strip()
+    safe_merchant_name = safe_merchant_name or "seller"
+    filename = f"{safe_merchant_name}_products.csv"
     
     return StreamingResponse(
         iter([output.getvalue()]),
