@@ -4,6 +4,8 @@ import {
   getMonitoredProductDetail,
   addMonitoredProducts,
   deleteMonitoredProduct,
+  deleteAllMonitoredProducts,
+  deleteInactiveMonitoredProducts,
   startFetchTask,
   stopFetchTask,
   getFetchTaskStatus,
@@ -45,6 +47,8 @@ export default function PriceMonitor() {
   const [lastInactiveCount, setLastInactiveCount] = useState(0);
   const [showFetchMenu, setShowFetchMenu] = useState(false);
   const [currentFetchType, setCurrentFetchType] = useState<FetchType>('active');
+  const [showDeleteModal, setShowDeleteModal] = useState<'all' | 'inactive' | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const activeProducts = products.filter(p => p.is_active !== false && p.seller_count > 0);
   const inactiveProducts = products.filter(p => p.is_active === false || p.seller_count === 0);
@@ -223,6 +227,29 @@ export default function PriceMonitor() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (!showDeleteModal) return;
+    try {
+      setDeleteLoading(true);
+      let result;
+      if (showDeleteModal === 'all') {
+        result = await deleteAllMonitoredProducts(platform);
+      } else {
+        result = await deleteInactiveMonitoredProducts(platform);
+      }
+      alert(result.message);
+      setShowDeleteModal(null);
+      setSelectedProduct(null);
+      setSellers([]);
+      loadProducts();
+    } catch (e) {
+      console.error('Error deleting products:', e);
+      alert('Delete failed');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(price);
   };
@@ -358,6 +385,20 @@ export default function PriceMonitor() {
               </div>
             )}
           </div>
+          <button
+            onClick={() => setShowDeleteModal('inactive')}
+            disabled={inactiveProducts.length === 0}
+            className="btn-secondary text-orange-400 border-orange-400/30 hover:bg-orange-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Delete Inactive
+          </button>
+          <button
+            onClick={() => setShowDeleteModal('all')}
+            disabled={products.length === 0}
+            className="btn-secondary text-red-400 border-red-400/30 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Delete All
+          </button>
         </div>
       </div>
 
@@ -783,6 +824,38 @@ export default function PriceMonitor() {
                 className="btn-primary"
               >
                 {importLoading ? 'Importing...' : 'Import'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="card-dark p-6 max-w-md w-full mx-4 border border-red-500/30">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {showDeleteModal === 'all' ? 'Delete All Products' : 'Delete Inactive Products'}
+            </h3>
+            <p className="text-neutral-300 mb-6">
+              {showDeleteModal === 'all' 
+                ? `Are you sure you want to delete all ${products.length} products for ${platform}? This action cannot be undone.`
+                : `Are you sure you want to delete ${inactiveProducts.length} inactive products for ${platform}? This action cannot be undone.`
+              }
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(null)}
+                disabled={deleteLoading}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
               </button>
             </div>
           </div>

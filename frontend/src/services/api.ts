@@ -289,6 +289,16 @@ export const deleteMonitoredProduct = async (productId: string): Promise<void> =
   await api.delete(`/price-monitor/products/${productId}`);
 };
 
+export const deleteAllMonitoredProducts = async (platform: string): Promise<{ success: boolean; deleted_count: number; message: string }> => {
+  const response = await api.delete('/price-monitor/products/bulk/all', { params: { platform } });
+  return response.data;
+};
+
+export const deleteInactiveMonitoredProducts = async (platform: string): Promise<{ success: boolean; deleted_count: number; message: string }> => {
+  const response = await api.delete('/price-monitor/products/bulk/inactive', { params: { platform } });
+  return response.data;
+};
+
 export type FetchType = 'active' | 'last_inactive' | 'inactive';
 
 export const startFetchTask = async (platform: string = 'hepsiburada', fetchType: FetchType = 'active'): Promise<{ task_id: string; platform: string; fetch_type: string; status: string; message: string }> => {

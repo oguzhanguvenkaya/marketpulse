@@ -1058,6 +1058,47 @@ async def delete_monitored_product(
     return {"success": True, "message": "Ürün silindi"}
 
 
+@router.delete("/price-monitor/products/bulk/all")
+async def delete_all_monitored_products(
+    platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
+    db: Session = Depends(get_db)
+):
+    """Belirli platformdaki tüm izlenen ürünleri sil"""
+    products = db.query(MonitoredProduct).filter(MonitoredProduct.platform == platform).all()
+    count = len(products)
+    
+    if count == 0:
+        return {"success": True, "deleted_count": 0, "message": "Silinecek ürün bulunamadı"}
+    
+    for product in products:
+        db.delete(product)
+    db.commit()
+    
+    return {"success": True, "deleted_count": count, "message": f"{count} ürün silindi"}
+
+
+@router.delete("/price-monitor/products/bulk/inactive")
+async def delete_inactive_monitored_products(
+    platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
+    db: Session = Depends(get_db)
+):
+    """Belirli platformdaki inaktif ürünleri sil"""
+    products = db.query(MonitoredProduct).filter(
+        MonitoredProduct.platform == platform,
+        MonitoredProduct.is_active == False
+    ).all()
+    count = len(products)
+    
+    if count == 0:
+        return {"success": True, "deleted_count": 0, "message": "Silinecek inaktif ürün bulunamadı"}
+    
+    for product in products:
+        db.delete(product)
+    db.commit()
+    
+    return {"success": True, "deleted_count": count, "message": f"{count} inaktif ürün silindi"}
+
+
 async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = None, fetch_type: str = "active"):
     """Arka planda satıcı fiyatlarını çek"""
     db = SessionLocal()
