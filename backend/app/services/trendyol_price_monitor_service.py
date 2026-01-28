@@ -87,24 +87,20 @@ class TrendyolPriceMonitorService:
             return None
     
     def parse_other_merchants(self, html: str) -> List[Dict[str, Any]]:
-        """HTML'den other-seller bölümündeki satıcı bilgilerini parse et (Trendyol'un yeni yapısı)"""
+        """HTML'den other-merchants bölümündeki satıcı bilgilerini parse et"""
         sellers = []
         
         soup = BeautifulSoup(html, 'html.parser')
         
-        containers = soup.find_all(class_=lambda x: x and 'other-seller-item-other-seller-container' in x)
+        other_merchants = soup.find(id='other-merchants')
+        if not other_merchants:
+            logger.debug("other-merchants bölümü bulunamadı")
+            return sellers
         
-        if not containers:
-            containers = soup.find_all(class_=lambda x: x and 'other-merchant-item-box' in x)
+        slides = other_merchants.find_all('div', {'data-testid': 'slide'})
+        logger.debug(f"Found {len(slides)} slides in other-merchants")
         
-        if not containers:
-            other_merchants = soup.find(id='other-merchants')
-            if other_merchants:
-                containers = other_merchants.find_all('div', {'data-testid': 'slide'})
-        
-        logger.debug(f"Found {len(containers)} seller containers")
-        
-        for idx, container in enumerate(containers):
+        for idx, slide in enumerate(slides):
             seller = {
                 'buybox_order': idx + 1,
                 'merchant_id': None,
@@ -119,50 +115,52 @@ class TrendyolPriceMonitorService:
                 'campaign_info': None
             }
             
-            link = container.find('a', href=lambda x: x and 'mid=' in x)
-            if link:
-                seller['merchant_name'] = link.get_text(strip=True)
-                seller['merchant_url_postfix'] = link.get('href')
-                seller['merchant_id'] = self._extract_merchant_id(link.get('href'))
+            name_elem = slide.find(class_='merchant-header-name')
+            if name_elem:
+                seller['merchant_name'] = name_elem.get_text(strip=True)
+                parent_a = name_elem.find_parent('a')
+                if parent_a and parent_a.get('href'):
+                    seller['merchant_id'] = self._extract_merchant_id(parent_a['href'])
+                    seller['merchant_url_postfix'] = parent_a['href']
             
-            score_elem = container.find(class_=lambda x: x and 'score' in str(x).lower())
+            score_elem = slide.find('div', {'data-testid': 'seller-score'})
             if score_elem:
                 try:
-                    score_text = score_elem.get_text(strip=True)
-                    seller['merchant_rating'] = float(score_text.replace(',', '.'))
+                    seller['merchant_rating'] = float(score_elem.get_text(strip=True).replace(',', '.'))
                 except:
                     pass
             
-            new_price_elem = container.find(class_='new-price')
+            new_price_elem = slide.find('p', class_='new-price')
             if new_price_elem:
                 seller['price'] = self._parse_price(new_price_elem.get_text(strip=True))
             
-            old_price_elem = container.find(class_='old-price')
+            old_price_elem = slide.find('p', class_='old-price')
             if old_price_elem:
                 seller['original_price'] = self._parse_price(old_price_elem.get_text(strip=True))
             
             if not seller['price']:
-                for price_elem in container.find_all(class_=lambda x: x and 'price' in str(x).lower()):
-                    text = price_elem.get_text(strip=True)
-                    if 'TL' in text:
-                        parsed = self._parse_price(text)
-                        if parsed:
-                            seller['price'] = parsed
-                            break
+                current_price_elem = slide.find('div', class_='price-current-price')
+                if current_price_elem:
+                    seller['price'] = self._parse_price(current_price_elem.get_text(strip=True))
             
             if seller['price'] and seller['original_price']:
                 seller['discount_rate'] = round((1 - seller['price'] / seller['original_price']) * 100, 1)
             
-            campaign_elem = container.find(class_=lambda x: x and 'campaign-price-info' in str(x))
-            if campaign_elem:
-                seller['campaign_info'] = campaign_elem.get_text(strip=True)
+            free_cargo = slide.find('div', {'data-testid': 'free-cargo-promotion'})
+            if free_cargo:
+                seller['free_shipping'] = True
             
-            shipping_elems = container.find_all(class_=lambda x: x and ('cargo' in str(x).lower() or 'kargo' in str(x).lower()))
-            for elem in shipping_elems:
-                text = elem.get_text(strip=True).lower()
-                if 'bedava' in text or 'ücretsiz' in text or 'free' in text:
-                    seller['free_shipping'] = True
-                    break
+            fast_delivery = slide.find('div', {'data-testid': 'tomorrow-shipping-delivery'})
+            if fast_delivery:
+                seller['fast_shipping'] = True
+            
+            delivery_elem = slide.find('div', class_='other-merchant-delivery-container')
+            if delivery_elem:
+                seller['delivery_info'] = delivery_elem.get_text(strip=True)
+            
+            campaign_info_elem = slide.find('p', class_='info-text')
+            if campaign_info_elem:
+                seller['campaign_info'] = campaign_info_elem.get_text(strip=True)
             
             if seller['merchant_name']:
                 sellers.append(seller)
@@ -170,15 +168,15 @@ class TrendyolPriceMonitorService:
         
         return sellers
     
-    async def fetch_single_product(self, product: MonitoredProduct, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def fetch_single_product(self, product_id: str, sku: str, product_url: str, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
         """Tek bir ürün için HTTP isteği yap ve sonucu döndür (thread-safe)"""
         if self._semaphore is None:
             self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
         async with self._semaphore:
-            html = await self.fetch_product_page(product.product_url, http_session)
+            html = await self.fetch_product_page(product_url, http_session)
             return {
-                "product_id": str(product.id),
-                "sku": product.sku,
+                "product_id": product_id,
+                "sku": sku,
                 "html": html,
                 "success": html is not None
             }
@@ -207,11 +205,20 @@ class TrendyolPriceMonitorService:
             logger.warning(f"No sellers found for Trendyol SKU {product.sku} (HTML={len(html)} bytes, other-merchants={has_other_merchants}) - marked as inactive")
             return False
         
+        valid_sellers = [s for s in sellers if s.get('price') is not None]
+        
+        if not valid_sellers:
+            product.is_active = False
+            product.last_fetched_at = datetime.utcnow()
+            db.commit()
+            logger.warning(f"No valid sellers (with price) for Trendyol SKU {product.sku} - marked as inactive")
+            return False
+        
         if not product.is_active:
             product.is_active = True
             logger.info(f"Trendyol SKU {product.sku} reactivated - sellers found")
         
-        for seller in sellers:
+        for seller in valid_sellers:
             snapshot = SellerSnapshot(
                 monitored_product_id=product.id,
                 merchant_id=seller.get('merchant_id') or 'unknown',
@@ -233,7 +240,7 @@ class TrendyolPriceMonitorService:
         product.last_fetched_at = datetime.utcnow()
         db.commit()
         
-        logger.info(f"Saved {len(sellers)} sellers for Trendyol SKU {product.sku}")
+        logger.info(f"Saved {len(valid_sellers)} sellers for Trendyol SKU {product.sku}")
         return True
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "trendyol", fetch_type: str = "active"):
@@ -297,7 +304,10 @@ class TrendyolPriceMonitorService:
         logger.info(f"Starting Trendyol fetch: {len(products)} products (fetch_type={fetch_type})")
         
         async with aiohttp.ClientSession(connector=connector) as http_session:
-            tasks = [self.fetch_single_product(p, http_session) for p in products]
+            tasks = [
+                self.fetch_single_product(str(p.id), p.sku, p.product_url, http_session) 
+                for p in products
+            ]
             
             for coro in asyncio.as_completed(tasks):
                 db.refresh(task)
@@ -321,11 +331,16 @@ class TrendyolPriceMonitorService:
                             failed_skus.append(sku)
                 except Exception as e:
                     logger.error(f"Error processing Trendyol product: {e}")
+                    db.rollback()
                     failed += 1
                 
-                task.completed_products = completed
-                task.failed_products = failed
-                db.commit()
+                try:
+                    task.completed_products = completed
+                    task.failed_products = failed
+                    db.commit()
+                except Exception as e:
+                    logger.error(f"Error updating task progress: {e}")
+                    db.rollback()
         
         task.status = "completed"
         task.completed_at = datetime.utcnow()
