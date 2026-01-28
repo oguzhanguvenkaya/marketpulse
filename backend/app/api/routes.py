@@ -1147,7 +1147,7 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
         task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
         if task:
             if platform == "trendyol":
-                await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform)
+                await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
             else:
                 await price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
     finally:

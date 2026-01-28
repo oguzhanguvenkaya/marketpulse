@@ -1,0 +1,23 @@
+2026-01-28 18:20:05 | price_monitor | WARNING | No sellers found for Trendyol SKU 687843032 - marked as inactive
+2026-01-28 18:20:05 | price_monitor | WARNING | No sellers found for Trendyol SKU 957614613 - marked as inactive
+2026-01-28 18:20:05 | price_monitor | WARNING | No sellers found for Trendyol SKU 897208783 - marked as inactive
+2026-01-28 18:20:06 | price_monitor | WARNING | Trendyol page error: status 410
+2026-01-28 18:20:06 | price_monitor | WARNING | No HTML for Trendyol SKU 705117088 - marked as inactive
+2026-01-28 18:20:06 | price_monitor | WARNING | No sellers found for Trendyol SKU 112729838 - marked as inactive
+2026-01-28 18:20:06 | price_monitor | WARNING | No sellers found for Trendyol SKU 699197799 - marked as inactive
+2026-01-28 18:20:06 | price_monitor | WARNING | No sellers found for Trendyol SKU 952986451 - marked as inactive
+2026-01-28 18:20:06 | price_monitor | WARNING | No sellers found for Trendyol SKU 852151174 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 700441342 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 858158522 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 734352646 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 734345062 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 692692316 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 743104434 - marked as inactive
+2026-01-28 18:20:07 | price_monitor | WARNING | No sellers found for Trendyol SKU 897250374 - marked as inactive
+2026-01-28 18:20:08 | price_monitor | WARNING | No sellers found for Trendyol SKU 952988937 - marked as inactive
+2026-01-28 18:20:08 | price_monitor | WARNING | No sellers found for Trendyol SKU 874414708 - marked as inactive
+2026-01-28 18:20:08 | price_monitor | WARNING | No sellers found for Trendyol SKU 1045013695 - marked as inactive
+2026-01-28 18:20:08 | price_monitor | WARNING | No sellers found for Trendyol SKU 39472236 - marked as inactive
+2026-01-28 18:20:08 | price_monitor | INFO | Trendyol fetch task completed: 0 success, 732 failed
+INFO:     10.84.5.17:0 - "GET /api/price-monitor/products?platform=trendyol HTTP/1.1" 200 OK
+INFO:     10.84.5.17:0 - "GET /api/price-monitor/last-inactive?platform=trendyol HTTP/1.1" 200 OK
