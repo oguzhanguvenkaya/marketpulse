@@ -570,7 +570,7 @@ class ScrapingService:
         return urls
     
     async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> Dict[str, Any]:
-        """Get product URLs using ScraperAPI PROXY PORT method - proven to work with Hepsiburada
+        """Get product URLs using ScraperAPI HTTP API method
         
         Returns dict with:
         - urls: List of product URLs to scrape
@@ -581,8 +581,8 @@ class ScrapingService:
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         logger.info(f"Fetching search results: {search_url[:60]}...")
         
-        session_number = random.randint(1, 10000)
-        html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
+        # HTTP API modunu kullan (proxy port yerine) - country_code=tr ile çalışıyor
+        html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
         
         if html:
             soup_check = BeautifulSoup(html, 'html.parser')
@@ -591,15 +591,12 @@ class ScrapingService:
             
             if "En Çok Tavsiye Edilen" in title_text or "Anasayfa" in title_text:
                 logger.warning(f"Got homepage instead of search results (title: {title_text[:50]})")
-                logger.info("Retrying with new session...")
-                session_number = random.randint(10001, 20000)
-                html = await self._fetch_with_scraperapi_proxy(search_url, session_number=session_number)
+                logger.info("Retrying with premium=True...")
+                html = await self._fetch_with_scraperapi(search_url, render=True, premium=True)
         
         if not html:
-            # Bright Data fallback devre dışı - bakiye yüklenmedi ve 90sn timeout yapıyor
-            # Sonradan aktif etmek için bu bloğu uncomment yapın
-            logger.error("ScraperAPI başarısız oldu. Bright Data fallback şu an devre dışı.")
-            logger.info("Not: ScraperAPI planınızı kontrol edin veya Bright Data'ya bakiye yükleyin.")
+            logger.error("ScraperAPI HTTP API başarısız oldu.")
+            logger.info("Not: ScraperAPI planınızı ve API key'inizi kontrol edin.")
             return {'urls': [], 'sponsored_brands': [], 'sponsored_product_urls': set(), 'error': 'ScraperAPI başarısız oldu'}
         
         soup = BeautifulSoup(html, 'html.parser')
