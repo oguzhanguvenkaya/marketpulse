@@ -1036,11 +1036,20 @@ async def get_monitored_product_detail(
             else:
                 merchant_url = None
             
+            seller_price = float(s.price) if s.price else None
             orig_price = float(s.original_price) if s.original_price else None
             camp_price = float(s.campaign_price) if s.campaign_price else None
             
-            has_price_alert = threshold is not None and orig_price is not None and orig_price < threshold
-            has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
+            if product.platform == 'trendyol':
+                if orig_price and seller_price:
+                    has_price_alert = False
+                    has_campaign_alert = campaign_threshold is not None and seller_price < campaign_threshold
+                else:
+                    has_price_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                    has_campaign_alert = False
+            else:
+                has_price_alert = threshold is not None and orig_price is not None and orig_price < threshold
+                has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
             
             if has_price_alert:
                 price_alert_count += 1
