@@ -216,18 +216,20 @@ class ScrapingService:
         if not settings.SCRAPER_API_KEY:
             return None
         
+        # Fiyat takip servisiyle aynı format - country_code=tr geotargeting gerektiriyor, kaldırıldı
+        encoded_url = quote_plus(url)
         params = {
             "api_key": settings.SCRAPER_API_KEY,
-            "url": url,
-            "render": "true" if render else "false",
-            "country_code": "tr",
-            "device_type": "desktop",
+            "url": encoded_url,
         }
+        
+        if render:
+            params["render"] = "true"
         
         if premium:
             params["premium"] = "true"
         
-        api_url = f"{SCRAPERAPI_BASE_URL}?" + "&".join([f"{k}={quote_plus(str(v))}" for k, v in params.items()])
+        api_url = f"{SCRAPERAPI_BASE_URL}?" + "&".join([f"{k}={v}" for k, v in params.items()])
         
         logger.debug(f"ScraperAPI HTTP request: {url[:60]}...")
         
