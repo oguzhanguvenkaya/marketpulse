@@ -4,18 +4,24 @@ import random
 import asyncio
 import aiohttp
 import re
+import json
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 from app.core.logger import price_monitor_logger as logger
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
 
 class TrendyolPriceMonitorService:
-    """Trendyol ürün sayfasından other-merchants bölümündeki satıcı verilerini çeken servis"""
+    """Trendyol ürün sayfasından JSON verisi ile satıcı bilgilerini çeken servis
     
-    MAX_CONCURRENT_REQUESTS = 5
+    JSON verisi sayfa kaynağında SSR olarak embedded geliyor:
+    window["__envoy_...__PROPS"] = { product: { merchantListing: { merchant, otherMerchants[] } } }
+    
+    Bu sayede render=true gerekmez, daha hızlı ve ucuz!
+    """
+    
+    MAX_CONCURRENT_REQUESTS = 10  # Basic mode daha hızlı, concurrent limit artırıldı
     
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')
@@ -27,31 +33,12 @@ class TrendyolPriceMonitorService:
             except:
                 pass
     
-    def _parse_price(self, price_text: str) -> Optional[float]:
-        """Türk lirası formatındaki fiyatı parse et: 2.611,55 TL -> 2611.55"""
-        if not price_text:
-            return None
-        try:
-            cleaned = price_text.replace('TL', '').strip()
-            cleaned = cleaned.replace('.', '').replace(',', '.')
-            return float(cleaned)
-        except:
-            return None
-    
-    def _extract_merchant_id(self, href: str) -> Optional[str]:
-        """URL'den merchant ID çıkar: /sr?mid=410074 -> 410074"""
-        if not href:
-            return None
-        match = re.search(r'mid=(\d+)', href)
-        if match:
-            return match.group(1)
-        return None
-    
     async def fetch_product_page(self, url: str, session: aiohttp.ClientSession) -> Optional[str]:
-        """ScraperAPI ile Trendyol ürün sayfasını çek - render=true mod (JavaScript için gerekli)"""
+        """ScraperAPI ile Trendyol ürün sayfasını çek - BASIC MODE (JSON SSR'da mevcut)"""
         session_num = random.randint(1, 999999)
         proxy_url = 'http://proxy-server.scraperapi.com:8001'
-        proxy_user = f'scraperapi.render=true.session_number={session_num}'
+        # render=true KALDIRILDI - JSON verisi basic modda mevcut
+        proxy_user = f'scraperapi.session_number={session_num}'
         proxy_pass = self.api_key
         
         proxy_auth = aiohttp.BasicAuth(proxy_user, proxy_pass)
@@ -69,15 +56,15 @@ class TrendyolPriceMonitorService:
                 proxy=proxy_url, 
                 proxy_auth=proxy_auth, 
                 headers=headers, 
-                timeout=aiohttp.ClientTimeout(total=60)
+                timeout=aiohttp.ClientTimeout(total=45)  # Basic mode daha hızlı
             ) as resp:
                 if resp.status == 200:
                     html = await resp.text()
-                    if 'other-merchant' in html or 'slider__slide' in html:
-                        logger.debug("Trendyol page fetched successfully")
+                    if 'merchantListing' in html:
+                        logger.debug("Trendyol page fetched with merchantListing data")
                         return html
                     else:
-                        logger.debug("Trendyol page fetched but no other-merchants section found")
+                        logger.debug("Trendyol page fetched but no merchantListing found")
                         return html
                 else:
                     logger.warning(f"Trendyol page error: status {resp.status}")
@@ -86,86 +73,122 @@ class TrendyolPriceMonitorService:
             logger.error(f"Error fetching Trendyol page: {e}")
             return None
     
-    def parse_other_merchants(self, html: str) -> List[Dict[str, Any]]:
-        """HTML'den other-merchants bölümündeki satıcı bilgilerini parse et"""
+    def parse_merchants_from_json(self, html: str) -> List[Dict[str, Any]]:
+        """HTML içindeki JSON verisinden tüm satıcıları parse et (main + others)
+        
+        JSON yapısı:
+        window["__envoy_...__PROPS"] = {
+            product: {
+                merchantListing: {
+                    merchant: { ... },           // Ana satıcı (buybox winner)
+                    winnerVariant: { price: {} }, // Ana satıcı fiyatı
+                    promotions: [],               // Ana satıcı promosyonları
+                    otherMerchants: [ ... ]       // Diğer satıcılar
+                }
+            }
+        }
+        """
         sellers = []
         
-        soup = BeautifulSoup(html, 'html.parser')
+        # JSON verisini bul
+        pattern = r'window\["__envoy[^"]*__PROPS"\]\s*=\s*(\{.*?\})(?:;|<)'
+        matches = re.findall(pattern, html, re.DOTALL)
         
-        other_merchants = soup.find(id='other-merchants')
-        if not other_merchants:
-            logger.debug("other-merchants bölümü bulunamadı")
+        merchant_listing = None
+        for match in matches:
+            try:
+                data = json.loads(match)
+                if 'product' in data and 'merchantListing' in data.get('product', {}):
+                    merchant_listing = data['product']['merchantListing']
+                    break
+            except json.JSONDecodeError:
+                continue
+        
+        if not merchant_listing:
+            logger.debug("merchantListing not found in JSON")
             return sellers
         
-        slides = other_merchants.find_all('div', {'data-testid': 'slide'})
-        logger.debug(f"Found {len(slides)} slides in other-merchants")
+        # 1. ANA SATICI (buybox winner) - buybox_order: 0
+        main_merchant = merchant_listing.get('merchant', {})
+        winner_variant = merchant_listing.get('winnerVariant', {})
+        main_promotions = merchant_listing.get('promotions', [])
         
-        for idx, slide in enumerate(slides):
-            seller = {
-                'buybox_order': idx + 1,
-                'merchant_id': None,
-                'merchant_name': None,
-                'merchant_rating': None,
-                'price': None,
-                'original_price': None,
+        if main_merchant and main_merchant.get('name'):
+            price_info = winner_variant.get('price', {})
+            discounted_price = price_info.get('discountedPrice', {}).get('value')
+            selling_price = price_info.get('sellingPrice', {}).get('value')
+            
+            # Promosyon bilgilerini birleştir
+            promo_names = [p.get('name', '') for p in main_promotions if p.get('name')]
+            campaign_info = ' | '.join(promo_names) if promo_names else None
+            
+            # Kargo bedava kontrolü
+            free_shipping = any('kargo bedava' in p.lower() for p in promo_names)
+            
+            main_seller = {
+                'buybox_order': 0,  # Buybox winner
+                'merchant_id': str(main_merchant.get('id', '')),
+                'merchant_name': main_merchant.get('name'),
+                'merchant_url_postfix': f"/sr?mid={main_merchant.get('id')}",
+                'merchant_rating': main_merchant.get('sellerScore', {}).get('value'),
+                'price': discounted_price,
+                'original_price': selling_price if selling_price != discounted_price else None,
                 'discount_rate': None,
-                'free_shipping': False,
+                'free_shipping': free_shipping,
                 'fast_shipping': False,
                 'delivery_info': None,
-                'campaign_info': None
+                'campaign_info': campaign_info
             }
             
-            name_elem = slide.find(class_='merchant-header-name')
-            if name_elem:
-                seller['merchant_name'] = name_elem.get_text(strip=True)
-                parent_a = name_elem.find_parent('a')
-                if parent_a and parent_a.get('href'):
-                    seller['merchant_id'] = self._extract_merchant_id(parent_a['href'])
-                    seller['merchant_url_postfix'] = parent_a['href']
+            # İndirim oranı hesapla
+            if main_seller['price'] and main_seller['original_price']:
+                main_seller['discount_rate'] = round(
+                    (1 - main_seller['price'] / main_seller['original_price']) * 100, 1
+                )
             
-            score_elem = slide.find('div', {'data-testid': 'seller-score'})
-            if score_elem:
-                try:
-                    seller['merchant_rating'] = float(score_elem.get_text(strip=True).replace(',', '.'))
-                except:
-                    pass
-            
-            new_price_elem = slide.find('p', class_='new-price')
-            if new_price_elem:
-                seller['price'] = self._parse_price(new_price_elem.get_text(strip=True))
-            
-            old_price_elem = slide.find('p', class_='old-price')
-            if old_price_elem:
-                seller['original_price'] = self._parse_price(old_price_elem.get_text(strip=True))
-            
-            if not seller['price']:
-                current_price_elem = slide.find('div', class_='price-current-price')
-                if current_price_elem:
-                    seller['price'] = self._parse_price(current_price_elem.get_text(strip=True))
-            
-            if seller['price'] and seller['original_price']:
-                seller['discount_rate'] = round((1 - seller['price'] / seller['original_price']) * 100, 1)
-            
-            free_cargo = slide.find('div', {'data-testid': 'free-cargo-promotion'})
-            if free_cargo:
-                seller['free_shipping'] = True
-            
-            fast_delivery = slide.find('div', {'data-testid': 'tomorrow-shipping-delivery'})
-            if fast_delivery:
-                seller['fast_shipping'] = True
-            
-            delivery_elem = slide.find('div', class_='other-merchant-delivery-container')
-            if delivery_elem:
-                seller['delivery_info'] = delivery_elem.get_text(strip=True)
-            
-            campaign_info_elem = slide.find('p', class_='info-text')
-            if campaign_info_elem:
-                seller['campaign_info'] = campaign_info_elem.get_text(strip=True)
-            
-            if seller['merchant_name']:
-                sellers.append(seller)
-                logger.debug(f"Parsed seller: {seller['merchant_name']} - {seller['price']} TL")
+            sellers.append(main_seller)
+            logger.debug(f"Main seller: {main_seller['merchant_name']} - {main_seller['price']} TL (buybox winner)")
         
+        # 2. DİĞER SATICILAR - buybox_order: 1, 2, 3...
+        other_merchants = merchant_listing.get('otherMerchants', [])
+        
+        for idx, other in enumerate(other_merchants):
+            price_info = other.get('price', {})
+            discounted_price = price_info.get('discountedPrice', {}).get('value')
+            selling_price = price_info.get('sellingPrice', {}).get('value')
+            
+            # Promosyon bilgileri
+            promos = other.get('promotions', [])
+            promo_names = [p.get('name', '') for p in promos if p.get('name')]
+            campaign_info = ' | '.join(promo_names) if promo_names else None
+            free_shipping = any('kargo bedava' in p.lower() for p in promo_names)
+            
+            other_seller = {
+                'buybox_order': idx + 1,
+                'merchant_id': str(other.get('id', '')),
+                'merchant_name': other.get('name'),
+                'merchant_url_postfix': f"/sr?mid={other.get('id')}",
+                'merchant_rating': other.get('sellerScore', {}).get('value'),
+                'price': discounted_price,
+                'original_price': selling_price if selling_price != discounted_price else None,
+                'discount_rate': None,
+                'free_shipping': free_shipping,
+                'fast_shipping': False,
+                'delivery_info': None,
+                'campaign_info': campaign_info
+            }
+            
+            # İndirim oranı hesapla
+            if other_seller['price'] and other_seller['original_price']:
+                other_seller['discount_rate'] = round(
+                    (1 - other_seller['price'] / other_seller['original_price']) * 100, 1
+                )
+            
+            if other_seller['merchant_name']:
+                sellers.append(other_seller)
+                logger.debug(f"Other seller [{idx+1}]: {other_seller['merchant_name']} - {other_seller['price']} TL")
+        
+        logger.info(f"Parsed {len(sellers)} total sellers (1 main + {len(other_merchants)} others)")
         return sellers
     
     async def fetch_single_product(self, product_id: str, sku: str, product_url: str, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
@@ -190,19 +213,17 @@ class TrendyolPriceMonitorService:
             logger.warning(f"No HTML for Trendyol SKU {product.sku} - marked as inactive")
             return False
         
-        has_other_merchants = 'other-merchant' in html
-        has_slider = 'slider__slide' in html
-        has_price = 'price' in html.lower()
+        has_merchant_listing = 'merchantListing' in html
         
-        logger.debug(f"SKU {product.sku}: HTML length={len(html)}, other-merchants={has_other_merchants}, slider={has_slider}, price={has_price}")
+        logger.debug(f"SKU {product.sku}: HTML length={len(html)}, merchantListing={has_merchant_listing}")
         
-        
-        sellers = self.parse_other_merchants(html)
+        # JSON parsing ile tüm satıcıları al (main + others)
+        sellers = self.parse_merchants_from_json(html)
         if not sellers:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
-            logger.warning(f"No sellers found for Trendyol SKU {product.sku} (HTML={len(html)} bytes, other-merchants={has_other_merchants}) - marked as inactive")
+            logger.warning(f"No sellers found for Trendyol SKU {product.sku} (HTML={len(html)} bytes, merchantListing={has_merchant_listing}) - marked as inactive")
             return False
         
         valid_sellers = [s for s in sellers if s.get('price') is not None]
