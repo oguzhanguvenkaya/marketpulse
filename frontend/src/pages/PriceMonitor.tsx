@@ -543,33 +543,33 @@ export default function PriceMonitor() {
                         )}
                       </div>
                       {product.product_name ? (
-                        showInactive ? (
-                          <span className="font-medium text-sm text-neutral-500 truncate block">{product.product_name}</span>
-                        ) : (
-                          <a
-                            href={getProductUrl(product)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-medium text-sm text-accent-primary hover:text-accent-primary/80 truncate block"
-                          >
-                            {product.product_name}
-                          </a>
-                        )
+                        <a
+                          href={getProductUrl(product)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`font-medium text-sm truncate block ${
+                            showInactive 
+                              ? 'text-neutral-400 hover:text-neutral-300' 
+                              : 'text-accent-primary hover:text-accent-primary/80'
+                          }`}
+                        >
+                          {product.product_name}
+                        </a>
                       ) : (
-                        showInactive ? (
-                          <span className="font-medium text-sm text-neutral-500">{product.sku}</span>
-                        ) : (
-                          <a
-                            href={getProductUrl(product)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-medium text-sm text-accent-primary hover:text-accent-primary/80"
-                          >
-                            {product.sku}
-                          </a>
-                        )
+                        <a
+                          href={getProductUrl(product)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`font-medium text-sm ${
+                            showInactive 
+                              ? 'text-neutral-400 hover:text-neutral-300' 
+                              : 'text-accent-primary hover:text-accent-primary/80'
+                          }`}
+                        >
+                          {product.sku}
+                        </a>
                       )}
                       {product.product_name && (
                         <div className="text-xs text-neutral-500 mt-1">
