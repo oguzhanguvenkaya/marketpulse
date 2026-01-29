@@ -1036,18 +1036,27 @@ async def get_monitored_product_detail(
             else:
                 merchant_url = None
             
-            seller_price = float(s.price) if s.price else None
-            orig_price = float(s.original_price) if s.original_price else None
-            camp_price = float(s.campaign_price) if s.campaign_price else None
+            current_price = float(s.price) if s.price else None  # Güncel satış fiyatı
+            orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı
+            camp_price = float(s.campaign_price) if s.campaign_price else None  # Hepsiburada sepete özel
             
+            # Trendyol için:
+            # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+            # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
+            # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
             if product.platform == 'trendyol':
-                if orig_price and seller_price:
-                    has_price_alert = False
-                    has_campaign_alert = campaign_threshold is not None and seller_price < campaign_threshold
+                list_price = orig_price if orig_price else current_price
+                # Price Alert: Liste fiyatı threshold'dan düşük mü?
+                has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+                
+                if orig_price and current_price:
+                    # Kampanya var - Campaign Alert kontrolü
+                    has_campaign_alert = campaign_threshold is not None and current_price < campaign_threshold
                 else:
-                    has_price_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                    # Kampanya yok
                     has_campaign_alert = False
             else:
+                # Hepsiburada için
                 has_price_alert = threshold is not None and orig_price is not None and orig_price < threshold
                 has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
             
@@ -1456,18 +1465,21 @@ async def get_seller_products(
         # Trendyol için:
         # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
         # - campaign_price = Güncel satış fiyatı (current_price - kampanyalıysa indirimli)
+        # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
+        # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
         if platform == 'trendyol':
             list_price = orig_price if orig_price else current_price  # Liste fiyatı
             campaign_price = current_price  # Güncel satış fiyatı (her zaman)
             
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            has_alert = threshold is not None and list_price is not None and list_price < threshold
+            
             if orig_price and current_price:
-                # Kampanya var (original_price mevcut)
-                has_alert = False
+                # Kampanya var - Campaign Alert kontrolü
                 has_campaign_alert = alert_campaign_threshold is not None and current_price < alert_campaign_threshold
                 campaign_discount = round(orig_price - current_price, 2)
             else:
                 # Kampanya yok
-                has_alert = threshold is not None and current_price is not None and current_price < threshold
                 has_campaign_alert = False
                 campaign_discount = None
         else:
@@ -1592,16 +1604,21 @@ async def export_seller_products(
         # Trendyol için:
         # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
         # - campaign_price = Güncel satış fiyatı
+        # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
+        # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
         if platform == 'trendyol':
             list_price = orig_price if orig_price else seller_price
             campaign_price = seller_price  # current selling price
             
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            has_alert = threshold is not None and list_price is not None and list_price < threshold
+            
             if orig_price and seller_price:
-                has_alert = False
+                # Kampanya var - Campaign Alert kontrolü
                 has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
                 campaign_diff = round(orig_price - seller_price, 2)
             else:
-                has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                # Kampanya yok
                 has_campaign_alert = False
                 campaign_diff = None
         else:
