@@ -1448,21 +1448,35 @@ async def get_seller_products(
             continue
         
         threshold = float(product.threshold_price) if product.threshold_price else None
-        seller_price = float(s.price) if s.price else None
-        orig_price = float(s.original_price) if s.original_price else None
+        current_price = float(s.price) if s.price else None  # Güncel satış fiyatı
+        orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı
         alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
-        campaign_price_val = float(s.campaign_price) if s.campaign_price else None
+        campaign_price_val = float(s.campaign_price) if s.campaign_price else None  # Hepsiburada sepete özel
         
+        # Trendyol için:
+        # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+        # - campaign_price = Güncel satış fiyatı (current_price - kampanyalıysa indirimli)
         if platform == 'trendyol':
-            if orig_price and seller_price:
+            list_price = orig_price if orig_price else current_price  # Liste fiyatı
+            campaign_price = current_price  # Güncel satış fiyatı (her zaman)
+            
+            if orig_price and current_price:
+                # Kampanya var (original_price mevcut)
                 has_alert = False
-                has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
+                has_campaign_alert = alert_campaign_threshold is not None and current_price < alert_campaign_threshold
+                campaign_discount = round(orig_price - current_price, 2)
             else:
-                has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+                # Kampanya yok
+                has_alert = threshold is not None and current_price is not None and current_price < threshold
                 has_campaign_alert = False
+                campaign_discount = None
         else:
-            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+            # Hepsiburada için eski mantık
+            list_price = current_price
+            campaign_price = campaign_price_val
+            has_alert = threshold is not None and current_price is not None and current_price < threshold
             has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+            campaign_discount = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
         
         if price_alert_only and not has_alert:
             continue
@@ -1478,16 +1492,6 @@ async def get_seller_products(
         else:
             seller_url = base_url
         
-        # Trendyol için campaign_price = price (eğer original_price varsa kampanyalı demektir)
-        # Hepsiburada için campaign_price = s.campaign_price (sepete özel fiyat)
-        if platform == 'trendyol' and orig_price and seller_price:
-            effective_campaign_price = seller_price
-            # İndirim oranı: original_price'dan ne kadar indirim var
-            campaign_discount = round(orig_price - seller_price, 2)
-        else:
-            effective_campaign_price = campaign_price_val
-            campaign_discount = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
-        
         result.append({
             "product_id": str(product.id),
             "sku": product.sku,
@@ -1499,14 +1503,14 @@ async def get_seller_products(
             "seller_stock_code": product.seller_stock_code,
             "image_url": product.image_url,
             "threshold_price": threshold,
-            "seller_price": seller_price,
-            "original_price": float(s.original_price) if s.original_price else None,
-            "campaign_price": effective_campaign_price,
+            "seller_price": list_price,  # Liste fiyatı
+            "original_price": orig_price,
+            "campaign_price": campaign_price,  # Güncel satış fiyatı
             "alert_campaign_price": alert_campaign_threshold,
             "campaigns": s.campaigns if s.campaigns else [],
             "price_alert": has_alert,
             "campaign_alert": has_campaign_alert,
-            "price_difference": round(threshold - seller_price, 2) if threshold and seller_price else None,
+            "price_difference": round(threshold - list_price, 2) if threshold and list_price else None,
             "campaign_difference": campaign_discount,
             "snapshot_date": s.snapshot_date.isoformat()
         })
@@ -1585,32 +1589,34 @@ async def export_seller_products(
         alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
         campaign_price_val = float(s.campaign_price) if s.campaign_price else None
         
+        # Trendyol için:
+        # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+        # - campaign_price = Güncel satış fiyatı
         if platform == 'trendyol':
+            list_price = orig_price if orig_price else seller_price
+            campaign_price = seller_price  # current selling price
+            
             if orig_price and seller_price:
                 has_alert = False
                 has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
+                campaign_diff = round(orig_price - seller_price, 2)
             else:
                 has_alert = threshold is not None and seller_price is not None and seller_price < threshold
                 has_campaign_alert = False
+                campaign_diff = None
         else:
+            list_price = seller_price
+            campaign_price = campaign_price_val
             has_alert = threshold is not None and seller_price is not None and seller_price < threshold
             has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
+            campaign_diff = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
         
         if price_alert_only and not has_alert:
             continue
         if campaign_alert_only and not has_campaign_alert:
             continue
         
-        price_diff = round(threshold - seller_price, 2) if threshold and seller_price else None
-        
-        # Trendyol için campaign_price = price (eğer original_price varsa kampanyalı demektir)
-        if platform == 'trendyol' and orig_price and seller_price:
-            effective_campaign_price = seller_price
-            campaign_diff = round(orig_price - seller_price, 2)
-        else:
-            effective_campaign_price = campaign_price_val
-            campaign_diff = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
-        
+        price_diff = round(threshold - list_price, 2) if threshold and list_price else None
         campaigns_str = ", ".join(s.campaigns) if s.campaigns else ""
         
         writer.writerow([
@@ -1621,11 +1627,11 @@ async def export_seller_products(
             product.seller_stock_code or '',
             product.product_url or '',
             threshold or '',
-            seller_price or '',
+            list_price or '',  # Liste fiyatı
             price_diff or '',
             'YES' if has_alert else 'NO',
             alert_campaign_threshold or '',
-            effective_campaign_price or '',
+            campaign_price or '',  # Güncel satış fiyatı
             campaign_diff or '',
             'YES' if has_campaign_alert else 'NO',
             campaigns_str,
