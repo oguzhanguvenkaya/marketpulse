@@ -1577,7 +1577,7 @@ async def export_seller_products(
     ).all()
     
     output = io.StringIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, delimiter=';')
     
     writer.writerow([
         'SKU', 'Barcode', 'Product Name', 'Brand', 'Stock Code',
