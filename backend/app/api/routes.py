@@ -1663,9 +1663,13 @@ async def export_seller_products(
     safe_merchant_name = safe_merchant_name or "seller"
     filename = f"{safe_merchant_name}_products.csv"
     
+    # UTF-8 BOM ekle - Excel'in UTF-8 encoding'i tanıması için
+    bom = '\ufeff'
+    csv_content = bom + output.getvalue()
+    
     return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="text/csv",
+        iter([csv_content]),
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
