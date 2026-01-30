@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSellers } from '../services/api';
 import type { SellerInfo } from '../services/api';
 
+const API_BASE = '/api';
+
 export default function Sellers() {
   const navigate = useNavigate();
-  const [platform, setPlatform] = useState<'hepsiburada' | 'trendyol'>('hepsiburada');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialPlatform = (searchParams.get('platform') as 'hepsiburada' | 'trendyol') || 'hepsiburada';
+  const [platform, setPlatform] = useState<'hepsiburada' | 'trendyol'>(initialPlatform);
   const [sellers, setSellers] = useState<SellerInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [bulkExporting, setBulkExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState({ current: 0, total: 0, sellerName: '' });
+
+  useEffect(() => {
+    setSearchParams({ platform });
+  }, [platform, setSearchParams]);
 
   useEffect(() => {
     fetchSellers();
@@ -30,6 +40,8 @@ export default function Sellers() {
     seller.merchant_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const sellersWithAlerts = filteredSellers.filter(s => s.price_alert_count > 0 || s.campaign_alert_count > 0);
+
   const formatRating = (rating?: number) => {
     if (!rating) return '-';
     return rating.toFixed(1);
@@ -46,6 +58,42 @@ export default function Sellers() {
     return 'bg-[#3a3a3a]';
   };
 
+  const handleBulkExport = async () => {
+    if (sellersWithAlerts.length === 0) return;
+
+    setBulkExporting(true);
+    setExportProgress({ current: 0, total: sellersWithAlerts.length, sellerName: '' });
+
+    for (let i = 0; i < sellersWithAlerts.length; i++) {
+      const seller = sellersWithAlerts[i];
+      setExportProgress({ current: i + 1, total: sellersWithAlerts.length, sellerName: seller.merchant_name });
+
+      try {
+        const response = await fetch(`${API_BASE}/sellers/${seller.merchant_id}/export?platform=${platform}`);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${seller.merchant_name.replace(/[^a-z0-9]/gi, '_')}_products.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }
+      } catch (error) {
+        console.error(`Error exporting ${seller.merchant_name}:`, error);
+      }
+
+      if (i < sellersWithAlerts.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    setBulkExporting(false);
+    setExportProgress({ current: 0, total: 0, sellerName: '' });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -53,7 +101,46 @@ export default function Sellers() {
           <h1 className="text-2xl font-bold text-white">Sellers</h1>
           <p className="text-neutral-400 mt-1">View all sellers and their alert products</p>
         </div>
+        {sellersWithAlerts.length > 0 && (
+          <button
+            onClick={handleBulkExport}
+            disabled={bulkExporting}
+            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {bulkExporting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900"></div>
+                <span>Exporting {exportProgress.current}/{exportProgress.total}</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Bulk Export ({sellersWithAlerts.length})</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
+
+      {bulkExporting && (
+        <div className="card-dark p-4 border border-accent-primary/30">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent-primary"></div>
+            <div>
+              <div className="text-white font-medium">Exporting: {exportProgress.sellerName}</div>
+              <div className="text-neutral-400 text-sm">{exportProgress.current} of {exportProgress.total} sellers</div>
+            </div>
+          </div>
+          <div className="mt-3 bg-dark-700 rounded-full h-2 overflow-hidden">
+            <div 
+              className="bg-accent-primary h-full transition-all duration-300"
+              style={{ width: `${(exportProgress.current / exportProgress.total) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-2 mb-4">
         <button

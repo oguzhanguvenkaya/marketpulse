@@ -77,7 +77,7 @@ export default function SellerDetail() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/sellers')}
+          onClick={() => navigate(`/sellers?platform=${platform}`)}
           className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors"
         >
           <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
