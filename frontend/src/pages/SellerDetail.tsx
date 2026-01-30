@@ -16,6 +16,7 @@ export default function SellerDetail() {
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
   const [campaignAlertOnly, setCampaignAlertOnly] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [priceAlertCount, setPriceAlertCount] = useState(0);
   const [campaignAlertCount, setCampaignAlertCount] = useState(0);
@@ -42,11 +43,14 @@ export default function SellerDetail() {
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async (exportType: 'all' | 'price' | 'campaign') => {
     if (!merchantId) return;
     setExporting(true);
+    setShowExportMenu(false);
     try {
-      await exportSellerProducts(merchantId, platform, priceAlertOnly, campaignAlertOnly);
+      const priceOnly = exportType === 'price';
+      const campaignOnly = exportType === 'campaign';
+      await exportSellerProducts(merchantId, platform, priceOnly, campaignOnly);
     } catch (error) {
       console.error('Error exporting:', error);
     } finally {
@@ -130,25 +134,56 @@ export default function SellerDetail() {
             )}
           </button>
 
-          <button
-            onClick={handleExport}
-            disabled={exporting || filteredProducts.length === 0}
-            className="btn-primary flex items-center gap-2"
-          >
-            {exporting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900"></div>
-                Exporting...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export CSV
-              </>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={exporting || filteredProducts.length === 0}
+              className="btn-primary flex items-center gap-2"
+            >
+              {exporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900"></div>
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export CSV
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
+                <button
+                  onClick={() => handleExport('all')}
+                  className="w-full px-4 py-2 text-left text-neutral-300 hover:bg-dark-600 rounded-t-lg"
+                >
+                  Export All
+                </button>
+                <button
+                  onClick={() => handleExport('price')}
+                  disabled={priceAlertCount === 0}
+                  className="w-full px-4 py-2 text-left text-neutral-300 hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-danger rounded-full"></span>
+                  Price Alerts Only ({priceAlertCount})
+                </button>
+                <button
+                  onClick={() => handleExport('campaign')}
+                  disabled={campaignAlertCount === 0}
+                  className="w-full px-4 py-2 text-left text-neutral-300 hover:bg-dark-600 rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-warning rounded-full"></span>
+                  Campaign Alerts Only ({campaignAlertCount})
+                </button>
+              </div>
             )}
-          </button>
+          </div>
         </div>
 
         {loading ? (

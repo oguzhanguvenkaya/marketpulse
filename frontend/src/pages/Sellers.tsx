@@ -15,6 +15,7 @@ export default function Sellers() {
   const [searchTerm, setSearchTerm] = useState('');
   const [bulkExporting, setBulkExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState({ current: 0, total: 0, sellerName: '' });
+  const [showBulkExportMenu, setShowBulkExportMenu] = useState(false);
 
   useEffect(() => {
     setSearchParams({ platform });
@@ -58,24 +59,34 @@ export default function Sellers() {
     return 'bg-[#3a3a3a]';
   };
 
-  const handleBulkExport = async () => {
-    if (sellersWithAlerts.length === 0) return;
+  const handleBulkExport = async (exportType: 'price' | 'campaign') => {
+    setShowBulkExportMenu(false);
+    
+    const targetSellers = exportType === 'price' 
+      ? filteredSellers.filter(s => s.price_alert_count > 0)
+      : filteredSellers.filter(s => s.campaign_alert_count > 0);
+    
+    if (targetSellers.length === 0) return;
 
     setBulkExporting(true);
-    setExportProgress({ current: 0, total: sellersWithAlerts.length, sellerName: '' });
+    setExportProgress({ current: 0, total: targetSellers.length, sellerName: '' });
 
-    for (let i = 0; i < sellersWithAlerts.length; i++) {
-      const seller = sellersWithAlerts[i];
-      setExportProgress({ current: i + 1, total: sellersWithAlerts.length, sellerName: seller.merchant_name });
+    const priceAlertOnly = exportType === 'price';
+    const campaignAlertOnly = exportType === 'campaign';
+
+    for (let i = 0; i < targetSellers.length; i++) {
+      const seller = targetSellers[i];
+      setExportProgress({ current: i + 1, total: targetSellers.length, sellerName: seller.merchant_name });
 
       try {
-        const response = await fetch(`${API_BASE}/sellers/${seller.merchant_id}/export?platform=${platform}`);
+        const response = await fetch(`${API_BASE}/sellers/${seller.merchant_id}/export?platform=${platform}&price_alert_only=${priceAlertOnly}&campaign_alert_only=${campaignAlertOnly}`);
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `${seller.merchant_name.replace(/[^a-z0-9]/gi, '_')}_products.csv`;
+          const suffix = exportType === 'price' ? '_price_alerts' : '_campaign_alerts';
+          a.download = `${seller.merchant_name.replace(/[^a-z0-9]/gi, '_')}${suffix}.csv`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -85,7 +96,7 @@ export default function Sellers() {
         console.error(`Error exporting ${seller.merchant_name}:`, error);
       }
 
-      if (i < sellersWithAlerts.length - 1) {
+      if (i < targetSellers.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
@@ -102,25 +113,56 @@ export default function Sellers() {
           <p className="text-neutral-400 mt-1">View all sellers and their alert products</p>
         </div>
         {sellersWithAlerts.length > 0 && (
-          <button
-            onClick={handleBulkExport}
-            disabled={bulkExporting}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {bulkExporting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900"></div>
-                <span>Exporting {exportProgress.current}/{exportProgress.total}</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Bulk Export ({sellersWithAlerts.length})</span>
-              </>
+          <div className="relative">
+            <button
+              onClick={() => setShowBulkExportMenu(!showBulkExportMenu)}
+              disabled={bulkExporting}
+              className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {bulkExporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900"></div>
+                  <span>Exporting {exportProgress.current}/{exportProgress.total}</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Bulk Export</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+            {showBulkExportMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
+                <button
+                  onClick={() => handleBulkExport('price')}
+                  disabled={filteredSellers.filter(s => s.price_alert_count > 0).length === 0}
+                  className="w-full px-4 py-3 text-left text-neutral-300 hover:bg-dark-600 rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-danger rounded-full"></span>
+                  <span>Export Price Alerts</span>
+                  <span className="ml-auto text-xs text-neutral-500">
+                    ({filteredSellers.filter(s => s.price_alert_count > 0).length} sellers)
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleBulkExport('campaign')}
+                  disabled={filteredSellers.filter(s => s.campaign_alert_count > 0).length === 0}
+                  className="w-full px-4 py-3 text-left text-neutral-300 hover:bg-dark-600 rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-warning rounded-full"></span>
+                  <span>Export Campaign Alerts</span>
+                  <span className="ml-auto text-xs text-neutral-500">
+                    ({filteredSellers.filter(s => s.campaign_alert_count > 0).length} sellers)
+                  </span>
+                </button>
+              </div>
             )}
-          </button>
+          </div>
         )}
       </div>
 
