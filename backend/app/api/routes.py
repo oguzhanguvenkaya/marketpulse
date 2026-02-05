@@ -1037,15 +1037,17 @@ async def get_monitored_product_detail(
                 merchant_url = None
             
             current_price = float(s.price) if s.price else None  # Güncel satış fiyatı
-            orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı
+            orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı (Trendyol)
             camp_price = float(s.campaign_price) if s.campaign_price else None  # Hepsiburada sepete özel
             
             # Trendyol için:
             # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+            # - selling_price = Güncel satış fiyatı (current_price)
             # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
             # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
             if product.platform == 'trendyol':
                 list_price = orig_price if orig_price else current_price
+                selling_price = current_price
                 # Price Alert: Liste fiyatı threshold'dan düşük mü?
                 has_price_alert = threshold is not None and list_price is not None and list_price < threshold
                 
@@ -1057,7 +1059,9 @@ async def get_monitored_product_detail(
                     has_campaign_alert = False
             else:
                 # Hepsiburada için
-                has_price_alert = threshold is not None and orig_price is not None and orig_price < threshold
+                list_price = current_price
+                selling_price = camp_price if camp_price else current_price
+                has_price_alert = threshold is not None and current_price is not None and current_price < threshold
                 has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
             
             if has_price_alert:
@@ -1074,8 +1078,9 @@ async def get_monitored_product_detail(
                 "merchant_rating": float(s.merchant_rating) if s.merchant_rating else None,
                 "merchant_rating_count": s.merchant_rating_count,
                 "merchant_city": s.merchant_city,
-                "price": float(s.price) if s.price else None,
-                "original_price": orig_price,
+                "price": selling_price,  # Güncel satış fiyatı (kampanyalı olabilir)
+                "list_price": list_price,  # Liste fiyatı (threshold ile karşılaştırılır)
+                "original_price": orig_price,  # Raw original_price
                 "minimum_price": float(s.minimum_price) if s.minimum_price else None,
                 "discount_rate": s.discount_rate,
                 "stock_quantity": s.stock_quantity,
