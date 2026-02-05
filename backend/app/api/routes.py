@@ -1396,13 +1396,31 @@ async def get_sellers(
         
         threshold = product_thresholds.get(str(s.monitored_product_id))
         seller_price = float(s.price) if s.price else None
-        if threshold and seller_price and seller_price < threshold:
-            sellers_data[s.merchant_id]['price_alert_count'] += 1
-        
-        campaign_threshold = product_campaign_thresholds.get(str(s.monitored_product_id))
+        orig_price = float(s.original_price) if s.original_price else None
         campaign_price = float(s.campaign_price) if s.campaign_price else None
-        if campaign_threshold and campaign_price and campaign_price < campaign_threshold:
-            sellers_data[s.merchant_id]['campaign_alert_count'] += 1
+        campaign_threshold = product_campaign_thresholds.get(str(s.monitored_product_id))
+        
+        if platform.lower() == "trendyol":
+            # Trendyol için:
+            # - list_price = original_price varsa o, yoksa price
+            list_price = orig_price if orig_price else seller_price
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            if threshold and list_price and list_price < threshold:
+                sellers_data[s.merchant_id]['price_alert_count'] += 1
+            # Campaign Alert: Kampanya varsa (orig_price != price), satış fiyatı campaign_threshold'dan düşük mü?
+            if orig_price and seller_price and orig_price != seller_price:
+                if campaign_threshold and seller_price < campaign_threshold:
+                    sellers_data[s.merchant_id]['campaign_alert_count'] += 1
+        else:
+            # Hepsiburada için:
+            # - list_price = original_price varsa o, yoksa price
+            list_price = orig_price if orig_price else seller_price
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            if threshold and list_price and list_price < threshold:
+                sellers_data[s.merchant_id]['price_alert_count'] += 1
+            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
+            if campaign_threshold and campaign_price and campaign_price < campaign_threshold:
+                sellers_data[s.merchant_id]['campaign_alert_count'] += 1
     
     sellers_list = sorted(
         sellers_data.values(), 
