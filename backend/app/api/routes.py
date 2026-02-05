@@ -1058,10 +1058,14 @@ async def get_monitored_product_detail(
                     # Kampanya yok
                     has_campaign_alert = False
             else:
-                # Hepsiburada için
-                list_price = current_price
+                # Hepsiburada için:
+                # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+                # - selling_price = Güncel satış fiyatı (campaign_price varsa o, yoksa current_price)
+                list_price = orig_price if orig_price else current_price
                 selling_price = camp_price if camp_price else current_price
-                has_price_alert = threshold is not None and current_price is not None and current_price < threshold
+                # Price Alert: Liste fiyatı threshold'dan düşük mü?
+                has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+                # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
                 has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
             
             if has_price_alert:
@@ -1488,10 +1492,14 @@ async def get_seller_products(
                 has_campaign_alert = False
                 campaign_discount = None
         else:
-            # Hepsiburada için eski mantık
-            list_price = current_price
+            # Hepsiburada için:
+            # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
+            # - campaign_price = Sepete özel fiyat
+            list_price = orig_price if orig_price else current_price
             campaign_price = campaign_price_val
-            has_alert = threshold is not None and current_price is not None and current_price < threshold
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            has_alert = threshold is not None and list_price is not None and list_price < threshold
+            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
             has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
             campaign_discount = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
         
@@ -1627,9 +1635,14 @@ async def export_seller_products(
                 has_campaign_alert = False
                 campaign_diff = None
         else:
-            list_price = seller_price
+            # Hepsiburada için:
+            # - list_price = Liste fiyatı (original_price varsa o, yoksa seller_price)
+            # - campaign_price = Sepete özel fiyat
+            list_price = orig_price if orig_price else seller_price
             campaign_price = campaign_price_val
-            has_alert = threshold is not None and seller_price is not None and seller_price < threshold
+            # Price Alert: Liste fiyatı threshold'dan düşük mü?
+            has_alert = threshold is not None and list_price is not None and list_price < threshold
+            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
             has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
             campaign_diff = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
         
