@@ -214,6 +214,7 @@ export interface SellerSnapshot {
   merchant_rating_count?: number;
   merchant_city?: string;
   price: number;
+  list_price?: number;
   original_price?: number;
   minimum_price?: number;
   discount_rate?: number;
