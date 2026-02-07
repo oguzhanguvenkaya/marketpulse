@@ -219,29 +219,65 @@ export default function UrlScraper() {
     });
   };
 
+  const HIDDEN_KEYS = ['source_url', 'json_ld', 'og_data', 'images', 'product_name', 'product_description', 'price', 'currency', 'original_price', 'product_brand', 'product_sku', 'product_barcode', 'product_category', 'page_title', 'h1', 'meta_description', 'product_specs'];
+  const FIELD_LABELS: Record<string, string> = {
+    product_mpn: 'MPN', product_color: 'Color', product_weight: 'Weight',
+    availability: 'Availability', rating: 'Rating', review_count: 'Reviews',
+    seller_name: 'Seller', product_image: 'Image URL',
+  };
+
   const renderScrapedData = (item: ScrapeResultItem) => {
     if (!item.scraped_data || Object.keys(item.scraped_data).length === 0) return null;
     const data = item.scraped_data;
     return (
-      <div className="mt-2 space-y-1.5">
+      <div className="mt-3 space-y-3">
         {data.product_name && (
-          <div className="text-sm"><span className="text-neutral-400">Name:</span> <span className="text-white">{data.product_name}</span></div>
+          <div className="text-sm"><span className="text-neutral-400">Name:</span> <span className="text-white font-medium">{data.product_name}</span></div>
+        )}
+        {(data.product_brand || data.product_sku || data.product_barcode || data.product_category) && (
+          <div className="flex flex-wrap gap-3">
+            {data.product_brand && <div className="text-sm"><span className="text-neutral-400">Brand:</span> <span className="text-neutral-200">{data.product_brand}</span></div>}
+            {data.product_sku && <div className="text-sm"><span className="text-neutral-400">SKU:</span> <span className="text-neutral-200">{data.product_sku}</span></div>}
+            {data.product_barcode && <div className="text-sm"><span className="text-neutral-400">Barcode:</span> <span className="text-neutral-200">{data.product_barcode}</span></div>}
+            {data.product_category && <div className="text-sm"><span className="text-neutral-400">Category:</span> <span className="text-neutral-200">{data.product_category}</span></div>}
+          </div>
         )}
         {data.price !== undefined && (
-          <div className="text-sm"><span className="text-neutral-400">Price:</span> <span className="text-accent-primary font-medium">{data.price}</span></div>
+          <div className="text-sm flex items-center gap-3">
+            <span><span className="text-neutral-400">Price:</span> <span className="text-accent-primary font-bold">{data.price} {data.currency || ''}</span></span>
+            {data.original_price && <span><span className="text-neutral-400">Was:</span> <span className="text-neutral-500 line-through">{data.original_price}</span></span>}
+          </div>
         )}
-        {data.description && (
-          <div className="text-sm"><span className="text-neutral-400">Description:</span> <span className="text-neutral-300 line-clamp-2">{data.description}</span></div>
+        {(data.product_description || data.meta_description) && (
+          <div className="text-sm">
+            <span className="text-neutral-400">Description:</span>
+            <div className="text-neutral-300 mt-1 whitespace-pre-line line-clamp-4 bg-dark-800/50 rounded px-3 py-2 border border-dark-600/30">{data.product_description || data.meta_description}</div>
+          </div>
+        )}
+        {data.product_specs && typeof data.product_specs === 'object' && Object.keys(data.product_specs).length > 0 && (
+          <div className="text-sm">
+            <span className="text-neutral-400">Specifications:</span>
+            <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 bg-dark-800/50 rounded px-3 py-2 border border-dark-600/30">
+              {Object.entries(data.product_specs).slice(0, 10).map(([k, v]) => (
+                <div key={k} className="text-xs">
+                  <span className="text-neutral-500">{k}:</span> <span className="text-neutral-300">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
         {data.images && Array.isArray(data.images) && data.images.length > 0 && (
           <div className="text-sm"><span className="text-neutral-400">Images:</span> <span className="text-neutral-300">{data.images.length} found</span></div>
         )}
-        {Object.entries(data).filter(([key]) => !['product_name', 'price', 'description', 'images'].includes(key)).map(([key, value]) => (
-          <div key={key} className="text-sm">
-            <span className="text-neutral-400">{key}:</span>{' '}
-            <span className="text-neutral-300">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
-          </div>
-        ))}
+        {Object.entries(data).filter(([key]) => !HIDDEN_KEYS.includes(key)).map(([key, value]) => {
+          if (value === null || value === undefined || value === '') return null;
+          return (
+            <div key={key} className="text-sm">
+              <span className="text-neutral-400">{FIELD_LABELS[key] || key}:</span>{' '}
+              <span className="text-neutral-300">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
