@@ -7,6 +7,7 @@ import {
   getScrapeJob,
   downloadScrapeResults,
   deleteScrapeJob,
+  stopScrapeJob,
 } from '../services/api';
 import type { ScrapeJobInfo, ScrapeJobDetail, ScrapeResultItem } from '../services/api';
 
@@ -176,6 +177,16 @@ export default function UrlScraper() {
     }
   };
 
+  const handleStop = async (jobId: string) => {
+    try {
+      await stopScrapeJob(jobId);
+      loadJobs();
+    } catch (e: any) {
+      console.error('Error stopping job:', e);
+      setError(e.response?.data?.detail || 'Failed to stop job');
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -203,6 +214,7 @@ export default function UrlScraper() {
       running: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
       completed: 'bg-green-500/20 text-green-400 border border-green-500/30',
       failed: 'bg-red-500/20 text-red-400 border border-red-500/30',
+      stopped: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
     };
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-neutral-500/20 text-neutral-400'}`}>
@@ -542,6 +554,18 @@ export default function UrlScraper() {
                     <td className="py-3 pr-4 text-neutral-400 text-sm">{formatDate(job.created_at)}</td>
                     <td className="py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {job.status === 'running' && (
+                          <button
+                            onClick={() => handleStop(job.id)}
+                            className="px-2.5 py-1 rounded-md text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 transition-all flex items-center gap-1"
+                            title="Stop scraping"
+                          >
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                              <rect x="6" y="6" width="12" height="12" rx="1" />
+                            </svg>
+                            Stop
+                          </button>
+                        )}
                         <button
                           onClick={() => handleViewResults(job.id)}
                           className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${

@@ -526,4 +526,9 @@ export const deleteScrapeJob = async (jobId: string): Promise<void> => {
   await api.delete(`/url-scraper/jobs/${jobId}`);
 };
 
+export const stopScrapeJob = async (jobId: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post(`/url-scraper/jobs/${jobId}/stop`);
+  return response.data;
+};
+
 export default api;

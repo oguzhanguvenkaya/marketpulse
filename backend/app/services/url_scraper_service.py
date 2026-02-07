@@ -2,6 +2,7 @@ import os
 import re
 import json
 import asyncio
+import time
 import aiohttp
 import logging
 from urllib.parse import quote_plus
@@ -9,10 +10,25 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+_stop_signals: dict[str, bool] = {}
+
+
+def request_stop(job_id: str):
+    _stop_signals[job_id] = True
+    logger.info(f"[JOB {job_id[:8]}] Stop signal received")
+
+
+def is_stop_requested(job_id: str) -> bool:
+    return _stop_signals.get(job_id, False)
+
+
+def clear_stop_signal(job_id: str):
+    _stop_signals.pop(job_id, None)
+
 
 class UrlScraperService:
     SCRAPERAPI_BASE_URL = "https://api.scraperapi.com"
-    MAX_CONCURRENT = 5
+    MAX_CONCURRENT = 15
 
     def __init__(self):
         self.api_key = os.environ.get('SCRAPPER_API', '')
@@ -32,17 +48,27 @@ class UrlScraperService:
         encoded_url = quote_plus(url)
         api_url = f"{self.SCRAPERAPI_BASE_URL}?api_key={self.api_key}&url={encoded_url}&render=false"
 
+        start = time.time()
         try:
             timeout = aiohttp.ClientTimeout(total=60)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(api_url) as resp:
+                    elapsed = round(time.time() - start, 1)
                     if resp.status == 200:
-                        return await resp.text()
+                        html = await resp.text()
+                        logger.info(f"  FETCH OK  {url[:80]} — {elapsed}s, {len(html)} bytes")
+                        return html
                     else:
-                        logger.error(f"ScraperAPI error {resp.status} for {url[:60]}")
+                        body = await resp.text()
+                        logger.warning(f"  FETCH FAIL {url[:80]} — HTTP {resp.status} in {elapsed}s — {body[:200]}")
                         return None
+        except asyncio.TimeoutError:
+            elapsed = round(time.time() - start, 1)
+            logger.error(f"  FETCH TIMEOUT {url[:80]} — {elapsed}s")
+            return None
         except Exception as e:
-            logger.error(f"Fetch error for {url[:60]}: {e}")
+            elapsed = round(time.time() - start, 1)
+            logger.error(f"  FETCH ERROR {url[:80]} — {elapsed}s — {type(e).__name__}: {e}")
             return None
 
     def _get_text_content(self, element) -> str:
@@ -328,23 +354,110 @@ class UrlScraperService:
             return {'source_url': url, 'error': 'Failed to fetch URL'}
         return self.parse_html(html, url)
 
-    async def scrape_urls_batch(self, results, db):
-        if not self._semaphore:
-            self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT)
+    async def scrape_urls_batch(self, result_ids_urls: list[tuple], db_factory, job_id: str = None):
+        total = len(result_ids_urls)
+        completed_count = 0
+        failed_count = 0
+        batch_start = time.time()
+        stopped = False
+        jid = (job_id or '?')[:8]
 
-        async def process_one(result):
-            async with self._semaphore:
+        logger.info(f"[JOB {jid}] Starting batch: {total} URLs, concurrency={self.MAX_CONCURRENT}")
+
+        queue: asyncio.Queue = asyncio.Queue()
+        for item in result_ids_urls:
+            await queue.put(item)
+
+        write_lock = asyncio.Lock()
+
+        async def worker():
+            nonlocal completed_count, failed_count, stopped
+            while True:
+                if job_id and is_stop_requested(job_id):
+                    stopped = True
+                    return
+
                 try:
-                    scraped = await self.scrape_url(result.url)
-                    result.scraped_data = scraped
-                    result.status = 'completed' if 'error' not in scraped else 'failed'
-                    result.error_message = scraped.get('error')
-                except Exception as e:
-                    result.status = 'failed'
-                    result.error_message = str(e)
-                db.add(result)
-                db.commit()
-                return result
+                    result_id, url = queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    return
 
-        tasks = [process_one(r) for r in results]
-        await asyncio.gather(*tasks)
+                url_start = time.time()
+                status = 'failed'
+                scraped_data = None
+                error_message = None
+
+                try:
+                    scraped = await self.scrape_url(url)
+                    if 'error' not in scraped:
+                        status = 'completed'
+                        scraped_data = scraped
+                        completed_count += 1
+                    else:
+                        error_message = scraped.get('error')
+                        scraped_data = scraped
+                        failed_count += 1
+                except Exception as e:
+                    error_message = str(e)
+                    failed_count += 1
+                    logger.error(f"[JOB {jid}] Exception scraping {url[:60]}: {e}")
+
+                url_elapsed = round(time.time() - url_start, 1)
+                done = completed_count + failed_count
+                logger.info(
+                    f"[JOB {jid}] [{done}/{total}] "
+                    f"{'OK' if status == 'completed' else 'FAIL'} "
+                    f"{url[:70]} — {url_elapsed}s"
+                )
+
+                async with write_lock:
+                    db = db_factory()
+                    try:
+                        from app.db.models import ScrapeResult
+                        db.query(ScrapeResult).filter(ScrapeResult.id == result_id).update({
+                            'status': status,
+                            'scraped_data': scraped_data,
+                            'error_message': error_message,
+                        })
+                        db.commit()
+                    except Exception as e:
+                        logger.error(f"[JOB {jid}] DB write error for result {result_id}: {e}")
+                        db.rollback()
+                    finally:
+                        db.close()
+
+        workers = [asyncio.create_task(worker()) for _ in range(self.MAX_CONCURRENT)]
+        await asyncio.gather(*workers, return_exceptions=True)
+
+        if job_id and is_stop_requested(job_id):
+            stopped = True
+
+        skipped_count = 0
+        if stopped:
+            db = db_factory()
+            try:
+                from app.db.models import ScrapeResult
+                import uuid as uuid_mod
+                skipped_count = db.query(ScrapeResult).filter(
+                    ScrapeResult.scrape_job_id == uuid_mod.UUID(job_id),
+                    ScrapeResult.status == 'pending'
+                ).update({'status': 'skipped'})
+                db.commit()
+                logger.info(f"[JOB {jid}] Marked {skipped_count} remaining URLs as skipped")
+            except Exception as e:
+                logger.error(f"[JOB {jid}] Error marking skipped: {e}")
+                db.rollback()
+            finally:
+                db.close()
+
+        batch_elapsed = round(time.time() - batch_start, 1)
+        logger.info(
+            f"[JOB {jid}] Batch finished in {batch_elapsed}s — "
+            f"OK: {completed_count}, FAIL: {failed_count}, SKIPPED: {skipped_count}, TOTAL: {total}"
+            + (" (STOPPED by user)" if stopped else "")
+        )
+
+        if job_id:
+            clear_stop_signal(job_id)
+
+        return {"completed": completed_count, "failed": failed_count, "skipped": skipped_count, "stopped": stopped}

@@ -264,25 +264,46 @@ async def delete_scrape_job(job_id: str, db: Session = Depends(get_db)):
     return {"success": True, "message": "Job deleted"}
 
 
+@router.post("/jobs/{job_id}/stop")
+async def stop_scrape_job(job_id: str, db: Session = Depends(get_db)):
+    from app.services.url_scraper_service import request_stop
+
+    job = db.query(ScrapeJob).filter(ScrapeJob.id == uuid_mod.UUID(job_id)).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if job.status != "running":
+        raise HTTPException(status_code=400, detail="Job is not running")
+
+    request_stop(job_id)
+    return {"success": True, "message": "Stop signal sent"}
+
+
 async def run_scrape_job(job_id: str):
+    import logging
     from app.services.url_scraper_service import UrlScraperService
+
+    logger = logging.getLogger(__name__)
 
     db = SessionLocal()
     try:
         job = db.query(ScrapeJob).filter(ScrapeJob.id == uuid_mod.UUID(job_id)).first()
         if not job:
+            logger.error(f"[JOB {job_id[:8]}] Job not found in DB")
             return
 
         job.status = "running"
         db.commit()
+        logger.info(f"[JOB {job_id[:8]}] Job started — {job.total_urls} URLs to scrape")
 
         results = db.query(ScrapeResult).filter(
             ScrapeResult.scrape_job_id == job.id,
             ScrapeResult.status == "pending"
         ).all()
 
+        result_ids_urls = [(r.id, r.url) for r in results]
+
         scraper = UrlScraperService()
-        await scraper.scrape_urls_batch(results, db)
+        batch_result = await scraper.scrape_urls_batch(result_ids_urls, SessionLocal, job_id=job_id)
 
         completed = db.query(ScrapeResult).filter(
             ScrapeResult.scrape_job_id == job.id,
@@ -295,12 +316,34 @@ async def run_scrape_job(job_id: str):
 
         job.completed_urls = completed
         job.failed_urls = failed
-        job.status = "completed"
+
+        if batch_result and batch_result.get("stopped"):
+            job.status = "stopped"
+            logger.info(f"[JOB {job_id[:8]}] Job stopped by user — OK: {completed}, FAIL: {failed}")
+        else:
+            job.status = "completed"
+            logger.info(f"[JOB {job_id[:8]}] Job completed — OK: {completed}, FAIL: {failed}")
+
         job.completed_at = datetime.utcnow()
         db.commit()
     except Exception as e:
-        job.status = "failed"
-        job.error_message = str(e)
-        db.commit()
+        logger.error(f"[JOB {job_id[:8]}] Job failed with exception: {e}")
+        try:
+            job.status = "failed"
+            job.error_message = str(e)
+            completed = db.query(ScrapeResult).filter(
+                ScrapeResult.scrape_job_id == job.id,
+                ScrapeResult.status == "completed"
+            ).count()
+            failed = db.query(ScrapeResult).filter(
+                ScrapeResult.scrape_job_id == job.id,
+                ScrapeResult.status == "failed"
+            ).count()
+            job.completed_urls = completed
+            job.failed_urls = failed
+            job.completed_at = datetime.utcnow()
+            db.commit()
+        except:
+            pass
     finally:
         db.close()
