@@ -6,6 +6,7 @@ import Ads from './pages/Ads'
 import PriceMonitor from './pages/PriceMonitor'
 import Sellers from './pages/Sellers'
 import SellerDetail from './pages/SellerDetail'
+import UrlScraper from './pages/UrlScraper'
 import Layout from './components/Layout'
 import './App.css'
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/price-monitor" element={<PriceMonitor />} />
           <Route path="/sellers" element={<Sellers />} />
           <Route path="/sellers/:merchantId" element={<SellerDetail />} />
+          <Route path="/url-scraper" element={<UrlScraper />} />
         </Routes>
       </Layout>
     </Router>

@@ -32,7 +32,8 @@ The frontend utilizes React, Vite, and TailwindCSS for a modern, responsive, and
 - **Sponsored Ads Tracking:** Identifies individual sponsored products and groups them to track brand advertisers. This involves parsing advertisement-specific HTML classes and decoding tracking URLs to extract real product information and associated seller data.
 - **AI Analysis:** Integrates OpenAI's GPT-4o-mini for generating insights from collected product data.
 - **Modular Proxy System:** Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass) if ScraperAPI fails. This system includes debug logging and HTML saving for troubleshooting scraping issues.
-- **Database Schema:** Designed to store rich product information, including `Products`, `ProductSnapshots`, `ProductSellers`, `ProductReviews`, and `SponsoredBrandAds`. This allows for historical tracking of prices, ratings, and seller activities.
+- **URL Scraper:** A generic URL scraping system that can scrape any product URL. Supports single URL input, bulk JSON input, and CSV file upload. Uses ScraperAPI to fetch pages, then extracts product data via HTML meta tags, JSON-LD schema, Open Graph data, and general HTML parsing. Results are stored in DB and downloadable as JSON. DB models: `ScrapeJob`, `ScrapeResult`. API routes at `/api/url-scraper/`.
+- **Database Schema:** Designed to store rich product information, including `Products`, `ProductSnapshots`, `ProductSellers`, `ProductReviews`, `SponsoredBrandAds`, `ScrapeJob`, and `ScrapeResult`. This allows for historical tracking of prices, ratings, and seller activities.
 - **Backend Services:** Implemented with FastAPI, utilizing background tasks for asynchronous operations like scraping. SQLAlchemy is used for ORM with PostgreSQL.
 - **Frontend Services:** Uses React with TypeScript, TailwindCSS, and a custom API client for interacting with the backend.
 

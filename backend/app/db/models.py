@@ -231,3 +231,42 @@ class PriceMonitorTask(Base):
     
     class Config:
         from_attributes = True
+
+
+class ScrapeJob(Base):
+    """URL kazıma görevi"""
+    __tablename__ = "scrape_jobs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    status = Column(String(20), default="pending")
+    total_urls = Column(Integer, default=0)
+    completed_urls = Column(Integer, default=0)
+    failed_urls = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+    error_message = Column(Text)
+    
+    scrape_results = relationship("ScrapeResult", back_populates="scrape_job", cascade="all, delete-orphan")
+    
+    class Config:
+        from_attributes = True
+
+
+class ScrapeResult(Base):
+    """Kazınan URL sonucu"""
+    __tablename__ = "scrape_results"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    scrape_job_id = Column(UUID(as_uuid=True), ForeignKey("scrape_jobs.id"), nullable=False, index=True)
+    url = Column(Text, nullable=False)
+    product_name = Column(Text)
+    barcode = Column(Text)
+    status = Column(String(20), default="pending")
+    scraped_data = Column(JSON)
+    error_message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    scrape_job = relationship("ScrapeJob", back_populates="scrape_results")
+    
+    class Config:
+        from_attributes = True
