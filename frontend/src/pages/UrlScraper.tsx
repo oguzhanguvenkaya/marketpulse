@@ -104,7 +104,9 @@ export default function UrlScraper() {
           return;
         }
         const result = await scrapeCsv(csvFile);
-        setSuccess(`Bulk scrape started! Job ID: ${result.job_id.slice(0, 8)}... (${result.total_urls} URLs)`);
+        let msg = `Bulk scrape started! Job ID: ${result.job_id.slice(0, 8)}... (${result.total_urls} URLs)`;
+        if (result.skipped_rows) msg += ` — ${result.skipped_rows} row(s) skipped (no URLs)`;
+        setSuccess(msg);
         setCsvFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
       } else {
@@ -439,7 +441,7 @@ export default function UrlScraper() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
                       <p className="text-neutral-300">Drop CSV file here or click to browse</p>
-                      <p className="text-neutral-500 text-xs">Expected columns: url, product_name (optional), barcode (optional)</p>
+                      <p className="text-neutral-500 text-xs">Supports comma (,) semicolon (;) or tab delimiters. Columns: url (+ url_1, url_2...), product_name (optional), barcode (optional)</p>
                     </div>
                   )}
                   <input

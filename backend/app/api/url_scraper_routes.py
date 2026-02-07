@@ -71,12 +71,45 @@ async def scrape_bulk_urls(req: BulkUrlRequest, background_tasks: BackgroundTask
     return {"job_id": str(job.id), "status": "running", "total_urls": len(req.urls)}
 
 
+def _detect_csv_delimiter(text: str) -> str:
+    first_lines = text.split('\n', 3)[:3]
+    sample = '\n'.join(first_lines)
+    semicolons = sample.count(';')
+    commas = sample.count(',')
+    tabs = sample.count('\t')
+    counts = {';': semicolons, ',': commas, '\t': tabs}
+    return max(counts, key=counts.get) if max(counts.values()) > 0 else ','
+
+def _extract_urls_from_cell(cell: str) -> list[str]:
+    cell = cell.strip()
+    if not cell:
+        return []
+    if ',' in cell and 'http' in cell:
+        parts = cell.split(',')
+        urls = []
+        current = ''
+        for part in parts:
+            part = part.strip()
+            if part.startswith('http'):
+                if current:
+                    urls.append(current)
+                current = part
+            elif current:
+                current += ',' + part
+        if current:
+            urls.append(current)
+        return [u.strip() for u in urls if u.strip().startswith('http')]
+    if cell.startswith('http'):
+        return [cell]
+    return []
+
 @router.post("/scrape-csv")
 async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: BackgroundTasks = None, db: Session = Depends(get_db)):
     content = await file.read()
     text = content.decode('utf-8-sig')
 
-    reader = csv.reader(io.StringIO(text))
+    delimiter = _detect_csv_delimiter(text)
+    reader = csv.reader(io.StringIO(text), delimiter=delimiter)
     header = next(reader, None)
     if not header:
         raise HTTPException(status_code=400, detail="Empty CSV file")
@@ -86,30 +119,35 @@ async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: Back
     barcode_col = None
     for i, h in enumerate(header):
         h_lower = h.strip().lower()
-        if 'url' in h_lower:
+        if 'url' in h_lower or 'link' in h_lower:
             url_columns.append(i)
-        if h_lower in ['product name', 'name', 'ürün adı', 'product_name']:
+        if h_lower in ['product name', 'name', 'ürün adı', 'product_name', 'ürün', 'urun']:
             name_col = i
         if h_lower in ['barcode', 'barkod']:
             barcode_col = i
 
     if not url_columns:
-        raise HTTPException(status_code=400, detail="No URL columns found in CSV")
+        raise HTTPException(status_code=400, detail="No URL columns found in CSV. Header columns detected: " + ", ".join(h.strip() for h in header))
 
     urls_to_scrape = []
+    skipped_rows = 0
     for row in reader:
         product_name = row[name_col].strip() if name_col is not None and name_col < len(row) else None
         barcode = row[barcode_col].strip() if barcode_col is not None and barcode_col < len(row) else None
 
+        row_has_url = False
         for col_idx in url_columns:
             if col_idx < len(row):
-                url = row[col_idx].strip()
-                if url and url.startswith('http'):
+                cell_urls = _extract_urls_from_cell(row[col_idx])
+                for url in cell_urls:
+                    row_has_url = True
                     urls_to_scrape.append({
                         'url': url,
                         'product_name': product_name,
                         'barcode': barcode
                     })
+        if not row_has_url and (product_name or barcode):
+            skipped_rows += 1
 
     if not urls_to_scrape:
         raise HTTPException(status_code=400, detail="No valid URLs found in CSV")
@@ -132,7 +170,11 @@ async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: Back
 
     background_tasks.add_task(run_scrape_job, str(job.id))
 
-    return {"job_id": str(job.id), "status": "running", "total_urls": len(urls_to_scrape)}
+    resp = {"job_id": str(job.id), "status": "running", "total_urls": len(urls_to_scrape)}
+    if skipped_rows > 0:
+        resp["skipped_rows"] = skipped_rows
+        resp["message"] = f"{skipped_rows} row(s) skipped (no valid URLs)"
+    return resp
 
 
 @router.get("/jobs")
