@@ -2,7 +2,10 @@ import re
 import asyncio
 import time
 import logging
+import os
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import GenericProxyConfig
+from youtube_transcript_api._errors import RequestBlocked, IpBlocked
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,47 @@ def extract_video_id(url: str) -> str | None:
     return None
 
 
+def _build_scraperapi_proxy_url():
+    api_key = os.getenv("SCRAPPER_API", "")
+    if not api_key:
+        return None
+    return f"http://scraperapi:{api_key}@proxy-server.scraperapi.com:8001"
+
+
+def _create_proxy_api(proxy_url: str) -> YouTubeTranscriptApi:
+    from requests import Session
+    proxy_config = GenericProxyConfig(
+        http_url=proxy_url,
+        https_url=proxy_url,
+    )
+    session = Session()
+    session.verify = False
+    return YouTubeTranscriptApi(proxy_config=proxy_config, http_client=session)
+
+
+def _fetch_with_api(ytt_api: YouTubeTranscriptApi, video_id: str):
+    transcript = None
+    try:
+        transcript_list = ytt_api.list(video_id)
+        available = list(transcript_list)
+        if available:
+            manual = [t for t in available if not t.is_generated]
+            chosen = manual[0] if manual else available[0]
+            transcript = ytt_api.fetch(video_id, languages=[chosen.language_code])
+    except (RequestBlocked, IpBlocked):
+        raise
+    except Exception:
+        pass
+
+    if transcript is None:
+        transcript = ytt_api.fetch(video_id)
+
+    return transcript
+
+
+IP_BLOCK_ERRORS = (RequestBlocked, IpBlocked)
+
+
 class TranscriptService:
     MAX_CONCURRENT = 10
 
@@ -43,47 +87,57 @@ class TranscriptService:
             return {'video_url': video_url, 'error': f'Could not extract video ID from URL: {video_url}'}
 
         try:
-            ytt_api = YouTubeTranscriptApi()
+            ytt_direct = YouTubeTranscriptApi()
+            transcript = _fetch_with_api(ytt_direct, video_id)
+            return self._format_result(video_url, video_id, transcript, proxy_used=None)
 
-            transcript = None
+        except IP_BLOCK_ERRORS as e:
+            logger.warning(f"[TRANSCRIPT] IP blocked for {video_id}, retrying with ScraperAPI proxy...")
+            proxy_url = _build_scraperapi_proxy_url()
+            if not proxy_url:
+                logger.error(f"[TRANSCRIPT] ScraperAPI key not configured, cannot retry {video_id}")
+                return {'video_url': video_url, 'video_id': video_id, 'error': f'IP blocked and no proxy available: {e}'}
+
             try:
-                transcript_list = ytt_api.list(video_id)
-                available = list(transcript_list)
-                if available:
-                    manual = [t for t in available if not t.is_generated]
-                    chosen = manual[0] if manual else available[0]
-                    transcript = ytt_api.fetch(video_id, languages=[chosen.language_code])
-            except Exception:
-                pass
+                import urllib3
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                ytt_proxy = _create_proxy_api(proxy_url)
+                transcript = _fetch_with_api(ytt_proxy, video_id)
+                return self._format_result(video_url, video_id, transcript, proxy_used='scraperapi')
+            except Exception as proxy_err:
+                error_msg = str(proxy_err)
+                logger.error(f"[TRANSCRIPT] ScraperAPI proxy also failed for {video_id}: {error_msg}")
+                return {'video_url': video_url, 'video_id': video_id, 'error': f'Failed with proxy: {error_msg}'}
 
-            if transcript is None:
-                transcript = ytt_api.fetch(video_id)
-
-            full_text = ' '.join(snippet.text for snippet in transcript.snippets)
-
-            snippets_data = [
-                {
-                    'text': snippet.text,
-                    'start': snippet.start,
-                    'duration': snippet.duration,
-                }
-                for snippet in transcript.snippets
-            ]
-
-            return {
-                'video_url': video_url,
-                'video_id': video_id,
-                'language': transcript.language,
-                'language_code': transcript.language_code,
-                'is_generated': transcript.is_generated,
-                'transcript_text': full_text,
-                'snippets': snippets_data,
-                'snippet_count': len(snippets_data),
-            }
         except Exception as e:
             error_msg = str(e)
             logger.error(f"[TRANSCRIPT] Error fetching transcript for {video_id}: {error_msg}")
             return {'video_url': video_url, 'video_id': video_id, 'error': error_msg}
+
+    def _format_result(self, video_url: str, video_id: str, transcript, proxy_used: str | None) -> dict:
+        full_text = ' '.join(snippet.text for snippet in transcript.snippets)
+        snippets_data = [
+            {
+                'text': snippet.text,
+                'start': snippet.start,
+                'duration': snippet.duration,
+            }
+            for snippet in transcript.snippets
+        ]
+
+        result = {
+            'video_url': video_url,
+            'video_id': video_id,
+            'language': transcript.language,
+            'language_code': transcript.language_code,
+            'is_generated': transcript.is_generated,
+            'transcript_text': full_text,
+            'snippets': snippets_data,
+            'snippet_count': len(snippets_data),
+        }
+        if proxy_used:
+            logger.info(f"[TRANSCRIPT] Successfully fetched {video_id} via {proxy_used} proxy")
+        return result
 
     async def fetch_transcripts_batch(self, result_ids_urls: list[tuple], db_factory, job_id: str = None):
         total = len(result_ids_urls)
