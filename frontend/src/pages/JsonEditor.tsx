@@ -32,6 +32,7 @@ export default function JsonEditor() {
   const [addFieldState, setAddFieldState] = useState<Record<string, { key: string; type: string }>>({});
   const [deleteFieldConfirm, setDeleteFieldConfirm] = useState<string | null>(null);
   const [saveToast, setSaveToast] = useState<string | null>(null);
+  const [fileListView, setFileListView] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentCategory = categories[activeTab] || null;
@@ -1121,7 +1122,27 @@ export default function JsonEditor() {
     );
   };
 
-  if (categories.length === 0) {
+  const removeFile = (index: number) => {
+    setCategories(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (updated.length === 0) {
+        setActiveTab(0);
+        setActiveProduct(0);
+      } else if (activeTab >= updated.length) {
+        setActiveTab(updated.length - 1);
+        setActiveProduct(0);
+      }
+      return updated;
+    });
+  };
+
+  const openFile = (index: number) => {
+    setActiveTab(index);
+    setActiveProduct(0);
+    setFileListView(false);
+  };
+
+  if (categories.length === 0 || fileListView) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
@@ -1134,17 +1155,17 @@ export default function JsonEditor() {
           onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-16 text-center cursor-pointer transition-all duration-200 ${
+          className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 ${
             isDragging
               ? 'border-[#00d4ff] bg-[#00d4ff]/5'
               : 'border-white/10 hover:border-white/20 bg-[#2a2a2a]'
           }`}
         >
           <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 mx-auto mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
-          <p className="text-lg font-medium text-white mb-2">Drop JSON files here or click to browse</p>
+          <p className="text-lg font-medium text-white mb-1">Drop JSON files here or click to browse</p>
           <p className="text-sm text-gray-500">Accepts multiple .json product catalog files — any structure</p>
         </div>
 
@@ -1156,6 +1177,75 @@ export default function JsonEditor() {
             ))}
           </div>
         )}
+
+        {categories.length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Loaded Files ({categories.length})</h2>
+              <button
+                onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); clearLocalStorage(); }}
+                className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-xs"
+              >
+                Clear All
+              </button>
+            </div>
+            <div className="space-y-2">
+              {categories.map((cat, i) => {
+                const productCount = cat.products.length;
+                const hasUnsaved = JSON.stringify(cat.products) !== cat._originalProducts;
+                const metaGroup = typeof cat.metadata?.group === 'string' ? cat.metadata.group : '';
+                return (
+                  <div
+                    key={`${cat._fileName}-${i}`}
+                    className="flex items-center gap-3 bg-[#1e1e1e] border border-white/10 rounded-lg p-3 hover:border-white/20 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-[#00d4ff]/10 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-[#00d4ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <button
+                      onClick={() => openFile(i)}
+                      className="flex-1 text-left min-w-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white truncate">{cat._fileName}</span>
+                        {hasUnsaved && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
+                            <span className="w-1 h-1 rounded-full bg-yellow-400 animate-pulse" />
+                            Modified
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-xs text-gray-500">{productCount} product{productCount !== 1 ? 's' : ''}</span>
+                        {metaGroup && <span className="text-xs text-gray-600">| {metaGroup}</span>}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                      className="p-2 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                      title="Remove file"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {saveToast && (
+          <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            {saveToast}
+          </div>
+        )}
       </div>
     );
   }
@@ -1164,7 +1254,16 @@ export default function JsonEditor() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-white">JSON Editor</h1>
+          <button
+            onClick={() => setFileListView(true)}
+            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            title="Back to files"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-white">{currentCategory?._fileName || 'JSON Editor'}</h1>
           {hasChanges && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
@@ -1173,13 +1272,6 @@ export default function JsonEditor() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={() => fileInputRef.current?.click()} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm flex items-center gap-1.5">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Files
-          </button>
-          <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
           <button onClick={saveToLocalStorage} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-sm font-medium flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1187,9 +1279,8 @@ export default function JsonEditor() {
             Save
           </button>
           <button onClick={resetCurrentProduct} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm">Reset Product</button>
-          <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium">Download Current</button>
+          <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium">Download</button>
           <button onClick={downloadAll} className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-sm">Download All</button>
-          <button onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); clearLocalStorage(); }} className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-sm">Clear All</button>
         </div>
       </div>
 
