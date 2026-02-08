@@ -491,7 +491,7 @@ export const scrapeBulkUrls = async (urls: { url: string; product_name?: string;
   return response.data;
 };
 
-export const scrapeCsv = async (file: File): Promise<{ job_id: string; status: string; total_urls: number }> => {
+export const scrapeCsv = async (file: File): Promise<{ job_id: string; status: string; total_urls: number; skipped_rows?: number }> => {
   const formData = new FormData();
   formData.append('file', file);
   const response = await api.post('/url-scraper/scrape-csv', formData, {

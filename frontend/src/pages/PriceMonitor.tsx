@@ -44,7 +44,7 @@ export default function PriceMonitor() {
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
   const [campaignAlertOnly, setCampaignAlertOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [lastInactiveProducts, setLastInactiveProducts] = useState<LastInactiveProduct[]>([]);
+  const [_lastInactiveProducts, _setLastInactiveProducts] = useState<LastInactiveProduct[]>([]);
   const [lastInactiveCount, setLastInactiveCount] = useState(0);
   const [showFetchMenu, setShowFetchMenu] = useState(false);
   const [currentFetchType, setCurrentFetchType] = useState<FetchType>('active');
@@ -72,7 +72,7 @@ export default function PriceMonitor() {
   const loadLastInactive = async () => {
     try {
       const data = await getLastInactiveSkus(platform);
-      setLastInactiveProducts(data.products);
+      _setLastInactiveProducts(data.products);
       setLastInactiveCount(data.count);
     } catch (e) {
       console.error('Error loading last inactive:', e);
