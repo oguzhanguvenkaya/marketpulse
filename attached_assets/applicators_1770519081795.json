@@ -1,0 +1,792 @@
+{
+  "metadata": {
+    "group_id": "applicators",
+    "group_name": "El Uygulama Pedleri ve Süngerler",
+    "total_products": 15,
+    "description": "Seramik, wax, cila, lastik parlatıcı ve iç bakım ürünlerinin manuel uygulanması için kullanılan sünger, mikrofiber ve süet aplikatörler.",
+    "sub_types": [
+      {
+        "id": "applicator_pad",
+        "name": "Uygulama Pedi",
+        "description": "Wax, sealant ve kaplama uygulamaları için köpük veya mikrofiber ped"
+      },
+      {
+        "id": "tire_applicator",
+        "name": "Lastik Aplikatörü",
+        "description": "Lastik jeli ve parlatıcı uygulaması için özel ped"
+      },
+      {
+        "id": "coating_applicator",
+        "name": "Kaplama Aplikatörü",
+        "description": "Seramik kaplama uygulaması için hassas süet/mikrofiber aplikatör"
+      },
+      {
+        "id": "cleaning_sponge",
+        "name": "Temizlik Süngeri",
+        "description": "Genel temizlik amaçlı yumuşak sünger"
+      },
+      {
+        "id": "scrub_pad",
+        "name": "Ovalama Pedi",
+        "description": "İnatçı kirlere yönelik ovalama ve temizleme pedi"
+      },
+      {
+        "id": "wash_sponge",
+        "name": "Yıkama Süngeri",
+        "description": "Araç yıkama için büyük gözenekli yumuşak sünger"
+      }
+    ],
+    "template_fields": {
+      "material": "Malzeme (Foam, Microfiber, Süet, Melamin)",
+      "shape": "Şekil (Yuvarlak, Elips, Dikdörtgen, Parmak Cep)",
+      "intended_use": "Kullanım alanı (Wax, Seramik, Lastik, Deri, İç Bakım)",
+      "size": "Boyut (cm veya mm)",
+      "reusable": "Yeniden kullanılabilir (true/false)",
+      "features": "Özel özellikler"
+    }
+  },
+  "products": [
+    {
+      "sku": "SGGD188-02",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Foam (Köpük)",
+          "shape": "Yuvarlak",
+          "intended_use": [
+            "Wax",
+            "Cila",
+            "Boya Koruma"
+          ],
+          "size": "105 mm",
+          "reusable": true,
+          "features": "Ergonomik kalın yapı",
+          "diameter": "105 mm",
+          "type": "El uygulama pedi"
+        }
+      },
+      "content": {
+        "short_description": "SGCB Hand Wax Sponge, 105 mm yuvarlak el uygulama pediyle cila, wax ve boya koruma işlemlerinde ergonomik tasarım ve yumuşak köpük yapısıyla mükemmel sonuç sağlar. 2’li paket!",
+        "full_description": "SGCB Hand Wax Sponge - Cila, boya koruma, wax uygulamaları için kalın el pedi.\r\n\r\nBüyüklük: 105 mm\r\nPaket İçeriği: 2 Adet\r\n\r\n• YÜKSEK KALİTELİ MALZEME YAPISI\r\nBirinci sınıf köpük sünger ile özenle üretilmiştir.\r\nYumuşak ve pürüzsüz, ancak boya yüzeyini ve cilayı uygulamak için mükemmeldir!\r\n\r\n• AKILLI VE ERGONOMİK TASARIM\r\nYan/Kenar presleme teknikleri kullanılmıştır\r\nUzun Ömür ve Dayanıklı Uygulama Sağlar.\r\nİnsan Elinin Özellikleri ve Boyutları Gibi Tasarlanmıştır, Tutması ve Kontrol Etmesi Kolay ve Kullanışlıdır, Böylece İşlerinizi Daha Verimli Bir Şekilde Bitirebilirsiniz!\r\n\r\n• ÇOK AMAÇLI KULLANIM\r\nEvrensel Versiyon ve Farklı Kişiler Tarafından Çok Sevilen, Özellikle Araba Severler İçin Gerekli Bir Araç!\r\nEsas Olarak Araba Cilalama, Araba Boyası, İç Temizlik, Deri Koltuk, Plastik, Tekerlek, Seramik vb. İçin Kullanılır.",
+        "how_to_use": "1. Ürünü pede damlatın veya yüzeye püskürtün.\n2. Dairesel hareketlerle yüzeye yayın.\n3. Eşit tabaka oluşturun.",
+        "when_to_use": "Wax, sealant ve koruma ürünlerinin el ile uygulanması için kullanılır.",
+        "target_surface": "Boyalı yüzeyler, vernik",
+        "why_this_product": "• 105mm yuvarlak tasarım\n• Kolay kavrama\n• Ekonomik"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Yıkanabilir mi?",
+          "answer": "Evet, ılık su ve şampuanla yıkanabilir."
+        }
+      ],
+      "price": 14000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/SGGD188-02_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "3229",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Microfiber Plush",
+          "intended_use": [
+            "Nano Koruma",
+            "Cila",
+            "İç Bakım"
+          ],
+          "size": "12x10 cm",
+          "reusable": true,
+          "features": "Ultra yumuşak, çizmez",
+          "quantity": "2 adet",
+          "type": "Peluş aplikatör",
+          "purpose": "Nano koruma uygulaması"
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Softy Serisi; KLIN Korea ürün ailesinin belki de en heyecan verici ürün serilerinden biridir. Softy Serisi yıkama eldiveni, yıkama pedi ve aplikatörleri ULTRA yumuşaktır. Uygun yöntemlerin kullanıldığı her Softy Serisi, elinize alır almaz oyunun kurallarını değiştirir. İlk dokunuşta sizi kendisine aşık edecektir.\r\n\r\n2’li paket olarak satılan Softy Serisi Aplikatör çok yönlü bir araçtır. Tüm boyalı yüzeylerde cila uygulaması, seramik kaplama uygulaması, deri/trim koruma işlemleri, küçük nokta cilalama veya tekerlekler ve kapı içi plastikler gibi küçük alanlar için uygulama pedi olarak kullanılır. Hatta yıkama işlemlerinde bile ulaşılması güç, dar alanlar için kullanabilirsiniz. Ultra yumuşak, dayanıklı ve güvenlidir.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin, havacılık gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 12x10 cm – Turkuaz\r\n• Paket içerisinde 2 adet aynı renkli aplikatör bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Nano koruma ürününü aplikatöre damlatın.\n2. İnce ve eşit tabaka halinde yüzeye yayın.\n3. Fazla ürün kullanmayın.",
+        "when_to_use": "Nano seramik kaplamalar, sealant ve ince koruma tabakası uygulamalarında kullanılır.",
+        "target_surface": "Boyalı yüzeyler, cam, tüm pürüzsüz yüzeyler",
+        "why_this_product": "• Peluş yumuşak doku\n• Eşit yayılım sağlar\n• 2'li ekonomik paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplama için uygun mu?",
+          "answer": "Evet, nano seramik kaplamalar için idealdir."
+        }
+      ],
+      "price": 29000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3229_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "3224M",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Microfiber",
+          "shape": "Parmak Cep",
+          "intended_use": [
+            "Jant",
+            "Trim",
+            "Dar Alanlar"
+          ],
+          "reusable": true,
+          "features": "Hassas detay çalışması için parmağa takılır",
+          "quantity": "6 adet",
+          "type": "Parmak aplikatör",
+          "design": "Parmağa geçmeli"
+        }
+      },
+      "content": {
+        "short_description": "KLIN KOREA Dünya’nın En Büyük Mikrofiber Bez Üreticisi Ürünleri Türkiye’de. Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Aynı Gün Ücretsiz Kargo.",
+        "full_description": "KLIN Parmak Aplikatörü ile boyayı bozma veya yüzeylere zarar verme korkusu olmadan tüm hassas parçalara veya dar noktalara kolayca uygulama yapabilirsiniz. Ellerinizi kirletmeden basit şekilde uygulama yapmak için idealdir. Birkaç parmağa güzelce oturur ve daha sonra kullanılmak üzere güzelce temizlenir.\r\n\r\nBu çok işlevli parmak aplikatörler, seramik kaplamaların, trim koruyucuların, wax/boya koruma ürünlerinin hassas bir şekilde uygulanmasını sağlar. Çok amaçlı ve ergonomiktir. Hem iç hem dış yüzey uygulamaları için uygundur.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin, havacılık gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 8.5x7 cm – Beyaz\r\n• Paket içerisinde 6 adet aynı renkli aplikatör bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Aplikatörü parmağınıza geçirin.\n2. Ürünü aplikatöre damlatın.\n3. Hassas bölgelere kontrollü uygulama yapın.",
+        "when_to_use": "Dar alanlar, köşeler ve hassas bölgelerde koruma ürünü uygulaması için kullanılır.",
+        "target_surface": "Dar alanlar, köşeler, hassas bölgeler",
+        "why_this_product": "• Parmağa geçmeli tasarım\n• Hassas kontrol\n• 6'lı ekonomik paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Hangi alanlarda kullanılır?",
+          "answer": "Dar köşeler, amblem çevreleri, pervaz kenarları gibi hassas alanlarda."
+        }
+      ],
+      "price": 38000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3224M_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "3235",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Dual Foam (Siyah/Turuncu)",
+          "intended_use": [
+            "Wax (Siyah)",
+            "Pasta (Turuncu)"
+          ],
+          "reusable": true,
+          "features": "İki farklı sertlikte yüzey",
+          "quantity": "2 adet",
+          "type": "Çift taraflı sünger",
+          "design": "Dual face"
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN KLIN Dual Çift Taraflı Sünger Aplikatör, adını her iki ucunda bulunan süngerlerin farklı yoğunluktaki köpük yapısından dolayı almıştır. Farklı ürünlerle kombine edilebilir ve kolayca elle uygulanabilir.\r\n\r\nSiyah kısmı yumuşaktır. Wax, boya koruma, katı cila gibi yüzeyde aşındırma gerektirmeyen uygulamalar için idealdir. Turuncu kısmı ile daha yoğun sünger yapılıdır. Aşındırma gerektiren pasta işlemleri ya da bölgesel işlemlerde kullanılabilir.\r\n\r\nKLIN KOREA ‘nın en son sünger teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin, havacılık gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• Yükseklik: 3,5cm – Çap: 9cm\r\n• Paket içerisinde 2 adet aplikatör bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Sünger\r\n• Turuncu kısım 60 PPI\r\n• Siyah kısım 80 PPI\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nElde, bol su ile temizleyin. Çamaşır suyu, yumuşatıcı gibi kimyasallar kullanmayın.",
+        "how_to_use": "1. İhtiyaca göre uygun tarafı seçin.\n2. Ürünü uygulayın.\n3. Her iki taraf kirlenince değiştirin.",
+        "when_to_use": "Wax, sealant ve koruma ürünlerinin uygulanmasında kullanılır. Çift taraf ile daha uzun kullanım.",
+        "target_surface": "Boyalı yüzeyler, plastik trimler",
+        "why_this_product": "• Çift taraflı kullanım\n• Ekonomik\n• 2'li paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Her iki taraf da kullanılır mı?",
+          "answer": "Evet, bir taraf kirlenince diğer tarafla devam edilebilir."
+        }
+      ],
+      "price": 35000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3235_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "ACC-SPG-2",
+      "template": {
+        "group": "applicators",
+        "sub_type": "tire_applicator",
+        "fields": {
+          "material": "Foam",
+          "shape": "Elips",
+          "intended_use": [
+            "Lastik Parlatıcı"
+          ],
+          "reusable": true,
+          "features": "Ele oturan ergonomik yapı",
+          "type": "Lastik parlatma süngeri",
+          "quantity": "1 adet"
+        }
+      },
+      "content": {
+        "short_description": "KLIN KOREA Dünya’nın En Büyük Mikrofiber Bez Üreticisi Ürünleri Türkiye’de. Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Aynı Gün Ücretsiz Kargo.",
+        "full_description": "KLIN Tire Aplikatör, elips şekliyle mükemmel kavrama özelliğine sahip, dayanıklı, çift katman süngerli lastik parlatıcı uygulama aplikatörüdür. Parlatma uygulamasını hızla ve kolayca yapmanızı sağlar. Ellerinizi temiz tutar. Tekrar tekrar kullanıma uygundur.\r\nDikkat! Sıcak yüzeylerde kullanmayın. Asidik ve kimyasal bazlı ürünler süngere zarar verebilir.\r\n\r\nÖlçü ve Renkler:\r\n• Yükseklik: 7,2 cm – En: 4 cm\r\n• Paket içerisinde 1 adet aplikatör bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Çift Katmanlı Sünger\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nElde, bol su ile temizleyin. Çamaşır suyu, yumuşatıcı gibi kimyasallar kullanmayın.",
+        "how_to_use": "1. Lastik parlatıcıyı süngere damlatın.\n2. Lastik yan yüzeyine eşit şekilde sürün.\n3. Kurumaya bırakın.",
+        "when_to_use": "Lastik parlatıcı, lastik jeli ve koruyucu ürünlerin uygulanmasında kullanılır.",
+        "target_surface": "Lastik yan yüzeyleri",
+        "why_this_product": "• Elips tasarım - kavraması kolay\n• Lastik konturu ile uyumlu\n• Ekonomik"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Yıkanabilir mi?",
+          "answer": "Evet, lastik parlatıcı kalıntıları suyla temizlenebilir."
+        }
+      ],
+      "price": 10000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/ACC-SPG-2_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "SGGD190",
+      "template": {
+        "group": "applicators",
+        "sub_type": "cleaning_sponge",
+        "fields": {
+          "material": "Melamin",
+          "intended_use": [
+            "Leke Çıkarma",
+            "Plastik Temizliği"
+          ],
+          "reusable": false,
+          "features": "Sadece su ile çalışır, kimyasal gerektirmez",
+          "type": "Melamin sünger",
+          "function": "Leke silgi",
+          "chemical_free": true
+        }
+      },
+      "content": {
+        "short_description": "SGCB Magic Sponge sihirli sünger, yüksek yoğunluklu melamin yapısı ile sadece suyla zorlu lekeleri çıkarır. Kimyasal gerektirmez, çizmez ve ev ile araç temizliği için idealdir!",
+        "full_description": "SGCB Magic Cleaning Sponge - Sihirli Sünger, sadece su ile kullanımda çizik bırakmayan formülüyle temizlikte devrim yaratıyor. Yüksek yoğunluklu melamin köpükten üretilen bu sünger, kimyasal madde kullanmadan zor lekeleri kolayca çıkarır; evler, arabalar ve hassas yüzeyler için mükemmeldir.<br><br>Boyut: 90*70*35 mm<br>Paket İçeriği: 1 Adet<br><br>Ürün Özellikleri:<br>• Ekstra Kalın Tasarım – Standart süngerlerin iki katı yoğunlukta olup daha uzun süreli kullanım sağlar.<br>• Evrensel Temizleme Gücü – Deri, mermer, paslanmaz çelik, duvarlar ve daha fazlasında etkilidir.<br>• Kimyasal İçermez ve Güvenlidir – Sadece suya ihtiyaç duyar; sert aşındırıcılar veya aşındırıcı temizleyiciler içermez.<br>• Çok Çeşitli Seçenekler – Özel temizlik için Orijinal, Ekstra Dayanıklı veya Mutfak için özel seçeneklerden birini seçin.<br>• Hassas Ama Etkili – Çizmez formülü, derinlemesine yerleşmiş kiri çıkarırken yüzeyleri korur.<br><br>Neden Bu Süngeri Seçmelisiniz?<br>• Çevre Dostu – Daha yeşil bir ev için kimyasal temizleyicilere olan bağımlılığı azaltır.<br>• Zaman Kazandırır – Islatma veya ovma gerektirmeden lekeleri anında siler.<br>• Profesyonel Sonuçlar – Yüksek kaliteli yüzeylerde iz bırakmadan parlaklık sağlar.<br><br>En İyi Kullanım Yöntemleri<br>• Hassas Yüzeyler (Deri/Mermer) – Süngeri nemlendirin, dairesel hareketlerle nazikçe silin.<br>• Zor lekeler için (mutfak yağı/çizikler) – Hafif basınç uygulayarak kiri çıkarın.<br>•  Bakım – Kullanımdan sonra durulayın ve ömrünü uzatmak için kurutun.",
+        "how_to_use": "1. Süngeri suyla ıslatın.\n2. Hafif basınçla lekeyi ovalayın.\n3. Silinerek temizlenir, kimyasal gerekmez.",
+        "when_to_use": "Plastik, deri ve vinil yüzeylerde inatçı lekelerin kimyasalsız temizliği için kullanılır.",
+        "target_surface": "Plastik, vinil, deri, sert yüzeyler",
+        "why_this_product": "• Kimyasalsız temizlik\n• İnatçı lekeleri çıkarır\n• Melamin teknolojisi"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Boyalı yüzeyde kullanılır mı?",
+          "answer": "Boyalı yüzeylerde dikkatli olun, melamin aşındırıcı olabilir. Önce test edin."
+        }
+      ],
+      "price": 6000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/SGGD190_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "SGGD296",
+      "template": {
+        "group": "applicators",
+        "sub_type": "tire_applicator",
+        "fields": {
+          "material": "Foam",
+          "shape": "Saplı Fırça/Sünger",
+          "intended_use": [
+            "Lastik Parlatıcı"
+          ],
+          "size": "31 cm",
+          "reusable": true,
+          "features": "Elleri kirletmeden uygulama sağlayan saplı tasarım",
+          "type": "Lastik uygulama aparatı",
+          "design": "PRO serisi",
+          "ergonomic": true
+        }
+      },
+      "content": {
+        "short_description": "SGCB Tire Sponge PRO, çift işlevli sünger ve fırça tasarımıyla lastik parlatıcı ve cila uygulamasını kolaylaştırır. Profesyonel parlaklık ve detaylı temizlik için ideal!",
+        "full_description": "SGCB Tire Sponge PRO - Çok Fonksiyonlu Lastik Parlatıcı Sünger; profesyonel lastik ve jant bakımı için çok yönlü özel olarak tasarlanmış bir lastik parlatıcı uygulama aparatıdır. Yüksek kaliteli sünger ile dayanıklı fırçayı bir araya getirerek, lastik parlatıcı, cila ve diğer detaylandırma ürünlerini uygulamak için mükemmeldir. Çift işlevli tasarımı, verimli uygulama ve eşit dağılım sağlayarak profesyonel sonuçlar sunar. Lastikler, jant göbekleri ve diğer detaylı alanlar için uygun olan bu sünger fırça, pürüzsüz ve parlak bir yüzey elde etmek için idealdir.<br><br>Boyut: 310*80*35 mm<br>Renk: Siyah sünger ve siyah/kırmızı sap<br>Malzeme: Poliüretan sünger/ABS sap<br><br>Toplamda 310 mm uzunluğa sahip olan bu uygulama aparatı, kullanıcıya rahat bir tutuş ve uygulama esnasında mükemmel kontrol sağlar. Süngerin genişliği 90 mm, uzunluğu 140 mm ve kalınlığı ise 30 mm'dir. Bu ölçüler, lastik yüzeyinin geniş bir alanını kapsayabilmesini ve uygulamanın hızlı ve verimli bir şekilde tamamlanmasını sağlar.<br><br>Ürün Özellikleri:<br>• Çift İşlevli Tasarım: Çok yönlü kullanım için yüksek kaliteli süngeri dayanıklı bir fırça ile birleştirir.<br>• Verimli Uygulama: Lastik parlatıcı, balmumu ve diğer detaylandırma ürünlerini uygulamak için mükemmeldir.<br>• Profesyonel Sonuçlar: Eşit dağılım ve pürüzsüz bir sonuç sağlar.<br>• Dayanıklı Yapı: Uzun ömürlü performans için birinci sınıf malzemelerden üretilmiştir.<br>• Detaylandırma için ideal: Lastikler, tekerlek göbekleri ve aracın diğer detaylı alanları için uygundur.<br><br>Kullanım Talimatları:<br>• Uygulamadan önce lastik veya tekerlek göbeğinin yüzeyini iyice temizleyin.<br>• SGCB Çok Fonksiyonlu Lastik Parlatıcı Sünger Fırçası'nı kullanarak lastik parlatıcıyı veya cilayı eşit bir şekilde uygulayın.<br>• Parlak ve pürüzsüz bir sonuç elde etmek için yüzeyi nazikçe parlatın.<br>• Kullanım ömrünü uzatmak için sünger fırçayı kullandıktan sonra serin ve kuru bir yerde saklayın.",
+        "how_to_use": "1. Lastik parlatıcıyı aparata uygulayın.\n2. Lastik yan yüzeyine sürün.\n3. Eşit kaplama sağlayın.",
+        "when_to_use": "Lastik parlatıcı ve jel uygulamalarında profesyonel sonuç için kullanılır.",
+        "target_surface": "Lastik yan yüzeyleri",
+        "why_this_product": "• PRO serisi - profesyonel kalite\n• Ergonomik tasarım\n• Eşit uygulama"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Normal süngerden farkı nedir?",
+          "answer": "PRO serisi daha ergonomik ve dayanıklıdır, profesyonel kullanım için tasarlanmıştır."
+        }
+      ],
+      "price": 75000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/SGGD296_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "11075-RE",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Foam",
+          "intended_use": [
+            "Wax",
+            "Deri Bakım",
+            "Vinil"
+          ],
+          "color": "Kırmızı",
+          "reusable": true,
+          "type": "Çok amaçlı el aplikatörü"
+        }
+      },
+      "content": {
+        "short_description": "MG PADS Avrupa Üretim Rotary Orbital Pasta Hare Hologram Süngerleri Cila Pedleri Türkiye Dağıtıcısı MTS Kimya’dan Satın Alın. Orijinal Ürün Garantisi.",
+        "full_description": "Wax/Cila/Deri bakım/Plastik-Vinil uygulamaları için sünger el pedi.<br><br>Dayanıklı, açık gözenekli sünger.<br><br>Büyüklük: 110x75 mm<br><br>Renk: Kırmızı",
+        "how_to_use": "1. Ürünü aplikatöre uygulayın.\n2. Yüzeye eşit şekilde yayın.\n3. Gerekirse farklı ürünlerle kullanın.",
+        "when_to_use": "Wax, sealant, koruma ürünleri ve iç mekan bakım ürünlerinin uygulanmasında kullanılır.",
+        "target_surface": "Çok amaçlı - boya, plastik, deri",
+        "why_this_product": "• Çok amaçlı kullanım\n• Ergonomik tasarım\n• Kırmızı renk - kolay takip"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Hangi ürünlerle kullanılır?",
+          "answer": "Wax, sealant, deri bakım ve plastik bakım ürünleriyle kullanılabilir."
+        }
+      ],
+      "price": 14000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/11075-RE_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-CA2P",
+      "template": {
+        "group": "applicators",
+        "sub_type": "coating_applicator",
+        "fields": {
+          "material": "Süet + Mikrofiber",
+          "intended_use": [
+            "Seramik Kaplama"
+          ],
+          "reusable": true,
+          "features": "Çift yüzeyli (Süet tarafı seramik, mikrofiber tarafı silim)",
+          "quantity": "2 adet",
+          "design": "Çift taraflı",
+          "purpose": "Seramik kaplama uygulaması"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Coating Applicator: Çift taraflı seramik uygulama pedi, 2'li paket. Hassas ve kolay uygulama için idealdir. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M Coating Applicator, kaplama işlemleri için özel olarak tasarlanmıştır. Çift taraflı yapısı sayesinde bir yüzeyde süetin ipeksi yumuşaklığı sunarken, diğer yüzeyde kısa tüylü mikrofiber özellik sağlar. İki yüzeyin arasında ideal yumuşaklıkta bir sünger bulunmaktadır.<br><br>Süet yüzeyin altındaki deri tabaka, seramik kaplama malzemesinin süngere sızmasını önleyerek ürün tüketimini azaltır ve yayılımını artırır.<br><br>GYEON Q²M Coating Applicator, keskin veya dikişli kenarlara sahip olmadığından yüzeye zarar verme riski bulunmamaktadır. Geniş boyutuyla uygulama süresini kısaltır ve hem amatörler hem de profesyoneller tarafından güvenle kullanılabilir.<br><br>Ürünün tüm yüzeylerini kullandığınızda, ürün çevresine Suede EVO sararak seramik takozu olarak kullanmaya devam edebilirsiniz. Bu sayede, seramik kaplama ürün tüketiminiz de azalacaktır.<br><br>PAKET: 2'li / 10'lu",
+        "how_to_use": "1. Seramik kaplamayı aplikatöre damlatın.\n2. Çapraz hareketlerle ince tabaka halinde yüzeye yayın.\n3. 3-5 dakika bekleyin ve mikrofiber ile silin.",
+        "when_to_use": "GYEON seramik kaplama ürünlerinin uygulanmasında kullanılır. Çift taraflı tasarım uzun kullanım sağlar.",
+        "target_surface": "Boyalı yüzeyler - seramik kaplama uygulaması",
+        "why_this_product": "• GYEON seramik kaplamalar için özel\n• Çift taraflı - uzun kullanım\n• Eşit ve ince tabaka sağlar\n• 2'li paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-CA10P"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Tek kullanımlık mı?",
+          "answer": "Çift taraflı olduğu için 2 uygulama yapılabilir. Sonra değiştirilmeli."
+        },
+        {
+          "question": "10'lu paket var mı?",
+          "answer": "Evet, Q2M-CA10P 10'lu paket olarak mevcuttur."
+        }
+      ],
+      "price": 55000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-CA2P_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-CA10P",
+      "template": {
+        "group": "applicators",
+        "sub_type": "coating_applicator",
+        "fields": {
+          "material": "Süet + Mikrofiber",
+          "intended_use": [
+            "Seramik Kaplama"
+          ],
+          "quantity": 10,
+          "reusable": true,
+          "design": "Çift taraflı",
+          "purpose": "Seramik kaplama uygulaması",
+          "professional": true
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Coating Applicator: Çift taraflı seramik uygulama pedi, 10'lu paket. Etkili ve pratik uygulama için idealdir. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M Coating Applicator, kaplama işlemleri için özel olarak tasarlanmıştır. Çift taraflı yapısı sayesinde bir yüzeyde süetin ipeksi yumuşaklığı sunarken, diğer yüzeyde kısa tüylü mikrofiber özellik sağlar. İki yüzeyin arasında ideal yumuşaklıkta bir sünger bulunmaktadır.<br><br>Süet yüzeyin altındaki deri tabaka, seramik kaplama malzemesinin süngere sızmasını önleyerek ürün tüketimini azaltır ve yayılımını artırır.<br><br>GYEON Q²M Coating Applicator, keskin veya dikişli kenarlara sahip olmadığından yüzeye zarar verme riski bulunmamaktadır. Geniş boyutuyla uygulama süresini kısaltır ve hem amatörler hem de profesyoneller tarafından güvenle kullanılabilir.<br><br>Ürünün tüm yüzeylerini kullandığınızda, ürün çevresine Suede EVO sararak seramik takozu olarak kullanmaya devam edebilirsiniz. Bu sayede, seramik kaplama ürün tüketiminiz de azalacaktır.<br><br>PAKET: 2'li / 10'lu",
+        "how_to_use": "1. Seramik kaplamayı aplikatöre damlatın.\n2. Çapraz hareketlerle ince tabaka halinde yüzeye yayın.\n3. 3-5 dakika bekleyin ve mikrofiber ile silin.",
+        "when_to_use": "Profesyonel atölyeler için ekonomik 10'lu paket. GYEON seramik kaplamalar için ideal.",
+        "target_surface": "Boyalı yüzeyler - seramik kaplama uygulaması",
+        "why_this_product": "• 10'lu profesyonel paket\n• Ekonomik toplu alım\n• Çift taraflı tasarım\n• GYEON seramik kaplamalar için"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-CA2P"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Kaç araç için yeterli?",
+          "answer": "Araç başına 2-3 aplikatör kullanımıyla 3-5 araç için yeterlidir."
+        }
+      ],
+      "price": 270000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-CA10P_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-CAP10P",
+      "template": {
+        "group": "applicators",
+        "sub_type": "coating_applicator",
+        "fields": {
+          "material": "Süet + Mikrofiber",
+          "intended_use": [
+            "Seramik Kaplama"
+          ],
+          "quantity": 10,
+          "reusable": true,
+          "features": "Ekonomik versiyon, çift taraflı",
+          "design": "Çift taraflı Light",
+          "purpose": "Hafif kaplama uygulaması"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Coating Applicator: Çift taraflı seramik uygulama pedi, 10'lu paket. Etkili ve pratik uygulama için idealdir. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M Coating Applicator Light Çift Taraflı Seramik Boya Yüzey Uygulama Pedi – 10'lu Paket\r\n\r\n\r\nSeramik Kaplama Uygulamaları İçin Geliştirilmiş Mikrofiber Aplikatör | Çift Yüzeyli Yapı | Maksimum Hassasiyet\r\n\r\n\r\nPROFESYONELLERİN TERCİHİ: SERAMİK UYGULAMADA YENİ STANDART\r\n\r\nGYEON Q²M Coating Applicator Light, seramik kaplama uygulamaları sırasında kusursuz kontrol, hassasiyet ve yüzey güvenliği sağlamak amacıyla özel olarak geliştirilmiş profesyonel mikrofiber aplikatördür.\r\nHer biri elde tutulması kolay ergonomik yapıda olan bu aplikatörler, seramik kaplamaların homojen, iz bırakmayan ve minimum ürün israfı ile uygulanmasına olanak tanır.\r\n\r\n\r\nAKILLI TASARIM: ÇİFT TARAFLI YAPI, TEK ÜRÜNDE 2 AVANTAJ\r\nÜrünün her iki yüzeyi farklı mikrofiber dokudadır:\r\n\r\n• İnce taraf, daha az emilimle kaplamanın yüzeye eşit yayılmasını sağlar.\r\n• Kalın havlı taraf, özellikle girintili çıkıntılı bölgelerde maksimum temas sunar.\r\n• Bu çift taraflı yapı sayesinde farklı yüzey yapılarında tek aplikatör ile maksimum uyum elde edilir.\r\n\r\n\r\nKAPLAMALARA VE BOYA YÜZEYİNE \u00100 GÜVENLİ\r\n\r\nGYEON aplikatörleri, özellikle seramik kaplama ürünleri (Q² MOHS, Q² Pure, Q² CanCoat Pro vs.) için formüle edilmiştir.\r\nYumuşak kenar yapısı sayesinde boyada çizik oluşturmaz. Ayrıca ürün kürleştikten sonra sertleştiği için tekrar kullanımı önerilmez.\r\n\r\n\r\nTEKNİK ÖZELLİKLER\r\n\r\n• Boyut: 87 mm (yaklaşık)\r\n• Kullanım Alanı Seramik kaplama, nano kaplama\r\n• Yapı: Çift taraflı mikrofiber yüzey\r\n• Esneklik: 4/10\r\n• Tek kullanımlık\r\n• Uygulama Uyumu: Tüm GYEON kaplamalar + diğer markalar\r\n• Ambalaj: 10 adet/paket\r\n\r\n\r\nNASIL KULLANILIR?\r\n\r\n• Aplikatörü kutudan çıkarın.\r\n• Seramik kaplama şişesinden birkaç damla ürünü aplikatörün uygun yüzeyine damlatın.\r\n• Yüzeye dikey ve yatay hareketlerle eşit şekilde uygulayın.\r\n• Her uygulama için ayrı aplikatör kullanın.\r\n• Kaplama sonrası sertleştiği için yeniden kullanılması önerilmez.\r\n\r\n\r\nKULLANIM ALANLARI:\r\n\r\n• Otomobil dış yüzey kaplamaları\r\n• Detailing stüdyolarında seramik uygulama\r\n• CanCoat, Q² Mohs, Q² Pure, Q² One EVO gibi ürünlerle tam uyum\r\n• Profesyonel veya amatör kullanıcılar için güvenli çözüm\r\n\r\n\r\nNEDEN GYEON Q²M COATING APPLICATOR LIGHT?\r\n\r\n• Seramik kaplama ürününü eşit yayar\r\n• İz ve dalga bırakmaz\r\n• Maksimum kontrol ve hassasiyet sunar\r\n• Hem düz hem kıvrımlı yüzeylere uygundur\r\n• Tek kullanımlık – her uygulamada hijyenik kullanım",
+        "how_to_use": "1. Kaplama ürününü aplikatöre damlatın.\n2. İnce ve eşit tabaka halinde yüzeye yayın.\n3. Talimatlarına göre bekleyin ve silin.",
+        "when_to_use": "Hafif seramik kaplamalar, sealant ve koruma ürünlerinin uygulanmasında kullanılır. Light versiyon daha ince uygulama sağlar.",
+        "target_surface": "Boyalı yüzeyler, cam, plastik",
+        "why_this_product": "• Light versiyon - ince uygulama\n• 10'lu profesyonel paket\n• Çift taraflı tasarım\n• Sealant ve hafif kaplamalar için"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-CA10P"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Normal Coating Applicator ile farkı nedir?",
+          "answer": "Light versiyon daha ince ve hassas uygulama için tasarlanmıştır. Sealant ve hafif kaplamalar için idealdir."
+        }
+      ],
+      "price": 170000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/Q2M-CAP10P_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-MFAE",
+      "template": {
+        "group": "applicators",
+        "sub_type": "applicator_pad",
+        "fields": {
+          "material": "Microfiber",
+          "shape": "Parmak Cep",
+          "intended_use": [
+            "Jant",
+            "İç Trim",
+            "Deri"
+          ],
+          "reusable": true,
+          "features": "Ergonomik cep tasarımı",
+          "design": "Parmak tip",
+          "version": "EVO"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM MF Applicator EVO: Parmak tip uygulama aplikatörü, 2'li paket. Hassas ve pratik kullanım için idealdir.",
+        "full_description": "GYEON Q²M MF Applicator EVO, kaplama işlemlerini hızlandırmak, kıvrımlı veya karmaşık panellere mükemmel bir şekilde uygulamak için tasarlanmış çok amaçlı bir parmak uygulama aplikatörüdür. Yüksek kaliteli mikro elyafa sarılmış yumuşak bir süngerle mükemmel uyum sağlar. Üst kısmındaki cep mükemmel tutuş sağlar ve işlevselliğini arttırır.<br><br>Bu çok işlevli parmak aplikatörler, seramik kaplamaların, trim koruyucuların, deri koruyucuların, wax/boya koruma ürünlerinin hassas bir şekilde uygulanmasını sağlar. Jelkot, plastik, deri, metal ve ahşap yüzeyler üzerinde kullanılması uygundur. Çok amaçlı ve ergonomiktir. Hem iç hem dış yüzey uygulamaları için kullanılabilir.<br><br>GYEON Q²M MF EVO Aplikatörü, 2'li paket olarak satılmaktadır.<br><br>BOYUT: 120x95x25 mm<br><br>Yıkama Önerisi:<br>Çamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.<br>",
+        "how_to_use": "1. Parmağınızı aplikatör cebine sokun.\n2. Ürünü mikrofiber yüzeye uygulayın.\n3. Hassas bölgelere kontrollü uygulama yapın.",
+        "when_to_use": "Sealant, wax ve koruma ürünlerinin hassas bölgelere uygulanmasında kullanılır. Mikrofiber yüzey eşit dağılım sağlar.",
+        "target_surface": "Boyalı yüzeyler, hassas bölgeler, köşeler",
+        "why_this_product": "• Parmak tip tasarım - hassas kontrol\n• Mikrofiber yüzey - eşit dağılım\n• EVO gelişmiş versiyon"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Yıkanabilir mi?",
+          "answer": "Evet, mikrofiber olduğu için ılık su ve şampuanla yıkanabilir."
+        }
+      ],
+      "price": 60000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-MFAE_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-TA2P",
+      "template": {
+        "group": "applicators",
+        "sub_type": "tire_applicator",
+        "fields": {
+          "material": "Foam",
+          "shape": "Kavisli Blok",
+          "intended_use": [
+            "Lastik Parlatıcı"
+          ],
+          "reusable": true,
+          "features": "Lastik yanağına tam oturan kavisli yapı",
+          "quantity": "2 adet",
+          "type": "Sünger blok",
+          "purpose": "Lastik parlatıcı uygulaması"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Tire Applicator: Büyük boy lastik parlatıcı sünger, 2'li paket. Etkili ve pratik uygulama için idealdir. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M Tire Applicator, dayanıklı tutma bölümü ve kavisli sünger yapısı sayesinde tüm lastiklerde etkili ve mükemmel bir uygulama sağlar. Q²M Tire ya da Q²M TireExpress lastik parlatıcılarını, minimum efor ve ürün sarfiyatı ile ellerinizi kirletmeden lastiklerinize uygulayabilirsiniz.\r\n\r\nGYEON Q²M Tire Applicator, yoğun gözenekli süngeri ve büyük boyutu ile tüm araç lastiklerinde yüksek performans ve kullanım kolaylığı sunar. Lastik parlatıcınızı homojen bir şekilde uygulamanızda en büyük destekçiniz olur.\r\n\r\nKUTU İÇERİĞİ:\r\n2 Adet Lastik Aplikatörü - BÜYÜK",
+        "how_to_use": "1. Lastik parlatıcıyı süngere damlatın.\n2. Lastik yan yüzeyine eşit şekilde sürün.\n3. Kurumaya bırakın veya fazlasını silin.",
+        "when_to_use": "Lastik parlatıcı, jel ve koruyucu ürünlerin uygulanmasında kullanılır.",
+        "target_surface": "Lastik yan yüzeyleri",
+        "why_this_product": "• GYEON lastik ürünleri ile uyumlu\n• Ergonomik blok tasarım\n• 2'li paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "TireExpress ile kullanılır mı?",
+          "answer": "Evet, GYEON TireExpress dahil tüm lastik bakım ürünleriyle kullanılabilir."
+        }
+      ],
+      "price": 30000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-TA2P_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "Q2M-SPE",
+      "template": {
+        "group": "applicators",
+        "sub_type": "scrub_pad",
+        "fields": {
+          "material": "Foam/Microfiber",
+          "intended_use": [
+            "Deri Temizliği",
+            "Plastik Temizliği"
+          ],
+          "reusable": true,
+          "features": "İç temizlik için ovma özelliği",
+          "version": "EVO",
+          "purpose": "Deri ve plastik temizliği",
+          "safe_for": [
+            "Deri",
+            "Plastik",
+            "Vinil"
+          ]
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Scrubpad EVO: Deri ve plastikler için çift taraflı temizlik aplikatörü, etkili ve pratik temizlik sağlar.",
+        "full_description": "GYEON Q²M ScrubPad EVO Deri ve Plastik Temizlik Aplikatörü – Çift Taraflı - 8x10 cm\r\n\r\nÇift Taraflı Tasarım | Çizmez Yapı | Deri ve Plastik İçin İdeal\r\n\r\n\r\nDERİ VE İÇ MEKÂN TEMİZLİĞİNDE KUSURSUZ SONUÇ\r\n\r\nGYEON Q²M ScrubPad EVO, araç iç mekânındaki deri yüzeyler, plastik parçalar ve trim bölgelerindeki kirleri etkili ve güvenli bir şekilde temizlemek üzere özel olarak geliştirilmiş, çift taraflı temizlik aplikatörüdür.\r\nGYEON kalitesi ve ergonomik tasarımı sayesinde araç içerisindeki dar, kıvrımlı ve ulaşılması güç alanlarda bile üstün performans sağlar.\r\n\r\n\r\nÇİFT TARAFLI ETKİ, ÜST DÜZEY TEMİZLİK PERFORMANSI\r\n\r\nScrubPad EVO, benzersiz çift taraflı tasarımı sayesinde farklı kir türlerine tek ürünle çözüm sunar:\r\n• Beyaz Mikrofiber Yüz:\r\nDeri yüzeylerdeki yağ, kir ve inatçı lekeleri hassas ve derinlemesine temizler. Plastik ve trim bölgelerde birikmiş kirleri söker, yüzeyleri orijinal görünümüne kavuşturur.\r\n• Siyah Sünger Yüz:\r\nAraç içindeki toz, tüy ve hafif kirleri kolayca toplar. Yüzeylere yapışmış partikülleri zahmetsizce temizler ve bakım ürünlerini uygulamak için ideal bir yüzey sağlar.\r\n\r\n\r\nERGONOMİK TASARIM, UZUN ÖMÜRLÜ YAPI\r\n• Ergonomik formu ve kompakt boyutuyla (8x10 cm) araç içindeki dar alanlarda kolay hareket eder.\r\n• Sentetik premium malzemeden üretilmiştir, uzun ömürlü kullanım sağlar.\r\n• Tekrar tekrar yıkanabilir ve ilk günkü performansını korur.\r\n\r\n\r\nTEKNİK ÖZELLİKLER\r\n• Boyut: 8 x 10 cm\r\n• Malzeme: Sentetik mikrofiber ve özel yapılı köpük\r\n• Tasarım: Çift taraflı (deri/plastik yüzeyi + toz toplama yüzeyi)\r\n• Temizlik Tipi: Derin temizlik, hassas yüzeyler, toz ve kir toplama\r\n• Kullanım Alanı: Deri, plastik, vinil, iç mekân trim ve konsol yüzeyleri\r\n• Dayanıklılık: 100+ kez yıkanabilir, uzun ömürlü yapı\r\n\r\n\r\nÖNE ÇIKAN AVANTAJLARI\r\n\r\n• Araç içindeki derinlemesine temizlik işlemlerini çizik ve iz riski olmadan gerçekleştirir.\r\n• Fırça ve diğer sert ürünlere kıyasla daha ergonomik ve güvenli bir alternatif sunar.\r\n• Çift yüzey yapısıyla farklı ihtiyaçları tek üründe çözer.\r\n• Ulaşılması zor kıvrım ve derz bölgelerine rahat erişim sağlar.\r\n• Araç iç yüzeylerine zarar vermeyen, yüksek kaliteli ve güvenilir malzemelerden üretilmiştir.\r\n\r\n\r\nNASIL KULLANILIR?\r\n\r\n• Ürün veya temizleyiciyi direkt olarak aplikatöre püskürtün.\r\n• Temizlik işlemine başlamadan önce yüzeyi nazikçe silin veya dairesel hareketlerle ovun.\r\n• Deri ve plastik yüzeylerde beyaz yüzü, toz alma ve bakım uygulamalarında siyah yüzü kullanın.\r\n• Kirlendikçe temiz suyla durulayın ve kurumaya bırakın.\r\n\r\n\r\nYIKAMA VE BAKIM ÖNERİSİ\r\n\r\n• Maksimum 30°C sıcaklıkta çamaşır makinesinde veya elde yıkayın.\r\n• GYEON TowelWash ya da sadece duru su ile temizleyin.\r\n• Çamaşır suyu, yumuşatıcı veya diğer agresif kimyasallar kullanmayın.\r\n• Sıkma işlemi yapmadan asarak doğal şekilde kurumaya bırakın.\r\n• Diğer renkli ürünlerden ayrı olarak yıkayın.\r\n\r\nPRO-TIP:\r\n\r\nScrubPad EVO aplikatörü, hafif nemli olarak deri yüzeylere uygulandığında maksimum temizlik sağlar. Ayrıca siyah sünger yüzü kuru hâlde toz alma ve bakım ürünleri uygulama aşamasında da rahatlıkla kullanabilirsiniz.\r\n\r\n\r\nNEDEN GYEON Q²M SCRUBPAD EVO?\r\n\r\n?? Deri ve plastik yüzeylerde üstün temizleme gücü\r\n?? Çizmez ve zarar vermez yapı\r\n?? Dar alanlarda ve kıvrımlı yüzeylerde ergonomik kullanım kolaylığı\r\n?? Çift yüzeyiyle çok yönlü kullanım imkânı\r\n?? Yıkanabilir ve tekrar kullanılabilir uzun ömürlü malzeme kalitesi\r\n\r\nGYEON Q²M ScrubPad EVO ile araç iç mekân temizliğinizi daha kolay, hızlı ve profesyonel hale getirin.",
+        "how_to_use": "1. Temizleyici püskürtün.\n2. Scrubpad ile dairesel hareketlerle ovalayın.\n3. Kirli köpüğü mikrofiber ile toplayın.\n4. Gerekirse tekrarlayın.",
+        "when_to_use": "Deri koltuklar ve plastik yüzeylerde derin temizlik için kullanılır. LeatherCleaner ile birlikte idealdir.",
+        "target_surface": "Deri, plastik, vinil yüzeyler",
+        "why_this_product": "• EVO gelişmiş versiyon\n• Deri ve plastikte güvenli\n• Derin temizlik gücü\n• Ergonomik tasarım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Deri yüzeye zarar verir mi?",
+          "answer": "Hayır, deri için güvenli tasarlanmıştır. Hafif basınçla kullanın."
+        },
+        {
+          "question": "Fırça yerine mi kullanılır?",
+          "answer": "Evet, fırçaya alternatif olarak veya tamamlayıcı olarak kullanılabilir."
+        }
+      ],
+      "price": 35000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/Q2M-SPE_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    },
+    {
+      "sku": "SGGD004",
+      "template": {
+        "group": "applicators",
+        "sub_type": "wash_sponge",
+        "fields": {
+          "sub_type": "pump_sprayer",
+          "capacity_liters": null,
+          "chemical_resistance": null,
+          "max_pressure_bar": null,
+          "pressure_relief_valve": null,
+          "nozzle_types": null,
+          "compressed_air_connection": null,
+          "spare_seals_included": null,
+          "spray_pattern_adjustable": null,
+          "function": "Araç Yıkama Süngeri",
+          "material": "Poliüretan köpük",
+          "dimensions": "200 x 125 x 45 mm",
+          "color": "Siyah",
+          "scratch_safe": true
+        }
+      },
+      "content": {
+        "short_description": "SGCB Araç Yıkama Süngeri, yüksek su emici dayanıklı poliüretan yapısıyla çizmeden temizlik sağlar. Geniş yüzeyiyle hızlı ve zahmetsiz oto yıkama için ideal sünger!",
+        "full_description": "SGCB Araç Yıkama Süngeri 20cm (Siyah) – Yüksek Su Emici Dayanıklı Oto Temizlik Süngeri\r\n\r\nSGCB araç yıkama süngeri, aracınızın boyasına zarar vermeden etkili temizlik sağlayan, yüksek su ve şampuan emici özelliğe sahip dayanıklı bir yıkama süngeridir. Poliüretan köpük yapısı sayesinde uzun ömürlü kullanım sunar ve en zorlu temizlik işlemlerinde bile formunu korur. Profesyonel detaycılar kadar günlük kullanıcılar tarafından da güvenle tercih edilebilir.\r\n\r\nYumuşak yapısı ve geniş yüzeyiyle, araç yıkama sürecini hem hızlı hem de zahmetsiz hale getirir. Büyük hacimli su emme kapasitesi, tek seferde geniş alanların temizlenmesine imkan tanır. Ürün sıkıldığında anında eski formuna döner; esneklik ve direnç açısından yüksek performans sunar.\r\n\r\n\r\nÜrün Özellikleri\r\n\r\n• Boyut: 200 x 125 x 45 mm\r\nDaha hızlı ve kapsamlı temizlik için geniş yüzeyli tasarım\r\n\r\n• Dayanıklı Malzeme:\r\nYüksek kaliteli poliüretan köpük sayesinde yırtılma ve kopmaya karşı uzun ömürlü kullanım\r\n\r\n•Yüksek Verimlilik:\r\nÇizmeden temizlik sağlar, kiri ve lekeleri zahmetsizce uzaklaştırır\r\n\r\n• Kolay Kullanım:\r\nErgonomik yapısı sayesinde ele kolay oturur, tutuşu rahattır\r\n\r\n• Çok Yönlü Kullanım:\r\nOtomobiller, SUV’ler, kamyonlar, motosikletler, bisikletler ve tekneler dahil tüm araç tiplerine uygundur\r\n\r\nNeden SGCB Araç Yıkama Süngerini Seçmelisiniz?\r\n\r\n• Çizik bırakmaz, güvenli temizlik sunar\r\n• Yoğun su tutma kapasitesiyle verimli kullanım sağlar\r\n• Yırtılmaya dayanıklı yapısıyla uzun ömürlüdür\r\n• Amatör ve profesyonel kullanıcılar için uygundur\r\n• Tüm araç dış yüzeylerinde yüksek performanslı temizlik sağlar\r\n\r\n\r\nSGCB Car Wash Sponge, araç yüzey temizliğinde maksimum hassasiyet ve performans isteyen kullanıcılar için tasarlandı. Geniş yüzeyi ve esnek yapısıyla suyu hapseder, kiri söker ve boyaya zarar vermez. Dayanıklı ve ergonomik yapısı sayesinde aracınızı temizlemek artık çok daha kolay.\r\n\r\nAracınız için en güvenli ve verimli temizlik deneyimi SGCB araç yıkama süngeri ile başlar!",
+        "how_to_use": "1. Süngeri bol su ve şampuan ile ıslatın.\n2. Aracınızı üstten aşağıya doğru yıkamaya başlayın.\n3. Kirli bölgelerde süngeri sık sık durulayın.\n4. Kullanım sırasında bezleri sık sık kontrol edin - kir birikimini önleyin.\n5. Yıkama sonrası süngeri temiz suyla durulayıp serin yerde kurutun.",
+        "when_to_use": "Araç dış yüzeylerinin köpüklü yıkaması için kullanın. Geniş yüzeyi sayesinde hızlı ve verimli temizlik sağlar.",
+        "target_surface": "Otomobil, SUV, kamyon, motosiklet, bisiklet, tekne dış yüzeyleri",
+        "why_this_product": "• Yüksek su ve şampuan emici özellik\n• Çizmeden güvenli temizlik\n• Dayanıklı poliüretan köpük yapısı\n• Geniş yüzey - hızlı temizlik\n• Ergonomik tutma kolaylığı"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Boyaya zarar verir mi?",
+          "answer": "Hayır, yumuşak yapısı sayesinde çizmeden güvenli temizlik sağlar."
+        },
+        {
+          "question": "Sünger formunu korur mu?",
+          "answer": "Evet, sıkıldığında anında eski formuna döner, esneklik ve direnç açısından yüksek performans sunar."
+        },
+        {
+          "question": "Hangi araçlarda kullanılabilir?",
+          "answer": "Otomobiller, SUV'ler, kamyonlar, motosikletler, bisikletler ve tekneler dahil tüm araç tiplerine uygundur."
+        },
+        {
+          "question": "Nasıl temizlenir?",
+          "answer": "Kullanım sonrası temiz suyla iyice durulayın ve serin yerde kurutun."
+        }
+      ],
+      "price": 18000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/SGGD004_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    }
+  ]
+}

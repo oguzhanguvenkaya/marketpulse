@@ -1,0 +1,1828 @@
+{
+  "metadata": {
+    "group_id": "microfiber",
+    "group_name": "Mikrofiber Bezler, Havlular ve Yıkama Eldivenleri",
+    "total_products": 33,
+    "description": "Araç kurulama havluları, pasta/cila silme bezleri, cam bezleri, yıkama eldivenleri ve süet uygulama bezleri.",
+    "sub_types": [
+      {
+        "id": "wash_mitt",
+        "name": "Yıkama Eldiveni",
+        "description": "Araç yıkama için yumuşak mikrofiber eldiven"
+      },
+      {
+        "id": "drying_towel",
+        "name": "Kurulama Havlusu",
+        "description": "Yüksek emicilikte büyük boy kurulama havlusu"
+      },
+      {
+        "id": "buffing_cloth",
+        "name": "Silme/Parlatma Bezi",
+        "description": "Pasta, cila ve kaplama sonrası fazla ürünü silmek için bez"
+      },
+      {
+        "id": "glass_cloth",
+        "name": "Cam Bezi",
+        "description": "Cam yüzeylerde iz bırakmayan özel dokulu mikrofiber"
+      },
+      {
+        "id": "multi_purpose_cloth",
+        "name": "Çok Amaçlı Bez",
+        "description": "Genel temizlik ve detay işler için evrensel mikrofiber bez"
+      },
+      {
+        "id": "interior_cloth",
+        "name": "İç Mekan Bezi",
+        "description": "Araç içi yüzeyler için yumuşak tüysüz mikrofiber"
+      },
+      {
+        "id": "coating_cloth",
+        "name": "Kaplama Bezi",
+        "description": "Seramik kaplama uygulamasında fazla ürünü almak için kısa tüylü bez"
+      },
+      {
+        "id": "suede_cloth",
+        "name": "Süet Bez",
+        "description": "Kaplama aplikasyonu ve hassas yüzeyler için ince süet doku bez"
+      },
+      {
+        "id": "kit",
+        "name": "Mikrofiber Seti",
+        "description": "Farklı kullanım amaçlarına yönelik mikrofiber bezlerin bir arada sunulduğu set"
+      },
+      {
+        "id": "chamois_drying_towel",
+        "name": "Güderi Kurulama Bezi",
+        "description": "Sentetik güderi kurulama bezi, yüksek su emme kapasiteli"
+      },
+      {
+        "id": "cleaning_cloth",
+        "name": "Temizlik Bezi",
+        "description": "Genel amaçlı dayanıklı temizlik bezi"
+      },
+      {
+        "id": "interior_cleaning_applicator",
+        "name": "İç Mekan Temizlik Aplikatörü",
+        "description": "İç mekan temizliği için dayanıklı mikrofiber aplikatör"
+      }
+    ],
+    "template_fields": {
+      "size": "Boyut (örn: 70x90 cm, 40x40 cm)",
+      "gsm": "Gramaj (g/m²)",
+      "type": "Lif tipi (Twist Pile, Plush, Ultra Plush, Waffle)",
+      "edge_type": "Kenar tipi (Lazer Kesim, Ultrasonik, Dikişli, Kenarsız)",
+      "features": "Özel özellikler",
+      "color": "Renk"
+    }
+  },
+  "products": [
+    {
+      "sku": "Q2M-SDE7090C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "drying_towel",
+        "fields": {
+          "size": "70x90 cm",
+          "gsm": 530,
+          "type": "Twist Pile (Bükümlü Lif)",
+          "edge_type": "Lazer Kesim / Kenarsız",
+          "features": "Kendi ağırlığının 10 katı su emişi",
+          "material_blend": "80% polyester / 20% polyamid",
+          "absorption_capacity": "Kendi ağırlığının 10 katı",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM SilkDryer EVO 70x90 cm: İnovatif tasarımıyla yüksek emicilik sunan kurulama havlusu. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo fırsatı.",
+        "full_description": "GYEON Q²M SilkDryer EVO İnovatif Kurulama Havlusu – 70 × 90 cm\r\n\r\nDÜNYA’DA EN ÇOK TERCİH EDİLEN İNOVATİF KURULAMA HAVLUSU\r\n\r\nTwist yapılı, benzersiz sentetik mikrofiber örgüsü sayesinde GYEON Q²M SilkDryer EVO; P artırılmış su emiş gücü, ipeksi kayganlık ve çiziksiz sonuçlarıyla kurulamayı bambaşka bir seviyeye taşır. 530 GSM’lik yeni EVO versiyonu, kısaltılmış kenar yapısıyla en girintili çıkıntılı panellerde bile güvenli ve leke bırakmayan performans sunar.\r\n\r\nÖne Çıkan Özellikler\r\n• Devasa Su Emiş Gücü – Yüksek yoğunluklu lifler, havlunun kendi ağırlığının 10 katı suyu tek geçişte hapseder.\r\n• İpeksi Kayganlık – Boya, cam ve trim üzerinde sürtünmeyi minimuma indirir; çizik ve hologram riskini ortadan kaldırır.\r\n• Geniş Yüzey Kapsamı – 70 × 90 cm ebatı, sedan’dan SUV’a tam aracı dakikalar içinde kurular.\r\n• Kenarsız Güvenlik – Isı kesimli logo ve ultra-kısa kenar mikrofiberleri, hassas verniklerde bile tam koruma sağlar.\r\n• Çok Yönlü Kullanım – Boya, cam, PPF, jant ve piano-black kaplamalarda aynı derecede etkilidir.\r\n\r\nTeknik Bilgiler\r\n\r\nÖzellik Değer\r\nBoyut 70 × 90 cm\r\nYoğunluk (GSM) 530 g/m²\r\nLif Oranı 80 % polyester / 20 % polyamid\r\nSu Emiş Kapasitesi Ağırlığının 10 katı\r\nYıkanabilirlik Evet (30 °C, GYEON Q²M TowelWash)\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Aracınızı pH-nötr şampuanla yıkayıp durulayın.\r\n2. SilkDryer EVO’yu ıslak yüzeye serin; hafif basınçla kaydırın veya pürüzsüzce pat-dry yapın.\r\n3. Havlunun doygunluğu arttığında ters yüz edin ve devam edin.\r\n4. İşlem sonrası 30 °C’de, sıvı deterjanla makinede yıkayın; sıkmadan, sererek kurutun.\r\n\r\nKullanım Alanları\r\n\r\n• Tam Araç Kurulama – Binek, SUV, ticari; tek havluyla eksiksiz sonuç.\r\n• Hassas Boyalar – Yumuşak vernikli ya da koyu renk araçlarda çiziksiz kurutma.\r\n• Kaplamalı Yüzeyler – Seramik, wax veya sealant korumalı araçlarda su lekesini önler.\r\n• Cam &amp; Trim – Yan cam, sunroof, plastik ve piano-black alanlarda iz bırakmaz.\r\n• Mobil Detailing &amp; Filo – Minimum ekipman, maksimum verimlilik ve hız.\r\n\r\nNeden GYEON Q²M SilkDryer EVO?\r\n\r\n• P Daha Fazla Emiş – Önceki modele göre yarım litre fazladan suyu hapseder.\r\n• Uzun Ömür – Kenarsız, ısı damgalı logo; 100+ yıkama döngüsüne dayanır.\r\n• Güvenli Ergonomi – İpeksi dokusu sürtünmeyi azaltır, elde kolay kavranır.\r\n• Ekonomik Kullanım – Tek havluyla tam araç; ekstra kurulama bezine gerek kalmaz.\r\n\r\n\r\nÖnerilen Aksesuar ve Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nGYEON Q²M Bathe+ Yıkama sırasında SiO² takviyesi Suyu boncuklandırır, kurulamayı kolaylaştırır\r\nGYEON Q²M WetCoat Durulama öncesi hızlı cila Hidrofobiyi artırır, havlunun kayganlığını yükseltir\r\nGYEON Q²M TowelWash Mikrofiber bakım deterjanı Lif ömrünü uzatır, yumuşaklığı korur\r\nGYEON Q²M Prep Kaplama öncesi yağ temizliği Kurulama sonrası saf yüzey sağlar\r\n\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nS: SilkDryer EVO’yu seramik kaplamalı araçlarda kullanabilir miyim?\r\nC: Evet. Kaplamaya zarar vermez, aksine su lekesi oluşumunu engeller.\r\nS: 70 × 90 cm bana büyük geliyor; daha küçük versiyonu var mı?\r\nC: 50 × 55 cm versiyonu mevcuttur; motosiklet ve dar alanlar için idealdir.\r\nS: Makinede yıkarken hangi deterjanı kullanmalıyım?\r\nC: Sıvı, sabun tozu içermeyen deterjan kullanın; yumuşatıcı ve ağartıcıdan kaçının.\r\nS: Kenar dikişi olmadığı için sökülme olur mu?\r\nC: Hayır. Kenarlar ısı kesimli olduğu için lif atması ve sökülme riski minimaldir.\r\n\r\n\r\nGYEON Q²M SilkDryer EVO, ipeksi dokusu ve üstün emiş gücüyle kurulamayı saniyelere indirir; çizik ve leke endişesini ortadan kaldırır. Tek geçiş, devasa su emişi ve kalıcı yumuşaklık – profesyonel sonuçlar artık herkesin elinde!",
+        "how_to_use": "1. Aracınızı pH-nötr şampuanla yıkayıp durulayın.\n2. SilkDryer EVO'yu ıslak yüzeye serin; hafif basınçla kaydırın veya pat-dry yapın.\n3. Havlunun doygunluğu arttığında ters yüz edin ve devam edin.\n4. İşlem sonrası 30°C'de, sıvı deterjanla makinede yıkayın; sıkmadan, asarak kurutun.",
+        "when_to_use": "Yıkama sonrası tam araç kurulama, hassas boyalar ve kaplamalı yüzeylerde su lekesi önleme, mobil detailing ve filo bakımı için kullanılır.",
+        "target_surface": "Boya, cam, PPF, jant, piano-black, trim",
+        "why_this_product": "• Kendi ağırlığının 10 katı su emiş gücü\n• İpeksi kayganlık ile çizik ve hologram riskini ortadan kaldırır\n• 70×90 cm devasa boyut ile tam aracı dakikalar içinde kurular\n• Kenarsız güvenlik - ısı kesimli logo ve ultra-kısa kenar mikrofiberleri"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-BYA1000M"
+        ],
+        "accessories": [
+          "Q2M-TWA500M"
+        ],
+        "alternatives": [
+          "Q2M-SDE5055C",
+          "3213EMR"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplamalı araçlarda kullanılabilir mi?",
+          "answer": "Evet, kaplamaya zarar vermez, aksine su lekesi oluşumunu engeller."
+        },
+        {
+          "question": "Makinede yıkarken hangi deterjanı kullanmalıyım?",
+          "answer": "Sıvı, sabun tozu içermeyen deterjan kullanın; yumuşatıcı ve ağartıcıdan kaçının."
+        },
+        {
+          "question": "Kenar dikişi olmadığı için sökülme olur mu?",
+          "answer": "Hayır, kenarlar ısı kesimli olduğu için lif atması ve sökülme riski minimaldir."
+        }
+      ],
+      "price": 110000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/Q2M-SDE7090C_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "Q2M-SDE5055C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "drying_towel",
+        "fields": {
+          "size": "50x55 cm",
+          "gsm": 530,
+          "type": "Twist Pile (Bükümlü Lif)",
+          "features": "Dar alanlar ve jantlar için ideal boyut",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM SilkDryer EVO 50x55 cm: İnovatif tasarımıyla mükemmel emicilik sağlayan kurulama havlusu.",
+        "full_description": "GYEON Q²M Silk Dryer EVO, şimdi çok daha gelişmiş, çok daha su emici! Twist yapılı, eşsiz  sentetik fiber örgülü bu inovatif kurulama havlusu, size şimdiye kadar hiç yaşamadığınız, yüksek performanslı, iz bırakmayan bir kurulama zevki yaşatacak!<br><br>GYEON Q²M Silk Dryer EVO, 2015 yılında alanının en inovatif kurulama havlusu SilkDryer'ı tanıttı. Bugün yenilenmiş ve geliştirilmiş EVO versiyonu, 530 GSM yapısı ve P artırılmış su emiş gücü ile kurulama havlusu tanımını yeniden yazmak için üretildi. Kenar mikrofiberleri olabilecek en kısa hale getirilerek, en kavisli yüzeylerde bile daha etkili, performanslı ve güvenli hale getirildi.<br><br>GYEON Q²M Silk Dryer EVO, boyalı yüzeyler, camlar ve trim aksamlar üzerinden ipeksi pürüzsüzlükte kayar, en yumuşak boya üzerinde bile çizmeden, arkasında su ve leke bırakmadan mükemmel bir kurulama sağlar. Büyük miktarda suyu tek geçişte içine emer ve hapseder. Aracınız seramik kaplamalı olsun ya da olmasın, tüm araçlarda maksimum performans gösterir.<br><br>BOYUT: 50x55 cm<br><br>BAKIM TAVSİYESİ<br>Towelwash kullanmanız önerilir. Makinede yıkama, en fazla 30°C'de yapılmalıdır. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın. Kullanım sırasında ürünü sıkmayın. Asarat kurutma yapın.<br>",
+        "how_to_use": "1. Aracınızı şampuanla yıkayıp durulayın.\n2. Havluyu ıslak yüzeye serin ve hafif basınçla kaydırın.\n3. Doygunluk arttığında ters yüz edin.\n4. 30°C'de sıvı deterjanla yıkayın, sıkmadan asarak kurutun.",
+        "when_to_use": "Dar alanlar, jantlar, motosiklet ve küçük yüzeyler için kurulama havlusu olarak kullanılır.",
+        "target_surface": "Boya, cam, PPF, jant, piano-black, trim",
+        "why_this_product": "• 530 GSM yüksek emicilik\n• Kompakt 50x55 cm boyut - dar alanlara uygun\n• Twist yapılı eşsiz sentetik fiber örgü\n• Çiziksiz ve iz bırakmayan kurulama"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-BYA1000M"
+        ],
+        "accessories": [
+          "Q2M-TWA500M"
+        ],
+        "alternatives": [
+          "Q2M-SDE7090C",
+          "3213EMR"
+        ]
+      },
+      "faq": [
+        {
+          "question": "70x90 cm versiyondan farkı nedir?",
+          "answer": "Aynı formül ve kalite, sadece daha küçük boyut - motosiklet ve dar alanlar için ideal."
+        },
+        {
+          "question": "Nasıl bakım yapılmalı?",
+          "answer": "Towelwash kullanın, 30°C'de yıkayın, sıkmayın ve asarak kurutun."
+        }
+      ],
+      "price": 66000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-SDE5055C_0.png",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "3213EMR",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "drying_towel",
+        "fields": {
+          "size": "75x43 cm",
+          "gsm": 1100,
+          "type": "Twist Pile (Çift Taraflı)",
+          "features": "Orta boy, yüksek emiş",
+          "weight_gr": 640,
+          "material_blend": "Polyester/Polyamide",
+          "edge_type": "Dikişsiz / Kenarsız",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Pasta Cila Silme Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Dünyada mikrofiber teknolojisinde devrim yaratan yenilik; Mikro Twist Pile. DRYING DUO EVO benzersiz mikro twist fiber yapısıyla, daha hafif, daha yumuşak, daha güvenli ama hala süper güçlü!\r\n\r\nÇift taraflı, kısa twist fiber yapılı, sık tüylü, dikişsiz ve kenarsız bu olağanüstü kurulama havlusu muhteşem su emicidir. Havluyu sadece aracın ıslak yüzüne bırakın ve çekin. Baskı yok, güç kullanmak yok. Geride 1100 GSM’in bıraktığı kuru, hatasız ve çiziksiz bir yüzey var! Kurulama hızına bayılacaksınız.\r\n\r\nDRYING DUO EVO ‘yu bu kadar benzersiz yapan özel dokunmuş mikro twist fiber yapısı, araç kurulama işleminizi daha kolay ve güvenli hale getiriyor. Ürün hafifleyerek ergonomik yapısı güçlenirken, kısalan iplikleri sayesinde araç üstü sivri köşelere, logolara, çıtalara takılıp sökülme riski ortadan kalkıyor. Dikişsiz ve kenarsız yapısı, ürünü araç kurularken olabilecek en güvenli süreci sağlıyor.\r\n\r\nDRYING DUO EVO, yumuşacık yapısı, hafif oluşu ve hızlı kuruma özelliği sayesinde sizi yormaz. Sadece ilk seferinde değil her seferinde kurulama sürecinizi hızlandırır. Arkasında hav bırakmaz. Kolay temizlenir.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçüler ve Renkler:\r\n• (L Boy) 80x75 cm – Kırmızı &amp; Gri\r\n• (M Boy) 75x43 cm – Kırmızı\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Özel Karışım Mikrofiber\r\n• 1100 GSM – 640 gr\r\n• p Polyester, 0 Polyamide\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinası – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.\r\n\r\nDikkat: Kurulama esnasında havlunun yüzeyine yabancı partiküller (kir, toz vb.) nüfuz edebilir ve yüzeyde çizik oluşturabilir. Bu duruma karşı dikkatli olun ve ürünün her kullanım öncesi temiz olduğundan emin olun.",
+        "how_to_use": "1. Havluyu aracın ıslak yüzeyine bırakın.\n2. Baskı uygulamadan hafifçe çekin.\n3. Havlunun doygunluğu arttığında ters yüzü kullanın.\n4. Maksimum 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Tam araç kurulama, profesyonel detailing ve filo bakımı için yüksek emicilikte kurulama havlusu.",
+        "target_surface": "Otomotiv, motor, marin yüzeyleri",
+        "why_this_product": "• 1100 GSM ultra yüksek yoğunluk\n• Mikro twist fiber yapısı ile hafif ve ergonomik\n• Kısaltılmış iplikler - logolara ve çıtalara takılmaz\n• Dikişsiz ve kenarsız güvenli yapı"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-SDE7090C",
+          "Q2M-SODE6080C"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Normal kurulama havlularından farkı nedir?",
+          "answer": "Mikro twist fiber yapısı daha hafif, daha yumuşak ama aynı güçte emicilik sağlar."
+        },
+        {
+          "question": "Yumuşatıcı kullanılabilir mi?",
+          "answer": "Hayır, yumuşatıcı, çamaşır suyu ve benzeri temizleyiciler kullanılmamalıdır."
+        }
+      ],
+      "price": 78000,
+      "image_url": "",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "Q2M-SODE6080C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "drying_towel",
+        "fields": {
+          "size": "60x80 cm",
+          "type": "Plush (Peluş)",
+          "edge_type": "Lazer Kesim",
+          "features": "Ekstra yumuşak, hassas boyalar için",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Soft Dryer EVO 60x80 cm: Lazer kesim peluş kurulama havlusu, mükemmel emicilik ve hassas temizlik sağlar.",
+        "full_description": "GYEON Q²M Soft Dryer EVO, tamamen yenilenen iplik yapısıyla artık daha PELUŞ daha YUMUŞAK ve daha SU EMİCİ! Lazer Kesim Peluş Kurulama Havlusu, aracınızı kuruturken çiziklerden endişe etmemeniz için son teknoloji ile üretilmiştir. Son derece güvenli ve etkili bir kurulama havlusudur. Daha yüksek GSM, aşırı yumuşaklık ve kalınlık Q²M SoftDryer EVO'nun en büyük avantajları ve geliştirmeleridir.<br><br>GYEON Q²M Soft Dryer EVO, ultra yumuşak yapısıyla kurulama sırasında aracınızı çizme riskini minimuma indirir. Lazer kesim teknolojisi kullanılarak üretilmiştir ve kenarları yoktur. Bu sayede, kurulama sırasında su lekelerinin oluşması ve havlunun kenarlarının boyayı çizme ihtimali ortadan kalkar. Muazzam miktarda suyu içine çeker.<br><br>BOYUT: 60x80 cm<br><br>BAKIM ÖNERİSİ<br>Tüylerin dökülme ihtimaline karşı ilk kullanımdan önce ve uygulama sonrasında Q²M TowelWash ile yıkayınız. Yumuşatıcı kullanmayın. Bezinizin ömrünü uzatmak için doğrudan güneş ışığı altında kurutmayınız.",
+        "how_to_use": "1. İlk kullanımdan önce Q²M TowelWash ile yıkayın.\n2. Kurulama sırasında hafif basınçla yüzeyde kaydırın.\n3. Doygunluk arttığında temiz bölümü kullanın.\n4. 30°C'de yıkayın, yumuşatıcı kullanmayın, doğrudan güneş ışığı altında kurutmayın.",
+        "when_to_use": "Hassas boyalar, yumuşak vernikler ve çizilmeye açık yüzeylerin kurulaması için ideal.",
+        "target_surface": "Hassas boya, yumuşak vernik, koyu renk araçlar",
+        "why_this_product": "• Tamamen yenilenen iplik yapısı - daha peluş ve yumuşak\n• Lazer kesim kenarlar - su lekesi ve çizik riski sıfır\n• Muazzam su emme kapasitesi\n• Ultra yumuşak yapı ile çizik riski minimumda"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-BYA1000M"
+        ],
+        "accessories": [
+          "Q2M-TWA500M"
+        ],
+        "alternatives": [
+          "Q2M-SDE7090C",
+          "3213EMR"
+        ]
+      },
+      "faq": [
+        {
+          "question": "SilkDryer EVO'dan farkı nedir?",
+          "answer": "Soft Dryer EVO peluş yapıda ve hassas boyalar için özel tasarlanmış, SilkDryer twist yapıda ve genel kullanım için."
+        },
+        {
+          "question": "Tüy dökülme riski var mı?",
+          "answer": "İlk kullanımdan önce Q²M TowelWash ile yıkayarak tüy dökülme riskini minimize edebilirsiniz."
+        }
+      ],
+      "price": 62000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-SODE6080C_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "3215D",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "buffing_cloth",
+        "fields": {
+          "size": "45x37 cm",
+          "gsm": 1000,
+          "type": "Ultra Plush",
+          "edge_type": "Ultrasonik Kesim",
+          "features": "Cila silme ve parlatma için kral",
+          "material_blend": "Polyester/Polyamide",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Pasta Cila Silme Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN Buffing King efsanevi serisinin en son ve en özel versiyonu. Üretim teknolojimiz ile gurur duyduğumuz, 1000 GSM, silme/parlatma bezlerinin KRALI! Bu segmente başka hiçbir ürünün rakip olamayacağı KALINLIK, YUMUŞAKLIK ve DAYANIKLILIK! Segmentinin yaratıcısı…\r\nDört tarafı ultrasonik lazer ile kesilmiş, bu ultra yumuşak, çift taraflı benzersiz kalınlıktaki 1000 GSM bezimiz tam bir performans ve dayanım kralıdır.. En hassas yüzeylerde dahi çizmeden güvenle kullanılabilir.\r\n\r\nBuffing King, hem profesyoneller hem amatörler hem de ev hanımları tarafından kullanılabilir. Son derece yumuşak bir yapıya sahip olmasının yanında, silim işlemleriniz için kalınlığı ve özel tüy yapısıyla mükemmel çözüm sunar. Aracınızın dış panellerinde wax, boya koruma, hızlı cila silmek için idealdir. Aynı zamanda çok iyi bir toz alıcıdır. Hem evinizde hem aracınızın iç panellerinde tercih edebilirsiniz. Susuz yıkamalarda iki adet bezi, yıkama ve kurulama amaçlı olarak da kullanabilirsiniz.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 45x37 cm – Mavi\r\n• Paket içerisinde 1 adet mikrofiber bez bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• p Polyester, 0 Polyamide\r\n• 1000 GSM\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Wax, boya koruma veya cila uygulamasından sonra kullanın.\n2. Bezin temiz yüzüyle hafif basınçla ürün kalıntılarını silin.\n3. Doygunluk arttığında bez yüzünü değiştirin.\n4. Maksimum 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Cila silme, wax silme, boya koruma kalıntılarını alma, susuz yıkama ve toz alma işlemleri için kullanılır.",
+        "target_surface": "Dış paneller, wax/cila uygulanmış yüzeyler, iç aksam, ev eşyaları",
+        "why_this_product": "• 1000 GSM - silme/parlatma bezlerinin KRALI\n• Ultrasonik lazer kesim dört taraflı kenar\n• Benzersiz kalınlık, yumuşaklık ve dayanıklılık\n• Çift taraflı kullanım imkanı"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-SWE4040C",
+          "Q2M-PWE4040C"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Hangi uygulamalar için uygundur?",
+          "answer": "Wax, boya koruma, hızlı cila silme, toz alma ve susuz yıkama işlemleri için idealdir."
+        },
+        {
+          "question": "Arkasında hav bırakır mı?",
+          "answer": "Hayır, hav bırakmayan iplik yapısına sahiptir."
+        }
+      ],
+      "price": 47000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3215D_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-SWE4040C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "buffing_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "type": "Plush (Peluş)",
+          "edge_type": "Kenarsız / Lazer Kesim",
+          "features": "Quick Detailer ve Wax silimi için ideal",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM SoftWipe EVO 40x40 cm: Lazer kesim peluş pasta cila bezi, mükemmel sonuçlar için tasarlandı. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo fırsatı.",
+        "full_description": "Q²M SoftWipe EVO, en hassas boyalara bile uyum sağlayacak şekilde yeniden geliştirilmiştir. Son derece yumuşak, peluş ve kalındır; kaplama/koruma ürünlerini, hızlı detaylandırıcıları, hızlı cilaları ve boya koruyucu wax ürünlerini silmek için idealdir. Q²M Cure, CeramicDetailer ve QuickDetailer uygulamaları için mükemmel bir seçimdir.<br><br>Q²M SoftWipe EVO, lazer kesim ve kenarsız yapısı sayesinde ultra güvenli hale gelmiştir. Q²M SoftWipe EVO, aşınmaya karşı yüksek dayanıklılık sağlayan en gelişmiş lazer kesim teknolojisi kullanılarak üretilmiştir.<br><br>BOYUT: 40x40 cm<br><br>BAKIM ÖNERİSİ<br>TowelWash kullanmanız önerilir. Makine yıkama, maksimum 30°C'de gerçekleştirilmelidir. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. Kaplama/koruma ürünü veya quick detailer uygulayın.\n2. SoftWipe EVO ile hafif basınçla silin ve parlatın.\n3. Bez doyunca temiz yüzü kullanın.\n4. 30°C'de TowelWash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Q²M Cure, CeramicDetailer, QuickDetailer ve boya koruyucu wax ürünlerinin silimi için kullanılır.",
+        "target_surface": "Hassas boyalar, kaplama/koruma uygulanan yüzeyler",
+        "why_this_product": "• En hassas boyalara uyumlu ultra yumuşak peluş yapı\n• Lazer kesim ve kenarsız yapı - ultra güvenli\n• Aşınmaya karşı yüksek dayanıklılık\n• Q²M Cure ve detailer uygulamaları için mükemmel"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-CRA500M",
+          "Q2M-QDA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-PWE4040C",
+          "3215D"
+        ]
+      },
+      "faq": [
+        {
+          "question": "PolishWipe EVO'dan farkı nedir?",
+          "answer": "SoftWipe daha yumuşak peluş yapıda ve detailer/wax silimi için, PolishWipe çift tüy uzunluklu ve pasta kalıntıları için."
+        },
+        {
+          "question": "Kuru temizleme yapılabilir mi?",
+          "answer": "Hayır, kuru temizleme yapmayın ve ütülemeyin."
+        }
+      ],
+      "price": 28000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-SWE4040C_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-PWE4040C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "buffing_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "gsm": 310,
+          "type": "Dual Pile (Kısa/Uzun Tüylü)",
+          "features": "Pasta kalıntılarını ve yağları silmek için",
+          "material_blend": "80% polyester / 20% polyamid",
+          "edge_type": "Lazer Kesim / Kenarsız",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM PolishWipe EVO 40x40 cm: Lazer kesim çift yönlü cila bezi, mükemmel sonuçlar için tasarlandı. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo avantajı.",
+        "full_description": "GYEON Q²M PolishWipe EVO Lazer Kesim Çift Yönlü Cila Bezi – 40 × 40 cm\r\n\r\nDETAYCILARIN EN GÜVENDİĞİ CİLA SİLME BEZİ\r\n\r\nLazer kesimli, kenarsız ve çift tüy uzunluklu yapısıyla GYEON Q²M PolishWipe EVO; pasta/cila kalıntılarını zahmetsizce toplar, uygulama öncesi yüzeyi mükemmel şekilde hazırlayarak kaplama performansını maksimize eder. 310 GSM yoğunluğu, her silmede yağlı artıkları emip kusursuz kontrol sağlar.\r\n\r\n\r\nÖne Çıkan Özellikler\r\n\r\n• Çift Yüzlü Tasarım – Kısa tüylü yüz, yoğun yağı söker; uzun tüylü yüz, kalan tozu nazikçe toplar.\r\n• Dikişsiz Kenarsız Güvenliği – Tamamen lazer kesim; dikiş, etiket ve keskin kenar yok, çizik riski sıfır.\r\n• Yüksek Emicilik – 80 % polyester / 20 % polyamid karışım, yağlı cila kalıntılarını bir dokunuşta hapseder.\r\n• 40 × 40 cm Pratik Ebat – Tek elle kontrol; hem iç hem dış detaylarda maksimum hâkimiyet.\r\n• Yüzey Hazırlığında Usta – Q²M Prep ile kombine edildiğinde, kaplamaların tutunma gücünü artırır.\r\n\r\n\r\nTeknik Bilgiler\r\n\r\nÖzellik Değer\r\nBoyut 40 × 40 cm\r\nYoğunluk (GSM) 310 g/m²\r\nLif Oranı 80 % polyester / 20 % polyamid\r\nLif Yapısı Çift taraflı, dual-length, lazer kesim\r\nKenar Tipi Etiketsiz, kenarsız\r\nYıkanabilirlik Evet (30 °C, sıvı deterjan)\r\n\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Cila/pasta işlemi tamamlandıktan sonra PolishWipe EVO’nun kısa tüylü yüzünü yüzeye hafif basınçla sürün, yağlı kalıntıları alın.\r\n2. Uzun tüylü yüzle son kontrol yapın; hologram ve iz bırakmadan parlaklığı onaylayın.\r\n3. Uygulama sonrasında 30 °C’de sıvı mikrofiber deterjanı ile yıkayın; asarak kurutun.\r\n\r\n\r\nKullanım Alanları\r\n\r\n• Cila &amp; Pasta Kalıntı Temizliği – Tek bezle hızlı, iz bırakmayan sonuç.\r\n• Yüzey Kontrolü / Inspection – Kaplama öncesi yağ ve tozu siler, boya çıplak hâlini gösterir.\r\n• İç Detay – Piano-black, plastik trim ve ekranlarda iz bırakmadan toz alma.\r\n• Hassas Bölgeler – Kenarsız yapı sayesinde krom, parlak nikel ve alüminyum yüzeylerde güvenli.\r\n\r\n\r\nNeden GYEON Q²M PolishWipe EVO?\r\n\r\n• Mükemmel Yağ Alma – Çift lif uzunluğu, yağ bazlı cila artığını tek hamlede söker.\r\n• Uzun Ömür – Lazer kesim kenar, 100+ yıkamada formunu korur.\r\n• Çiziksiz Sonuç – Etiketsiz ve dikişsiz tasarım, en yumuşak verniklerde bile güvenli.\r\n• Çok Yönlü – Hem pasta temizleyici hem de kaplama öncesi son silime uygun.\r\n\r\n\r\nÖnerilen Aksesuar ve Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nGYEON Q²M Prep Yağ &amp; dolgu temizliği PolishWipe EVO ile mükemmel ikili; tam çıplak yüzey\r\nGYEON Q²M TowelWash Mikrofiber bakım deterjanı Lif yumuşaklığını ve emişini korur\r\nGYEON Q²M BaldWipe Kaplama sonrası ilk silme Yüksek GSM ile sakız kalıntısı toplar\r\nGYEON Q²M SilkDryer EVO Kurulama &amp; final kontrol Cila sonrası su lekesiz kurutma\r\n\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nS: PolishWipe EVO’yu seramik kaplama sonrası silme işleminde kullanabilir miyim?\r\nC: Evet, kaplama artıklarını çiziksiz toplamaya uygundur; lifleri kimyasala dayanıklıdır.\r\nS: Uzun ve kısa tüylü yüzleri ne zaman tercih etmeliyim?\r\nC: Kısa lif, yağlı kalıntıyı söker; uzun lif, tozu ve mikromar haznelerini toplar. İki adımlı kullanın.\r\nS: Makinede hangi sıcaklıkta yıkamalıyım?\r\nC: 30 °C’yi geçmeyin; yumuşatıcı, ağartıcı ve toz deterjan kullanmayın.\r\nS: Kenarsız olduğu için sökülür mü?\r\nC: Hayır. Lazer kesim kenar, liflerin çözülmesini engeller; yüksek dayanım sunar.\r\n\r\n\r\nGYEON Q²M PolishWipe EVO, cila ve kaplama hazırlığında yağlı kalıntıları tek hamlede silerek parlaklığı ortaya çıkarır. Kenarsız güvenlik, çift yönlü etkinlik ve kalıcı dayanıklılık – profesyonel sonuçlar artık elinizde!",
+        "how_to_use": "1. Cila/pasta işlemi tamamlandıktan sonra kısa tüylü yüzle yağlı kalıntıları alın.\n2. Uzun tüylü yüzle son kontrol yapın; hologram ve iz bırakmadan parlaklığı onaylayın.\n3. 30°C'de sıvı mikrofiber deterjanı ile yıkayın; asarak kurutun.",
+        "when_to_use": "Pasta/cila kalıntı temizliği, yüzey kontrolü (inspection), kaplama öncesi son silim ve iç detay işleri için kullanılır.",
+        "target_surface": "Boya, krom, parlak nikel, alüminyum, piano-black, plastik trim",
+        "why_this_product": "• Çift yüzlü tasarım - kısa tüy yağ söker, uzun tüy toz toplar\n• Dikişsiz kenarsız güvenlik - çizik riski sıfır\n• 310 GSM yüksek emicilik\n• Q²M Prep ile kombine edildiğinde kaplama tutunmasını artırır"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-PRA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-SWE4040C",
+          "3215D"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplama sonrası silme işleminde kullanılabilir mi?",
+          "answer": "Evet, kaplama artıklarını çiziksiz toplamaya uygundur; lifleri kimyasala dayanıklıdır."
+        },
+        {
+          "question": "Uzun ve kısa tüylü yüzleri ne zaman tercih etmeliyim?",
+          "answer": "Kısa lif yağlı kalıntıyı söker; uzun lif tozu ve mikro kalıntıları toplar. İki adımlı kullanın."
+        }
+      ],
+      "price": 26000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-PWE4040C_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-BWE4040",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "coating_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "type": "Short Pile (Kısa Tüylü)",
+          "features": "Seramik kaplama silimi için en iyisi",
+          "edge_type": "Lazer Kesim",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM BaldWipe EVO 40x40 cm: Lazer kesim tüysüz çok amaçlı mikrofiber bez, pratik ve etkili temizlik için idealdir. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo avantajı.",
+        "full_description": "GYEON Q²M BaldWipe EVO, artırılan fiber kalitesi ile tüysüz, lazer kesimli, yumuşak ama çok etkili ve çok amaçlı bir silme bezidir. Koruma uygulamalarını silmek, Q²M Cure uygulamak, Q²M Prep veya Q²M Tar ile boyayı temizlemek gibi birçok farklı uygulamaya uygundur. Pasta cila işlemlerinde artıkları, ardından iz veya çizik ibırakmadan kolayca giderir.<br><br>GYEON Q²M BaldWipe EVO, iç detaylandırma ve temizleme uygulamaları için de çok amaçlıbir mikrofiber olarak da kullanılabilir. Tıpkı tüm kenarsız havlularımız gibi, en gelişmiş lazer kesim teknolojisi kullanılarak üretilmiştir.<br><br>BOYUT: 40x40 cm<br><br>BAKIM ÖNERİSİ<br>Towelwash ile yıkamanızı önerilir. Makine yıkama, maksimum 30°C. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. Koruma/kaplama uygulamasından sonra fazla ürünü silin.\n2. Q²M Cure veya Q²M Prep ile kullanarak boyayı temizleyin.\n3. Pasta/cila kalıntılarını iz bırakmadan giderin.\n4. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Koruma uygulamalarını silme, seramik kaplama silimi, Q²M Cure/Prep/Tar ile boya temizleme ve pasta/cila artıklarını giderme için kullanılır.",
+        "target_surface": "Boya, kaplama uygulanan yüzeyler, iç aksam",
+        "why_this_product": "• Tüysüz, lazer kesimli yapı\n• Yumuşak ama çok etkili silme\n• Çok amaçlı kullanım - kaplama, temizlik, cila silme\n• İç detaylandırma için de uygun"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-CRA500M",
+          "Q2M-PRA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-PWE4040C"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplama uygulamasında kullanılabilir mi?",
+          "answer": "Evet, seramik kaplama silimi için en ideal bezdir."
+        },
+        {
+          "question": "Peluş bezlerden farkı nedir?",
+          "answer": "BaldWipe kısa tüylü ve tüysüz yapıda - koruma/kaplama silimi için özel tasarlanmış."
+        }
+      ],
+      "price": 24000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-BWE4040_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3217HS-5G",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "multi_purpose_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "gsm": 430,
+          "quantity": 5,
+          "features": "Genel temizlik ve silme işlemleri",
+          "edge_type": "Lazer Kesim",
+          "silicone_free": true,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Pasta Cila Silme Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN ZERO FINISH HD mikrofiber bezler, en ağır çalışma koşullarında bile çok yönlü kullanım alanları, yüksek kaliteli iplik yapıları ve dayanımları ile hayranlarının favorisidir. Tüy bırakmayan kısa tüylü yapısı, lazer kesim kenarları, yumuşacık hissiyatı ve mükemmel fiyat/performans oranı ile üç farklı renkte hayranlarının kullanımına sunulmuştur.\r\n\r\nPasta, cila, seramik, wax silme ve susuz yıkama gibi işlemlerde mükemmel bir yardımcıdır. Ürün artığı ve su emiciliği yüksektir. Yüzeylerden cila artıklarını çok daha az eforla, saniyeler içinde siler. Arkasında iz bırakmaz. En hassas yüzeylerde dahi güvenle kullanılabilir. Antistatik özelliği sayesinde araç iç aksamlarında ve ev temizliğinde kullanılabilir. Yıkanabilir ve tekrar tekrar kullanılabilir.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin, havacılık gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 40x40 cm – Gri / Turuncu / Beyaz (3 Renk)\r\n• Paket içerisinde 5 adet aynı renkli mikrofiber bez bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 430+ GSM\r\n• Silikonsuz\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Pasta, cila, seramik veya wax uygulamasından sonra kalıntıları silin.\n2. Susuz yıkama işlemlerinde nemli olarak kullanın.\n3. İç aksam ve ev temizliğinde toz alma için kullanın.\n4. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Pasta/cila silme, seramik/wax silme, susuz yıkama, iç aksam temizliği ve ev temizliği için çok amaçlı kullanım.",
+        "target_surface": "Dış yüzeyler, iç aksam, ev eşyaları, elektronik ürünler",
+        "why_this_product": "• 430+ GSM yüksek kaliteli iplik yapısı\n• Tüy bırakmayan kısa tüylü yapı\n• Lazer kesim kenarlar ile güvenli kullanım\n• 5'li paket - ekonomik çözüm"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3217HS-5W",
+          "KLIN-3113AG"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Kaç farklı renk seçeneği var?",
+          "answer": "Gri, Turuncu ve Beyaz olmak üzere 3 renk seçeneği mevcuttur."
+        },
+        {
+          "question": "Antistatik özelliği var mı?",
+          "answer": "Evet, antistatik özelliği sayesinde araç iç aksamlarında ve ev temizliğinde kullanılabilir."
+        }
+      ],
+      "price": 80000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3217HS-5G_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-STE",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "20x30 cm",
+          "gsm": 1250,
+          "type": "3 Farklı Elyaf (Twist+Split+Chenille)",
+          "features": "Kaygan ve çiziksiz yıkama",
+          "material_blend": "Polyester/Polyamid",
+          "edge_type": "Dikişsiz (Edgeless)",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Smoothie EVO: Mikrofiber araç yıkama eldiveni, üst düzey temizlik ve hassasiyet sağlar. Yüzeylere zarar vermez.",
+        "full_description": "GYEON QÂ²M Smoothie EVO Mikrofiber AraÃ§ YÄ±kama Eldiveni - 20x30 cm<br><br><br>1250 GSM QÂ²M Smoothie EVO | ÃÃ§ FarklÄ± Mikrofiber Elyaf | DikiÅsiz Ergonomik TasarÄ±m<br><br><br>YIKAMA KONFORUNDA YENÄ° BÄ°R DEVRÄ°M<br><br>GYEON QÂ²M Smoothie EVO, efsaneleÅmiÅ mikrofiber yÄ±kama eldivenimizin geliÅmiÅ yeni nesil versiyonudur. ÃÃ§ farklÄ± mikrofiber elyaf tÃ¼rÃ¼nÃ¼ tek bir Ã¼rÃ¼nde birleÅtirerek, benzersiz yumuÅaklÄ±k ve derinlemesine temizlik gÃ¼cÃ¼ sunar. Sahip olduÄu yÃ¼ksek yoÄunluk (1250 GSM) ile boya yÃ¼zeyindeki kir ve partikÃ¼lleri gÃ¼venle toplar, aracÄ±nÄ±zda Ã§iziksiz ve pÃ¼rÃ¼zsÃ¼z bir yÄ±kama deneyimi yaÅatÄ±r.<br>Ãzel dikiÅsiz tasarÄ±mÄ±, ergonomik yapÄ±sÄ± ve kolay kavrama saÄlayan bilekliÄi sayesinde kullanÄ±m kolaylÄ±ÄÄ± maksimum seviyededir. Her tÃ¼rlÃ¼ araÃ§ yÃ¼zeyine ve Åekline kolaylÄ±kla uyum saÄlar.<br><br><br>YENÄ°LÄ°KÃÄ° ÃÃ ELYAF TEKNOLOJÄ°SÄ°YLE ÃSTÃN TEMÄ°ZLÄ°K<br><br>GYEON QÂ²M Smoothie EVO, Ã¼Ã§ farklÄ± mikrofiber tÃ¼rÃ¼nÃ¼ iÃ§eren Ã¶zel yapÄ±sÄ±yla:<br>â¢\tTwist Loop lifler ile derinlemesine temizlik kapasitesini artÄ±rÄ±r.<br>â¢\tSplit Mikrofiberler ile ince kirleri etkili Åekilde tutar.<br>â¢\tChenille yapÄ±sÄ± sayesinde yÃ¼zeyde benzersiz bir kayganlÄ±k ve pÃ¼rÃ¼zsÃ¼zlÃ¼k sunar.<br>BÃ¶ylece aracÄ±nÄ±zÄ±n yÃ¼zeyinde Ã§izik riski olmadan, gÃ¼venli ve derinlemesine temizlik elde edebilirsiniz.<br><br><br>ÃSTÃN KALÄ°TE VE DAYANIKLILIK<br><br>QÂ²M Smoothie EVO, yÃ¼ksek kaliteli orijinal Kore malzemelerinden Ã¼retilmiÅ olup, GYEON tarafÄ±ndan Ã¶zel olarak dikilir. GÃ¼Ã§lendirilmiÅ iÃ§ yapÄ±sÄ±, eldivenin Åeklinin bozulmasÄ±nÄ± Ã¶nler, kullanÄ±m Ã¶mrÃ¼nÃ¼ uzatÄ±r ve performansÄ±nÄ± sÃ¼rekli kÄ±lar.<br><br><br>TEKNÄ°K ÃZELLÄ°KLER<br><br>â¢\tBoyut: 20 x 30 cm<br>â¢\tGSM DeÄeri: 1250 GSM<br>â¢\tElyaf YapÄ±sÄ±: Twist loop + Split Mikrofiber + Chenille<br>â¢\tKenar YapÄ±sÄ±: DikiÅsiz (Edgeless)<br>â¢\tMalzeme:  Polyester,   Polyamid<br>â¢\tÃretim: Kore menÅeli orijinal mikrofiber<br><br><br>GYEON QÂ²M SMOOTHIE EVO KULLANIM AVANTAJLARI:<br><br>â¢\tBoya yÃ¼zeyinde kayarak temizlik saÄlar ve Ã§izik oluÅumunu Ã¶nler.<br>â¢\tAracÄ±nÄ±zÄ±n tÃ¼m kÄ±vrÄ±mlÄ± ve zor eriÅilen alanlarÄ±nda kolay kullanÄ±m saÄlar.<br>â¢\tGÃ¼Ã§lÃ¼ su ve kÃ¶pÃ¼k tutma kapasitesiyle daha az Åampuan kullanarak etkili temizlik yapmanÄ±zÄ± saÄlar.<br>â¢\tSeramik kaplamalÄ± araÃ§larda gÃ¼venle kullanÄ±labilir ve kaplamanÄ±n Ã¶mrÃ¼nÃ¼ uzatÄ±r.<br>â¢\tErgonomik bileklik sayesinde, elinizden kayma veya dÃ¼Åme riskini ortadan kaldÄ±rÄ±r.<br><br><br>NASIL KULLANILIR?<br><br>â¢\tEldiveni kullanmadan Ã¶nce temiz su ve Åampuanla iyice Ä±slatÄ±n.<br>â¢\tDairesel hareketler yerine dÃ¼z Ã§izgiler halinde yÃ¼zey Ã¼zerinde gezdirin.<br>â¢\tSÄ±k sÄ±k ayrÄ± temiz su bulunan kovada eldiveni durulayarak kirlerden arÄ±ndÄ±rÄ±n.<br>â¢\tKullanÄ±m sonrasÄ± eldiveni temiz suyla durulayÄ±n ve asarak kurutun.<br><br><br>NEDEN GYEON QÂ²M SMOOTHIE EVO?<br><br>?? ÃstÃ¼n yumuÅaklÄ±k ve kir tutma performansÄ±<br>?? AraÃ§ yÃ¼zeyine zarar vermeden derinlemesine temizlik<br>?? Uzun kullanÄ±m Ã¶mrÃ¼ ve yÃ¼ksek dayanÄ±klÄ±lÄ±k<br>?? Profesyonel detaycÄ±lar ve araÃ§ tutkunlarÄ± iÃ§in ideal ergonomi ve konfor<br><br><br>BAKIM ÃNERÄ°SÄ°<br><br>â¢\tEldiveninizi her (2-3) kullanÄ±m sonrasÄ± maksimum 30Â°Câde makinede yÄ±kayÄ±n.<br>â¢\tTowelwash veya mikrofiber Ã¶zel temizleyicilerle yÄ±kamanÄ±z Ã¶nerilir.<br>â¢\tÃrÃ¼nÃ¼ asarak kurutun; kurutma makinesi kullanmayÄ±n.<br>â¢\tÃamaÅÄ±r suyu kullanmayÄ±n ve Ã¼tÃ¼ yapmayÄ±n.<br>â¢\tÃrÃ¼nÃ¼n temiz ve partikÃ¼lsÃ¼z olduÄundan emin olarak saklayÄ±n.<br><br>Ä°PUCU:<br>YÄ±kama esnasÄ±nda Ã§ift kova tekniÄini kullanarak, aracÄ±nÄ±zÄ±n boya yÃ¼zeyindeki swirl (ince Ã§izik) oluÅumunu en aza indirebilirsiniz.<br><br><br>AracÄ±nÄ±zÄ± temizlerken maksimum performans ve Ã§iziksiz temizlik arÄ±yorsanÄ±z, GYEON QÂ²M Smoothie EVO sizin iÃ§in en doÄru seÃ§im olacaktÄ±r.",
+        "how_to_use": "1. Eldiveni temiz su ve şampuanla iyice ıslatın.\n2. Dairesel hareketler yerine düz çizgiler halinde yüzey üzerinde gezdirin.\n3. Sık sık ayrı temiz su bulunan kovada eldiveni durulayarak kirlerden arındırın.\n4. Kullanım sonrasında temiz suyla durulayın ve asarak kurutun.",
+        "when_to_use": "Araç yıkama, seramik kaplamalı araç bakımı ve hassas boya yüzeylerinin çiziksiz temizliği için kullanılır.",
+        "target_surface": "Boya, cam, PPF, seramik kaplamalı yüzeyler",
+        "why_this_product": "• 1250 GSM yüksek yoğunluk - mükemmel kir tutma\n• Üç farklı mikrofiber elyaf teknolojisi (Twist+Split+Chenille)\n• Dikişsiz ergonomik tasarım\n• Güçlendirilmiş iç yapı - şekil bozulmaz"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-BYA1000M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "3221A-RD",
+          "3227I-HD"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplamalı araçlarda güvenle kullanılabilir mi?",
+          "answer": "Evet, seramik kaplamalı araçlarda güvenle kullanılabilir ve kaplamanın ömrünü uzatır."
+        },
+        {
+          "question": "Çift kova tekniği ile mi kullanılmalı?",
+          "answer": "Evet, çift kova tekniği kullanarak swirl (ince çizik) oluşumunu en aza indirebilirsiniz."
+        }
+      ],
+      "price": 110000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-STE_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "3221A-RD",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "20x18 cm",
+          "type": "Duo (Eldiven ve Ped olarak kullanım)",
+          "features": "İç süngerli, yüksek köpük tutuşu",
+          "inner_sponge_mm": 14,
+          "weight_gr": 240,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN Dual Wash Mitt Mikrofiber Araç Yıkama Eldiveni (Kırmızı) – 20x18 cm\r\n\r\n\r\nÇift Taraflı Kullanım | Yüksek Köpük Üretimi | Çiziksiz Yıkama Performansı\r\n\r\n\r\nPROFESYONEL SEVİYEDE BİR YIKAMA DENEYİMİNE HAZIR OLUN!\r\n\r\nKLIN Dual Wash Mitt, üstün Kore mikrofiber teknolojisiyle tasarlanan, aracınızın boya yüzeylerini çizmeden derinlemesine temizleyen profesyonel kalitede bir yıkama eldivenidir. Özel çift taraflı yapısı, ergonomik iç parmak hazneleri ve geliştirilmiş iç destek süngeri ile her tür araç bakımında mükemmel sonuç sağlar.\r\n\r\n\r\nYÜKSEK KALİTELİ MİKROFİBER – GÜVENLİ VE ÇİZİKSİZ TEMİZLİK\r\n\r\n14 mm kalınlığındaki iç sünger tabakası sayesinde yüksek miktarda şampuanı ve suyu emer, yüzeye eşit ve güvenli bir şekilde aktararak yoğun köpük oluşturur. Birinci kalite Kore menşeli mikrofiber yapısı ile boya yüzeyindeki kir ve partikülleri etkili biçimde temizler ve yıkama sırasında çizik oluşma riskini minimize eder.\r\n\r\n\r\nÇİFT FONKSİYONLU ERGONOMİK TASARIM\r\n\r\nKLIN Dual Wash Mitt, benzersiz tasarımıyla size iki farklı kullanım seçeneği sunar:\r\n• Yıkama Eldiveni Modu:\r\nİç parmak haznesini kullanarak ergonomik bir eldiven şeklinde aracınızı kolayca temizleyebilirsiniz.\r\n• Yıkama Pedi Modu:\r\nKatlanabilir elastik bilek yapısı sayesinde saniyeler içinde yıkama pedine dönüşür, böylece tercih ettiğiniz yıkama şekline kolayca geçiş yapabilirsiniz.\r\n\r\n\r\nÖZEL CCS TEKNOLOJİSİ (Contaminant Control System)\r\n\r\nKLIN Korea'nın benzersiz CCS teknolojisi sayesinde ürün, paketlenmeden önce özel olarak yıkanır ve böylece size doğrudan paketten çıkarıp anında kullanma imkânı sunar. Bu özel sistem sayesinde kirlenmeye karşı dirençlidir ve uzun ömürlü kullanım sağlar.\r\n\r\n\r\nTEKNİK ÖZELLİKLER\r\n\r\n• Boyut: 20 x 18 cm\r\n• Mikrofiber Kalitesi: \u00100 Kore menşeli premium mikrofiber\r\n• İç Sünger: 14 mm kalınlığında yüksek emiciliğe sahip sünger\r\n• Tasarım: Çift taraflı kullanım (eldiven ve ped modu)\r\n• Ağırlık: 240 gr\r\n• Özel Teknoloji: Contaminant Control System (CCS)\r\n• Renk Seçenekleri: Kırmızı &amp; Mavi\r\n\r\n\r\nKULLANIM ALANLARI\r\n\r\n• Araç boya yüzeyleri ve cam yüzeyler\r\n• Seramik kaplamalı ve hassas boyalı araçlar\r\n• Motosiklet ve scooter yüzeyleri\r\n• Marin sektöründe tekne ve yat bakımı\r\n\r\n\r\nNASIL KULLANILIR?\r\n\r\n1. Aracınızı öncelikle tazyikli su ile iyice durulayın ve yüzeydeki kaba kiri uzaklaştırın.\r\n2. KLIN Dual Wash Mitt’i su ve şampuan dolu kovanın içine daldırıp köpürtün.\r\n3. Yumuşak hareketlerle, fazla baskı uygulamadan yüzeyi yıkayın.\r\n4. Eldiveni sık sık temiz su kovasında durulayın ve ardından şampuanlı kovaya tekrar batırarak devam edin.\r\n5. Yıkama sonrası aracınızı bol su ile durulayın ve kurulama havlusuyla kurulayın.\r\n\r\n\r\nBAKIM ÖNERİLERİ\r\n\r\n• Maksimum 40°C sıcaklıkta elde veya özel mikrofiber şampuanıyla yıkayın.\r\n• Yıkama sonrası sıkma yapmadan asarak kurumaya bırakın.\r\n• Yumuşatıcı, çamaşır suyu gibi agresif temizlik maddelerini kullanmayın.\r\n• Diğer mikrofiber ürünlerden ayrı olarak yıkayın.\r\n\r\nİPUCU:\r\nHer kullanım sonrası eldiveni durulayın ve açık havada asarak kurutun. Bu sayede uzun süreli ve yüksek performanslı kullanım sağlarsınız.\r\n\r\n\r\nNEDEN KLIN DUAL WASH MITT?\r\n?? Profesyonel seviyede çiziksiz araç yıkama performansı\r\n?? Çift fonksiyonlu ergonomik yapı – Eldiven ve ped olarak kullanılabilir\r\n?? Üst düzey Kore mikrofiber kalitesi ve CCS teknolojisi\r\n?? Yüksek köpük oluşturma ve üstün temizleme kapasitesi\r\n?? Uzun ömürlü, dayanıklı ve çok yönlü kullanım imkânı\r\n\r\nKLIN Dual Wash Mitt ile aracınızı profesyoneller gibi temizleyin ve göz alıcı parlaklığın keyfini çıkarın!",
+        "how_to_use": "1. Aracı tazyikli su ile ön yıkama yapın.\n2. Eldiveni su ve şampuan dolu kovaya daldırıp köpürtün.\n3. Yumuşak hareketlerle, fazla baskı uygulamadan yüzeyi yıkayın.\n4. Eldiveni sık sık temiz su kovasında durulayın.\n5. Yıkama sonrası aracı bol su ile durulayın.",
+        "when_to_use": "Araç yıkama, seramik kaplamalı araçlar, motosiklet, tekne ve yat bakımı için kullanılır.",
+        "target_surface": "Araç boya yüzeyleri, cam, motosiklet, marin",
+        "why_this_product": "• Çift fonksiyonlu tasarım - eldiven ve ped modu\n• 14 mm iç sünger tabakası - yüksek köpük üretimi\n• CCS teknolojisi - paketten çıkarıp anında kullanım\n• Ergonomik iç parmak hazneleri"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-STE",
+          "3227I-HD"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Eldiven mi ped mi olarak kullanılmalı?",
+          "answer": "İsterseniz iç parmak haznelerini kullanarak eldiven, isterseniz katlanarak ped olarak kullanabilirsiniz."
+        },
+        {
+          "question": "Hangi renk seçenekleri var?",
+          "answer": "Kırmızı ve Mavi renk seçenekleri mevcuttur."
+        }
+      ],
+      "price": 62000,
+      "image_url": "",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "3227I-HD",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "23x16 cm",
+          "type": "Ultra Soft Long Pile",
+          "features": "Hassas boyalar için en yumuşak seçenek",
+          "color": "Açık Bej (Ivory)",
+          "inner_sponge_mm": 14,
+          "weight_gr": 240,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Softy serisi tarafından atılan temel üzerine inşa edilen SOFTY HD serisi; yumuşaklığı en uç noktaya taşıyor. Net görüş için açık bej rengi sayesinde bu eldiven, kiri nazikçe kaldırması ve tüylerinden kolayca ayırabilmesi nedeniyle seramik/PPF/boya koruma kaplı araçlarınızın favori yıkama ekipmanı olacak! En hassas yüzeylerde dahil çiziksiz, güvenli ve kolay temizlik için birebir…\r\n\r\nKLIN KOREA SOFTY HD WASH MITT, komple yüzeyi kaplı, birinci kalite dayanıklı yumuşacık mikrofiber yapısı, önceki seriye göre uzayan yumuşacık tüyleri, geliştirilmiş 14mm iç destek süngeri, esnek bilek kavraması ve ergonomik iç parmak haznesi, ergonomik tutuşu ve çok amaçlı kullanımı ile detayseverlere benzersiz bir yıkama deneyimi sunuyor.\r\n\r\nYükseltilen iç süngeri daha fazla miktarda şampuanı ve suyu içine emer, özel peluş mikrofiber yapısı yüzeyde yağ gibi akıp kayarken, ekstra yoğun köpük oluşturur ve 3” yüksekliğindeki bu ped yüzeyde çiziksiz, güvenli bir temizlik sunar. Size de tertemiz aracınızın keyfini sürmek kalır.\r\n\r\nSofty Mitt HD, size çok yönlü kullanım imkânı sunar. İsterseniz ergonomik iç parmak haznelerini kullanarak eldiven olarak kullanabilirsiniz. Ya da isterseniz katlanabilir, elastik bilek yapısı sayesinde, eldiveninizi saniyeler içinde yıkama padine dönüştürebilirsiniz. Seçim sizin!\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 23x16 cm – Açık Bej (IVORY)\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 14 mm İç Sünger\r\n• 240 gr\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.\r\n\r\nDikkat: Öncelikle araç üzerinde ön yıkama işlemi yapılmalı, tazyikli su ile durulanmalı ve ardından uygun bir şampuan ile yıkama pedi kullanılmalıdır. Yıkama esnasında pedin yüzeyine yabancı partiküller (kir, toz vb.) nüfuz edebilir ve yüzeyde çizik oluşturabilir. Bu duruma karşı dikkatli olun ve ürünün her kullanım öncesi temiz olduğundan emin olun.",
+        "how_to_use": "1. Araç üzerinde ön yıkama yaparak tazyikli su ile durulayın.\n2. Eldiveni şampuanlı kovaya daldırıp köpürtün.\n3. Yüzeyde yağ gibi akarak kaygan hareketlerle yıkayın.\n4. Sık sık temiz su kovasında durulayın.\n5. Yıkama sonrası 40°C'de yıkayıp asarak kurutun.",
+        "when_to_use": "Seramik/PPF/boya koruma kaplı araçlar, en hassas yüzeyler ve premium araç bakımı için kullanılır.",
+        "target_surface": "Hassas boyalar, seramik kaplamalı yüzeyler, PPF, premium araçlar",
+        "why_this_product": "• Ultra soft uzun tüylü yapı - en hassas yüzeylere uygun\n• Açık bej renk - kir tespiti kolaylığı\n• Geliştirilmiş 14mm iç destek süngeri\n• Çift fonksiyonlu - eldiven ve ped olarak kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-STE",
+          "3221A-RD"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Normal yıkama eldiveninden farkı nedir?",
+          "answer": "Ultra yumuşak ve uzun tüylü yapısı en hassas yüzeylerde bile çiziksiz temizlik sağlar."
+        },
+        {
+          "question": "Neden açık bej renk tercih edilmiş?",
+          "answer": "Net görüş için açık renk seçilmiş, böylece kirler kolayca tespit edilebilir ve liflerden ayrılabilir."
+        }
+      ],
+      "price": 48000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3227I-HD_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "Q2M-WME",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "Ergonomik",
+          "gsm": 1250,
+          "target_surface": "Jantlar",
+          "features": "Fren tozuna ve kire dayanıklı",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Wheelmitt EVO: Jant yıkama eldiveni, etkili ve pratik temizlik sağlar. Yüzeylere zarar vermeden derinlemesine temizlik için idealdir.",
+        "full_description": "GYEON Q²M WheelMitt EVO Jantlara Özel Dayanıklı Mikrofiber Yıkama Eldiveni - 1250 GSM\r\n\r\nJantlarınız İçin Güvenli Temizlik | Ergonomik Tasarım | Kore Malı Premium Mikrofiber\r\n\r\nERGONOMİK TASARIMLA JANT TEMİZLİĞİNDE YENİ STANDART\r\n\r\nGYEON Q²M WheelMitt EVO, jantların ve ulaşılması güç alanların temizliğini daha kolay, daha güvenli ve çok daha etkili hale getirmek için özel olarak tasarlandı. 1250 GSM yoğunluğundaki premium mikrofiber yapısı ve yenilikçi ergonomik tasarımı sayesinde jant temizliğini çok daha hızlı ve zahmetsiz hale getirir.\r\n\r\nGELİŞTİRİLMİŞ ELYAF TEKNOLOJİSİ İLE MAKSİMUM PERFORMANS\r\n\r\nGYEON Q²M WheelMitt EVO, üç farklı türden özel elyafın bir araya gelmesiyle oluşan benzersiz yapısı sayesinde jant yüzeyindeki kiri ve fren tozunu maksimum güvenlikle temizler. Eklenen twist-loop lifler ile önceki versiyona göre temizleme gücü artırılmış, dayanıklılığı ise çok daha uzun ömürlü hale getirilmiştir.\r\n• Yoğun Mikrofiber Yapı: Kirleri derinlemesine kavrar ve güvenle uzaklaştırır.\r\n• Kaygan ve Güvenli Temizlik: Yıkama işlemini pürüzsüz ve \"yağlanmış\" hissettirir, çizik riskini minimize eder.\r\n• Uzun Süre Dayanıklılık: Özel elyaf teknolojisi sayesinde defalarca yıkamaya rağmen ilk günkü performansını korur.\r\n\r\nTEKNİK ÖZELLİKLER\r\n\r\n• GSM: 1250\r\n• Malzeme: Orijinal Kore üretimi yüksek kaliteli mikrofiber\r\n• Ebat: Standart ergonomik eldiven formu\r\n• Kullanım Alanı: Jantlar ve ulaşılması zor bölgeler\r\n• Özel Tasarım: Kaymayı ve düşmeyi önleyen ergonomik bilek kuşağı\r\n• Üretim: GYEON özel üretim, Kore malı\r\n\r\nNEDEN GYEON Q²M WHEELMITT EVO?\r\n\r\n?? Hassas Temizlik:\r\nÖzel tasarımı ve premium lifleri sayesinde tüm jant tiplerinde güvenle kullanılabilir. Hassas boyalı, krom ve seramik kaplı yüzeylerde dahi çiziksiz temizlik sağlar.\r\n?? Güçlendirilmiş Temizleme Kapasitesi:\r\nYeni eklenen twist-loop lifleri sayesinde fren tozu, yol kiri ve kalıntıları derinlemesine temizler ve daha etkili sonuç verir.\r\n?? Çok Yönlü ve Pratik:\r\nErgonomik yapısıyla dar jant aralıkları, karmaşık tasarımlı jant telleri ve fren kaliperleri gibi ulaşılması güç bölgeleri kolayca temizlemenizi sağlar. Hem profesyoneller hem de detaylı araç bakımı yapan amatörler için vazgeçilmez bir üründür.\r\n?? Premium Kore Kalitesi:\r\nTamamen orijinal Kore üretimi olan Q²M WheelMitt EVO, sektördeki en yüksek kalite standartlarında üretilmiş mikrofiberlerden yapılmıştır. Profesyonel detaylandırma uygulamalarında üstün performansıyla kendini kanıtlamıştır.\r\n\r\nKULLANIM ALANLARI\r\n\r\n• Tüm tipte jant yüzeyleri (boyalı, krom, kaplamalı, seramik kaplı vb.)\r\n• Dar jant telleri ve karmaşık jant tasarımları\r\n• Fren kaliperleri ve diskleri çevresindeki bölgeler\r\n• Egzoz uçları ve motor bölgesi gibi ulaşılması güç detay alanları\r\n• Araç dışındaki diğer detaylı temizlik işleri (motor, motosiklet, bisiklet vs.)\r\n\r\nNASIL KULLANILIR?\r\n\r\n1. Öncelikle jant yüzeylerini tazyikli suyla ön yıkama yaparak kaba kirleri uzaklaştırın.\r\n2. Favori jant temizleyicinizi (örneğin: Q²M Iron WheelCleaner Redefined) yüzeye püskürtün ve kısa süre bekleyin.\r\n3. WheelMitt EVO'yu şampuanlı veya temiz su dolu kovaya daldırıp, bolca emmesini sağlayın.\r\n4. Eldiveni yüzeye hafif ve kontrollü hareketlerle uygulayarak jantları temizleyin.\r\n5. Yıkama işlemi sırasında eldiveni sık sık durulayarak içerisindeki kiri atmasını sağlayın.\r\n6. Temizlik sonrası jantları bol suyla durulayarak işlemi tamamlayın.\r\n\r\nBAKIM VE YIKAMA ÖNERİLERİ\r\n\r\n• Sadece elde yıkayın, maksimum 30°C sıcaklıkta yıkama önerilir.\r\n• Kurutma makinesi kullanmayın, doğal ortamda asarak kurutun.\r\n• Ütülemeyin, çamaşır suyu ve yumuşatıcı gibi agresif temizleyiciler kullanmayın.\r\n• Kullanım öncesi eldiveni temiz olduğundan emin olun ve kir birikimini önlemek için her kullanım sonrasında mutlaka temizleyin.\r\n\r\nPROFESYONEL DETAYLANDIRMANIN VAZGEÇİLMEZ PARÇASI\r\n\r\nGYEON Q²M WheelMitt EVO, üstün kalitesi ve benzersiz performansıyla jant temizliğinde yepyeni bir standart belirliyor. Her kullanımda profesyonel sonuçlar elde edin, aracınızın jantlarında güvenli ve detaylı temizliğin keyfini yaşayın.\r\n\r\nGYEON Q²M WheelMitt EVO ile kusursuz jant temizliğine ulaşmak artık çok kolay!",
+        "how_to_use": "1. Jant yüzeylerini tazyikli suyla ön yıkama yaparak kaba kirleri uzaklaştırın.\n2. Jant temizleyicinizi (örn: Q²M Iron WheelCleaner) yüzeye püskürtün.\n3. WheelMitt EVO'yu şampuanlı kovaya daldırıp bolca emmesini sağlayın.\n4. Hafif ve kontrollü hareketlerle jantları temizleyin.\n5. Sık sık durulayarak içerisindeki kiri atmasını sağlayın.",
+        "when_to_use": "Jant temizliği, dar jant aralıkları, fren kaliperleri, egzoz uçları ve ulaşılması güç bölgeler için kullanılır.",
+        "target_surface": "Jantlar (boyalı, krom, kaplamalı, seramik kaplı), fren kaliperleri, egzoz uçları",
+        "why_this_product": "• 1250 GSM premium mikrofiber yapı\n• Üç farklı elyaf teknolojisi + twist-loop lifler\n• Ergonomik bilek kuşağı - kaymayı önler\n• Fren tozu ve yol kirine dayanıklı"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-IWCR1000M"
+        ],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Seramik kaplı jantlarda kullanılabilir mi?",
+          "answer": "Evet, hassas boyalı, krom ve seramik kaplı yüzeylerde çiziksiz temizlik sağlar."
+        },
+        {
+          "question": "Sadece elde mi yıkanmalı?",
+          "answer": "Evet, sadece elde maksimum 30°C sıcaklıkta yıkama önerilir."
+        }
+      ],
+      "price": 110000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-WME_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri/Süngerleri"
+      }
+    },
+    {
+      "sku": "Q2M-GWE4040",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "glass_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "type": "Waffle Weave (Petek Dokulu)",
+          "features": "İz bırakmayan cam temizliği",
+          "gsm": 390,
+          "material_blend": "80% polyester / 20% polyamid",
+          "edge_type": "Güçlendirilmiş dikişli",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM GlassWipe EVO 40x40 cm: Cam yüzeyler için özel temizlik bezi, streaksız ve parlak sonuçlar sağlar.",
+        "full_description": "GYEON Q²M GlassWipe EVO Waffle Dokulu Cam Temizlik Bezi – 40 × 40 cm\r\n\r\nLEKE &amp; İZ BIRAKMAYAN CAM TEMİZLİĞİNİN EN GELİŞMİŞ YOLU\r\n\r\n390 GSM yoğunluğa sahip özel waffle (baklava) dokusu sayesinde GYEON Q²M GlassWipe EVO, cam, ayna ve ekranlarda tek geçişte kristal berraklık sunar. Q²M Glass cam temizleyici ile eşleştiğinde hidrofobik, parlak ve tamamen çiziksiz yüzeyler elde edilir; dilediğiniz diğer cam spreyleriyle de mükemmel sonuç verir.\r\n\r\nÖne Çıkan Özellikler\r\n\r\n• Waffle Dokulu Yüzey – Derin baklava kanalları kir, yağ ve suyu hapsederek tek hareketle izsiz temizlik sağlar.\r\n• Yüksek Yoğunluk • 390 GSM – Mikro katmanda kalıntı bırakmaz; her silmede maksimum emiş.\r\n• Çift Taraflı Etkinlik – Pürüzsüz yüz cam parlatır; dokulu yüz inatçı kir ve böcek kalıntısını söker.\r\n• Dayanıklı Dikişli Kenarlar – Sağlam overlock, formu korur; uzun ömürlü kullanım.\r\n• Evrensel Kullanım – Araç, tekne, ofis, ev camları, aynalar ve bilgi-eğlence ekranlarında güvenli.\r\n\r\nTeknik Bilgiler\r\n\r\nÖzellik Değer\r\nBoyut 40 × 40 cm\r\nYoğunluk (GSM) 390 g/m²\r\nLif Karışımı 80 % polyester / 20 % polyamid\r\nDoku Waffle (baklava) örgü\r\nKenar Tipi Güçlendirilmiş dikişli\r\nYıkanabilirlik Evet (30 °C, sıvı deterjan)\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Cam yüzeyi güneşten uzak, serin ve kuru hâlde hazırlayın.\r\n2. Q²M Glass+ (veya tercih ettiğiniz cam temizleyiciyi) yüzeye az miktarda püskürtün.\r\n3. GlassWipe EVO’nun waffle yüzüyle kir ve kalıntıları dairesel olmayan, düz geçişlerle alın.\r\n4. Havlunun temiz bölümünü çevirerek son parlatmayı yapın; iz ve film bırakmaz.\r\n5. Kullanım sonrası 30 °C’de sıvı mikrofiber deterjanla yıkayın; sererek kurutun.\r\n\r\nKullanım Alanları\r\n\r\n• Otomotiv Cam &amp; Ayna – Ön/yan cam, dikiz ve yan aynalarda yüksek görüş netliği.\r\n• Bilgi-Eğlence Ekranları – GPS, dokunmatik ekran ve gösterge panelinde parmak izi giderme.\r\n• Ev &amp; Ofis – Pencereler, vitrin camları, masaüstü camları ve parlak yüzeyler.\r\n• Marine &amp; Karavan – Tuz lekeleri, su damlaları ve böcek kalıntılarında çiziksiz temizlik.\r\n\r\nNeden GYEON Q²M GlassWipe EVO?\r\n\r\n• Lekesiz Sonuç – Özel waffle kanalları, cam temizleyicideki fazla nemi hapsederek buharlaşma izini engeller.\r\n• Tek Bez, Çift İşlev – Temizleme ve parlatmayı aynı bezle hızla tamamlarsınız.\r\n• Uzun Ömür – Güçlü kenar dikişi ve sağlam lif yapısı, 100+ yıkamada performansını korur.\r\n• Zaman Tasarrufu – Daha az kimyasal, daha az silme; dakikalar içinde kristal berraklığı yakalayın.\r\n\r\nÖnerilen Aksesuar &amp; Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nGYEON Q²M Glass+ Profesyonel cam temizleyici GlassWipe EVO ile izsiz, hidrofobik temizlik\r\nGYEON Q²M TowelWash Mikrofiber bakım deterjanı Lif esnekliğini ve emişini korur\r\nGYEON Q²M CeramicGlass Uzun ömürlü cam kaplama Temiz yüzeyde üstün yağmur iticilik\r\nGYEON Q²M BaldWipe Çok amaçlı iç detay bezi Parlak trim ve ekranlarda tamamlayıcı temizlik\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nS: Cam temizleyiciyi fazla sıkarsam neden iz kalıyor?\r\nC: Aşırı ürün, buharlaşırken film bırakır. Az miktar püskürtün; GlassWipe EVO fazla nemi emer.\r\nS: Ev camlarında amonyak bazlı temizleyiciyle kullanabilir miyim?\r\nC: Evet. Lif yapısı kimyasal dayanımlıdır; ancak yoğun amonyak kokusu için iyi havalandırma sağlayın.\r\nS: Havluyu kaç derecede yıkamalıyım?\r\nC: 30 °C’yi geçmeyin; yumuşatıcı ve ağartıcı içeren deterjanlardan kaçının, doğal olarak kurutun.\r\nS: Waffle dokusu boyalı yüzeyde kullanılabilir mi?\r\nC: Cam-odaklıdır; boya üzerinde yoğun baskı uygulamadığınız sürece güvenli, fakat boya kurulama için SilkDryer EVO tavsiye edilir.\r\n\r\nGYEON Q²M GlassWipe EVO, waffle dokusu ve yüksek GSM’iyle cam temizliğini kusursuzlaştırır; iz bırakmayı geçmişte bırakın, net görüşe merhaba deyin!",
+        "how_to_use": "1. Cam yüzeyini güneşten uzak, serin ve kuru halde hazırlayın.\n2. Q²M Glass+ veya tercih ettiğiniz cam temizleyiciyi az miktarda püskürtün.\n3. GlassWipe EVO'nun waffle yüzüyle düz geçişlerle kir ve kalıntıları alın.\n4. Havlunun temiz bölümünü çevirerek son parlatmayı yapın.\n5. 30°C'de sıvı mikrofiber deterjanla yıkayın; sererek kurutun.",
+        "when_to_use": "Otomotiv cam ve ayna temizliği, bilgi-eğlence ekranları, ev ve ofis pencere/vitrin temizliği, marine ve karavan bakımı için kullanılır.",
+        "target_surface": "Cam, ayna, ekran, vitrin, pencere",
+        "why_this_product": "• 390 GSM waffle (baklava) dokulu yüzey\n• Tek geçişte leke ve iz bırakmadan kristal berraklık\n• Çift taraflı etkinlik - temizleme ve parlatma\n• Güçlü kenar dikişi - 100+ yıkamada form korur"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-GLA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "3218",
+          "3218-1"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Cam temizleyiciyi fazla sıkarsam neden iz kalıyor?",
+          "answer": "Aşırı ürün buharlaşırken film bırakır. Az miktar püskürtün; GlassWipe EVO fazla nemi emer."
+        },
+        {
+          "question": "Waffle dokusu boyalı yüzeyde kullanılabilir mi?",
+          "answer": "Cam-odaklıdır; boya üzerinde yoğun baskı uygulamadığınız sürece güvenli, fakat boya kurulama için SilkDryer EVO tavsiye edilir."
+        }
+      ],
+      "price": 33000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-GWE4040_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3218",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "glass_cloth",
+        "fields": {
+          "size": "60x30 cm",
+          "features": "Yüzeye yapışmaz, kaygan silim",
+          "color": "Sarı",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN KOREA Dünya’nın En Büyük Mikrofiber Bez Üreticisi Ürünleri Türkiye’de. Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Aynı Gün Ücretsiz Kargo.",
+        "full_description": "Ev camlarınız, aynalarınız, otomotiv iç/dış camları ve diğer parlak yüzeyleriniz için çiziksiz/hatasız bir silme bezi bakıyorsanız, doğru üründesiniz! KLIN KOREA GLASS SHINE, inanılmaz şekilde ince, inanılmaz şekilde güçlü, arkasında iz ve hav bırakmayan bir cam silme bezidir.\r\n\r\nDörde katlanıp ulaşılması zor olanlarda dahil kolayca uygulanabilir, tekrar tekrar yıkanabilir. Diğer cam silme bezlerinizin aksine yüzeye yapışmaz, kayıp gider. Dilerseniz sadece su ile dilerseniz favori cam silme kimyasalınız ile uzun süreler kullanabilirsiniz. En ideal kullanım için 2 adet ürünü, arka arkaya nemli ve kuru olarak kullanmanızı öneririz.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 60x30 cm – Sarı\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Dörde katlayarak ulaşılması zor alanlarda bile kolayca uygulayın.\n2. Sadece su veya cam temizleyici ile kullanın.\n3. İdeal sonuç için 2 adet kullanın - nemli ve kuru olarak arka arkaya.\n4. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Ev camları, aynalar, otomotiv iç/dış camları ve diğer parlak yüzeylerin çiziksiz temizliği için kullanılır.",
+        "target_surface": "Cam, ayna, parlak yüzeyler",
+        "why_this_product": "• İnanılmaz ince ve güçlü yapı\n• Arkasında iz ve hav bırakmaz\n• Yüzeye yapışmaz - kayıp gider\n• Tekrar tekrar yıkanabilir ve uzun ömürlü"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-GWE4040",
+          "3218-1"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Diğer cam bezlerinden farkı nedir?",
+          "answer": "Yüzeye yapışmaz ve kayarak gider, iz ve hav bırakmaz."
+        },
+        {
+          "question": "En ideal kullanım şekli nedir?",
+          "answer": "2 adet ürünü nemli ve kuru olarak arka arkaya kullanmanız önerilir."
+        }
+      ],
+      "price": 22000,
+      "image_url": "",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-WD4040C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "glass_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "type": "Waffle Weave",
+          "gsm": 390,
+          "features": "Cam ve yüzey kurulama için ortak kullanım",
+          "material_blend": "Polyester/Polyamid",
+          "absorption_level": "Çok yüksek (9/10)",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Waffle Dryer 40x40 cm: Petek dokulu cam silme bezi ve yüzey kurulama havlusu, mükemmel emicilikle temizliği kolaylaştırır. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON QÂ²M Waffle Dryer EVO Petek Dokulu Cam Silme Bezi ve YÃ¼zey Kurulama Havlusu â 40x40 cm\r\n\r\nPetek Dokulu YapÄ± | YÃ¼ksek Su Emici | Ä°z ve Hav BÄ±rakmaz\r\n\r\nKUSURSUZ CAM VE YÃZEY KURULAMA DENEYÄ°MÄ°\r\n\r\nGYEON QÂ²M Waffle Dryer EVO, yenilenmiÅ EVO versiyonuyla araÃ§ camlarÄ±, boyalÄ± yÃ¼zeyler ve plastik aksamlarda Ã¼stÃ¼n kurulama performansÄ± sunar. Petek dokulu Ã¶zel yapÄ±sÄ± ve artÄ±rÄ±lmÄ±Å 390 GSM yoÄunluÄu sayesinde Ã¶nceki nesillere gÃ¶re % daha fazla emicilik saÄlar ve tÃ¼m yÃ¼zeylerde kusursuz, iz bÄ±rakmayan bir kurutma deneyimi yaÅatÄ±r.\r\nCam yÃ¼zeylerde oluÅan su lekelerini ve temizlik sonrasÄ± kalÄ±ntÄ±larÄ±, geride tÃ¼y veya mikrofiber izi bÄ±rakmadan temizler. Ergonomik boyutlarÄ± (40x40 cm) ile dar alanlarda ve detay Ã§alÄ±Åmalarda mÃ¼kemmel bir kullanÄ±m saÄlar.\r\n\r\n\r\nPETEK DOKULU ÃZEL TASARIM â HIZLI VE ETKÄ°LÄ° KURUTMA\r\n\r\nGYEON QÂ²M Waffle Dryer EVOânun petek dokusu sayesinde:\r\nâ¢ Maksimum su emiÅ gÃ¼cÃ¼ ile yÃ¼zeylerde hÄ±zlÄ± ve etkili kurulama saÄlar.\r\nâ¢ Cam ve boyalÄ± yÃ¼zeylerde Ã§izik ve hare izi riskini minimize eder.\r\nâ¢ Temizlik sonrasÄ± yÃ¼zeyde kalan su izlerini, tÃ¼y veya mikrofiber kalÄ±ntÄ±sÄ± bÄ±rakmadan tamamen yok eder.\r\n\r\n\r\nHER YÃZEY Ä°ÃÄ°N MÃKEMMEL ÃÃZÃM\r\n\r\nQÂ²M Waffle Dryer EVO, Ã§ok yÃ¶nlÃ¼ kullanÄ±mÄ±yla her tÃ¼rlÃ¼ yÃ¼zeyde Ã¼stÃ¼n performans sergiler:\r\nâ¢ AraÃ§ camlarÄ± ve aynalarÄ±nda kusursuz silim saÄlar.\r\nâ¢ Seramik kaplamalÄ± araÃ§larÄ±n boyalÄ± yÃ¼zeylerinde gÃ¼venli kurulama imkÃ¢nÄ± tanÄ±r.\r\nâ¢ Farlar, jantlar ve plastik trim gibi detay bÃ¶lgelerinde izsiz temizlik saÄlar.\r\n\r\n\r\nTEKNÄ°K ÃZELLÄ°KLER\r\n\r\nâ¢ Boyut: 40x40 cm\r\nâ¢ Dokuma YapÄ±sÄ±: Petek dokulu waffle (Waffle weave)\r\nâ¢ GSM: 390 GSM (yÃ¼ksek yoÄunluk)\r\nâ¢ Malzeme:  Polyester,   Polyamid\r\nâ¢ Kenar YapÄ±sÄ±: Ä°z bÄ±rakmayan Ã¶zel kesim\r\nâ¢ Emicilik: Ãok yÃ¼ksek (10 Ã¼zerinden 9 puan)\r\n\r\n\r\nGYEON QÂ²M WAFFLE DRYER EVO KULLANIM ALANLARI:\r\n\r\nGYEON QÂ²M Waffle Dryer EVO, araÃ§ temizliÄi dÄ±ÅÄ±nda gÃ¼nlÃ¼k yaÅamda farkÄ±nda olmadÄ±ÄÄ±nÄ±z birÃ§ok alanda mÃ¼kemmel sonuÃ§lar saÄlar:\r\nâ¢ CamlÄ± Ofislerde:\r\nBÃ¶lme camlar, toplantÄ± odasÄ± camlarÄ± ve giriÅ kapÄ±larÄ±nda parmak izi ve su lekelerini zahmetsizce temizler, profesyonel gÃ¶rÃ¼nÃ¼mlÃ¼ bir Ã§alÄ±Åma ortamÄ± yaratÄ±r.\r\nâ¢ Ev ve Ofis MobilyalarÄ±nda:\r\nParlak yÃ¼zeyli masalar, dolap kapaklarÄ± ve cam sehpalardaki toz ve lekeleri Ã§izmeden siler, yÃ¼zeylere yeni gÃ¶rÃ¼nÃ¼m kazandÄ±rÄ±r.\r\nâ¢ AraÃ§ CamlarÄ±nda: YaÄmur sonrasÄ± oluÅan su lekelerini, cam yÃ¼zeylerdeki parmak izi ve kirleri Ã§izmeden kolayca temizler, Ã¼stÃ¼n gÃ¶rÃ¼Å saÄlar.\r\nâ¢ AraÃ§ Ä°Ã§ EkranlarÄ±nda: Dokunmatik multimedya ekranlarÄ±, navigasyon panelleri ve dijital gÃ¶sterge ekranlarÄ±nda gÃ¼venli ve Ã§iziksiz silme iÅlemi sunar.\r\nâ¢ AynalÄ± Alanlarda:\r\nBanyo ve giyinme odasÄ± aynalarÄ±nda oluÅan buhar, su lekeleri ve parmak izlerini iz bÄ±rakmadan temizleyerek mÃ¼kemmel berraklÄ±k saÄlar.\r\n\r\n\r\nâ¢ Petek dokusu sayesinde Ã§iziksiz, iz bÄ±rakmayan yÃ¼zey kurulama\r\nâ¢ Cam temizliÄinde tÃ¼y bÄ±rakmaz, net ve parlak sonuÃ§ verir\r\nâ¢ KÃ¼Ã§Ã¼k boyutu sayesinde eriÅimi zor alanlarda maksimum kullanÄ±m kolaylÄ±ÄÄ±\r\nâ¢ ArtÄ±rÄ±lmÄ±Å yoÄunluÄu ve kalitesi ile defalarca yÄ±kamadan sonra bile ilk gÃ¼nkÃ¼ performansÄ±nÄ± korur\r\n\r\nNASIL KULLANILIR?\r\n\r\nâ¢ Kuru ve temiz olarak kullanmaya baÅlayÄ±n.\r\nâ¢ Cam veya araÃ§ yÃ¼zeylerinde silme iÅlemini hafif baskÄ± uygulayarak yapÄ±n.\r\nâ¢ Kurulama iÅlemi sÄ±rasÄ±nda havluyu dÃ¼zenli olarak ters Ã§evirerek temiz yÃ¼zeylerden yararlanÄ±n.\r\nâ¢ KullanÄ±m sonrasÄ± temiz su ile yÄ±kayÄ±p, asarak kurutun.\r\n\r\n\r\nBAKIM VE YIKAMA ÃNERÄ°LERÄ°\r\n\r\nâ¢ Mikrofiber havlu temizliÄi iÃ§in Ã¶zel Towelwash deterjan kullanÄ±lmasÄ± Ã¶nerilir.\r\nâ¢ Maksimum 30Â°C sÄ±caklÄ±kta Ã§amaÅÄ±r makinesinde yÄ±kayÄ±n.\r\nâ¢ ÃamaÅÄ±r suyu, yumuÅatÄ±cÄ± veya benzeri agresif temizlik Ã¼rÃ¼nleri kullanmayÄ±n.\r\nâ¢ ÃtÃ¼leme ve kuru temizleme yapmayÄ±n.\r\nâ¢ ÃrÃ¼nÃ¼n emiciliÄini korumak iÃ§in havlu kurutucuda kurutmayÄ±n, doÄal ortamda asarak kurutun.\r\n?? Ä°PUCU:\r\nWaffle Dryer EVO havlunuzu cam silme iÃ§in Ã¶zel olarak ayÄ±rarak, Ã§apraz kirlenme riskini azaltabilir ve her zaman mÃ¼kemmel sonuÃ§lar alabilirsiniz.\r\n\r\n\r\nNEDEN GYEON QÂ²M WAFFLE DRYER EVO?\r\n\r\n?? % artÄ±rÄ±lmÄ±Å su emme kapasitesiyle maksimum kurulama performansÄ±\r\n?? Ãzel petek dokusuyla iz ve tÃ¼y bÄ±rakmadan Ã¼stÃ¼n cam temizliÄi\r\n?? KÃ¼Ã§Ã¼k detay alanlarÄ±nda rahat kullanÄ±m saÄlayan ergonomik boyut\r\n?? GÃ¼Ã§lendirilmiÅ kenar tasarÄ±mÄ±yla Ã§izik ve iz oluÅumunu tamamen engeller\r\n?? Profesyonel detaylandÄ±rma ve gÃ¼nlÃ¼k kullanÄ±m iÃ§in vazgeÃ§ilmez yardÄ±mcÄ±\r\n\r\n\r\nGYEON QÂ²M Waffle Dryer EVO ile araÃ§ yÃ¼zeylerinde kusursuz kurutma ve temizliÄin keyfini yaÅayÄ±n.",
+        "how_to_use": "1. Kuru ve temiz olarak kullanmaya başlayın.\n2. Cam veya araç yüzeylerinde silme işlemini hafif baskı uygulayarak yapın.\n3. Kurulama sırasında havluyu düzenli olarak ters çevirerek temiz yüzeylerden yararlanın.\n4. Kullanım sonrası temiz su ile yıkayıp, asarak kurutun.",
+        "when_to_use": "Araç camları ve aynaları, seramik kaplamalı yüzeyler, farlar, jantlar, plastik trim, ev ve ofis camları için kullanılır.",
+        "target_surface": "Cam, ayna, boyalı yüzey, plastik aksam, ekran",
+        "why_this_product": "• Petek dokulu özel tasarım - hızlı ve etkili kurutma\n• 390 GSM artırılmış yoğunluk - % daha fazla emicilik\n• Çiziksiz, iz bırakmayan yüzey kurulama\n• Tüy veya mikrofiber kalıntısı bırakmaz"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-GLA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-GWE4040",
+          "Q2M-WD4060C"
+        ]
+      },
+      "faq": [
+        {
+          "question": "GlassWipe EVO'dan farkı nedir?",
+          "answer": "Waffle Dryer hem cam hem yüzey kurulama için tasarlanmış, daha çok yönlü kullanım sunar."
+        },
+        {
+          "question": "Cam silme için ayrı tutulmalı mı?",
+          "answer": "Evet, çapraz kirlenme riskini azaltmak için cam silme bezini ayrı tutmanız önerilir."
+        }
+      ],
+      "price": 22000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/Q2M-WD4040C_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "Q2M-IWE40402P",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "interior_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "type": "Plush & Double Sided",
+          "features": "Toz alma ve ekran silme için güvenli",
+          "quantity": 2,
+          "edge_type": "Ultrasonik Lazer Kesim",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM InteriorWipe EVO 40x40 cm: etkili ve pratik kullanımla temizlik sağlar. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M InteriorWipe EVO, peluş, lazer kesimli, yumuşak ama çok etkili iç aksamlara özel detaylandırıcı ve temizleyici bir bezdir. Her çeşit plastik, trim ve benzeri yüzeyler için mükemmel bir seçimdir.\r\n\r\nBu peluş, çift taraflı mikrofiber bez, temizlik işleminde olduğu kadar silme işleminde de etkili ve emicidir. Her çeşit tozu, kiri ve temizleyici artığını saniyeler içerisinde, arkasında iz ve kalıntı bırakmadan saniyeler içerisinde içine hapseder.\r\n\r\nGYEON Q²M InteriorWipe EVO 'nun ultrasonik lazer kesimi, onu hiç olmadığı kadar peluş, yumuşak ve kusursuz yapar.\r\n\r\nGYEON Q²M InteriorWipe EVO mikrofiber bezi, aracınızda olduğu gibi evinizdeki, teknenizdeki ve ofisinizdeki detaylı temizlik işlemlerinde de güvenle kullanabilirsiniz.\r\n\r\nBOYUT: 40x40 cm\r\nPAKET İÇERİĞİ: 2 Adet Bez\r\n\r\nBAKIM ÖNERİSİ\r\nTowelwash ile yıkamanızı önerilir. Makine yıkama, maksimum 30°C. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. İç temizlik ürününü yüzeye uygulayın.\n2. InteriorWipe EVO ile hafif basınçla silin.\n3. Tozu, kiri ve temizleyici artıklarını saniyeler içinde alır.\n4. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Plastik, trim, torpido, konsol ve benzeri iç yüzeylerin detaylı temizliği, toz alma ve temizleyici kalıntı silimi için kullanılır.",
+        "target_surface": "Plastik, trim, dashboard, konsol, iç aksam",
+        "why_this_product": "• Çift taraflı peluş yapı - temizlik ve silme işlemi birlikte\n• Ultrasonik lazer kesim - iz ve kalıntı bırakmaz\n• 2'li paket - ekonomik çözüm\n• Ev, tekne ve ofiste de kullanılabilir"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-INA500M"
+        ],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Araç dışında kullanılabilir mi?",
+          "answer": "Evet, evde, teknede ve ofiste detaylı temizlik işlemlerinde güvenle kullanılabilir."
+        },
+        {
+          "question": "GlassWipe veya LeatherWipe yerine kullanılabilir mi?",
+          "answer": "Plastik ve trim için uygun, cam ve deri için özel bezler tercih edilmeli."
+        }
+      ],
+      "price": 50000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-IWE40402P_0-scaled.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-LWE40402P",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "interior_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "target_surface": "Deri",
+          "features": "Deri temizleyicilerle kullanım için özel doku",
+          "quantity": 2,
+          "edge_type": "Lazer Kesim",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM LeatherWipe EVO 40x40 cm: Deri aksamlara özel temizlik için 2'li paket, etkili ve nazik bakım sağlar.",
+        "full_description": "GYEON Q²M LeatherWipe EVO, kısa tüylü, lazer kesimli, yumuşak ama çok etkili ve emici deri aksamlara özel bir temizleme ve silme bezidir. Deri döşemeler üzerindeki kirleri gidermek, temizleyici artıklarını silmek ve deri koruma ürünleri ile birlikte kullanmak için idealdir. Alkantara döşemelerde de güvenle kullanılabilir.<br><br>GYEON Q²M LeatherWipe EVO, deri döşemeler için oldukça etkili ve güvenlidir. Ultrasonik lazer kesimi kusursuz ve net bir sonuç verir.<br><br>GYEON Q²M LeatherWipe EVO mikrofiber bezi, aracınızda olduğu gibi evinizdeki, teknenizdeki ve ofisinizdeki deri döşemeli koltuklar, masalar ve başlıklar için de güvenle kullanabilirsiniz.<br><br>BOYUT: 40x40 cm<br>PAKET İÇERİĞİ: 2 Adet Bez<br><br>BAKIM ÖNERİSİ<br>Towelwash ile yıkamanızı önerilir. Makine yıkama, maksimum 30°C. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. Deri temizleyiciyi yüzeye veya beze uygulayın.\n2. LeatherWipe EVO ile hafif basınçla kirleri giderin.\n3. Temizleyici artıklarını silin ve deri koruma ürünü uygulayın.\n4. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Deri döşeme temizliği, deri temizleyici artıklarını silme, deri koruma ürünleri ile birlikte kullanım ve Alcantara döşemelerde temizlik için kullanılır.",
+        "target_surface": "Deri koltuk, deri döşeme, Alcantara",
+        "why_this_product": "• Kısa tüylü lazer kesimli yapı - deri için özel tasarım\n• Yumuşak ama çok etkili ve emici\n• Alcantara döşemelerde de güvenle kullanılabilir\n• 2'li paket - ev, tekne ve ofis için de uygun"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-LCA500M"
+        ],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Alcantara yüzeylerde kullanılabilir mi?",
+          "answer": "Evet, Alcantara döşemelerde de güvenle kullanılabilir."
+        },
+        {
+          "question": "Deri koruma ürünleriyle birlikte kullanılabilir mi?",
+          "answer": "Evet, deri temizlik ve koruma ürünleri ile birlikte kullanım için idealdir."
+        }
+      ],
+      "price": 40000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LWE40402P_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-SEP1010C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "suede_cloth",
+        "fields": {
+          "size": "10x10 cm",
+          "gsm": 200,
+          "quantity": 10,
+          "features": "Seramik kaplama aplikatörüne sarılarak kullanılır",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "Seramik uygulamaları için özel süet silme bezi, 10'lu paket. Hassas ve etkili temizlik sunar. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo.",
+        "full_description": "GYEON Q²M Suede EVO süet bezlerimiz 10x10 cm boyutundan 20x20 cm ve 40x40 cm'lik ölçülere kadar 3 farklı boyutta mevcuttur. Seramik kaplama uygulamalarında, uygulama sırasında ve sonrasında silim için yüksek performanlı ve güvenli son adım mikrofiber bezdir. Ultra yumuşak yüzeyi ve lazer kesim kenarları sayesinde yüzeyde pürüzsüz bir hareket sağlar, uygulama risklerini en aza indirir.<br><br>GYEON Q²M Suede EVO, yenilenen 200 GSM yoğunluğu ile şimdi daha kaliteli, dayanıklı ve performanslıdır. Q² Wax, CanCoat, QuickView ve View gibi ürünleri uyguladıktan sonra yüzey kalıntıları temizlemek için idealdir. <br><br>BOYUT: 10x10 cm<br>GSM: 200<br><br>BAKIM ÖNERİSİ<br>Towelwash kullanmanız önerilir. Makine yıkama, maksimum 30°C'de gerçekleştirilmelidir. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. Süet bezi seramik kaplama aplikatörüne sarın.\n2. Q² veya seramik kaplama ürününü uygulayın.\n3. Uygulama sonrası yüzey kalıntılarını temizlemek için kullanın.\n4. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Seramik kaplama uygulaması, Q² Wax, CanCoat, QuickView, View ve benzeri koruma ürünleri silimi için kullanılır.",
+        "target_surface": "Seramik kaplama uygulanan yüzeyler",
+        "why_this_product": "• 200 GSM yenilenen yoğunluk - daha kaliteli ve dayanıklı\n• Ultra yumuşak yüzey ve lazer kesim kenarlar\n• 10'lu paket - yeterli stok\n• Aplikatöre sarılarak kullanım için ideal boyut"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Diğer boyutları var mı?",
+          "answer": "Evet, 20x20 cm ve 40x40 cm boyutlarında da mevcuttur."
+        },
+        {
+          "question": "Q² Wax uygulamasında kullanılabilir mi?",
+          "answer": "Evet, Q² Wax, CanCoat, QuickView ve View gibi ürünlerin silimi için idealdir."
+        }
+      ],
+      "price": 35000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-SEP1010C_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "KLIN-3113AG",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "multi_purpose_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "quantity": 10,
+          "features": "Genel temizlik için ekonomik paket",
+          "material_blend": "Polyester/Polyamide",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Temizlik Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Orijinal Ürün Garantisi. Hızlı Kargo",
+        "full_description": "KLIN Clean Towel bezler, Ã§ok amaÃ§lÄ± mikrofiber bez arayÄ±ÅÄ±nÄ±za son verecek uygun fiyatlÄ± ve yÃ¼ksek performanslÄ± Ã§Ã¶zÃ¼mÃ¼mÃ¼zdÃ¼r. AracÄ±nÄ±zda, ev eÅyalarÄ±nÄ±zda, elektronik Ã¼rÃ¼nlerinizde ve deÄerli parÃ§alarÄ±nÄ±zda gÃ¼venle kullanabilirsiniz. Toz almak, temizlik yapmak cila silmek veya koruyucu uygulamak; neredeyse ihtiyacÄ±nÄ±z olan tÃ¼m iÅlemler iÃ§in bu bezler mÃ¼kemmel uyum sunar.\r\nKore Ã¼retimi birinci sÄ±nÄ±f dayanÄ±klÄ±lÄ±kta, az tÃ¼ylÃ¼ bir yapÄ±dadÄ±r. ArkasÄ±nda havÄ±nÄ±/tÃ¼yÃ¼nÃ¼ bÄ±rakmaz. KolaylÄ±kla bozulmaz ve sÃ¶kÃ¼lmez. Tek bir bezi uzun sÃ¼re kullanabilirsiniz.\r\n\r\nDÃ¶Åeme temizliÄi, iÃ§ detaylandÄ±rma, elektronik Ã¼rÃ¼n panelleri temizleme, pasta cila silme, seramik kaplama ve boya koruma gibi tÃ¼m uygulalarda gÃ¼venli, etkili ve dayanÄ±klÄ± bir Ã§Ã¶zÃ¼m sunar. Tekrar tekrar yÄ±kanÄ±p kullanÄ±lbilir.\r\n\r\nKLIN KOREA ânÄ±n en son mikrofiber teknolojisi ile Ã¼retilmiÅtir. Benzersiz CCS* Ã¶zelliÄi ile Ã¼rÃ¼n paketlenmeden Ã¶n yÄ±kama yapÄ±lmÄ±Å ve paketten Ã§Ä±kartÄ±p anÄ±nda kullanÄ±ma hazÄ±r hale getirilmiÅtir. Uzun sÃ¼reler Ã¶zelliÄi bozulmadan kullanÄ±m imkÃ¢nÄ± verir. Otomotiv, motor, marin gibi farklÄ± alanlarda gÃ¼venle kullanÄ±labilir.\r\n\r\nÃlÃ§Ã¼ ve Renkler:\r\nâ¢ 40x40 cm â Gri veya Kahverengi\r\nâ¢ Paket iÃ§erisinde 10 adet mikrofiber bez bulunur.\r\n\r\nTeknik Ãzellikler:\r\nâ¢ Birinci Kalite Kore MenÅei Mikrofiber\r\nâ¢  Polyester,   Polyamide\r\nâ¢ Hav bÄ±rakmayan iplik\r\nâ¢ Contaminent Control System (CCS) â Kirlilik Kontrol Sistemi\r\n\r\nYÄ±kama Ãnerisi:\r\nÃamaÅÄ±r Makinesi â Duru su veya mikrofiber ÅampuanÄ± ile maksimum 40 derece. SÄ±kma yapÄ±lmamalÄ±. Asarak kurutulmalÄ±. YumuÅatÄ±cÄ±, Ã§amaÅÄ±r suyu ve benzer temizleyiciler kullanÄ±lmamalÄ±. Beyaz ve renkli diÄer Ã¼rÃ¼nlerden ayrÄ± yÄ±kama yapÄ±lmalÄ±.",
+        "how_to_use": "1. Toz alma, temizlik veya koruyucu uygulama silimi için kullanın.\n2. Döşeme temizliği, iç detaylandırma, elektronik panel temizliği için uygulayın.\n3. Pasta/cila silme, seramik kaplama ve boya koruma uygulamalarında kullanın.\n4. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Toz alma, temizlik, pasta/cila silme, seramik/boya koruma silimi, döşeme temizliği ve iç detaylandırma için çok amaçlı kullanım.",
+        "target_surface": "Araç, ev eşyaları, elektronik ürünler, değerli parçalar",
+        "why_this_product": "• Kore üretimi birinci sınıf dayanıklılık\n• Az tüylü yapı - arkasında hav bırakmaz\n• Kolaylıkla bozulmaz ve sökülmez\n• 10'lu paket - ekonomik ve uzun süreli kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3217HS-5G",
+          "3217HS-5W"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Hangi renk seçenekleri var?",
+          "answer": "Gri ve Kahverengi renk seçenekleri mevcuttur."
+        },
+        {
+          "question": "Elektronik ürünlerde güvenle kullanılabilir mi?",
+          "answer": "Evet, değerli parçalarda ve elektronik ürünlerde güvenle kullanılabilir."
+        }
+      ],
+      "price": 100000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/KLIN-3113AG_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-IPE4P",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "kit",
+        "fields": {
+          "kit_contents": [
+            "InteriorWipe (2)",
+            "GlassWipe (1)",
+            "LeatherWipe (1)"
+          ],
+          "features": "Komple iç temizlik seti",
+          "size": "40x40 cm",
+          "edge_type": "Ultrasonik Lazer Kesim",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "İç aksamlar için mikrofiber detaylı temizlik bezleri, etkili ve pratik temizlik sunar. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo fırsatı.",
+        "full_description": "GYEON QÂ²M InteriorPack EVO Ä°Ã§ Aksam Mikrofiber DetaylÄ± Temizlik Bezi Seti 4'lÃ¼ Paket - 40x40 cm<br><br>Tam Ä°Ã§ DetaylandÄ±rma Seti | Lazer Kesim | Ä°z BÄ±rakmayan Temizlik<br><br>ARAÃ Ä°Ã DETAYLANDIRMADA PROFESYONEL SONUÃLAR TEK PAKETTE!<br><br>GYEON QÂ²M InteriorPack EVO, aracÄ±nÄ±zÄ±n iÃ§ temizliÄinde ihtiyaÃ§ duyduÄunuz tÃ¼m Ã¶zel mikrofiber bezleri profesyonel kalite ve tek paket avantajÄ±yla sizlere sunar. Birbirinden farklÄ± yÃ¼zeylere Ã¶zel tasarlanmÄ±Å dÃ¶rt farklÄ± bez ile iÃ§ detaylandÄ±rma iÅlemlerinizi kusursuzlaÅtÄ±rÄ±r.<br><br><br>TEKNÄ°K ÃZELLÄ°KLER<br><br>â¢\tBez ÃlÃ§Ã¼leri: 40 x 40 cm (Her bez iÃ§in)<br>â¢\tKenar YapÄ±sÄ±: Ultrasonik Lazer Kesim (iz bÄ±rakmaz)<br>â¢\tSet Ä°Ã§eriÄi:<br>â¢ InteriorWipe EVO â 2 adet<br>â¢ GlassWipe EVO â 1 adet<br>â¢ LeatherWipe EVO â 1 adet<br>â¢\tMalzeme: Premium Mikrofiber ( Polyester,   Polyamid)<br>â¢\tGSM: GlassWipe EVO iÃ§in 390 GSM<br><br><br>SET Ä°ÃERÄ°ÄÄ° VE KULLANIM ALANLARI<br><br> GYEON QÂ²M InteriorWipe EVO (2 Adet)<br>â¢\tÃift taraflÄ± peluÅ yapÄ±sÄ±yla tÃ¼m iÃ§ plastik, trim, torpido ve konsol yÃ¼zeylerini Ã§izmeden temizler.<br>â¢\tTozlarÄ± ve temizlik Ã¼rÃ¼nÃ¼ kalÄ±ntÄ±larÄ±nÄ± etkin bir Åekilde siler, yÃ¼zeyleri yenilenmiÅ hale getirir.<br>â¢\tUltrasonik lazer kesim kenarlarÄ± sayesinde yÃ¼zeylere zarar vermez, iz bÄ±rakmaz.<br> GYEON QÂ²M GlassWipe EVO (1 Adet)<br>â¢\t390 GSM yoÄunluÄunda mikrofiber yapÄ±sÄ±yla cam, ayna ve ekranlarda kusursuz sonuÃ§ saÄlar.<br>â¢\tÃzel dokusu, cam yÃ¼zeylerde leke ve iz oluÅumunu engeller, camlarda berrak bir gÃ¶rÃ¼ntÃ¼ bÄ±rakÄ±r.<br>â¢\tDayanÄ±klÄ± yapÄ±sÄ± sayesinde tekrar tekrar kullanÄ±ma uygundur ve uzun Ã¶mÃ¼rlÃ¼dÃ¼r.<br> GYEON QÂ²M LeatherWipe EVO (1 Adet)<br>â¢\tKÄ±sa tÃ¼ylÃ¼, lazer kesim tasarÄ±mÄ±yla deri koltuklar ve dÃ¶Åemeler Ã¼zerinde hassas ve etkili temizlik sunar.<br>â¢\tDeri temizleyici artÄ±klarÄ±nÄ±, kirleri ve bakÄ±m Ã¼rÃ¼nlerini derinlemesine temizler, deri yÃ¼zeylerini Ã§izmez.<br>â¢\tAlcantara dÃ¶Åemelerde de gÃ¼venle kullanÄ±labilir, yumuÅak dokusu sayesinde yÃ¼zeye zarar vermez.<br><br><br>GYEON QÂ²M INTERIORPACK EVO KULLANIM ALANLARI<br><br>â¢\tAraÃ§ iÃ§ konsol, torpido ve plastik aksamlar<br>â¢\tGÃ¶sterge paneli ve dokunmatik ekranlar<br>â¢\tAraÃ§ iÃ§i ve dÄ±ÅÄ± cam yÃ¼zeyler, aynalar<br>â¢\tDeri koltuk ve deri dÃ¶Åemeler<br>â¢\tAlcantara yÃ¼zeyli dÃ¶Åeme ve iÃ§ aksamlar<br><br><br>NASIL KULLANILIR?<br><br>1.\tHer bezi kullanÄ±m alanÄ±na gÃ¶re ayÄ±rarak kullanÄ±n.<br>2.\tGlassWipe EVO'yu cam temizleyici ile birlikte kullanarak camlarÄ± silin ve parlatÄ±n.<br>3.\tInteriorWipe EVO bezlerini iÃ§ temizlik Ã¼rÃ¼nleriyle kullanarak araÃ§ konsolu, trimler ve plastik yÃ¼zeylerdeki kirleri temizleyin.<br>4.\tLeatherWipe EVO bezini deri temizleyicileri ve bakÄ±m Ã¼rÃ¼nleriyle kullanarak deri ve Alcantara yÃ¼zeyleri nazikÃ§e silin ve yenileyin.<br>5.\tKullanÄ±m sonrasÄ± bezleri temizleyip asarak kurumaya bÄ±rakÄ±n.<br><br><br>BAKIM VE YIKAMA ÃNERÄ°LERÄ°<br><br>â¢\tMaksimum 30Â°C sÄ±caklÄ±kta Ã§amaÅÄ±r makinesinde yÄ±kayÄ±n.<br>â¢\tGYEON Towelwash veya mikrofiber havlu temizleyici kullanÄ±mÄ± Ã¶nerilir. BÃ¶ylece bezlerin yumuÅaklÄ±ÄÄ±nÄ± ve emiciliÄini uzun sÃ¼re koruyabilirsiniz.<br>â¢\tYÄ±kama sonrasÄ± bezleri kesinlikle Ã¼tÃ¼lemeyin, kuru temizleme yaptÄ±rmayÄ±n ve Ã§amaÅÄ±r suyu veya yumuÅatÄ±cÄ± gibi kimyasallar kullanmayÄ±n.<br>â¢\tKurutma iÅlemini asarak ve doÄal ortamda yapmanÄ±z bezlerin kullanÄ±m Ã¶mrÃ¼nÃ¼ uzatacaktÄ±r.<br>â¢\tBezleri renk ve kullanÄ±m alanÄ±na gÃ¶re gruplandÄ±rarak ayrÄ± ayrÄ± yÄ±kayÄ±n, bÃ¶ylece Ã§apraz kirlenmeyi Ã¶nleyebilirsiniz.<br><br><br>NEDEN GYEON QÂ²M INTERIORPACK EVO TERCÄ°H EDÄ°LMELÄ°?<br><br>?? TÃ¼m Ä°Ã§ DetaylandÄ±rma Ä°htiyaÃ§larÄ±nÄ±z Ä°Ã§in Tek Set<br>FarklÄ± iÃ§ yÃ¼zeylerin ihtiyaÃ§larÄ±na Ã¶zel geliÅtirilmiÅ bezler sayesinde, araÃ§ iÃ§i temizliÄi ve bakÄ±mÄ±nda tek pakette profesyonel sonuÃ§lar.<br>?? ÃstÃ¼n Kaliteli Lazer Kesim Mikrofiber YapÄ±<br>Bezlerin ultrasonik lazer kesim kenarlarÄ± yÃ¼zeylerde iz veya Ã§izik bÄ±rakmaz. BÃ¶ylece gÃ¼venli ve kusursuz temizlik saÄlar.<br>?? Uzun ÃmÃ¼rlÃ¼ ve DayanÄ±klÄ± KullanÄ±m<br>YÃ¼ksek GSM oranÄ±, kaliteli Ã¼retim materyali ve Ã¶zenli iÅÃ§ilik sayesinde uzun Ã¶mÃ¼rlÃ¼ ve tekrar kullanÄ±labilir bezlerdir.<br>?? Ãok YÃ¶nlÃ¼ KullanÄ±m AlanlarÄ±<br>AraÃ§ iÃ§ plastik, deri, cam ve Alcantara yÃ¼zeylerde Ã¼stÃ¼n performans sunmasÄ±nÄ±n yanÄ± sÄ±ra ev ve ofislerdeki detaylÄ± temizlik ihtiyaÃ§larÄ±nÄ±za da mÃ¼kemmel Ã§Ã¶zÃ¼mler sunar.<br><br><br>GYEON QÂ²M INTERIORPACK EVO Ä°LE PROFESYONEL Ä°Ã TEMÄ°ZLÄ°K DENEYÄ°MÄ°<br><br>GYEON QÂ²M InteriorPack EVO, araÃ§ iÃ§i temizlik uygulamalarÄ±nda profesyonellerin tercihi olmasÄ±nÄ±n yanÄ± sÄ±ra detaylandÄ±rma tutkunlarÄ±nÄ±n da vazgeÃ§ilmez setidir. AracÄ±nÄ±zÄ±n iÃ§ temizliÄini her zaman ilk gÃ¼nkÃ¼ gibi korumanÄ±z iÃ§in gerekli tÃ¼m mikrofiber bezleri tek pakette sunarak, zamandan ve bÃ¼tÃ§enizden tasarruf etmenizi saÄlar.<br><br>GYEON QÂ²M InteriorPack EVO ile aracÄ±nÄ±zÄ±n iÃ§ yÃ¼zeylerinde derinlemesine temizlik, gÃ¼venli kullanÄ±m ve profesyonel bir sonuÃ§ elde edin!",
+        "how_to_use": "1. Her bezi kullanım alanına göre ayırarak kullanın.\n2. GlassWipe EVO'yu cam temizleyici ile birlikte kullanarak camları silin.\n3. InteriorWipe EVO bezlerini iç temizlik ürünleriyle kullanarak plastik yüzeyleri temizleyin.\n4. LeatherWipe EVO bezini deri temizleyici ve bakım ürünleriyle kullanın.\n5. 30°C'de Towelwash ile yıkayın.",
+        "when_to_use": "Araç iç konsol, torpido, plastik aksam, gösterge paneli, cam, ayna, deri koltuk ve Alcantara yüzeylerin profesyonel temizliği için kullanılır.",
+        "target_surface": "İç konsol, torpido, plastik, cam, ayna, deri, Alcantara",
+        "why_this_product": "• Tam iç detaylandırma seti - tek pakette 4 bez\n• Ultrasonik lazer kesim - iz bırakmayan temizlik\n• Farklı yüzeylere özel tasarlanmış bezler\n• Ekonomik ve pratik çözüm"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-GPE2P"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Set içeriği nedir?",
+          "answer": "InteriorWipe EVO x2, GlassWipe EVO x1, LeatherWipe EVO x1 toplam 4 bez."
+        },
+        {
+          "question": "Ev ve ofiste de kullanılabilir mi?",
+          "answer": "Evet, araç dışında ev ve ofis detaylı temizlik ihtiyaçlarına da mükemmel çözümler sunar."
+        }
+      ],
+      "price": 88000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-IPE4P_0-scaled.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-GPE2P",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "kit",
+        "fields": {
+          "kit_contents": [
+            "GlassWipe",
+            "BaldWipe"
+          ],
+          "features": "Waffle ve düz dokuma kombinasyonu",
+          "size": "40x40 cm",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM GlassPack EVO 2'li Paket 40x40 cm: Cam yüzey temizlik ve silme için mikrofiber bez seti, etkili ve streaksız sonuçlar sağlar.",
+        "full_description": "GYEON Q²M GlassPack EVO, cam yüzeylerin temizlik, koruma ve bakım uygulamalarında ihtiya. duyacağınız tüm mikrofiber bezleri size tek bir pakette sunan, hem ekonomik hem de yüksek performanslı bir settir. Paket içerisinde toplamda 2 adet 40x40 cm mikrofiber bez bulunmaktadır.<br><br>PAKET İÇERİĞİ:<br>GYEON Q²M GlassWipe EVO (1 adet); camlarınızda/aynalarında iz ve leke bırakmadan temizliğin en mükemmel seçimidir. 390 GSM'lik yapısıyla  size kusursuz, hatasız ve lekesiz bir sonuç verir. Oldukça dayanıklıdır, uzun ömürlüdür.<br><br>GYEON Q²M BaldWipe EVO (1 adet); yüksek fiber kaliteli, tüysüz, lazer kesimli, yumuşak ama çok etkili ve çok amaçlı bir silme bezidir. Koruma uygulamalarını silmek,yüzeyleri temizlemek ve iç detaylandırma gibi birçok farklı uygulamaya uygundur.<br><br>Ölçüler: 40x40 cm<br>Adet: Toplam 2 adet mikrofiber bez<br>GlassWipe EVO x 1 adet<br>BaldWipe EVO x 1 Adet<br><br>BAKIM ÖNERİSİ<br>Towelwash kullanmanız önerilir. Makine yıkama, maksimum 30°C'de gerçekleştirilmelidir. Kuru temizleme yapmayın. Ütülemeyin. Çamaşır suyu kullanmayın.",
+        "how_to_use": "1. GlassWipe EVO'yu cam temizleyici ile kullanarak camları silin ve parlatın.\n2. BaldWipe EVO'yu koruma uygulamalarını silme ve yüzey temizleme için kullanın.\n3. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Cam yüzeylerin temizlik, koruma ve bakım uygulamaları için ekonomik ve yüksek performanslı set olarak kullanılır.",
+        "target_surface": "Cam, ayna, koruma uygulanan yüzeyler",
+        "why_this_product": "• Waffle ve düz dokuma kombinasyonu\n• GlassWipe EVO 390 GSM - kusursuz cam temizliği\n• BaldWipe EVO - çok amaçlı koruma silimi\n• Ekonomik 2'li paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-GLA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-IPE4P"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Set içeriği nedir?",
+          "answer": "GlassWipe EVO x1 ve BaldWipe EVO x1 toplam 2 bez."
+        },
+        {
+          "question": "InteriorPack ile farkı nedir?",
+          "answer": "GlassPack sadece cam ve koruma odaklı, InteriorPack tüm iç aksam için kapsamlı set."
+        }
+      ],
+      "price": 50000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-GPE2P_0-scaled.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-WP",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "sub_type": "wash_mitt",
+          "size": null,
+          "gsm": null,
+          "material_blend": null,
+          "edge_type": null,
+          "recommended_use": null,
+          "wash_instructions": null,
+          "pile_type": null,
+          "absorption_level": null,
+          "color": null,
+          "type": "Çift Taraflı (Uzun/Kısa Lif)",
+          "features": "Q²M RestartWash ile uyumlu"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Wash Pad: Çift yüzlü araç yıkama eldiveni, etkili temizlik ve kolay kullanım sunar. Yüzeylere zarar vermeden derinlemesine temizlik sağlar.",
+        "full_description": "Mükemmel kimyasallar, doğru aletler olmadan hiçbir işe yaramaz! Yüksek derecede temizleyici Q²M RestartWash ile uyumlu bir yıkama pedi sunuyoruz. Güvenli ve verimli bir yıkama rutini için çift taraflı bir yıkama pedi. Hem uzun hem de kısa olmak üzere iki tür özel olarak seçilmiş lif, kirletici maddelerin güvenli bir şekilde uzaklaştırılmasını ve başlangıçta temizlenen bir panelde ek temizleme gücünü garanti eder.<br><br>GYEON Q²M Wash Pad Çift Yüzlü Araç Yıkama Eldiveni, tasarımı sayesinde, bir lif kombinasyonu ile kalıntı ve kiri tamamen gidermenize olanak tanır. Uzun tüylü lif ile yüzeydeki kirlenmeyi doğrudan lifte toplamak için ilk hareketi, ardından kısa tüylü tarafın güvenli bir şekilde çıkarması sağlanır. Bu, yüzeyin pırıl pırıl temiz olduğunu görsel olarak onaylar.<br><br>GYEON Q²M Wash Pad, tek boyutta gelir ve hem ped hem de eldiven olarak kullanılabilir.",
+        "how_to_use": "1. Uzun tüylü lif ile yüzeydeki kirlenmeyi doğrudan lifte toplayın.\n2. Kısa tüylü tarafla güvenli bir şekilde çıkarın.\n3. Hem ped hem de eldiven olarak kullanılabilir.\n4. Yıkama sonrası temiz su ile durulayın.",
+        "when_to_use": "Güvenli ve verimli araç yıkama rutini, Q²M RestartWash ile birlikte kullanım için tasarlanmıştır.",
+        "target_surface": "Araç boya yüzeyleri",
+        "why_this_product": "• Çift taraflı tasarım - uzun ve kısa lif kombinasyonu\n• Q²M RestartWash ile mükemmel uyum\n• Kirletici maddelerin güvenli uzaklaştırılması\n• Hem ped hem eldiven olarak kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-STE"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Smoothie EVO'dan farkı nedir?",
+          "answer": "Wash Pad çift taraflı (uzun/kısa lif) yapıda, Smoothie EVO üç farklı elyaf teknolojisi içerir."
+        },
+        {
+          "question": "Sadece ped olarak mı kullanılır?",
+          "answer": "Hayır, hem ped hem de eldiven olarak kullanılabilir."
+        }
+      ],
+      "price": 90000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-WP_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "3215ZB",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "buffing_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "gsm": 320,
+          "type": "Dual Pile (Çift Taraflı)",
+          "edge_type": "Lazer Kesim",
+          "features": "Cila silme ve parlatma",
+          "quantity": 2,
+          "material_blend": "Polyester/Polyamide",
+          "color": "Gri",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Pasta Cila Silme Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN Dual Side Multi Towel; premium, Ã§ift taraflÄ± ve Ã§ok amaÃ§lÄ± bir silme bezidir. Tek bez ile Ã§oklu Ã§Ã¶zÃ¼mler sunar. AradÄ±ÄÄ±nÄ±z tek bezi, hem sÄ±vÄ± hem katÄ± Ã¼rÃ¼nlerde kullanmak ise yeni gÃ¶zdeniz olacaktÄ±r.\r\n\r\nBezin birbirinden farklÄ± tÃ¼y uzunluklarÄ± olan Ã§ift tarafÄ± bulunur. Uzun tÃ¼ylÃ¼ peluÅ tarafÄ± ile cila / boya koruma uygulamalarÄ±nÄ±zÄ± silebilir, kÄ±sa tarafÄ± ile wax gibi yaÄlÄ± Ã¼rÃ¼nlerin son silme iÅleminde kullanÄ±labilirsiniz. GerÃ§ek 320 GSM premium yapÄ±sÄ± ve Ã¶n yÄ±kama (CSS) yapÄ±lmÄ±Å olmasÄ±, bu bezi araÃ§ yÃ¼zeylerinin silim ve bakÄ±m iÅlemleri iÃ§in gerÃ§ekten gÃ¼venli ve etkili hale getiriyor.\r\n\r\nKLIN KOREA ânÄ±n en son mikrofiber teknolojisi ile Ã¼retilmiÅtir. Benzersiz CCS* Ã¶zelliÄi ile Ã¼rÃ¼n paketlenmeden Ã¶n yÄ±kama yapÄ±lmÄ±Å ve paketten Ã§Ä±kartÄ±p anÄ±nda kullanÄ±ma hazÄ±r hale getirilmiÅtir. Uzun sÃ¼reler Ã¶zelliÄi bozulmadan kullanÄ±m imkÃ¢nÄ± verir. Otomotiv, motor, marin gibi farklÄ± alanlarda gÃ¼venle kullanÄ±labilir.\r\n\r\nÃlÃ§Ã¼ ve Renkler:\r\nâ¢ 40x40 cm â Gri\r\nâ¢ Paket iÃ§erisinde 2 adet mikrofiber bez bulunur.\r\n\r\nTeknik Ãzellikler:\r\nâ¢ Birinci Kalite Kore MenÅei Mikrofiber\r\nâ¢  Polyester,   Polyamide\r\nâ¢ 320 GSM\r\nâ¢ Hav bÄ±rakmayan, Ã§ift uzunluklu iplik\r\nâ¢ Contaminent Control System (CCS) â Kirlilik Kontrol Sistemi\r\n\r\nYÄ±kama Ãnerisi:\r\nÃamaÅÄ±r Makinesi â Duru su veya mikrofiber ÅampuanÄ± ile maksimum 40 derece. SÄ±kma yapÄ±lmamalÄ±. Asarak kurutulmalÄ±. YumuÅatÄ±cÄ±, Ã§amaÅÄ±r suyu ve benzer temizleyiciler kullanÄ±lmamalÄ±. Beyaz ve renkli diÄer Ã¼rÃ¼nlerden ayrÄ± yÄ±kama yapÄ±lmalÄ±.",
+        "how_to_use": "1. Uzun tüylü peluş tarafı ile cila/boya koruma uygulamalarını silin.\n2. Kısa tarafı ile wax gibi yağlı ürünlerin son silme işlemini yapın.\n3. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Cila silme, boya koruma silimi, wax silme ve çeşitli silim işlemleri için çok amaçlı kullanım.",
+        "target_surface": "Dış paneller, cila/wax uygulanan yüzeyler",
+        "why_this_product": "• Çift taraflı farklı tüy uzunlukları - çok yönlü kullanım\n• Gerçek 320 GSM premium yapı\n• Lazer kesim kenarlar - güvenli silim\n• CCS ön yıkama - paketten çıkıp anında kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3215D",
+          "Q2M-PWE4040C"
+        ]
+      },
+      "faq": [
+        {
+          "question": "İki tarafın farkı nedir?",
+          "answer": "Uzun tüylü peluş taraf cila/koruma silimi için, kısa taraf wax gibi yağlı ürünlerin son silimi için idealdir."
+        },
+        {
+          "question": "Buffing King ile farkı nedir?",
+          "answer": "Buffing King 1000 GSM tek tip, bu bez 320 GSM çift taraflı farklı tüy uzunluğunda."
+        }
+      ],
+      "price": 39000,
+      "image_url": "",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3217HS-5W",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "multi_purpose_cloth",
+        "fields": {
+          "size": "40x40 cm",
+          "gsm": 430,
+          "quantity": 5,
+          "color": "Beyaz",
+          "features": "Genel temizlik ve silme",
+          "edge_type": "Lazer Kesim",
+          "silicone_free": true,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Pasta Cila Silme Bezleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN ZERO FINISH HD mikrofiber bezler, en ağır çalışma koşullarında bile çok yönlü kullanım alanları, yüksek kaliteli iplik yapıları ve dayanımları ile hayranlarının favorisidir. Tüy bırakmayan kısa tüylü yapısı, lazer kesim kenarları, yumuşacık hissiyatı ve mükemmel fiyat/performans oranı ile üç farklı renkte hayranlarının kullanımına sunulmuştur.\r\n\r\nPasta, cila, seramik, wax silme ve susuz yıkama gibi işlemlerde mükemmel bir yardımcıdır. Ürün artığı ve su emiciliği yüksektir. Yüzeylerden cila artıklarını çok daha az eforla, saniyeler içinde siler. Arkasında iz bırakmaz. En hassas yüzeylerde dahi güvenle kullanılabilir. Antistatik özelliği sayesinde araç iç aksamlarında ve ev temizliğinde kullanılabilir. Yıkanabilir ve tekrar tekrar kullanılabilir.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin, havacılık gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 40x40 cm – Gri / Turuncu / Beyaz (3 Renk)\r\n• Paket içerisinde 5 adet aynı renkli mikrofiber bez bulunur.\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 430+ GSM\r\n• Silikonsuz\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Pasta, cila, seramik veya wax uygulamasından sonra kalıntıları silin.\n2. Susuz yıkama işlemlerinde nemli olarak kullanın.\n3. İç aksam ve ev temizliğinde toz alma için kullanın.\n4. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Pasta/cila silme, seramik/wax silme, susuz yıkama, iç aksam temizliği ve ev temizliği için çok amaçlı kullanım.",
+        "target_surface": "Dış yüzeyler, iç aksam, ev eşyaları, elektronik ürünler",
+        "why_this_product": "• 430+ GSM yüksek kaliteli iplik yapısı\n• Tüy bırakmayan kısa tüylü yapı\n• Lazer kesim kenarlar ile güvenli kullanım\n• 5'li paket - ekonomik çözüm"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3217HS-5G",
+          "KLIN-3113AG"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Gri versiyondan farkı nedir?",
+          "answer": "Sadece renk farkı, aynı kalite ve özellikler."
+        },
+        {
+          "question": "Beyaz rengin avantajı nedir?",
+          "answer": "Kir birikimi daha kolay görünür, temizlik kontrolü kolaylaşır."
+        }
+      ],
+      "price": 80000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3217HS-5W_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3218-1",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "glass_cloth",
+        "fields": {
+          "size": "30x40 cm",
+          "type": "Dual Pile (Çift Taraflı)",
+          "features": "İz bırakmayan cam temizliği",
+          "color": "Sarı",
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN KOREA Dünya’nın En Büyük Mikrofiber Bez Üreticisi Ürünleri Türkiye’de. Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Aynı Gün Ücretsiz Kargo.",
+        "full_description": "Meşhur GLASS SHINE ‘ın ekstra güçlü ve dayanıklı versiyonu GLASS SHINE HD, daha büyük ve kalındır. Çift yönlü yapısı ile hassas parçaların temizliğinde inanılmaz şekilde hızlı, arkasında iz ve hav bırakmayan bir cam silme bezidir.\r\n\r\nTek tarafı geniş alanlarda yapılan silim işlemlerinde dahil çiziksiz/havsız muhteşem sonuç veren daha alçak ve yumuşak yapıdayken, arkası ise inatçı kirleri temizlemek ve dış camları kurutmak için etkili twist yapılı mikrofiberden yapılmıştır.\r\n\r\nTekrar tekrar yıkanabilir. Diğer cam silme bezlerinizin aksine yüzeye yapışmaz, kayıp gider. Dilerseniz sadece su ile dilerseniz favori cam silme kimyasalınız ile uzun süreler kullanabilirsiniz. En ideal kullanım için 2 adet ürünü, arka arkaya nemli ve kuru olarak kullanmanızı öneririz.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 30x40 cm – Sarı\r\n• Teknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• Hav bırakmayan iplik\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Alçak ve yumuşak tarafı ile geniş alanlarda iz bırakmadan silin.\n2. Twist yapılı tarafı ile inatçı kirleri temizleyin ve dış camları kurutun.\n3. 2 adet kullanarak nemli ve kuru olarak arka arkaya uygulayın.\n4. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Ev camları, aynalar, otomotiv iç/dış camları ve hassas parçaların çiziksiz temizliği için kullanılır.",
+        "target_surface": "Cam, ayna, parlak yüzeyler",
+        "why_this_product": "• Çift taraflı yapı - silim + kurulama tek bezde\n• Ekstra güçlü ve dayanıklı HD versiyon\n• Daha büyük 30x40 cm boyut\n• İz ve hav bırakmayan performans"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3218",
+          "Q2M-GWE4040"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Glass Shine'dan farkı nedir?",
+          "answer": "HD versiyon çift taraflı yapıda, daha büyük boyutta ve daha dayanıklı."
+        },
+        {
+          "question": "İki tarafın farkı nedir?",
+          "answer": "Alçak yumuşak taraf silim için, twist yapılı taraf inatçı kir ve kurulama için."
+        }
+      ],
+      "price": 37000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3218-1_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "Q2M-WD4060C",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "glass_cloth",
+        "fields": {
+          "size": "40x60 cm",
+          "type": "Waffle Weave",
+          "gsm": 390,
+          "features": "Cam ve yüzey kurulama için büyük boy",
+          "material_blend": "Polyester/Polyamid",
+          "absorption_level": "Çok yüksek (9/10)",
+          "wash_temp_max": 30
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Waffle Dryer 40x60 cm: Petek dokulu cam silme bezi ve yüzey kurulama havlusu, yüksek emicilikle etkili temizlik sunar. MTS Kimya güvencesiyle orijinal ürün, aynı gün kargo fırsatı.",
+        "full_description": "GYEON QÂ²M Waffle Dryer EVO Petek Dokulu Cam Silme Bezi ve YÃ¼zey Kurulama Havlusu â 40x60 cm<br><br>Petek Dokulu YapÄ± | YÃ¼ksek Su Emici | Ä°z ve Hav BÄ±rakmaz<br><br>KUSURSUZ CAM VE YÃZEY KURULAMA DENEYÄ°MÄ°<br><br>GYEON QÂ²M Waffle Dryer EVO, yenilenmiÅ EVO versiyonuyla araÃ§ camlarÄ±, boyalÄ± yÃ¼zeyler ve plastik aksamlarda Ã¼stÃ¼n kurulama performansÄ± sunar. Petek dokulu Ã¶zel yapÄ±sÄ± ve artÄ±rÄ±lmÄ±Å 390 GSM yoÄunluÄu sayesinde Ã¶nceki nesillere gÃ¶re % daha fazla emicilik saÄlar ve tÃ¼m yÃ¼zeylerde kusursuz, iz bÄ±rakmayan bir kurutma deneyimi yaÅatÄ±r.<br>Cam yÃ¼zeylerde oluÅan su lekelerini ve temizlik sonrasÄ± kalÄ±ntÄ±larÄ±, geride tÃ¼y veya mikrofiber izi bÄ±rakmadan temizler. Ergonomik boyutlarÄ± (40x40 cm) ile dar alanlarda ve detay Ã§alÄ±Åmalarda mÃ¼kemmel bir kullanÄ±m saÄlar.<br><br><br>PETEK DOKULU ÃZEL TASARIM â HIZLI VE ETKÄ°LÄ° KURUTMA<br><br>GYEON QÂ²M Waffle Dryer EVOânun petek dokusu sayesinde:<br>â¢\tMaksimum su emiÅ gÃ¼cÃ¼ ile yÃ¼zeylerde hÄ±zlÄ± ve etkili kurulama saÄlar.<br>â¢\tCam ve boyalÄ± yÃ¼zeylerde Ã§izik ve hare izi riskini minimize eder.<br>â¢\tTemizlik sonrasÄ± yÃ¼zeyde kalan su izlerini, tÃ¼y veya mikrofiber kalÄ±ntÄ±sÄ± bÄ±rakmadan tamamen yok eder.<br><br><br>HER YÃZEY Ä°ÃÄ°N MÃKEMMEL ÃÃZÃM<br><br>QÂ²M Waffle Dryer EVO, Ã§ok yÃ¶nlÃ¼ kullanÄ±mÄ±yla her tÃ¼rlÃ¼ yÃ¼zeyde Ã¼stÃ¼n performans sergiler:<br>â¢\tAraÃ§ camlarÄ± ve aynalarÄ±nda kusursuz silim saÄlar.<br>â¢\tSeramik kaplamalÄ± araÃ§larÄ±n boyalÄ± yÃ¼zeylerinde gÃ¼venli kurulama imkÃ¢nÄ± tanÄ±r.<br>â¢\tFarlar, jantlar ve plastik trim gibi detay bÃ¶lgelerinde izsiz temizlik saÄlar.<br><br><br>TEKNÄ°K ÃZELLÄ°KLER<br><br>â¢\tBoyut: 40x60 cm<br>â¢\tDokuma YapÄ±sÄ±: Petek dokulu waffle (Waffle weave)<br>â¢\tGSM: 390 GSM (yÃ¼ksek yoÄunluk)<br>â¢\tMalzeme:  Polyester,   Polyamid<br>â¢\tKenar YapÄ±sÄ±: Ä°z bÄ±rakmayan Ã¶zel kesim<br>â¢\tEmicilik: Ãok yÃ¼ksek (10 Ã¼zerinden 9 puan)<br><br><br>GYEON QÂ²M WAFFLE DRYER EVO KULLANIM ALANLARI:<br><br>GYEON QÂ²M Waffle Dryer EVO, araÃ§ temizliÄi dÄ±ÅÄ±nda gÃ¼nlÃ¼k yaÅamda farkÄ±nda olmadÄ±ÄÄ±nÄ±z birÃ§ok alanda mÃ¼kemmel sonuÃ§lar saÄlar:<br>â¢\tCamlÄ± Ofislerde:<br>BÃ¶lme camlar, toplantÄ± odasÄ± camlarÄ± ve giriÅ kapÄ±larÄ±nda parmak izi ve su lekelerini zahmetsizce temizler, profesyonel gÃ¶rÃ¼nÃ¼mlÃ¼ bir Ã§alÄ±Åma ortamÄ± yaratÄ±r.<br>â¢\tEv ve Ofis MobilyalarÄ±nda:<br>Parlak yÃ¼zeyli masalar, dolap kapaklarÄ± ve cam sehpalardaki toz ve lekeleri Ã§izmeden siler, yÃ¼zeylere yeni gÃ¶rÃ¼nÃ¼m kazandÄ±rÄ±r.<br>â¢\tAraÃ§ CamlarÄ±nda: YaÄmur sonrasÄ± oluÅan su lekelerini, cam yÃ¼zeylerdeki parmak izi ve kirleri Ã§izmeden kolayca temizler, Ã¼stÃ¼n gÃ¶rÃ¼Å saÄlar.<br>â¢\tAraÃ§ Ä°Ã§ EkranlarÄ±nda: Dokunmatik multimedya ekranlarÄ±, navigasyon panelleri ve dijital gÃ¶sterge ekranlarÄ±nda gÃ¼venli ve Ã§iziksiz silme iÅlemi sunar.<br>â¢\tAynalÄ± Alanlarda:<br>Banyo ve giyinme odasÄ± aynalarÄ±nda oluÅan buhar, su lekeleri ve parmak izlerini iz bÄ±rakmadan temizleyerek mÃ¼kemmel berraklÄ±k saÄlar.<br><br><br>â¢\tPetek dokusu sayesinde Ã§iziksiz, iz bÄ±rakmayan yÃ¼zey kurulama<br>â¢\tCam temizliÄinde tÃ¼y bÄ±rakmaz, net ve parlak sonuÃ§ verir<br>â¢\tKÃ¼Ã§Ã¼k boyutu sayesinde eriÅimi zor alanlarda maksimum kullanÄ±m kolaylÄ±ÄÄ±<br>â¢\tArtÄ±rÄ±lmÄ±Å yoÄunluÄu ve kalitesi ile defalarca yÄ±kamadan sonra bile ilk gÃ¼nkÃ¼ performansÄ±nÄ± korur<br><br>NASIL KULLANILIR?<br><br>â¢\tKuru ve temiz olarak kullanmaya baÅlayÄ±n.<br>â¢\tCam veya araÃ§ yÃ¼zeylerinde silme iÅlemini hafif baskÄ± uygulayarak yapÄ±n.<br>â¢\tKurulama iÅlemi sÄ±rasÄ±nda havluyu dÃ¼zenli olarak ters Ã§evirerek temiz yÃ¼zeylerden yararlanÄ±n.<br>â¢\tKullanÄ±m sonrasÄ± temiz su ile yÄ±kayÄ±p, asarak kurutun.<br><br><br>BAKIM VE YIKAMA ÃNERÄ°LERÄ°<br><br>â¢\tMikrofiber havlu temizliÄi iÃ§in Ã¶zel Towelwash deterjan kullanÄ±lmasÄ± Ã¶nerilir.<br>â¢\tMaksimum 30Â°C sÄ±caklÄ±kta Ã§amaÅÄ±r makinesinde yÄ±kayÄ±n.<br>â¢\tÃamaÅÄ±r suyu, yumuÅatÄ±cÄ± veya benzeri agresif temizlik Ã¼rÃ¼nleri kullanmayÄ±n.<br>â¢\tÃtÃ¼leme ve kuru temizleme yapmayÄ±n.<br>â¢\tÃrÃ¼nÃ¼n emiciliÄini korumak iÃ§in havlu kurutucuda kurutmayÄ±n, doÄal ortamda asarak kurutun.<br>?? Ä°PUCU:<br>Waffle Dryer EVO havlunuzu cam silme iÃ§in Ã¶zel olarak ayÄ±rarak, Ã§apraz kirlenme riskini azaltabilir ve her zaman mÃ¼kemmel sonuÃ§lar alabilirsiniz.<br><br><br>NEDEN GYEON QÂ²M WAFFLE DRYER EVO?<br><br>?? % artÄ±rÄ±lmÄ±Å su emme kapasitesiyle maksimum kurulama performansÄ±<br>?? Ãzel petek dokusuyla iz ve tÃ¼y bÄ±rakmadan Ã¼stÃ¼n cam temizliÄi<br>?? KÃ¼Ã§Ã¼k detay alanlarÄ±nda rahat kullanÄ±m saÄlayan ergonomik boyut<br>?? GÃ¼Ã§lendirilmiÅ kenar tasarÄ±mÄ±yla Ã§izik ve iz oluÅumunu tamamen engeller<br>?? Profesyonel detaylandÄ±rma ve gÃ¼nlÃ¼k kullanÄ±m iÃ§in vazgeÃ§ilmez yardÄ±mcÄ±<br><br><br>GYEON QÂ²M Waffle Dryer EVO ile araÃ§ yÃ¼zeylerinde kusursuz kurutma ve temizliÄin keyfini yaÅayÄ±n.",
+        "how_to_use": "1. Kuru ve temiz olarak kullanmaya başlayın.\n2. Cam veya araç yüzeylerinde silme işlemini hafif baskı uygulayarak yapın.\n3. Kurulama sırasında havluyu düzenli olarak ters çevirerek temiz yüzeylerden yararlanın.\n4. 30°C'de Towelwash ile yıkayın, asarak kurutun.",
+        "when_to_use": "Araç camları, seramik kaplamalı yüzeyler, farlar, jantlar, plastik trim, ev ve ofis camları için kullanılır.",
+        "target_surface": "Cam, ayna, boyalı yüzey, plastik aksam, ekran",
+        "why_this_product": "• 40x60 cm büyük boyut - daha geniş çalışma alanı\n• 390 GSM petek dokulu yapı\n• Çiziksiz, iz bırakmayan yüzey kurulama\n• Tüy veya mikrofiber kalıntısı bırakmaz"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [
+          "Q2M-GLA500M"
+        ],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-WD4040C",
+          "Q2M-GWE4040"
+        ]
+      },
+      "faq": [
+        {
+          "question": "40x40 cm versiyondan farkı nedir?",
+          "answer": "Aynı kalite ve özellikler, sadece daha büyük boyut - daha geniş çalışma alanı."
+        },
+        {
+          "question": "Hangi boyut tercih edilmeli?",
+          "answer": "Geniş yüzeyler için 40x60, detay işler ve dar alanlar için 40x40 tercih edilebilir."
+        }
+      ],
+      "price": 28000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-WD4060C_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Kurulama Havluları"
+      }
+    },
+    {
+      "sku": "3225A-BL",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "25x15 cm",
+          "type": "Wash Pad",
+          "color": "Mavi",
+          "features": "Araç yıkama için düz pad",
+          "inner_sponge_mm": 14,
+          "weight_gr": 280,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Komple yüzeyi kaplı, birinci, kalite dayanıklı, peluş mikrofiber yapısı, geliştirilmiş 14mm iç destek süngeri, ergonomik tutuşu ve çok amaçlı kullanımı ile benzersiz bir yıkama deneyimine hazır olun! KLIN DUAL WASH PAD+ ile aracınızı bir profesyonel gibi yıkayın…\r\n\r\nKLIN DUAL WASH PAD+, en favori şampuanınızın vazgeçilmez iş ortağı olacak. Yükseltilen iç süngeri daha fazla miktarda şampuanı ve suyu içine emer, özel peluş mikrofiber yapısı ekstra yoğun köpük oluşturur ve 3” yüksekliğindeki bu ped yüzeyde çiziksiz, güvenli bir temizlik sunar. Size de tertemiz aracınızın keyfini sürmek kalır.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 24x16 cm – Mavi\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 14 mm İç Sünger\r\n• 280 gr\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.\r\n\r\nDikkat: Öncelikle araç üzerinde ön yıkama işlemi yapılmalı, tazyikli su ile durulanmalı ve ardından uygun bir şampuan ile yıkama pedi kullanılmalıdır. Yıkama esnasında pedin yüzeyine yabancı partiküller (kir, toz vb.) nüfuz edebilir ve yüzeyde çizik oluşturabilir. Bu duruma karşı dikkatli olun ve ürünün her kullanım öncesi temiz olduğundan emin olun.",
+        "how_to_use": "1. Ön yıkama yaparak araç yüzeyini tazyikli su ile durulayın.\n2. Pedi şampuanlı kovaya daldırıp köpürtün.\n3. Yüzeyde hafif hareketlerle çiziksiz temizlik yapın.\n4. Sık sık temiz su kovasında durulayın.\n5. 40°C'de mikrofiber şampuanıyla yıkayın, asarak kurutun.",
+        "when_to_use": "Profesyonel araç yıkama, yüksek köpük üretimi gereken yıkama işlemleri ve genel araç temizliği için kullanılır.",
+        "target_surface": "Araç boya yüzeyleri, cam",
+        "why_this_product": "• Birinci kalite dayanıklı peluş mikrofiber yapı\n• 14 mm iç destek süngeri - yüksek köpük üretimi\n• Ergonomik tutuş - çok amaçlı kullanım\n• CCS teknolojisi - paketten çıkıp anında kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3221A-RD",
+          "Q2M-WP"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Eldiven mi ped mi?",
+          "answer": "Düz pad formatında, eldiven parmak haznesi yok."
+        },
+        {
+          "question": "Kırmızı versiyondan farkı nedir?",
+          "answer": "Sadece renk farkı, aynı kalite ve özellikler."
+        }
+      ],
+      "price": 58000,
+      "image_url": "",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "3227B",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "20x16 cm",
+          "type": "Soft Long Pile",
+          "color": "Siyah",
+          "features": "Yumuşak tüylü yıkama eldiveni",
+          "inner_sponge_mm": 14,
+          "weight_gr": 240,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Eminiz, daha önce hiç bu kadar yumuşak bir yıkama eldiveni kullanmadınız! Premium kalite, ultra soft ve narin mikrofiberlerden üretilen, bir KLIN KOREA harikası. En hassas yüzeylerde dahil çiziksiz, güvenli ve kolay temizlik için birebir…\r\n\r\nKLIN KOREA Softy Mitt, komple yüzeyi kaplı, birinci kalite dayanıklı yumuşacık mikrofiber yapısı, geliştirilmiş 14mm iç destek süngeri, esnek bilek kavraması ve ergonomik iç parmak haznesi, ergonomik tutuşu ve çok amaçlı kullanımı ile detayseverlere benzersiz bir yıkama deneyimi sunuyor.\r\n\r\nYükseltilen iç süngeri daha fazla miktarda şampuanı ve suyu içine emer, özel peluş mikrofiber yapısı yüzeyde yağ gibi akıp kayarken, ekstra yoğun köpük oluşturur ve 3” yüksekliğindeki bu ped yüzeyde çiziksiz, güvenli bir temizlik sunar. Size de tertemiz aracınızın keyfini sürmek kalır.\r\n\r\nSofty Mitt, size çok yönlü kullanım imkânı sunar. İsterseniz ergonomik iç parmak haznelerini kullanarak eldiven olarak kullanabilirsiniz. Ya da isterseniz katlanabilir, elastik bilek yapısı sayesinde, eldiveninizi saniyeler içinde yıkama padine dönüştürebilirsiniz. Seçim sizin!\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 20x16 cm – Siyah\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 14 mm İç Sünger\r\n• 240 gr\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.\r\n\r\nDikkat: Öncelikle araç üzerinde ön yıkama işlemi yapılmalı, tazyikli su ile durulanmalı ve ardından uygun bir şampuan ile yıkama pedi kullanılmalıdır. Yıkama esnasında pedin yüzeyine yabancı partiküller (kir, toz vb.) nüfuz edebilir ve yüzeyde çizik oluşturabilir. Bu duruma karşı dikkatli olun ve ürünün her kullanım öncesi temiz olduğundan emin olun.",
+        "how_to_use": "1. Araç üzerinde ön yıkama yaparak tazyikli su ile durulayın.\n2. Eldiveni şampuanlı kovaya daldırıp köpürtün.\n3. Yüzeyde yağ gibi akarak kaygan hareketlerle yıkayın.\n4. Sık sık temiz su kovasında durulayın.\n5. 40°C'de yıkayıp asarak kurutun.",
+        "when_to_use": "En hassas yüzeylerde çiziksiz yıkama, premium araç bakımı ve seramik/PPF kaplamalı araçlar için kullanılır.",
+        "target_surface": "Hassas boyalar, seramik kaplamalı yüzeyler, premium araçlar",
+        "why_this_product": "• Premium kalite ultra soft ve narin mikrofiber\n• Geliştirilmiş 14mm iç destek süngeri\n• Ergonomik iç parmak haznesi ve esnek bilek kavraması\n• Hem eldiven hem ped olarak kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3227I-HD",
+          "Q2M-STE"
+        ]
+      },
+      "faq": [
+        {
+          "question": "HD versiyondan farkı nedir?",
+          "answer": "Softy Mitt siyah renkte, HD versiyon açık bej renkte ve kir tespiti daha kolay."
+        },
+        {
+          "question": "Neden siyah renk tercih edilmiş?",
+          "answer": "Siyah renk kirlerin gizlenmesine neden olabilir, ancak profesyonel görünüm sağlar."
+        }
+      ],
+      "price": 46000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3227B_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "3228R",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "wash_mitt",
+        "fields": {
+          "size": "22x14 cm",
+          "type": "Soft Long Pile Pad",
+          "color": "Kırmızı",
+          "features": "Yumuşak tüylü yıkama padi",
+          "inner_sponge_mm": 14,
+          "weight_gr": 280,
+          "ccs_technology": true,
+          "wash_temp_max": 40
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "Eminiz, daha önce hiç bu kadar yumuşak ve peluş bir yıkama süngeri kullanmadınız! Premium kalite, ultra soft ve narin mikrofiberlerden üretilen, bir KLIN KOREA harikası. En hassas yüzeylerde dahil çiziksiz, güvenli ve kolay temizlik için birebir…\r\n\r\nKLIN KOREA Softy Wash Pad, komple yüzeyi kaplı, birinci kalite dayanıklı, peluş ve aynı zamanda yumuşacık mikrofiber yapısı, geliştirilmiş 14mm iç destek süngeri, ergonomik tutuşu ve çok amaçlı kullanımı ile detayseverlere benzersiz bir yıkama deneyimi sunuyor.\r\nYükseltilen iç süngeri daha fazla miktarda şampuanı ve suyu içine emer, özel peluş mikrofiber yapısı yüzeyde yağ gibi akıp kayarken, ekstra yoğun köpük oluşturur ve 3” yüksekliğindeki bu eldiven yüzeyde çiziksiz, güvenli bir temizlik sunar. Size de tertemiz aracınızın keyfini sürmek kalır.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n22x14 cm – Kırmızı\r\n\r\nTeknik Özellikler:\r\n• Birinci Kalite Kore Menşei Mikrofiber\r\n• 14 mm İç Sünger\r\n• 280 gr\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.\r\nDikkat: Öncelikle araç üzerinde ön yıkama işlemi yapılmalı, tazyikli su ile durulanmalı ve ardından uygun bir şampuan ile yıkama pedi kullanılmalıdır. Yıkama esnasında pedin yüzeyine yabancı partiküller (kir, toz vb.) nüfuz edebilir ve yüzeyde çizik oluşturabilir. Bu duruma karşı dikkatli olun ve ürünün her kullanım öncesi temiz olduğundan emin olun.",
+        "how_to_use": "1. Araç üzerinde ön yıkama yaparak tazyikli su ile durulayın.\n2. Pedi şampuanlı kovaya daldırıp köpürtün.\n3. Yüzeyde yağ gibi akarak kaygan hareketlerle yıkayın.\n4. Sık sık temiz su kovasında durulayın.\n5. 40°C'de yıkayıp asarak kurutun.",
+        "when_to_use": "En hassas yüzeylerde çiziksiz yıkama, premium araç bakımı ve detay yıkama işlemleri için kullanılır.",
+        "target_surface": "Hassas boyalar, premium araçlar",
+        "why_this_product": "• Premium kalite ultra soft ve peluş mikrofiber\n• Geliştirilmiş 14mm iç destek süngeri\n• Yüzeyde yağ gibi kayarak ekstra yoğun köpük oluşturur\n• Düz pad formatı - ergonomik kullanım"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "3227B",
+          "3225A-BL"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Softy Mitt'ten farkı nedir?",
+          "answer": "Wash Pad düz pad formatında, Mitt eldiven formatında. Kullanım tercihinize göre seçebilirsiniz."
+        },
+        {
+          "question": "Hangi renkler mevcut?",
+          "answer": "Softy Wash Pad kırmızı renkte mevcuttur."
+        }
+      ],
+      "price": 40000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3228R_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Yıkama Eldivenleri ve Süngerleri"
+      }
+    },
+    {
+      "sku": "70919",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "chamois_drying_towel",
+        "fields": {
+          "sub_type": "pump_sprayer",
+          "capacity_liters": null,
+          "chemical_resistance": null,
+          "max_pressure_bar": null,
+          "pressure_relief_valve": null,
+          "nozzle_types": null,
+          "compressed_air_connection": null,
+          "spare_seals_included": null,
+          "spray_pattern_adjustable": null,
+          "function": "Kurulama ve Temizlik Bezi",
+          "material": "Sentetik Güderi",
+          "dimensions": "54 x 44 cm",
+          "weight_g": 300,
+          "made_in": "İtalya"
+        }
+      },
+      "content": {
+        "short_description": "İtalyan FRA-BER 1. Kalite Mikrofiber ve Güderi Bez Yetkili Türkiye Distribütörü MTS Kimya’da. Orijinal Ürün Garantisi. Aynı Gün Hızlı Kargo.",
+        "full_description": "FRA-BER sentetik güderi bez, yüzey temizliği ve kurulama işlemleriniz için mükemmel bir çözümdür. Arabanızda, motorsikletinizde, teknenizde ve evinizdeki her türlü yüzeyin bakımı ve temizliği için kullanabilirsiniz.<br><br>Bu bez, üstün kalitesi ve yüksek emicilik özelliği ile dikkat çeker. Su ve diğer sıvıları hızla emer, böylece temizlik ve kurutma işlemleri daha hızlı ve verimli hale gelir. Aynı zamanda yüzeylere zarar vermez ve etkili bir şekilde temizler.<br><br>54x44 cm ölçülerindeki bu geniş ve kullanışlı bez, kolay ve hızlı bir temizlik deneyimi sunar. Ayrıca, 300 gr ağırlığıyla dayanıklılığı ve kullanım ömrü konusunda güven verir. FRA-BER Sentetik Güderi Bez, temizliğin ve bakımın önemli bir parçasıdır ve kullanım kolaylığı ile her türlü yüzey temizliğinde vazgeçilmez bir yardımcınız olacaktır.<br><br>Ölçü: 54x44 cm<br><br>Kullanma Talimatı:<br>• Bezi kullanmadan önce iyice ıslatın ve fazla suyu sıkın. Bu, bezin performansını artıracak ve en iyi sonuçları almanıza yardımcı olacaktır.<br><br><br>",
+        "how_to_use": "1. Bezi kullanmadan önce iyice ıslatın.\n2. Fazla suyu sıkın.\n3. Yüzeyi tek yönlü hareketlerle kurulayın.\n4. Nemlendiğinde tekrar sıkıp devam edin.\n5. Kullanım sonrası temiz suyla durulayıp serin yerde kurutun.",
+        "when_to_use": "Araç, motorsiklet, tekne ve ev yüzeylerinin temizliği ve kurulaması için kullanın. Yüksek emicilik özelliği ile hızlı ve iz bırakmayan kurulama sağlar.",
+        "target_surface": "Araç boyası, cam, plastik, ev yüzeyleri, tekne",
+        "why_this_product": "• Üstün su emicilik kapasitesi\n• Yüzeylere zarar vermez - çizmez\n• 54x44 cm geniş boyut\n• 300 gr dayanıklı yapı\n• Çok yönlü kullanım - araç, ev, tekne"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Sentetik güderi bez ne işe yarar?",
+          "answer": "Su ve sıvıları hızla emer, temizlik ve kurutma işlemlerini daha hızlı ve verimli hale getirir."
+        },
+        {
+          "question": "Boyaya zarar verir mi?",
+          "answer": "Hayır, yumuşak yapısı sayesinde yüzeylere zarar vermez ve etkili temizlik sağlar."
+        },
+        {
+          "question": "Nasıl kullanılır?",
+          "answer": "Kullanmadan önce iyice ıslatın ve fazla suyu sıkın. Bu, bezin performansını artırır."
+        },
+        {
+          "question": "Nerelerde kullanılabilir?",
+          "answer": "Araba, motorsiklet, tekne ve evdeki her türlü yüzeyin bakımı ve temizliği için kullanılabilir."
+        }
+      ],
+      "price": 45000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/70919_0.jpg",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3219",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "cleaning_cloth",
+        "fields": {
+          "sub_type": "pump_sprayer",
+          "capacity_liters": null,
+          "chemical_resistance": null,
+          "max_pressure_bar": null,
+          "pressure_relief_valve": null,
+          "nozzle_types": null,
+          "compressed_air_connection": null,
+          "spare_seals_included": null,
+          "spray_pattern_adjustable": null,
+          "function": "Zorlu Kir ve Yağ Temizliği",
+          "material": "Elastik Fiber + Polimer Kaplama",
+          "dimensions": "30 x 60 cm",
+          "color": "Yeşil",
+          "ccs_system": true,
+          "made_in": "Güney Kore"
+        }
+      },
+      "content": {
+        "short_description": "KLIN KOREA Dünya’nın En Büyük Mikrofiber Bez Üreticisi Ürünleri Türkiye’de. Yetkili Dağıtıcı MTS Kimya’dan İncele Satın Al. Aynı Gün Ücretsiz Kargo.",
+        "full_description": "O bir kir canavarı! KLIN Green Monster; araçların jant, motor bölmesi, lastikler, motorsikletler ve ATV’lerde biriken balata tozu ve yağı sadece su ekleyerek mükemmel şekilde temizlenmesini sağlar.\r\n\r\nGreen Monster, sıradan bir bezden daha fazlasıdır. Tescilli bir polimer kaplama ve dayanıklı elastik fiber yapısı sayesinde zorlu kirleri kolayca giderir, defalarca kullanılabilir.\r\n\r\nNot: Silme sırasında yüzeylerde çizik oluşturabilecek kir birikmesini önlemek için kullanım sırasında bezleri sık sık kontrol edin.\r\n\r\nKLIN KOREA ‘nın en son mikrofiber teknolojisi ile üretilmiştir. Benzersiz CCS* özelliği ile ürün paketlenmeden ön yıkama yapılmış ve paketten çıkartıp anında kullanıma hazır hale getirilmiştir. Uzun süreler özelliği bozulmadan kullanım imkânı verir. Otomotiv, motor, marin gibi farklı alanlarda güvenle kullanılabilir.\r\n\r\nÖlçü ve Renkler:\r\n• 30x60 cm – Yeşil\r\n• Teknik Özellikler:\r\n• Birinci Kalite Kore Menşei Elastik Fiber ve Polimer Kaplama\r\n• Contaminent Control System (CCS) – Kirlilik Kontrol Sistemi\r\n\r\nYıkama Önerisi:\r\nÇamaşır Makinesi – Duru su veya mikrofiber şampuanı ile maksimum 40 derece. Sıkma yapılmamalı. Asarak kurutulmalı. Yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanılmamalı. Beyaz ve renkli diğer ürünlerden ayrı yıkama yapılmalı.",
+        "how_to_use": "1. Bezi su ile ıslatın.\n2. Zorlu kirli alanlara (jant, motor bölmesi, lastik) uygulayın.\n3. Nazikçe ovun - polimer kaplama kiri çözer.\n4. Kullanım sırasında çizik oluşturabilecek kir birikimini önlemek için bezi sık sık kontrol edin.\n5. Yıkama: Mikrofiber şampuanı ile max 40°C, sıkmadan asarak kurutun.",
+        "when_to_use": "Jant, motor bölmesi, lastik, motorsiklet ve ATV'lerde biriken balata tozu ve yağ temizliği için kullanın. Sadece su ile bile etkili temizlik sağlar.",
+        "target_surface": "Jantlar, motor bölmesi, lastikler, motorsikletler, ATV'ler",
+        "why_this_product": "• Tescilli polimer kaplama - zorlu kirleri kolayca çözer\n• Dayanıklı elastik fiber yapısı\n• Sadece su ile kullanılabilir\n• CCS sistemi - paketten çıkıp anında kullanıma hazır\n• Defalarca yıkanıp kullanılabilir"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Green Monster neden farklı?",
+          "answer": "Tescilli polimer kaplama ve dayanıklı elastik fiber yapısı sayesinde zorlu kirleri sadece su ekleyerek temizler."
+        },
+        {
+          "question": "CCS sistemi nedir?",
+          "answer": "Contaminent Control System - ürün ön yıkamalı gelir, paketten çıkarıp hemen kullanabilirsiniz."
+        },
+        {
+          "question": "Nasıl yıkanır?",
+          "answer": "Maksimum 40°C'de mikrofiber şampuanı ile yıkayın. Sıkma yapmayın, asarak kurutun."
+        },
+        {
+          "question": "Yumuşatıcı kullanılabilir mi?",
+          "answer": "Hayır, yumuşatıcı, çamaşır suyu ve benzer temizleyiciler kullanmayın."
+        }
+      ],
+      "price": 22000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3219_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Mikrofiber Ürünler",
+        "sub_cat2": "Silme Bezleri"
+      }
+    },
+    {
+      "sku": "3236NBR2",
+      "template": {
+        "group": "microfiber",
+        "sub_type": "interior_cleaning_applicator",
+        "fields": {
+          "sub_type": "pump_sprayer",
+          "capacity_liters": null,
+          "chemical_resistance": null,
+          "max_pressure_bar": null,
+          "pressure_relief_valve": null,
+          "nozzle_types": null,
+          "compressed_air_connection": null,
+          "spare_seals_included": null,
+          "spray_pattern_adjustable": null,
+          "function": "Araç İçi Deri ve Plastik Temizlik",
+          "material": "Sentetik fiber + Sünger",
+          "dimensions": "9 x 6 x 1.8 cm",
+          "quantity": 2,
+          "dual_sided": true,
+          "made_in": "Güney Kore"
+        }
+      },
+      "content": {
+        "short_description": "KLIN Dünya’nın En İyi Dayanıklı Mikrofiber Araç Yıkama Eldivenleri Pedleri Türkiye Yetkili Dağıtıcı MTS Kimya. Satın Al. Orijinal Ürün. Hızlı Kargo.",
+        "full_description": "KLIN Utility Cleaning Block, araç iç detaylı temizlik işlemlerinde deri ve plastik yüzeylerde kullanılabilen, yüksek kaliteli malzemeden üretilen, çift taraflı, dayanıklı ve çok etkili bir temizlik aplikatörüdür. Temizlik işlemi sırasıda araç iç yüzeylerine zarar vermeyen/çizmeyen son derece güvenli ve kaliteli materyallerden üretilmiştir. Sadece su ile ıslatılarak derinlemesine temizlik sağlar. Ürün yıkanarak tekrar tekrar kullanılabilir, uzun ömürlüdür.\r\n\r\nÜrünün beyaz kısa tüylü sentetik yüzü, deri temizliği, plastik ve trim üzerindeki inatçı kirlerin giderilmesi işlemleri için ideldir. Siyah sünger kısmı ise mükemmel bir toz alıcıdır. Ergonomik tasarımı ve şekli sayesinde kıvrımlı, pütürlü ve ulaşılması zor yüzeylerde kolayca kullanılabilir.\r\n\r\nPaket içerisinde 2 adet kullanıma hazır aplikatör bulunmaktadır.\r\n\r\nBOYUT: 9 x 6 x 1.8 cm\r\n\r\nKullanım Talimatı: Ürünü sadece ılık su ile kullanın. Nazikçe uygulayın. Kullanım öncesi aplikatörün temiz olduğundan temin olun. Ürünü PH nötr şampuanlar ile diğer mikrofiber ürünlerden ayrı olarak elde ya da sıkma yapmadan çamaşır makinesinde yıkayabilirsiniz.\r\n\r\nUyarı: Uygulama öncesi ürünü her zaman ufak bir alanda deneyin. Ürünü PH dengeli olmayan temizleyiciler ve kimyasallar ile birlikte kullanmayın. Ürünün yıpranmış/bozulmuş deri ve plastik yüzeylerde kullanması önerilmez. Sıcak yüzeylere temastan ve asit ile temasından kaçının.",
+        "how_to_use": "1. Aplikatörü ılık su ile ıslatın.\n2. Beyaz sentetik yüzü deri ve plastik üzerindeki inatçı kirler için kullanın.\n3. Siyah sünger kısmı toz alma için idealdir.\n4. Nazikçe uygulayın, aşırı basınç uygulamayın.\n5. Yıkama: pH nötr şampuan ile elde veya sıkmadan çamaşır makinesinde yıkayın.",
+        "when_to_use": "Araç iç detaylı temizliğinde deri koltuklar, plastik trim ve dashboard temizliği için kullanın. Kıvrımlı ve ulaşılması zor yüzeylerde etkilidir.",
+        "target_surface": "Deri koltuklar, plastik trim, dashboard, kapı panelleri, ulaşılması zor alanlar",
+        "why_this_product": "• Çift taraflı tasarım - temizlik + toz alma\n• Sadece su ile derin temizlik\n• Ergonomik boyut - kıvrımlı yüzeylerde kolay kullanım\n• Yıkanıp tekrar tekrar kullanılabilir\n• 2'li paket"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Hangi taraf ne için kullanılır?",
+          "answer": "Beyaz sentetik yüz deri ve plastik üzerindeki inatçı kirler için, siyah sünger kısmı toz alma için idealdir."
+        },
+        {
+          "question": "Temizleyici kullanmam gerekiyor mu?",
+          "answer": "Sadece ılık su ile etkili temizlik sağlar. İsterseniz pH nötr temizleyicilerle de kullanabilirsiniz."
+        },
+        {
+          "question": "Yıpranmış deride kullanılabilir mi?",
+          "answer": "Yıpranmış/bozulmuş deri ve plastik yüzeylerde kullanımı önerilmez."
+        },
+        {
+          "question": "Nasıl yıkanır?",
+          "answer": "pH nötr şampuanlar ile elde ya da sıkma yapmadan çamaşır makinesinde yıkayabilirsiniz."
+        }
+      ],
+      "price": 42000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/3236NBR2_1.webp",
+      "category": {
+        "main_cat": "AKSESUAR",
+        "sub_cat": "Uygulama Aplikatörleri",
+        "sub_cat2": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,730 @@
+{
+  "metadata": {
+    "group_id": "leather_care",
+    "group_name": "Deri Temizlik, Bakım ve Koruma",
+    "total_products": 11,
+    "description": "Araç içi deri döşemeler (koltuk, direksiyon, trim) için özel temizleyiciler, besleyici kremler ve SiO2 bazlı koruyucular.",
+    "sub_types": [
+      {
+        "id": "leather_cleaner",
+        "name": "Deri Temizleyici",
+        "description": "Deri yüzeylerdeki kir, leke ve vücut yağını temizleyen ürün"
+      },
+      {
+        "id": "leather_protectant",
+        "name": "Deri Koruyucu",
+        "description": "Deri yüzeylere UV ve leke bariyeri sağlayan SiO2/polimer koruma"
+      },
+      {
+        "id": "leather_conditioner",
+        "name": "Deri Bakım Kremi",
+        "description": "Deriyi besleyerek esnekliğini ve yumuşaklığını koruyan bakım ürünü"
+      },
+      {
+        "id": "leather_care_kit",
+        "name": "Deri Bakım Seti",
+        "description": "Deri temizlik ve bakım ürünlerinin bir arada sunulduğu uygulama seti"
+      }
+    ],
+    "source_file": "Yapıştırılan metin"
+  },
+  "products": [
+    {
+      "sku": "Q2-LCR120M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_protectant",
+        "fields": {
+          "function": "SiO2 Bazlı Koruma",
+          "finish": "Mat / Görünmez",
+          "durability_label": "3 Ay",
+          "ph_level": "Nötr (7)",
+          "features": "UV kalkanı, sıvı itici, renk solmasını önler",
+          "application_method": "Sprey ve Sil",
+          "durability": "3 ay",
+          "volume": "120 ml",
+          "consumption": "15-25 ml/araç"
+        }
+      },
+      "content": {
+        "short_description": "GYEON Q Leather Coat REDEFINED 120 ml Deri Yüzeyler İçin Bakım ve Koruma - MTS Kimya güvencesiyle orijinal ürün garantisiyle güvenli alışveriş yapın.",
+        "full_description": "GYEON Q² Leather Coat REDEFINED Deri Yüzeyler İçin Bakım Ve Koruma - 120 ml<br><br>GYEON Q² LeatherCoat REDEFINED, SiO² destekli hidrofobik formülüyle otomotiv deri yüzeylerine 3 aya varan koruma sağlar. Tek kat sprey-uygulama, sıvıları ve kiri uzak tutar; UV bariyeri sayesinde renk solmasını önler, mat fabrika görünümünü bozmadan bakım süresini dakikalara indirir.<br><br><br>Öne Çıkan Özellikler<br><br>> 3 Ay Kalıcı Bariyer — Hidrofobik film sıvı ve kiri iter, leke riskini azaltır.<br>> UV Kalkanı — Güneş ışınlarına karşı renk solmasını engeller.<br>> pH-Nötr Güvenlik — Tüm modern deri türleriyle uyumlu, yüzeyi tahriş etmez.<br>> Mat & Görünmez — Parlatmaz; orijinal dokuyu ve hissi korur.<br>> Hızlı Tek Kat Uygulama — Sprey-sil yönteminde kuruma bekleme süresi kısadır.<br>> Düşük VOC Formül — Kokusuz çalışma konforu, toz çekmez.<br><br><br>Teknik Bilgiler<br><br>Parametre\tDeğer\tNot<br>Tüketim / Seyreltme\t15 – 25 ml / araç içi\tSeyreltilmez<br>pH / SiO²\tpH ? 7 / Silika bazlı\tDeri kaplama dostu<br>Etki / Koruma Süresi\t? 3 ay\tDüzenli bakım ile uzar<br>Çalışma Sıcaklığı\t15 – 25 °C\tDirekt güneşten kaçınılmalı<br>Ambalaj\t120 ml sprey şişe\tPüskürt-uygula kolaylığı<br><br><br>Nasıl Kullanılır?<br><br>1.\tHazırlık – Deriyi Q²M LeatherCleaner ile temizleyip tam kurulayın.<br>2.\tUygulama – Q²M MF Aplikatöre 2-3 sprey sıkın.<br>3.\tYayma – İnce, eşit film tabakası halinde düz çizgilerle uygulayın.<br>4.\tBekleme – 5-10 dk yüzeyde bırakın; fazlalık varsa mikrofiberle hafifçe silin.<br>5.\tKürlenme – Araç içini min. 2 saat kullanmayın.<br>6.\tİkinci Kat (Opsiyonel) – Yoğun kullanımlı alanlara 3 saat sonra ekstra kat atın.<br>7.\tBakım – Koruma zayıfladığında (? 3 ay) işlemi tekrarlayın.<br><br><br>Kullanım Alanları<br><br>• Otomobil koltukları, kapı panelleri, konsol deri trimleri<br>• Direksiyon simidi, vites topuzu, kol dayama alanları<br>• Mat, yarı-anilin, nappa ve kaplamalı modern deri yüzeyler<br>• Klasik, spor ve lüks segment iç mekân uygulamaları<br><br><br>Neden GYEON Q² LeatherCoat REDEFINED?<br><br>• Zamandan Tasarruf — Sprey-sil uygulama; dakikalar içinde tamam.<br>• Yüksek Performans — SiO² destekli formül uzun ömürlü koruma sunar.<br>• Sağlığa Dost — VOC düşük, pH nötr; soluma ve temas riskini azaltır.<br>• Ekonomik — 120 ml şişe ile 5-8 koltuk seti rahatça kaplanır.<br><br><br>Önerilen Aksesuar & Tamamlayıcı Ürünler<br><br>Ürün\tAmaç\tUyum<br>Q²M LeatherCleaner Mild\tDeri ön temizliği\tMaksimum bağlanma<br>Q²M MF Applicator\tİnce ve homojen yayma\tİz bırakmaz uygulama<br>Q²M BaldWipe Microfiber\tFazla ürün silme, kurutma\tÇiziksiz bitiş<br>Q²M LeatherBrush\tGözenek derin temizlik\tEski/yoğun kirli deri<br><br><br>Sıkça Sorulan Sorular (FAQ)<br><br>S: Parlaklık verir mi?<br>C: Hayır, görünmez mat katman oluşturur; kayganlık veya parlama yapmaz.<br>S: Nubuk veya süet üzerinde kullanabilir miyim?<br>C: Hayır, yalnızca kaplamalı ve pürüzsüz otomotiv derileri için tasarlanmıştır.<br>S: Ne sıklıkla yenilemeliyim?<br>C: Günlük kullanımda her 3 ayda bir uygulama tazelemek ideal sonuç verir.<br>S: Kot boyası transferini engeller mi?<br>C: Evet, hidrofobik bariyer boya transferini minimize eder; leke temizliği kolaylaşır.<br><br><br>Orijinal mat görünümü koru, lekeleri geri çevir! Sprey sık, yay ve keyfini sür — profesyonel deri koruması artık herkesin elinde!",
+        "how_to_use": "1. Hazırlık: Deriyi Q²M LeatherCleaner ile temizleyip tam kurulayın.\n2. Uygulama: Q²M MF Aplikatöre 2-3 sprey sıkın.\n3. Yayma: İnce, eşit film tabakası halinde düz çizgilerle uygulayın.\n4. Bekleme: 5-10 dk yüzeyde bırakın; fazlalık varsa mikrofiberle hafifçe silin.\n5. Kür: Tam performans için 24 saat deriye temas etmeyin.",
+        "when_to_use": "Deri koltuklar, direksiyon ve kapı panellerinde sıvı ve kir bariyeri oluşturmak, UV solmasını önlemek için kullanılır. LeatherCleaner ile temizlik sonrası uygulanır.",
+        "target_surface": "Otomotiv deri yüzeyleri - koltuklar, direksiyon, kapı panelleri, kol dayama",
+        "why_this_product": "• SiO² destekli hidrofobik formül - 3 aya varan koruma\n• UV bariyeri - renk solmasını önler\n• Mat & görünmez bitiş - orijinal dokuyu korur\n• pH-nötr - tüm modern deri türleriyle uyumlu\n• Düşük VOC - kokusuz, konforlu çalışma"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2-LCR500M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "LeatherCoat deriyi parlatır mı?",
+          "answer": "Hayır, mat ve görünmez bitiş sağlar. Orijinal deri dokusunu ve fabrika görünümünü korur."
+        },
+        {
+          "question": "Ne kadar süre koruma sağlar?",
+          "answer": "Tek kat uygulamayla yaklaşık 3 ay koruma sağlar. Düzenli bakımla bu süre uzatılabilir."
+        },
+        {
+          "question": "Kot boyası transferini önler mi?",
+          "answer": "Evet, hidrofobik bariyer kot boyası ve diğer boya transferlerini engelleyerek açık renkli derileri korur."
+        },
+        {
+          "question": "Temizlik yapmadan uygulanabilir mi?",
+          "answer": "Hayır, önce Q²M LeatherCleaner ile temizlik şart. Kirli yüzeyde kaplama tutmaz ve leke kalıcı hale gelebilir."
+        }
+      ],
+      "price": 48000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2-LCR120M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Bakım Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2-LCR500M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_protectant",
+        "fields": {
+          "function": "SiO2 Bazlı Koruma",
+          "finish": "Mat / Görünmez",
+          "durability_label": "3 Ay",
+          "consumption": "15-25 ml/araç",
+          "features": "Kot boyası transferini engeller",
+          "durability": "3 ay",
+          "ph_level": "Nötr (pH 7)",
+          "volume": "500 ml"
+        }
+      },
+      "content": {
+        "short_description": "GYEON Q Leather Coat REDEFINED 500 ml Deri Yüzeyler İçin Bakım ve Koruma - MTS Kimya güvencesiyle orijinal ürün garantisiyle güvenli alışveriş yapın.",
+        "full_description": "GYEON Q² Leather Coat REDEFINED Deri Yüzeyler İçin Bakım Ve Koruma - 500 ml<br><br><br>GYEON Q² LeatherCoat REDEFINED, SiO² destekli hidrofobik formülüyle otomotiv deri yüzeylerine 3 aya varan koruma sağlar. Tek kat sprey-uygulama, sıvıları ve kiri uzak tutar; UV bariyeri sayesinde renk solmasını önler, mat fabrika görünümünü bozmadan bakım süresini dakikalara indirir.<br><br><br>Öne Çıkan Özellikler<br><br>> 3 Ay Kalıcı Bariyer — Hidrofobik film sıvı ve kiri iter, leke riskini azaltır.<br>> UV Kalkanı — Güneş ışınlarına karşı renk solmasını engeller.<br>> pH-Nötr Güvenlik — Tüm modern deri türleriyle uyumlu, yüzeyi tahriş etmez.<br>> Mat & Görünmez — Parlatmaz; orijinal dokuyu ve hissi korur.<br>> Hızlı Tek Kat Uygulama — Sprey-sil yönteminde kuruma bekleme süresi kısadır.<br>> Düşük VOC Formül — Kokusuz çalışma konforu, toz çekmez.<br><br><br>Teknik Bilgiler<br><br>Parametre\tDeğer\tNot<br>Tüketim / Seyreltme\t15 – 25 ml / araç içi\tSeyreltilmez<br>pH / SiO²\tpH ? 7 / Silika bazlı\tDeri kaplama dostu<br>Etki / Koruma Süresi\t? 3 ay\tDüzenli bakım ile uzar<br>Çalışma Sıcaklığı\t15 – 25 °C\tDirekt güneşten kaçınılmalı<br>Ambalaj\t500 ml sprey şişe\tPüskürt-uygula kolaylığı<br><br><br>Nasıl Kullanılır?<br><br>1.\tHazırlık – Deriyi Q²M LeatherCleaner ile temizleyip tam kurulayın.<br>2.\tUygulama – Q²M MF Aplikatöre 2-3 sprey sıkın.<br>3.\tYayma – İnce, eşit film tabakası halinde düz çizgilerle uygulayın.<br>4.\tBekleme – 5-10 dk yüzeyde bırakın; fazlalık varsa mikrofiberle hafifçe silin.<br>5.\tKürlenme – Araç içini min. 2 saat kullanmayın.<br>6.\tİkinci Kat (Opsiyonel) – Yoğun kullanımlı alanlara 3 saat sonra ekstra kat atın.<br>7.\tBakım – Koruma zayıfladığında (? 3 ay) işlemi tekrarlayın.<br><br><br>Kullanım Alanları<br><br>• Otomobil koltukları, kapı panelleri, konsol deri trimleri<br>• Direksiyon simidi, vites topuzu, kol dayama alanları<br>• Mat, yarı-anilin, nappa ve kaplamalı modern deri yüzeyler<br>• Klasik, spor ve lüks segment iç mekân uygulamaları<br><br><br>Neden GYEON Q² LeatherCoat REDEFINED?<br><br>• Zamandan Tasarruf — Sprey-sil uygulama; dakikalar içinde tamam.<br>• Yüksek Performans — SiO² destekli formül uzun ömürlü koruma sunar.<br>• Sağlığa Dost — VOC düşük, pH nötr; soluma ve temas riskini azaltır.<br>• Ekonomik — 500 ml şişe ile 26-32  koltuk seti rahatça kaplanır.<br><br><br>Önerilen Aksesuar & Tamamlayıcı Ürünler<br><br>Ürün\tAmaç\tUyum<br>Q²M LeatherCleaner Mild\tDeri ön temizliği\tMaksimum bağlanma<br>Q²M MF Applicator\tİnce ve homojen yayma\tİz bırakmaz uygulama<br>Q²M BaldWipe Microfiber\tFazla ürün silme, kurutma\tÇiziksiz bitiş<br>Q²M LeatherBrush\tGözenek derin temizlik\tEski/yoğun kirli deri<br><br><br>Sıkça Sorulan Sorular (FAQ)<br><br>S: Parlaklık verir mi?<br>C: Hayır, görünmez mat katman oluşturur; kayganlık veya parlama yapmaz.<br>S: Nubuk veya süet üzerinde kullanabilir miyim?<br>C: Hayır, yalnızca kaplamalı ve pürüzsüz otomotiv derileri için tasarlanmıştır.<br>S: Ne sıklıkla yenilemeliyim?<br>C: Günlük kullanımda her 3 ayda bir uygulama tazelemek ideal sonuç verir.<br>S: Kot boyası transferini engeller mi?<br>C: Evet, hidrofobik bariyer boya transferini minimize eder; leke temizliği kolaylaşır.<br><br><br>Orijinal mat görünümü koru, lekeleri geri çevir! Sprey sık, yay ve keyfini sür — profesyonel deri koruması artık herkesin elinde!<br><br>",
+        "how_to_use": "1. Hazırlık: Deriyi Q²M LeatherCleaner ile temizleyip tam kurulayın.\n2. Uygulama: Q²M MF Aplikatöre 2-3 sprey sıkın.\n3. Yayma: İnce, eşit film tabakası halinde düz çizgilerle uygulayın.\n4. Bekleme: 5-10 dk yüzeyde bırakın; fazlalık varsa mikrofiberle hafifçe silin.\n5. Kür: Tam performans için 24 saat deriye temas etmeyin.",
+        "when_to_use": "Deri koltuklar, direksiyon ve kapı panellerinde sıvı ve kir bariyeri oluşturmak, UV solmasını önlemek için kullanılır. Profesyonel detay atölyeleri için ekonomik 500 ml boyut.",
+        "target_surface": "Otomotiv deri yüzeyleri - koltuklar, direksiyon, kapı panelleri, kol dayama",
+        "why_this_product": "• 500 ml profesyonel boyut - 20-33 araç kapasitesi\n• SiO² destekli hidrofobik formül - 3 aya varan koruma\n• UV bariyeri - renk solmasını önler\n• Kot boyası transferini engeller\n• Mat bitiş - orijinal dokuyu korur"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2-LCR120M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "120 ml ile 500 ml arasındaki fark nedir?",
+          "answer": "Aynı formül, sadece boyut farkı. 500 ml profesyonel kullanım için ekonomik seçenektir (20-33 araç kapasitesi)."
+        },
+        {
+          "question": "LeatherCoat deriyi parlatır mı?",
+          "answer": "Hayır, mat ve görünmez bitiş sağlar. Orijinal deri dokusunu ve fabrika görünümünü korur."
+        },
+        {
+          "question": "Kot boyası transferini önler mi?",
+          "answer": "Evet, hidrofobik bariyer kot boyası ve diğer boya transferlerini engelleyerek açık renkli derileri korur."
+        },
+        {
+          "question": "Kaç araç için yeterli?",
+          "answer": "500 ml, araç başına 15-25 ml tüketimle yaklaşık 20-33 araç için yeterlidir."
+        }
+      ],
+      "price": 99000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2-LCR500M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Bakım Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LCSYA500M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_cleaner",
+        "fields": {
+          "cleaning_strength": "Strong (Güçlü)",
+          "ph_level": "Alkali (pH 12)",
+          "features": "Mat yüzey hazırlar, kaplama öncesi ideal",
+          "composition": "Yumuşatıcı ve silikon içermez",
+          "target_dirt": "Yağ, ter, dikiş arası kiri",
+          "volume": "500 ml",
+          "consumption": "100 ml/araç",
+          "dilution": "Saf veya 1:1-1:3 seyreltme"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Cleaner Strong, güçlü deri temizleyici, 500 ml. MTS Kimya güvencesiyle orijinal üründür.",
+        "full_description": "GYEON Q²M LeatherCleaner Strong Güçlü Deri Temizleyici - 500 ml -Mat Görünüm Deri Koltuk Temizleme<br><br>İnatçı kir, yağ ve renk solmalarıyla mücadelede son nokta! Alkali pH 12 formüllü Q²M LeatherCleaner Strong, deriyi yumuşatmadan derinlemesine temizler, kaplama öncesi pürüzsüz ve tamamen mat bir yüzey hazırlar. Yumuşatıcı ve koruyucu katkı maddesi içermez; böylece Q² LeatherShield gibi seramik kaplamaların tutunmasını mükemmelleştirir.<br><br><br>Öne Çıkan Özellikler<br><br>> Alkali pH 12 Gücü — Yağ ve ter kalıntılarını çözer, derin kiri söker.<br>> Mat Yüzey Hazırlığı — Kaplama performansını artıran kalıntısız bitiş.<br>> Katkısız Formül — Yumuşatıcı, silikon ve balmumu içermez.<br>> Hızlı Köpük Aktivitesi — Su ile seyreltildiğinde köpük artar, temizlik kolaylaşır.<br>> Tüm Modern Derilerde Güvenli — Kaplamalı, boyalı, PU destekli deri tiplerine uyum.<br>> Yüksek Konsantrasyon — 100 ml/araç tüketim; ekonomik kullanım.<br><br><br>Teknik Bilgiler<br><br>Parametre\t\tDeğer\tNot<br>Tüketim / Seyreltme\t\t100 ml / araç <br>İsteğe bağlı 1:1–1:3\tKöpük artırmak için su ekleyin<br>pH / Sertlik / SiO²\t\tpH ? 12 / Alkali / SiO² yok\tKaplama dostu formül<br>Etki / Koruma Süresi\t\tAnında temizlik\tKaplama öncesi hazırlık<br>Çalışma Sıcaklığı\t\t15 – 25 °C\tDirekt güneşten kaçının<br>Ambalaj\t\t500 ml HDPE şişe\tPüskürtücülü<br><br><br>Nasıl Kullanılır?<br><br>1.\tVakumlama — Yüzeydeki tozu ve döküntüleri alın.<br>2.\tUygulama — Ürünü doğrudan deri yüzeye veya Q²M LeatherBrush’a püskürtün.<br>3.\tFırçalama — Dairesel hareketlerle nazikçe köpürtün; kiri liflerin arasından çıkarın.<br>4.\tSilme — Kirli köpüğü ilk mikrofiber bezle alın.<br>5.\tDurulama — Hafif nemli ikinci bezle kalıntıları temizleyin.<br>6.\tKurulama — Kuru üçüncü bezle yüzeyi tamamen kurulayın.<br>7.\tKaplama — Yüzey kuruduktan sonra Q² LeatherShield uygulayın.<br><br><br>Kullanım Alanları<br><br>• Kaplamadan önce deri koltuk hazırlığı<br>• Direksiyon, vites topuzu ve kapı içi deri paneller<br>• Açık renk deride ter & jean lekesi giderme<br>• Yoğun kirli detay dikiş araları<br>• Lüks deri döşemelerde mat görünüm elde etme<br><br><br>Neden GYEON Q²M LeatherCleaner Strong?<br><br>•\tMaksimum Temizlik Gücü — 10/10 temizlik derecesi.<br>•\tKalıntısız Hazırlık — Kaplama tutunmasını garantiler.<br>•\tZamandan Tasarruf — Tek adım, hızlı kuruma.<br>•\tEkonomik — 500 ml ile 4–5 araç detayı.<br><br><br>Önerilen Aksesuar & Tamamlayıcı Ürünler<br><br>Ürün\tAmaç\tUyum<br>Q²M LeatherBrush\tDerin fırçalama\tKöpük aktivitesi<br>Q²M ScrubPad EVO\tDikiş arası temizlik\tYoğun kir<br>Q² LeatherShield EVO\tSeramik deri kaplama\tUzun ömürlü koruma<br>Q²M BaldWipe\tSon silme & kontrol\tİz bırakmaz<br><br>Sıkça Sorulan Sorular<br><br>Q: LeatherCleaner Strong deriyi kurutur mu?<br>A: Hayır; yumuşatıcı içermez fakat alkali formülü deriyi mat bırakır. Kaplama veya hafif bakım kremi sonrası esneklik korunur.<br>Q: Klasik deri kremiyle birlikte kullanabilir miyim?<br>A: Evet, ancak krem uygulamadan önce yüzey tamamen kuru olmalıdır.<br>Q: Seyreltme zorunlu mu?<br>A: Değil; ağır kirde saf kullanın. Köpük ve çalışma süresini artırmak için 1:1–1:3 oranında seyreltilebilir.<br>Q: Anilin veya süet deride güvenli mi?<br>A: Hayır, yalnızca kaplamalı modern otomotiv derilerinde kullanınız.<br><br><br>Deriyi arındır, mat dokusunu geri kazan ve kaplamaya hazırla—profesyonel sonuçlar artık dakikalar içinde seninle!",
+        "how_to_use": "1. Vakumlama: Yüzeydeki tozu ve döküntüleri alın.\n2. Uygulama: Ürünü doğrudan deri yüzeye veya Q²M LeatherBrush'a püskürtün.\n3. Fırçalama: Dairesel hareketlerle köpürterek derin kiri sökün.\n4. Silme: Temiz mikrofiber ile köpüğü ve kiri toplayın.\n5. Gerekirse Tekrar: İnatçı lekeler için işlemi tekrarlayın.\n6. Kurulama: Tamamen kurumasını bekleyin, ardından koruma (LeatherCoat) uygulayın.",
+        "when_to_use": "İnatçı kir, yağ ve ter kalıntılarının temizliği için kullanılır. Özellikle seramik deri kaplama (LeatherShield) öncesi yüzey hazırlığı için idealdir.",
+        "target_surface": "Kaplamalı, boyalı, PU destekli tüm modern deri türleri - koltuklar, direksiyon, kapı panelleri",
+        "why_this_product": "• Alkali pH 12 - yağ ve ter kalıntılarını çözer, derin kiri söker\n• Katkısız formül - yumuşatıcı, silikon, balmumu içermez\n• Mat yüzey hazırlığı - kaplama tutunmasını mükemmelleştirir\n• Köpüren formül - su ile seyreltildiğinde köpük artar"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LCSYA1000M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Neden yumuşatıcı içermiyor?",
+          "answer": "Kaplama öncesi hazırlık için. Yumuşatıcı ve silikon kalıntıları kaplamanın tutunmasını engeller. Bu formül tamamen temiz bir yüzey bırakır."
+        },
+        {
+          "question": "Normal deri temizleyiciden farkı nedir?",
+          "answer": "pH 12 alkali formül sayesinde daha güçlü temizlik gücü sunar. Özellikle inatçı yağ, ter ve derin kir için tasarlanmıştır."
+        },
+        {
+          "question": "Seyreltmek gerekiyor mu?",
+          "answer": "Zorunlu değil, saf kullanılabilir. Köpük artırmak için 1:1 ile 1:3 oranında su ile seyreltilebilir."
+        },
+        {
+          "question": "Koruma sağlıyor mu?",
+          "answer": "Hayır, sadece temizlik ürünü. Temizlik sonrası Q² LeatherCoat veya LeatherShield ile koruma uygulanmalıdır."
+        }
+      ],
+      "price": 70000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LCSYA500M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LCSYA1000M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_cleaner",
+        "fields": {
+          "cleaning_strength": "Strong (Güçlü)",
+          "ph_level": "Alkali (pH 12)",
+          "consumption": "100 ml/araç",
+          "features": "Kalıntısız durulama, köpüren formül",
+          "volume": "1000 ml",
+          "dilution": "Saf veya 1:1-1:3 seyreltme"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Cleaner Strong, güçlü deri temizleyici, 1000 ml. Orijinal ürün, MTS Kimya güvencesiyle.",
+        "full_description": "GYEON Q²M LeatherCleaner Strong Güçlü Deri Temizleyici - 1000 ml -Mat Görünüm Deri Koltuk Temizleme<br><br>İnatçı kir, yağ ve renk solmalarıyla mücadelede son nokta! Alkali pH 12 formüllü Q²M LeatherCleaner Strong, deriyi yumuşatmadan derinlemesine temizler, kaplama öncesi pürüzsüz ve tamamen mat bir yüzey hazırlar. Yumuşatıcı ve koruyucu katkı maddesi içermez; böylece Q² LeatherShield gibi seramik kaplamaların tutunmasını mükemmelleştirir.<br><br><br>Öne Çıkan Özellikler<br><br>> Alkali pH 12 Gücü — Yağ ve ter kalıntılarını çözer, derin kiri söker.<br>> Mat Yüzey Hazırlığı — Kaplama performansını artıran kalıntısız bitiş.<br>> Katkısız Formül — Yumuşatıcı, silikon ve balmumu içermez.<br>> Hızlı Köpük Aktivitesi — Su ile seyreltildiğinde köpük artar, temizlik kolaylaşır.<br>> Tüm Modern Derilerde Güvenli — Kaplamalı, boyalı, PU destekli deri tiplerine uyum.<br>> Yüksek Konsantrasyon — 100 ml/araç tüketim; ekonomik kullanım.<br><br><br>Teknik Bilgiler<br><br>Parametre\t\tDeğer\tNot<br>Tüketim / Seyreltme\t\t100 ml / araç <br>İsteğe bağlı 1:1–1:3\tKöpük artırmak için su ekleyin<br>pH / Sertlik / SiO²\t\tpH ? 12 / Alkali / SiO² yok\tKaplama dostu formül<br>Etki / Koruma Süresi\t\tAnında temizlik\tKaplama öncesi hazırlık<br>Çalışma Sıcaklığı\t\t15 – 25 °C\tDirekt güneşten kaçının<br>Ambalaj\t\t1000 ml HDPE şişe\tPüskürtücülü<br><br><br>Nasıl Kullanılır?<br><br>1.\tVakumlama — Yüzeydeki tozu ve döküntüleri alın.<br>2.\tUygulama — Ürünü doğrudan deri yüzeye veya Q²M LeatherBrush’a püskürtün.<br>3.\tFırçalama — Dairesel hareketlerle nazikçe köpürtün; kiri liflerin arasından çıkarın.<br>4.\tSilme — Kirli köpüğü ilk mikrofiber bezle alın.<br>5.\tDurulama — Hafif nemli ikinci bezle kalıntıları temizleyin.<br>6.\tKurulama — Kuru üçüncü bezle yüzeyi tamamen kurulayın.<br>7.\tKaplama — Yüzey kuruduktan sonra Q² LeatherShield uygulayın.<br><br><br>Kullanım Alanları<br><br>• Kaplamadan önce deri koltuk hazırlığı<br>• Direksiyon, vites topuzu ve kapı içi deri paneller<br>• Açık renk deride ter & jean lekesi giderme<br>• Yoğun kirli detay dikiş araları<br>• Lüks deri döşemelerde mat görünüm elde etme<br><br><br>Neden GYEON Q²M LeatherCleaner Strong?<br><br>•\tMaksimum Temizlik Gücü — 10/10 temizlik derecesi.<br>•\tKalıntısız Hazırlık — Kaplama tutunmasını garantiler.<br>•\tZamandan Tasarruf — Tek adım, hızlı kuruma.<br>•\tEkonomik — 1000 ml ile 8–10 araç detayı.<br><br><br>Önerilen Aksesuar & Tamamlayıcı Ürünler<br><br>Ürün\tAmaç\tUyum<br>Q²M LeatherBrush\tDerin fırçalama\tKöpük aktivitesi<br>Q²M ScrubPad EVO\tDikiş arası temizlik\tYoğun kir<br>Q² LeatherShield EVO\tSeramik deri kaplama\tUzun ömürlü koruma<br>Q²M BaldWipe\tSon silme & kontrol\tİz bırakmaz<br><br>Sıkça Sorulan Sorular<br><br>Q: LeatherCleaner Strong deriyi kurutur mu?<br>A: Hayır; yumuşatıcı içermez fakat alkali formülü deriyi mat bırakır. Kaplama veya hafif bakım kremi sonrası esneklik korunur.<br>Q: Klasik deri kremiyle birlikte kullanabilir miyim?<br>A: Evet, ancak krem uygulamadan önce yüzey tamamen kuru olmalıdır.<br>Q: Seyreltme zorunlu mu?<br>A: Değil; ağır kirde saf kullanın. Köpük ve çalışma süresini artırmak için 1:1–1:3 oranında seyreltilebilir.<br>Q: Anilin veya süet deride güvenli mi?<br>A: Hayır, yalnızca kaplamalı modern otomotiv derilerinde kullanınız.<br><br><br>Deriyi arındır, mat dokusunu geri kazan ve kaplamaya hazırla—profesyonel sonuçlar artık dakikalar içinde seninle!<br><br>",
+        "how_to_use": "1. Vakumlama: Yüzeydeki tozu ve döküntüleri alın.\n2. Uygulama: Ürünü doğrudan deri yüzeye veya Q²M LeatherBrush'a püskürtün.\n3. Fırçalama: Dairesel hareketlerle köpürterek derin kiri sökün.\n4. Silme: Temiz mikrofiber ile köpüğü ve kiri toplayın.\n5. Gerekirse Tekrar: İnatçı lekeler için işlemi tekrarlayın.\n6. Kurulama: Tamamen kurumasını bekleyin, ardından koruma uygulayın.",
+        "when_to_use": "İnatçı kir, yağ ve ter kalıntılarının temizliği için kullanılır. Profesyonel atölyeler için ekonomik 1000 ml boyut. Seramik deri kaplama öncesi yüzey hazırlığı için ideal.",
+        "target_surface": "Kaplamalı, boyalı, PU destekli tüm modern deri türleri - koltuklar, direksiyon, kapı panelleri",
+        "why_this_product": "• 1000 ml profesyonel boyut - 10 araç kapasitesi\n• Alkali pH 12 - yağ ve ter kalıntılarını çözer\n• Katkısız formül - kaplama tutunmasını mükemmelleştirir\n• Kalıntısız durulama - mat yüzey hazırlığı"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LCSYA500M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "500 ml ile 1000 ml arasındaki fark nedir?",
+          "answer": "Aynı formül, sadece boyut farkı. 1000 ml profesyonel atölyeler için ekonomik seçenektir (yaklaşık 10 araç kapasitesi)."
+        },
+        {
+          "question": "Neden yumuşatıcı içermiyor?",
+          "answer": "Kaplama öncesi hazırlık için. Yumuşatıcı kalıntıları kaplamanın tutunmasını engeller. Bu formül tamamen temiz bir yüzey bırakır."
+        },
+        {
+          "question": "Deriyi kurutur mu?",
+          "answer": "Tek başına koruma sağlamaz. Temizlik sonrası LeatherCoat veya benzeri bir koruma ürünü ile deriyi beslemek önerilir."
+        },
+        {
+          "question": "Kaç araç için yeterli?",
+          "answer": "1000 ml, araç başına 100 ml tüketimle yaklaşık 10 araç için yeterlidir."
+        }
+      ],
+      "price": 105000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LCSYA1000M_0-1.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    },
+    {
+      "sku": "700468",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_conditioner",
+        "fields": {
+          "function": "Besleme ve Nemlendirme",
+          "scent": "Black Orchid (Siyah Orkide)",
+          "ph_level": "Nötr (7.29)",
+          "features": "Çatlamayı önler, esneklik kazandırır",
+          "suitable_surface": [
+            "Doğal Deri",
+            "Suni Deri",
+            "Vinil"
+          ],
+          "volume": "4,54 lt",
+          "suitable_surfaces": [
+            "Doğal Deri",
+            "Suni Deri (Sky)",
+            "Vinil"
+          ]
+        }
+      },
+      "content": {
+        "short_description": "İtalyan FRA-BER Profesyonel Araç Yıkama Köpükleri, Bakım Ürünleri ve Hızlı Cilaları Yetkili Türkiye Distribütörü MTS Kimya. Orijinal Ürün. Vadesiz Taksit.",
+        "full_description": "FRA-BER CREAM LEATHER – Deri Bakım ve Koruyucu Black Orchid Kokulu – 4,54 Litre\r\n\r\nCREAM LEATHER’IN FAYDALARI | Nemlendirme, Yumuşaklık ve Lüks Koruma\r\n\r\nFra-Ber’in Cream Leather ürünü, araç içi deri yüzeylerin profesyonel bakımı için özel olarak geliştirilmiş besleyici ve koruyucu bir solüsyondur. Deriye eski esnekliğini ve yumuşaklığını kazandırırken, çatlama, kuruma ve yıpranmaya karşı uzun süreli koruma sağlar. Black Orchid kokusu sayesinde iç mekânda lüks ve zarif bir atmosfer yaratır. Geniş formatı, hem bireysel hem profesyonel kullanım için idealdir.\r\n\r\nANA ÖZELLİKLER | CREAM LEATHER Ürün Özellikleri\r\n\r\n• Besleyici ve Nemlendirici Etki:\r\nYorgun ve kurumuş deri yüzeylerin doğal esnekliğini ve yumuşak dokusunu geri kazandırır.\r\n• Koruyucu Film Tabakası:\r\nDeri üzerinde görünmez bir katman oluşturarak çatlama, soyulma ve sertleşmeye karşı koruma sağlar.\r\n• Deri Uyumluluğu:\r\nDoğal deri, suni deri (Sky), vinil ve benzeri hassas yüzeylerde güvenle kullanılabilir.\r\n• Koku ve Format Çeşitliliği:\r\nBlack Orchid ve klasik “leather” parfüm seçenekleriyle, 750 ml ve 4.54 L formatlarında sunulur.\r\n• pH Dengesi:\r\nNötr pH (7,29) yapısı sayesinde deriye zarar vermez, düzenli kullanımda yaşlanma etkilerini geciktirir.\r\n\r\nCREAM LEATHER İDEAL KULLANIM ALANLARI | Nerelerde Kullanılır?\r\n\r\n• Deri kaplı direksiyon, vites topuzu ve koltuk gibi yıpranmaya açık yüzeylerde,\r\n• Araç iç mekanlarında kullanılan doğal veya suni deri döşemelerde,\r\n• Vinil veya Sky yüzeylerde, yumuşaklık ve esneklik sağlamak için,\r\n• Kuru ve matlaşmış deri yüzeylerin parlaklığını ve canlılığını geri kazandırmak için,\r\n• Profesyonel araç bakım merkezlerinde, detaylı iç temizlik ve bakım rutinlerinde.\r\n\r\nCREAM LEATHER KULLANIM SENARYOLARI | En İyi Sonuçlar İçin\r\n\r\n• Derin Bakım ve Yenileme: Deri yüzeylerin çatlama, sertleşme ve soyulma sorunlarını önlemek ve onarmak için.\r\n• Lüks İç Mekan Hissiyatı: Aromatik Black Orchid kokusu ile iç mekâna ferah ve zarif bir dokunuş katmak için.\r\n• Profesyonel İç Detay Temizliği: Det Leather gibi ön temizlik ürünlerinden sonra, yüzeyi besleyici bakım aşamasına hazırlamak için.\r\n• Yeni Araç Koruma: Yeni alınmış deri koltuk ve donanımların ömrünü uzatmak için düzenli uygulama.\r\n• Showroom &amp; Detailing Hazırlığı: Sergi araçlarında deri yüzeyin kusursuz görünmesini sağlamak için.\r\n\r\nCREAM LEATHER NASIL KULLANILIR? | Uygulama Talimatları\r\n\r\n1. Yüzeyi önceden özel bir deri temizleyici ile temizleyin.\r\n2. Ürünü doğrudan yüzeye ya da temiz bir sünger/bez üzerine püskürtün (yaklaşık 15 cm mesafeden).\r\n3. Ürünü dairesel hareketlerle yüzeye eşit şekilde yayın.\r\n4. Ürün tamamen emilene kadar uygulamaya devam edebilir veya kısa süre bekledikten sonra kuru bezle silerek işlemi tamamlayabilirsiniz.\r\nKullanım şekli: Seyreltmeden, doğrudan uygulanır.\r\n\r\nUYARILAR VE DEPOLAMA\r\n• Kullanım öncesi, test edilmemiş yüzeylerde lokal uygulama yaparak uyumluluğu kontrol ediniz.\r\n• Güneş ışığına doğrudan maruz bırakmayınız.\r\n• Ürünü kapağı kapalı şekilde, oda sıcaklığında, kuru ve serin bir ortamda muhafaza ediniz.",
+        "how_to_use": "1. Temizlik: Deri yüzeyi temiz ve kuru hale getirin.\n2. Uygulama: Ürünü mikrofiber veya aplikatör bez ile ince bir tabaka halinde yayın.\n3. Emilim: 5-10 dakika emilmesini bekleyin.\n4. Silme: Fazla ürünü temiz mikrofiber ile silin.\n5. Tamponlama: Parlaklık istiyorsanız yumuşak bezle hafifçe tamponlayın.",
+        "when_to_use": "Kurumuş, sertleşmiş veya yorgun görünümlü deri yüzeylerde besleyici bakım için kullanılır. Düzenli kullanımda deri yaşlanmasını geciktirir, çatlama ve soyulmayı önler.",
+        "target_surface": "Deri koltuklar, direksiyon, vites topuzu, kapı panelleri, doğal/suni deri ve vinil yüzeyler",
+        "why_this_product": "• 4,54 lt profesyonel ekonomi boyut\n• Besleyici ve nemlendirici - esneklik ve yumuşaklık kazandırır\n• Koruyucu film tabakası - çatlama ve sertleşmeye karşı koruma\n• Black Orchid kokusu - lüks ve zarif atmosfer\n• pH nötr (7.29) - düzenli kullanımda güvenli"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Temizlik yapmadan uygulanabilir mi?",
+          "answer": "Önce deriyi temizlemek önerilir. Kirli yüzeye uygulandığında kir tabakasını kapatır ve temizliği zorlaştırır."
+        },
+        {
+          "question": "Black Orchid kokusu kalıcı mı?",
+          "answer": "Uygulama sonrası birkaç gün hoş koku devam eder. Zamanla azalır ancak deri bakım etkisi devam eder."
+        },
+        {
+          "question": "Suni deri (Sky) yüzeylerde güvenli mi?",
+          "answer": "Evet, doğal deri, suni deri (Sky) ve vinil yüzeylerde güvenle kullanılabilir."
+        },
+        {
+          "question": "Ne sıklıkla kullanmalıyım?",
+          "answer": "Normal koşullarda ayda 1 kez yeterlidir. Kuruyan veya çatlama riski olan derilerde 2 haftada bir önerilebilir."
+        }
+      ],
+      "price": 290000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/700468_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Bakım Ürünleri"
+      }
+    },
+    {
+      "sku": "71132",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_cleaner",
+        "fields": {
+          "function": "Temizlik ve Bakım (2in1)",
+          "ph_level": "Nötr (7.0)",
+          "features": "Kullanıma hazır, durulama gerektirmez",
+          "scent": "Doğal Deri Aroması",
+          "volume": "750 ml",
+          "dilution": "Kullanıma hazır",
+          "rinse_required": false,
+          "suitable_surfaces": [
+            "Gerçek Deri",
+            "Yarı Anilin",
+            "Suni Deri",
+            "Vinil"
+          ]
+        }
+      },
+      "content": {
+        "short_description": "Fra-Ber Det Leather 750 ml Spray, araç içi deri yüzeylerin derinlemesine temizliği ve bakımı için ideal profesyonel üründür. Konsantre formülü ile seyreltmeye gerek duymadan uygulanır; fırça veya sihirli süngerle kolayca yayılır, derinin ömrünü uzatır ve hoş bir koku bırakır.",
+        "full_description": "FRA-BER DET LEATHER – Araç Deri Koltuk Temizleyici &amp; Bakım Spreyi – 750 ml\r\n\r\n\r\nFRA-BER DET LEATHER’IN FAYDALARI | Derin Temizlik, Güvenli Bakım, Hoş Deri Kokusu\r\n\r\nFra-Ber’in DET LEATHER ürünü, \u00100 kullanıma hazır formülüyle gerçek ve suni deri yüzeyleri çizmeden temizler, besler ve tazeler. Yüzeyi kurutmayan pH-dengeli yapısı, kalıcı deri kokusuyla birleşerek kabinde ferah ve premium bir atmosfer bırakır.\r\n\r\n\r\nANA ÖZELLİKLER | FRA-BER DET LEATHER Ürün Özellikleri\r\n\r\n• Derin Temizlik: Fırça veya melamin süngerle kullanıldığında gözenek içi kiri söker.\r\n• Kullanıma Hazır: Seyreltme gerekmez; doğrudan püskürt-sil.\r\n• Pratik &amp; Hızlı: Direksiyon, koltuk, vites derisi gibi noktalarda dakikalar içinde sonuç verir.\r\n• Hoş Deri Kokusu: Temizlik sonrası kabinde doğal deri aroması bırakır.\r\n• Tüm Deri Türleri: Gerçek, yarı anilin, suni ve vinil deri yüzeylerle uyumludur.\r\n• Araç-Dışı Kullanım: Motosiklet seleleri, tekne kabinleri, karavan ve kamyon koltuklarında güvenli.\r\n\r\n\r\nFRA-BER DET LEATHER İDEAL KULLANIM ALANLARI | Nerelerde Kullanılır?\r\n\r\n• Leke ve parmak izlerini zarar vermeden çıkarmak\r\n• Yeni veya bakımsız deri koltukları derinlemesine temizlemek\r\n• Direksiyon, vites körüğü, kapı içi deri panelleri tazelemek\r\n• Profesyonel detay atölyelerinde hızlı deri bakım paketleri\r\n• Ev garajında ekipmansız koltuk bakımı yapmak isteyen hobi kullanıcıları\r\n\r\n\r\nFRA-BER DET LEATHER KULLANIM SENARYOLARI | En İyi Sonuçlar İçin\r\n\r\n• Showroom Teslimatı: Araç satış öncesi koltuklarda mat, temiz görünüm sağlamak\r\n• Kış Öncesi Bakım: Soğuk havayla kuruyan deriyi beslemek ve çatlamayı önlemek\r\n• Detaylı İç Temizlik Paketleri: Buharlı temizlik sonrası kalıntıları nazikçe silmek\r\n• Motosiklet Sele Bakımı: Sürücü konforu ve görsel yenilik için düzenli temizlik\r\n\r\n\r\nFRA-BER DET LEATHER NASIL KULLANILIR? | Uygulama Talimatları\r\n\r\n1. Hazırlık: Yüzeyi süpürgeyle toz-kırıntıdan arındırın.\r\n2. Püskürtme: Şişeyi çalkalayın; yüzeye ~15 cm mesafeden püskürtün.\r\n3. Yayma: Nemli mikrofiber bez veya süngerle eşit dağıtın.\r\n4. Fırçalama (opsiyonel): İnce deri fırçası veya melamin süngerle dairesel hareket yapın.\r\n5. Silme: Kir çözündükten sonra temiz, kuru bezle yüzeyi kurulayın.\r\n6. Dikey Paneller: Alttan üste uygulayarak akıntı izini önleyin.\r\n\r\nKullanım: Ürün saf olarak uygulanır; durulama gerekmez.\r\n\r\n\r\nTEKNİK ÖZELLİKLER\r\n\r\nÖzellik Değer\r\nİşlev Derin temizlik &amp; bakım\r\npH 7,0 ± 0,5 (nötr)\r\nFormat Tetikli şişe, solventsiz\r\nHacim 750 ml\r\nKoku Doğal deri aroması\r\nUyumluluk Gerçek &amp; suni deri, vinil\r\n\r\n\r\nUYARILAR VE DEPOLAMA\r\n\r\n• Sıcak yüzey veya doğrudan güneş altında uygulamayınız.\r\n• Emiş gücü yüksek nubuk/süet gibi açık gözenekli derilerde önce görünmeyen bir alanda test ediniz.\r\n• Çocuklardan uzak tutunuz; yutulması zararlıdır.\r\n• Kapak kapalı olarak 5 °C – 30 °C arasında, donmaya ve aşırı ısıya maruz bırakmadan saklayınız.\r\n•\r\nFRA-BER DET LEATHER ile araç içi deri yüzeyleriniz ilk günkü temizlik, esneklik ve şıklığını korusun!",
+        "how_to_use": "1. Püskürtme: Ürünü doğrudan deri yüzeye veya fırçaya/süngere püskürtün.\n2. Fırçalama: Deri fırça veya melamin sünger ile dairesel hareketlerle temizleyin.\n3. Silme: Temiz mikrofiber ile köpüğü ve kiri toplayın.\n4. Kurulama: Doğal kurumaya bırakın - durulama gerektirmez.\n5. Gerekirse Tekrar: İnatçı lekeler için işlemi tekrarlayın.",
+        "when_to_use": "Deri koltuklarda leke, parmak izi ve günlük kir temizliği için kullanılır. Hem temizler hem hafif bakım sağlar. Showroom hazırlığı, rutin bakım ve hızlı detay işleri için ideal.",
+        "target_surface": "Gerçek deri, yarı anilin, suni deri, vinil - koltuklar, direksiyon, vites körüğü, kapı panelleri, motosiklet seleleri",
+        "why_this_product": "• 2in1 formül - temizler ve besler tek üründe\n• Kullanıma hazır - seyreltme gerekmez\n• Durulama gerektirmez - hızlı uygulama\n• Doğal deri kokusu bırakır\n• pH nötr - tüm deri türlerinde güvenli"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Temizlik sonrası ayrıca bakım ürünü gerekiyor mu?",
+          "answer": "Hafif bakım içerir ancak kurumuş veya yıpranmış derilerde ek olarak Cream Leather gibi bir kondisyoner kullanılabilir."
+        },
+        {
+          "question": "Durulama gerekiyor mu?",
+          "answer": "Hayır, durulama gerektirmez. Temizlik sonrası direkt kurumaya bırakabilirsiniz."
+        },
+        {
+          "question": "Motosiklet ve tekne koltuklarında kullanılabilir mi?",
+          "answer": "Evet, araç dışı kullanım için de uygundur. Motosiklet seleleri, tekne kabinleri, karavan ve kamyon koltuklarında güvenle kullanılabilir."
+        },
+        {
+          "question": "Seyreltmek gerekiyor mu?",
+          "answer": "Hayır, kullanıma hazır formüldür. Doğrudan püskürtüp kullanabilirsiniz."
+        }
+      ],
+      "price": 35000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/71132_1.webp",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Bakım Ürünleri"
+      }
+    },
+    {
+      "sku": "70751",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_conditioner",
+        "fields": {
+          "sub_type": "interior_detailer",
+          "target_surfaces": null,
+          "finish": null,
+          "concentrate": null,
+          "dilution": null,
+          "anti_bacterial_claim": null,
+          "safe_on_screens": null,
+          "scent": null,
+          "uv_protection": null,
+          "function": "Nemlendirici ve Besleyici",
+          "anti_aging": true,
+          "volume_ml": 750
+        }
+      },
+      "content": {
+        "short_description": "Fra-Ber Cream Leather 750 ml; deri direksiyon, koltuk ve diğer iç yüzeyler için geliştirilmiş bakım kremidir. Deriyi besler, nemlendirir ve çatlamayı önler. Orijinal deri kokusuyla uzun süre kalıcı temizlik ve koruma sağlar.",
+        "full_description": "FRA-BER CREAM LEATHER – Deri Onarıcı ve Koruyucu Bakım Kremi – 750 ml\r\n\r\nCREAM LEATHER’IN FAYDALARI | Yumuşaklık, Esneklik ve Derinlemesine Bakım\r\n\r\nFRA-BER Cream Leather, araç içi deri yüzeyler için özel olarak geliştirilmiş, besleyici ve onarıcı etkili premium bakım kremidir. Direksiyon, koltuk, kapı panelleri gibi sık kullanılan alanlardaki yıpranmış, kurumuş ve esnekliğini kaybetmiş deri yüzeyleri canlandırır. Uygulama sonrası yüzeyde ipeksi bir his bırakırken çatlama ve yaşlanmaya karşı etkili koruma sağlar.\r\n\r\nANA ÖZELLİKLER | CREAM LEATHER Ürün Özellikleri\r\n\r\n• Nemlendirici &amp; Besleyici Etki:\r\nKuru ve sertleşmiş deri yüzeylere yoğun nem kazandırarak yumuşaklık ve esneklik sağlar.\r\n• Yaşlanma Karşıtı Koruma:\r\nDüzenli kullanımda deri yüzeylerde çatlama, yırtılma ve sertleşme gibi deformasyonları önlemeye yardımcı olur.\r\n• Geniş Uyumluluk:\r\nGerçek deri, suni deri (Sky), vinil gibi hassas yüzeylerde güvenle kullanılabilir.\r\n• Direksiyon &amp; Koltuk Onarımı:\r\nÖzellikle sürtünmeye bağlı yıpranmış bölgelerde etkili yenileme sağlar.\r\n• Hoş Kokular:\r\nSiyah orkide veya deri aromasıyla ferah ve lüks bir iç mekân deneyimi sunar.\r\n• Kolay Uygulama:\r\nSprey başlık veya bez ile uygulanabilir. Hızlı emilen formülüyle pratik kullanım sunar.\r\n\r\nCREAM LEATHER İDEAL KULLANIM ALANLARI | Nerelerde Kullanılır?\r\n\r\n• Araç içi deri koltuk, direksiyon ve kapı panellerinde düzenli bakım için,\r\n• Yıpranma, çatlama ve sertleşme belirtisi gösteren deri yüzeylerde onarım amaçlı,\r\n• Gerçek ya da suni deri içeren binek ve ticari araçlarda detaylı iç bakım işlemleri için,\r\n• Showroom araçlarında veya teslimata hazırlanan araçlarda estetik bütünlük sağlamak için,\r\n• Profesyonel oto kuaförlerinde iç mekân bakım rutinlerinin parçası olarak.\r\n\r\nCREAM LEATHER KULLANIM SENARYOLARI | En İyi Sonuçlar İçin\r\n\r\n• Yıpranmış Direksiyon Bakımı: Sürüş sırasında en çok etkiye maruz kalan alanlarda yumuşaklık ve koruma sağlamak için.\r\n• Eski Deri Yenileme: Kurumuş, çatlamaya başlamış deri koltuklarda estetik ve fonksiyonel onarım için.\r\n• Yeni Araç Koruma: Deri yüzeyin ömrünü uzatmak ve ilk günkü hissini korumak için düzenli kullanım.\r\n• Profesyonel Detay Uygulamaları: Deri yüzeylerin showroom veya müşteri teslimatına hazırlanmasında.\r\n• Kışlık Bakım Paketi: Soğuk hava kaynaklı çatlamalara karşı koruyucu nemlendirme sağlamak için.\r\n\r\nCREAM LEATHER NASIL KULLANILIR? | Uygulama Talimatları\r\n\r\n1. Yüzeyi önceden temizleyin. (Det Leather ile detaylı temizlik önerilir.)\r\n2. Ürünü doğrudan yüzeye veya temiz bir sünger/bez üzerine püskürtün (yaklaşık 15 cm mesafeden).\r\n3. Dairesel hareketlerle tüm yüzeye eşit şekilde yayın.\r\n4. Ürün emilene kadar bekleyin. Gerekirse kuru bir bezle son bir kat silme işlemi yapabilirsiniz.\r\nKullanım şekli: Ürün saf olarak kullanılır. Seyreltme gerekmez.\r\n\r\nUYARILAR VE DEPOLAMA\r\n• Uygulamadan önce küçük bir alanda test yapılması önerilir.\r\n• Ürünü güneş ışığından uzak, serin ve kuru bir ortamda muhafaza ediniz.\r\n• Deri yüzeyin tamamen soğuk ve temiz olduğundan emin olun.",
+        "how_to_use": "1. Yüzeyi önceden temizleyin (Det Leather ile detaylı temizlik önerilir).\n2. Ürünü doğrudan yüzeye veya temiz bir sünger/bez üzerine püskürtün (yaklaşık 15 cm mesafeden).\n3. Dairesel hareketlerle tüm yüzeye eşit şekilde yayın.\n4. Ürün emilene kadar bekleyin.\n5. Gerekirse kuru bir bezle son bir kat silme işlemi yapabilirsiniz.",
+        "when_to_use": "Araç içi deri koltuk, direksiyon ve kapı panellerinde düzenli bakım için, yıpranma, çatlama ve sertleşme belirtisi gösteren deri yüzeylerde onarım amaçlı, showroom araçlarında estetik bütünlük sağlamak için kullanılır.",
+        "target_surface": "Deri koltuk, direksiyon, kapı panelleri, gerçek ve suni deri yüzeyler, vinil kaplamalar",
+        "why_this_product": "• Nemlendirici ve besleyici etki - kuru deri yüzeylere yoğun nem kazandırır\n• Yaşlanma karşıtı koruma - çatlama, yırtılma ve sertleşmeyi önler\n• Hoş kokular - siyah orkide veya deri aromasıyla lüks iç mekân deneyimi\n• Kolay uygulama - hızlı emilen formül"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": []
+      },
+      "faq": [
+        {
+          "question": "Hangi yüzeylerde kullanılabilir?",
+          "answer": "Gerçek deri, suni deri (Sky), vinil gibi hassas yüzeylerde güvenle kullanılabilir."
+        },
+        {
+          "question": "Seyreltme gerekli mi?",
+          "answer": "Hayır, ürün saf olarak kullanılır, seyreltme gerekmez."
+        },
+        {
+          "question": "Çatlak önleme özelliği var mı?",
+          "answer": "Evet, düzenli kullanımda deri yüzeylerde çatlama, yırtılma ve sertleşme gibi deformasyonları önlemeye yardımcı olur."
+        },
+        {
+          "question": "Uygulama öncesi temizlik gerekli mi?",
+          "answer": "Evet, yüzeyi önceden temizlemeniz önerilir, Det Leather ile detaylı temizlik yapılabilir."
+        }
+      ],
+      "price": 70000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/70751_1.webp",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Bakım Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LSSYA200M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_care_kit",
+        "fields": {
+          "sub_type": "interior_detailer",
+          "target_surfaces": null,
+          "finish": null,
+          "concentrate": null,
+          "dilution": null,
+          "anti_bacterial_claim": null,
+          "safe_on_screens": null,
+          "scent": null,
+          "uv_protection": null,
+          "kit_contents": [
+            "200 ml Cleaner",
+            "120 ml LeatherCoat",
+            "ScrubPad EVO",
+            "MF Aplikatör",
+            "LeatherWipe"
+          ],
+          "ph_level": 10,
+          "sio2_content": true,
+          "protection_duration": "3 ay",
+          "dilution_ratio": "1:5 - 1:10",
+          "coverage": "2-3 araç/set"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Set Strong, güçlü deri bakım seti, 200 ml. MTS Kimya güvencesiyle orijinal üründür.",
+        "full_description": "GYEON Q²M LeatherSet Strong Güçlü Deri Temizlik ve Bakım Seti (5 Parça) - 200 ml\r\n\r\nGYEON Q²M LeatherSet Strong, yoğun köpük oluşturan temizleyicisiyle gözeneklere işlemiş kir ve yağı nazikçe yumuşatır, ScrubPad EVO ile liflerin arasından söküp atar ve ardından SiO² katkılı LeatherCoat REDEFINED ile deriye üç aya varan mat, nefes alabilir bir koruma bariyeri kazandırır. Tek sette sunulan profesyonel aksesuarlar ve etkili formüller sayesinde ağır yıpranmış deri döşemeler bile dakikalar içinde doğal dokusuna, canlı tonlarına ve ipeksi pürüzsüzlüğüne kavuşur.\r\n\r\nÖne Çıkan Özellikler\r\n\r\n&gt; Alkalik Güç (pH 10) — Yağ, ter ve inatçı kirleri hızla çözer.\r\n&gt; SiO² Mat Koruma — 3 aya kadar UV, renk transferi ve lekelere karşı bariyer.\r\n&gt; Tam Set Çözüm — Temizlik + kaplama için ihtiyacınız olan 5 parça birlikte.\r\n&gt; Hızlı Kuruma, Mat Bitiş — Doğal deri dokusunu parlatmaz, kaygan bırakmaz.\r\n&gt; Kolay Uygulama — Köpük yapıcı şişe ve ScrubPad EVO ile zahmetsiz temizlik.\r\n&gt; Evrensel Uyumluluk — Tüm otomotiv derilerinde güvenli.\r\n\r\nTeknik Bilgiler\r\n\r\nParametre Değer Not\r\nTüketim / Seyreltme 1 set / 2-3 araç\r\nTemizlik: 1:5-1:10 Köpük şişe ile\r\npH / Sertlik / SiO² pH 10 / Alkali\r\nSiO² içerir Temizlik + koruma\r\nEtki / Koruma Süresi Anında temizlik\r\nKoruma: ? 3 ay Düzenli bakım önerilir\r\nÇalışma Sıcaklığı 15 – 25 °C Güneşten kaçının\r\nAmbalaj 200 ml Cleaner\r\n120 ml LeatherCoat\r\nScrubPad EVO, MF Aplikatör, LeatherWipe Köpük şişe dâhil\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Hazırlık — Deri yüzeyi vakumlayın, tozu alın.\r\n2. Köpük Hazırlama — Cleaner Strong’u ihtiyaca göre 1:5-1:10 seyrelterek köpük şişesine doldurun.\r\n3. Temizlik — Köpüğü deri üzerine sıkın, ScrubPad EVO ile dairesel hareketlerle kirleri çözün.\r\n4. Silme — LeatherWipe ile köpük ve kiri kaldırın; nemli bezle son kez silin.\r\n5. Kuruma — Yüzeyi 15 dk havalandırın, tamamen kuru olduğundan emin olun.\r\n6. Koruma Uygulaması — MF Aplikatöre 3-4 fıs LeatherCoat alın, ince tabaka hâlinde çapraz geçişlerle yayın.\r\n7. Son Kontrol — Fazla ürünü gerekirse temiz MF bezle hafifçe alın, 2 saat temas etmeyin.\r\n\r\nKullanım Alanları\r\n\r\n• Otomobil deri koltuklarında derin temizlik &amp; mat koruma\r\n• Direksiyon ve kapı içi deri panellerinde günlük aşınmaya karşı bariyer\r\n• Lüks deri kaplı konsol ve trimlerde UV kalkanı\r\n• Renk transferine eğilimli açık renk derilerde leke direnci\r\n• Motosiklet seleleri ve deri aksesuarlarında etkin bakım\r\n\r\nNeden GYEON Q²M LeatherSet Strong?\r\n\r\n• Tek Kutuda Çözüm — Ayrı ürün aramaya son, her şey dâhil.\r\n• Yüksek Performans — 10/10 temizlik gücü + uzun ömürlü SiO² koruma.\r\n• Ekonomik — Bir setle 2-3 tam iç mekân detaylaması.\r\n• Sağlığa Dost — Silikon, yağ bazlı yumuşatıcı içermez; deri nefes alır.\r\n\r\nÖnerilen Aksesuar &amp; Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nQ²M LeatherBrush Detay fırçalama Zorlu dikiş araları\r\nQ²M BaldWipe Malzeme kalıntısı kontrolü Son silme\r\nQ²M Preserve Vinil &amp; plastik koruma Tam iç mekân uyumu\r\nQ²M Interior Detailer Hızlı iç temizleme Günlük bakım\r\n\r\nSıkça Sorulan Sorular\r\n\r\nQ: LeatherCleaner Strong deriyi kurutur mu?\r\nA: Hayır, yumuşatıcı içermez ancak SiO² kaplama öncesi ideal temiz yüzey bırakır.\r\nQ: LeatherCoat parlak bir film oluşturur mu?\r\nA: Oluşturmaz; mat, doğal dokuyu koruyan ince bir bariyer sağlar.\r\nQ: Koruma süresi ne kadar?\r\nA: Günlük kullanımda ve düzenli temizlikle 3 aya kadar kalıcıdır.\r\n\r\nKöpürt, fırçala, koru—profesyonel deri bakımının gücü artık elinizde!",
+        "how_to_use": "1. Deri yüzeyi vakumlayın ve tozu alın.\n2. Cleaner Strong'u ihtiyaca göre 1:5-1:10 seyrelterek köpük şişesine doldurun.\n3. Köpüğü deri üzerine sıkın, ScrubPad EVO ile dairesel hareketlerle kirleri çözün.\n4. LeatherWipe ile köpük ve kiri kaldırın; nemli bezle son kez silin.\n5. Yüzeyi 15 dk havalandırın, tamamen kuru olduğundan emin olun.\n6. MF Aplikatöre 3-4 fıs LeatherCoat alın, ince tabaka hâlinde çapraz geçişlerle yayın.\n7. Fazla ürünü gerekirse temiz MF bezle hafifçe alın, 2 saat temas etmeyin.",
+        "when_to_use": "Ağır yıpranmış deri döşemelerin restorasyonunda, profesyonel detailing stüdyolarında, yoğun kullanım gören deri koltuklarda, direksiyon ve kapı panellerinde aşınmaya karşı bariyer oluşturmak için kullanılır.",
+        "target_surface": "Otomobil deri koltukları, direksiyon, kapı içi deri paneller, konsol ve trim, motosiklet seleleri",
+        "why_this_product": "• Alkalik güç (pH 10) - yağ, ter ve inatçı kirleri hızla çözer\n• SiO² mat koruma - 3 aya kadar UV ve lekelere karşı bariyer\n• Tam set çözüm - temizlik ve koruma için 5 parça birlikte\n• Ekonomik - bir setle 2-3 tam iç mekân detaylaması"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LSN200M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "LeatherCleaner Strong deriyi kurutur mu?",
+          "answer": "Hayır, yumuşatıcı içermez ancak SiO² kaplama öncesi ideal temiz yüzey bırakır."
+        },
+        {
+          "question": "LeatherCoat parlak bir film oluşturur mu?",
+          "answer": "Oluşturmaz; mat, doğal dokuyu koruyan ince bir bariyer sağlar."
+        },
+        {
+          "question": "Koruma süresi ne kadar?",
+          "answer": "Günlük kullanımda ve düzenli temizlikle 3 aya kadar kalıcıdır."
+        },
+        {
+          "question": "Açık renk derilerde renk transferini önler mi?",
+          "answer": "Evet, SiO² koruma bariyeri renk transferine karşı direnç sağlar."
+        }
+      ],
+      "price": 170000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LSSYA200M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LCN500M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_cleaner",
+        "fields": {
+          "sub_type": "interior_detailer",
+          "target_surfaces": null,
+          "finish": null,
+          "concentrate": null,
+          "dilution": null,
+          "anti_bacterial_claim": null,
+          "safe_on_screens": null,
+          "scent": null,
+          "uv_protection": null,
+          "ph_level": "Nötr",
+          "silicone_free": true,
+          "wax_free": true,
+          "consumption": "100 ml/araç",
+          "dilution_ratio": "Saf veya 1:1",
+          "volume_ml": 500
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Cleaner Natural, modern napa yarı anilin derilere özel temizleyici, 500 ml. Orijinal ürün, MTS Kimya güvencesiyle.",
+        "full_description": "GYEON Q²M Leather Cleaner Natural Modern Napa Yarı Anilin Derilere Özel Temizleyici - 500 ml\r\n\r\n\r\nLüks ve spor otomobillerin hassas napa, yarı anilin ve tüm modern deri döşemelerinde güvenle kullanabileceğiniz en saf temizlik çözümü! Q²M LeatherCleaner Natural, silikon, balmumu ve yumuşatıcı içermeyen formülüyle kiri, vücut yağlarını ve hafif renk bozulmalarını nazikçe giderirken tamamen mat, kaplamaya hazır bir yüzey bırakır. GYEON’un Q² LeatherShield EVO ve LeatherCoat REDEFINED kaplamaları için ideal ön hazırlık ürünüdür.\r\n\r\n\r\nÖne Çıkan Özellikler\r\n\r\n• pH-Nötr &amp; Hassas Deriye Uygun – Nappa, yarı anilin, kaplamalı veya perforeli tüm modern deri tiplerinde güvenli temizlik\r\n• Kaplama-Hazır Yüzey – Yumuşatıcı/koruyucu bırakmaz; LeatherShield EVO’nun tutunmasını maksimize eder\r\n• Mat Fabrika Görünümü – Parlaklaştırmaz; orijinal dokuyu korur\r\n• Nazik Ama Etkili – Günlük kir, ter yağları, hafif boya transferini zahmetsizce çözer\r\n• Düzenli Bakım İçin İdeal – Aylık bakımda veya detay öncesi hızlı temizlikte düşük sarfiyat (? 100 ml/araç)\r\n\r\n\r\nTeknik Bilgiler\r\n\r\nParametre Değer Not\r\nTüketim ? 100 ml / tam iç kabin Ekonomik\r\npH Nötr Deriyi kurutmaz\r\nSeyreltme Saf (isteğe bağlı 1:1 su + köpük) Köpük dağılımı için\r\nFinish Tam mat Parlama yapmaz\r\nUyumluluk Nappa, yarı anilin, kaplamalı &amp; perforeli deri Vinil ve Alcantara’da kullanmayın\r\nAmbalaj 500 ml / 1000 ml Püskürtücülü\r\n\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Ön Vakum\r\no Koltuk dikişleri ve havalandırma delikleri dâhil tüm döşemeyi iyice süpürün.\r\n2. Uygulama Hazırlığı\r\no İsteğe bağlı: Sprey şişeye 1:1 oranında su ekleyerek ekstra köpük elde edin.\r\no Q²M ScrubPad EVO veya yumuşak deri fırçası hazırlayın.\r\n3. Bölgesel Temizlik\r\no 40×40 cm’lik alan seçin, temizleyiciyi yüzeye ve ped/fırçaya püskürtün.\r\no Hafif basınçla ileri-geri hareketlerle köpürtüp kiri çözün.\r\n4. Üç Havlu Yöntemi\r\no Havlu #1: İlk kirli köpükleri düz hatlarla silin.\r\no Havlu #2 (nemli): Artık köpüğü ve kalıntıyı toplayın.\r\no Havlu #3 (kuru): Yüzeyi kurulayın, mat dokuyu kontrol edin.\r\n5. Kontrol &amp; Kuruma\r\no Homojen mat finish elde edene kadar adımları tekrarlayın.\r\no Deri tamamen kuruduktan sonra LeatherShield EVO veya LeatherCoat REDEFINED uygulayabilirsiniz.\r\n\r\nPRO İPUCU: Deri koruma öncesi son kez Q²M Prep ile hafif bir silme, yağ kalıntılarını sıfırlar ve kaplamanın kimyasal bağını güçlendirir.\r\n\r\n\r\nKullanım Alanları\r\n\r\n• Kaplama Öncesi Hazırlık – LeatherShield EVO uygulamasından önce en saf yüzey\r\n• Aylık Bakım – Hafif kirlenmiş lüks iç mekânı hızlıca tazeler\r\n• Renk Canlandırma – Boya transferi ve hafif sararmayı giderir\r\n• Hassas Yüzey Güvenliği – Parlak veya mat kaplamalı deride korumayı sökmeden temizler\r\n\r\n\r\nNeden Q²M LeatherCleaner Natural?\r\n\r\n• Lüks İç Mekâna Uygunluğu Kanıtlı – Nappa &amp; yarı anilinle mükemmel uyum\r\n• Sıfır Kalıntı – Kaplama başarısızlığı riskini ortadan kaldırır\r\n• Gerçek Mat Sonuç – Suni parlatma yok, showroom doğallığı\r\n• GYEON Ekosistemi – EVO/REDEFINED kaplamaları ile optimize edilmiş formül\r\n\r\n\r\nÖnerilen Aksesuar &amp; Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nQ²M ScrubPad EVO Nazik fırçalama &amp; köpük dağıtımı Dikiş aralarında etkili\r\nQ² LeatherShield EVO 12 ay+ seramik deri kaplama Natural sonrası maksimum tutunma\r\nQ² LeatherCoat REDEFINED Hızlı koruyucu sprey (3-6 ay) Günlük bakımlı araçlar\r\nQ²M BaldWipe / SoftWipe Kalıntı silme &amp; kurutma İz bırakmaz\r\n\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nQ: Ventile/perforeli deri koltuklarda emici deliklere zarar verir mi?\r\nA: Hayır. Köpük formu deliklerden akmaz; ilk havluyla hafifçe silmek yeterlidir.\r\nQ: Mevcut LeatherShield kaplamasını söker mi?\r\nA: Düzenli bakım dozunda (100 ml/araç) kaplamayı etkilemez; sadece yüzey kirini çözer.\r\nQ: Deriyi kurutur mu, çatlama yapar mı?\r\nA: pH-nötr formül deri nem dengesine zarar vermez; uzun vadeli koruma için sonrasında LeatherCoat önerilir.\r\nQ: Vinil veya sentetik deri döşemede kullanabilir miyim?\r\nA: Vinil yüzeylerde temizlik sağlar ancak asıl etkisi gerçek deride optimize edilmiştir.\r\n\r\n\r\nDeri döşemenizi ilk günkü mat zarafetine döndürün, kaplama için mükemmel zemin hazırlayın – Q²M LeatherCleaner Natural ile her temizlik, lüks konforunuzu koruyan nazik ama güçlü bir adım!",
+        "how_to_use": "1. Koltuk dikişleri ve havalandırma delikleri dâhil tüm döşemeyi iyice süpürün.\n2. İsteğe bağlı: Sprey şişeye 1:1 oranında su ekleyerek ekstra köpük elde edin.\n3. 40×40 cm'lik alan seçin, temizleyiciyi yüzeye ve ped/fırçaya püskürtün.\n4. Hafif basınçla ileri-geri hareketlerle köpürtüp kiri çözün.\n5. Havlu #1 ile kirli köpükleri silin, Havlu #2 (nemli) ile artıkları toplayın.\n6. Havlu #3 (kuru) ile yüzeyi kurulayın ve mat dokuyu kontrol edin.\n7. Deri tamamen kuruduktan sonra LeatherShield EVO veya LeatherCoat uygulayabilirsiniz.",
+        "when_to_use": "LeatherShield EVO veya LeatherCoat uygulaması öncesi yüzey hazırlığında, aylık deri bakımında, hafif kirlenmiş lüks iç mekânlarda, boya transferi ve hafif sararma gidermede kullanılır.",
+        "target_surface": "Nappa deri, yarı anilin deri, kaplamalı deri, perforeli deri koltuklar, direksiyon, kapı panelleri",
+        "why_this_product": "• pH-nötr formül - hassas nappa ve yarı anilin derilerde güvenli\n• Sıfır kalıntı - kaplama tutunması için ideal temiz yüzey\n• Mat fabrika görünümü - parlatmaz, orijinal dokuyu korur\n• GYEON kaplama sistemi ile optimize edilmiş formül"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LCN1000M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Perforeli deri koltuklarda deliklere zarar verir mi?",
+          "answer": "Hayır, köpük formu deliklerden akmaz; ilk havluyla hafifçe silmek yeterlidir."
+        },
+        {
+          "question": "Mevcut LeatherShield kaplamasını söker mi?",
+          "answer": "Düzenli bakım dozunda (100 ml/araç) kaplamayı etkilemez; sadece yüzey kirini çözer."
+        },
+        {
+          "question": "Deriyi kurutur mu?",
+          "answer": "pH-nötr formül deri nem dengesine zarar vermez; uzun vadeli koruma için sonrasında LeatherCoat önerilir."
+        },
+        {
+          "question": "Vinil döşemede kullanılabilir mi?",
+          "answer": "Vinil yüzeylerde temizlik sağlar ancak asıl etkisi gerçek deride optimize edilmiştir."
+        }
+      ],
+      "price": 60000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LCN500M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LCN1000M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_cleaner",
+        "fields": {
+          "sub_type": "interior_detailer",
+          "target_surfaces": null,
+          "finish": null,
+          "concentrate": null,
+          "dilution": null,
+          "anti_bacterial_claim": null,
+          "safe_on_screens": null,
+          "scent": null,
+          "uv_protection": null,
+          "ph_level": "Nötr",
+          "silicone_free": true,
+          "wax_free": true,
+          "consumption": "100 ml/araç",
+          "dilution_ratio": "Saf veya 1:1",
+          "volume_ml": 1000
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Cleaner Natural, modern napa yarı anilin derilere özel temizleyici, 1000 ml. MTS Kimya güvencesiyle orijinal üründür.",
+        "full_description": "GYEON Q²M Leather Cleaner Natural Modern Napa Yarı Anilin Derilere Özel Temizleyici - 1000 ml\r\n\r\n\r\nLüks ve spor otomobillerin hassas napa, yarı anilin ve tüm modern deri döşemelerinde güvenle kullanabileceğiniz en saf temizlik çözümü! Q²M LeatherCleaner Natural, silikon, balmumu ve yumuşatıcı içermeyen formülüyle kiri, vücut yağlarını ve hafif renk bozulmalarını nazikçe giderirken tamamen mat, kaplamaya hazır bir yüzey bırakır. GYEON’un Q² LeatherShield EVO ve LeatherCoat REDEFINED kaplamaları için ideal ön hazırlık ürünüdür.\r\n\r\n\r\nÖne Çıkan Özellikler\r\n\r\n• pH-Nötr &amp; Hassas Deriye Uygun – Nappa, yarı anilin, kaplamalı veya perforeli tüm modern deri tiplerinde güvenli temizlik\r\n• Kaplama-Hazır Yüzey – Yumuşatıcı/koruyucu bırakmaz; LeatherShield EVO’nun tutunmasını maksimize eder\r\n• Mat Fabrika Görünümü – Parlaklaştırmaz; orijinal dokuyu korur\r\n• Nazik Ama Etkili – Günlük kir, ter yağları, hafif boya transferini zahmetsizce çözer\r\n• Düzenli Bakım İçin İdeal – Aylık bakımda veya detay öncesi hızlı temizlikte düşük sarfiyat (? 100 ml/araç)\r\n\r\n\r\nTeknik Bilgiler\r\n\r\nParametre Değer Not\r\nTüketim ? 100 ml / tam iç kabin Ekonomik\r\npH Nötr Deriyi kurutmaz\r\nSeyreltme Saf (isteğe bağlı 1:1 su + köpük) Köpük dağılımı için\r\nFinish Tam mat Parlama yapmaz\r\nUyumluluk Nappa, yarı anilin, kaplamalı &amp; perforeli deri Vinil ve Alcantara’da kullanmayın\r\nAmbalaj 500 ml / 1000 ml Püskürtücülü\r\n\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Ön Vakum\r\no Koltuk dikişleri ve havalandırma delikleri dâhil tüm döşemeyi iyice süpürün.\r\n2. Uygulama Hazırlığı\r\no İsteğe bağlı: Sprey şişeye 1:1 oranında su ekleyerek ekstra köpük elde edin.\r\no Q²M ScrubPad EVO veya yumuşak deri fırçası hazırlayın.\r\n3. Bölgesel Temizlik\r\no 40×40 cm’lik alan seçin, temizleyiciyi yüzeye ve ped/fırçaya püskürtün.\r\no Hafif basınçla ileri-geri hareketlerle köpürtüp kiri çözün.\r\n4. Üç Havlu Yöntemi\r\no Havlu #1: İlk kirli köpükleri düz hatlarla silin.\r\no Havlu #2 (nemli): Artık köpüğü ve kalıntıyı toplayın.\r\no Havlu #3 (kuru): Yüzeyi kurulayın, mat dokuyu kontrol edin.\r\n5. Kontrol &amp; Kuruma\r\no Homojen mat finish elde edene kadar adımları tekrarlayın.\r\no Deri tamamen kuruduktan sonra LeatherShield EVO veya LeatherCoat REDEFINED uygulayabilirsiniz.\r\n\r\nPRO İPUCU: Deri koruma öncesi son kez Q²M Prep ile hafif bir silme, yağ kalıntılarını sıfırlar ve kaplamanın kimyasal bağını güçlendirir.\r\n\r\n\r\nKullanım Alanları\r\n\r\n• Kaplama Öncesi Hazırlık – LeatherShield EVO uygulamasından önce en saf yüzey\r\n• Aylık Bakım – Hafif kirlenmiş lüks iç mekânı hızlıca tazeler\r\n• Renk Canlandırma – Boya transferi ve hafif sararmayı giderir\r\n• Hassas Yüzey Güvenliği – Parlak veya mat kaplamalı deride korumayı sökmeden temizler\r\n\r\n\r\nNeden Q²M LeatherCleaner Natural?\r\n\r\n• Lüks İç Mekâna Uygunluğu Kanıtlı – Nappa &amp; yarı anilinle mükemmel uyum\r\n• Sıfır Kalıntı – Kaplama başarısızlığı riskini ortadan kaldırır\r\n• Gerçek Mat Sonuç – Suni parlatma yok, showroom doğallığı\r\n• GYEON Ekosistemi – EVO/REDEFINED kaplamaları ile optimize edilmiş formül\r\n\r\n\r\nÖnerilen Aksesuar &amp; Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nQ²M ScrubPad EVO Nazik fırçalama &amp; köpük dağıtımı Dikiş aralarında etkili\r\nQ² LeatherShield EVO 12 ay+ seramik deri kaplama Natural sonrası maksimum tutunma\r\nQ² LeatherCoat REDEFINED Hızlı koruyucu sprey (3-6 ay) Günlük bakımlı araçlar\r\nQ²M BaldWipe / SoftWipe Kalıntı silme &amp; kurutma İz bırakmaz\r\n\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nQ: Ventile/perforeli deri koltuklarda emici deliklere zarar verir mi?\r\nA: Hayır. Köpük formu deliklerden akmaz; ilk havluyla hafifçe silmek yeterlidir.\r\nQ: Mevcut LeatherShield kaplamasını söker mi?\r\nA: Düzenli bakım dozunda (100 ml/araç) kaplamayı etkilemez; sadece yüzey kirini çözer.\r\nQ: Deriyi kurutur mu, çatlama yapar mı?\r\nA: pH-nötr formül deri nem dengesine zarar vermez; uzun vadeli koruma için sonrasında LeatherCoat önerilir.\r\nQ: Vinil veya sentetik deri döşemede kullanabilir miyim?\r\nA: Vinil yüzeylerde temizlik sağlar ancak asıl etkisi gerçek deride optimize edilmiştir.\r\n\r\n\r\nDeri döşemenizi ilk günkü mat zarafetine döndürün, kaplama için mükemmel zemin hazırlayın – Q²M LeatherCleaner Natural ile her temizlik, lüks konforunuzu koruyan nazik ama güçlü bir adım!",
+        "how_to_use": "1. Koltuk dikişleri ve havalandırma delikleri dâhil tüm döşemeyi iyice süpürün.\n2. İsteğe bağlı: Sprey şişeye 1:1 oranında su ekleyerek ekstra köpük elde edin.\n3. 40×40 cm'lik alan seçin, temizleyiciyi yüzeye ve ped/fırçaya püskürtün.\n4. Hafif basınçla ileri-geri hareketlerle köpürtüp kiri çözün.\n5. Havlu #1 ile kirli köpükleri silin, Havlu #2 (nemli) ile artıkları toplayın.\n6. Havlu #3 (kuru) ile yüzeyi kurulayın ve mat dokuyu kontrol edin.\n7. Deri tamamen kuruduktan sonra LeatherShield EVO veya LeatherCoat uygulayabilirsiniz.",
+        "when_to_use": "LeatherShield EVO veya LeatherCoat uygulaması öncesi yüzey hazırlığında, profesyonel detailing stüdyolarında, aylık deri bakımında, boya transferi ve hafif sararma gidermede kullanılır.",
+        "target_surface": "Nappa deri, yarı anilin deri, kaplamalı deri, perforeli deri koltuklar, direksiyon, kapı panelleri",
+        "why_this_product": "• Profesyonel boy - 1000 ml ile yaklaşık 10 araç iç deri temizliği\n• pH-nötr formül - hassas nappa ve yarı anilin derilerde güvenli\n• Sıfır kalıntı - kaplama tutunması için ideal temiz yüzey\n• Mat fabrika görünümü - parlatmaz, orijinal dokuyu korur"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LCN500M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Perforeli deri koltuklarda deliklere zarar verir mi?",
+          "answer": "Hayır, köpük formu deliklerden akmaz; ilk havluyla hafifçe silmek yeterlidir."
+        },
+        {
+          "question": "Mevcut LeatherShield kaplamasını söker mi?",
+          "answer": "Düzenli bakım dozunda (100 ml/araç) kaplamayı etkilemez; sadece yüzey kirini çözer."
+        },
+        {
+          "question": "Deriyi kurutur mu?",
+          "answer": "pH-nötr formül deri nem dengesine zarar vermez; uzun vadeli koruma için sonrasında LeatherCoat önerilir."
+        },
+        {
+          "question": "500 ml versiyonundan farkı nedir?",
+          "answer": "Aynı formül, profesyonel kullanım için ekonomik hacim."
+        }
+      ],
+      "price": 95000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/11/Q2M-LCSYA1000M_0.jpg",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    },
+    {
+      "sku": "Q2M-LSN200M",
+      "template": {
+        "group": "leather_care",
+        "sub_type": "leather_care_kit",
+        "fields": {
+          "sub_type": "interior_detailer",
+          "target_surfaces": null,
+          "finish": null,
+          "concentrate": null,
+          "dilution": null,
+          "anti_bacterial_claim": null,
+          "safe_on_screens": null,
+          "scent": null,
+          "uv_protection": null,
+          "kit_contents": [
+            "200 ml Cleaner",
+            "120 ml Coat",
+            "ScrubPad EVO",
+            "MF Aplikatör",
+            "LeatherWipe"
+          ],
+          "ph_level": 7,
+          "sio2_content": true,
+          "protection_duration": "6 ay",
+          "coverage": "2-3 araç/set"
+        }
+      },
+      "content": {
+        "short_description": "GYEON QM Leather Set Natural, günlük modern deri bakım seti, 200 ml. MTS Kimya güvencesiyle orijinal üründür.",
+        "full_description": "GYEON Q²M LeatherSet Natural Modern Deri Günlük Hafif Temizlik ve Bakım Seti (5 Parça) - 200 ml\r\n\r\nGYEON Q²M LeatherSet Natural, nappa ve yarı-anilin dâhil tüm modern deri yüzeyleri için geliştirilmiş, pH-nötr temizlik ve 6 + ay kalıcı koruma sağlayan beş parçalı eksiksiz çözümdür. Q²M LeatherCleaner Natural kir ve yağ artıklarını anında sökerken, Q² LeatherCoat REDEFINED mat, doğal görünümü mühürler ve gelecekteki bakımı dakikalar içinde kolaylaştırır.\r\n\r\nÖne Çıkan Özellikler\r\n\r\n&gt; pH-Nötr Formül — Hassas deri yapısına zarar vermez, renk değişimine yol açmaz.\r\n&gt; Mat Fabrika Görünümü — Parlatmaz; orijinal, kaymayan yüzey bırakır.\r\n&gt; Seramik Destekli Koruma — LeatherCoat’taki SiO² katkısı sayesinde ? 6 ay su-kir iticilik.\r\n&gt; Kolay Uygulama Köpüğü — Dahili köpük şişesi ürünü homojen dağıtır, tüketimi düşürür.\r\n&gt; Tam Set — ScrubPad EVO, MF Aplikatör ve mikrofiber bez dâhil; ekstra ekipman gerekmez.\r\n&gt; Kaplama Uyumu — Mevcut deri kaplamalarını sökmeden temizlik &amp; yenileme sağlar.\r\n\r\nTeknik Bilgiler\r\n\r\nParametre Değer Not\r\nTüketim / Seyreltme 1 set = 2-3 araç içi Gündelik temizlikte 1:1 su ile köpüklenebilir\r\npH / SiO² pH ? 7 / SiO² destekli Deri kaplama uyumlu\r\nEtki / Koruma Süresi ? 6 ay Düzenli bakım ile uzar\r\nÇalışma Sıcaklığı 15 – 25 °C Direkt güneşten kaçının\r\nAmbalaj 200 ml Cleaner + 120 ml Coat ScrubPad EVO, MF Aplikatör, LeatherWipe\r\n\r\nNasıl Kullanılır?\r\n\r\n1. Hazırlık – Deriyi vakumlayın; gevşek kiri alın.\r\n2. Köpükleme – Q²M LeatherCleaner Natural’i köpük şişesine sıkın, ScrubPad EVO’ye uygulayın.\r\n3. Temizleme – Düz çizgilerle nazikçe ovalayın; köpüğü kirle beraber kaldırın.\r\n4. Silme – Nemli mikrofiberle köpüğü alın, ikinci bezle kurulayın.\r\n5. Koruma – MF Aplikatöre 3-4 damla Q² LeatherCoat REDEFINED damlatın, ince tabaka halinde yayın.\r\n6. Bekleme – 1-2 saat kürlenmeye bırakın; bu süre içinde yüzeye temas etmeyin.\r\n7. Bakım – Aylık hafif temizlik için aynı temizleyiciyi 1:1 su ile kullanın.\r\n\r\nKullanım Alanları\r\n\r\n• Otomobil koltukları, kapı panelleri, konsol deri trimleri\r\n• Direksiyon simidi, vites topuzu, kol dayama alanları\r\n• Perfore veya kaplamalı modern otomotiv derileri\r\n• Hafif kirli nappa ve yarı-anilin yüzeyler\r\n• Sedan, SUV, spor ve lüks segment iç mekanları\r\n\r\nNeden GYEON Q²M LeatherSet Natural?\r\n\r\n• Zamandan Tasarruf – Temizle-koru iki adım, tek sette.\r\n• Yüksek Performans – Seramik destekli bariyerle uzun ömürlü koruma.\r\n• Sağlığa Dost – VOC oranı düşük, pH-nötr içerik.\r\n• Ekonomik – 1 setle 2-3 araç; minimum ürün, maksimum etki.\r\n\r\nÖnerilen Aksesuar &amp; Tamamlayıcı Ürünler\r\n\r\nÜrün Amaç Uyum\r\nQ²M LeatherBrush Detaylı oyuk temizlik Deri dikiş &amp; gözenekler\r\nQ²M BaldWipe Microfiber Artık silme &amp; kurutma Çiziksiz bitiş\r\nQ² LeatherShield EVO Profesyonel SiO² kaplama Çok yoğun kullanım gören alanlar\r\n\r\nSıkça Sorulan Sorular (FAQ)\r\n\r\nS: Kaplamalı deri koltuklarda güvenli mi?\r\nC: Evet. Cleaner kalıntı bırakmaz; LeatherCoat mevcut kaplamayla birleşerek ekstra koruma sunar.\r\nS: Parlaklık ekler mi?\r\nC: Hayır. Doğal mat fabrikadan çıkmış görünüm sağlar, kayganlık yapmaz.\r\nS: Koruma süresini nasıl uzatırım?\r\nC: 6 ayda bir LeatherCoat’ı tazeleyin, aylık bakımda Cleaner’ı 1:1 su ile kullanın.\r\nS: Set bir SUV’un içini tamamen kaplar mı?\r\nC: Normal kir seviyesinde tek set, orta boy SUV’un koltuk ve panellerini rahatlıkla temizler ve korur.\r\n\r\nBakımı kolaylaştır, derine yerleşmiş kiri uzaklaştır ve deri yüzeyini aylarca koru. Püskürt, sil ve yenile — profesyonel sonuçlar artık herkesin elinde!",
+        "how_to_use": "1. Deriyi vakumlayın ve gevşek kiri alın.\n2. Q²M LeatherCleaner Natural'i köpük şişesine sıkın, ScrubPad EVO'ye uygulayın.\n3. Düz çizgilerle nazikçe ovalayın; köpüğü kirle beraber kaldırın.\n4. Nemli mikrofiberle köpüğü alın, ikinci bezle kurulayın.\n5. MF Aplikatöre 3-4 damla Q² LeatherCoat REDEFINED damlatın, ince tabaka halinde yayın.\n6. 1-2 saat kürlenmeye bırakın; bu süre içinde yüzeye temas etmeyin.\n7. Aylık bakım için aynı temizleyiciyi 1:1 su ile kullanın.",
+        "when_to_use": "Hafif kirlenmiş nappa ve yarı anilin derilerde, aylık rutin deri bakımında, perfore veya kaplamalı modern otomotiv derilerinde, lüks segment araç iç mekanlarında kullanılır.",
+        "target_surface": "Otomobil deri koltukları, kapı panelleri, konsol deri trimleri, direksiyon, vites topuzu, kol dayama alanları",
+        "why_this_product": "• pH-nötr formül - hassas deri yapısına zarar vermez\n• Seramik destekli koruma - SiO² katkısıyla 6 ay su ve kir iticilik\n• Mat fabrika görünümü - parlatmaz, kaymayan yüzey\n• Tam set - temizle-koru iki adım tek sette"
+      },
+      "relations": {
+        "use_before": [],
+        "use_after": [],
+        "use_with": [],
+        "accessories": [],
+        "alternatives": [
+          "Q2M-LSSYA200M"
+        ]
+      },
+      "faq": [
+        {
+          "question": "Kaplamalı deri koltuklarda güvenli mi?",
+          "answer": "Evet. Cleaner kalıntı bırakmaz; LeatherCoat mevcut kaplamayla birleşerek ekstra koruma sunar."
+        },
+        {
+          "question": "Parlaklık ekler mi?",
+          "answer": "Hayır. Doğal mat fabrikadan çıkmış görünüm sağlar, kayganlık yapmaz."
+        },
+        {
+          "question": "Koruma süresini nasıl uzatırım?",
+          "answer": "6 ayda bir LeatherCoat'ı tazeleyin, aylık bakımda Cleaner'ı 1:1 su ile kullanın."
+        },
+        {
+          "question": "Set bir SUV'un içini tamamen kaplar mı?",
+          "answer": "Normal kir seviyesinde tek set, orta boy SUV'un koltuk ve panellerini rahatlıkla temizler ve korur."
+        }
+      ],
+      "price": 170000,
+      "image_url": "https://mgpolishing.com/wp-content/uploads/2025/08/Q2M-LSN200M_1.webp",
+      "category": {
+        "main_cat": "İÇ YÜZEY",
+        "sub_cat": "Deri Temizlik ve Bakım Ürünleri",
+        "sub_cat2": "Deri Temizlik Ürünleri"
+      }
+    }
+  ]
+}
