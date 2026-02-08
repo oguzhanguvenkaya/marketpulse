@@ -1,33 +1,45 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Dashboard from './pages/Dashboard'
-import Products from './pages/Products'
-import ProductDetail from './pages/ProductDetail'
-import Ads from './pages/Ads'
-import PriceMonitor from './pages/PriceMonitor'
-import Sellers from './pages/Sellers'
-import SellerDetail from './pages/SellerDetail'
-import UrlScraper from './pages/UrlScraper'
-import VideoTranscripts from './pages/VideoTranscripts'
-import JsonEditor from './pages/JsonEditor'
+import { lazy, Suspense } from 'react'
 import Layout from './components/Layout'
 import './App.css'
+
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Products = lazy(() => import('./pages/Products'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Ads = lazy(() => import('./pages/Ads'))
+const PriceMonitor = lazy(() => import('./pages/PriceMonitor'))
+const Sellers = lazy(() => import('./pages/Sellers'))
+const SellerDetail = lazy(() => import('./pages/SellerDetail'))
+const UrlScraper = lazy(() => import('./pages/UrlScraper'))
+const VideoTranscripts = lazy(() => import('./pages/VideoTranscripts'))
+const JsonEditor = lazy(() => import('./pages/JsonEditor'))
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  )
+}
 
 function App() {
   return (
     <Router>
       <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/ads" element={<Ads />} />
-          <Route path="/price-monitor" element={<PriceMonitor />} />
-          <Route path="/sellers" element={<Sellers />} />
-          <Route path="/sellers/:merchantId" element={<SellerDetail />} />
-          <Route path="/url-scraper" element={<UrlScraper />} />
-          <Route path="/video-transcripts" element={<VideoTranscripts />} />
-          <Route path="/json-editor" element={<JsonEditor />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/ads" element={<Ads />} />
+            <Route path="/price-monitor" element={<PriceMonitor />} />
+            <Route path="/sellers" element={<Sellers />} />
+            <Route path="/sellers/:merchantId" element={<SellerDetail />} />
+            <Route path="/url-scraper" element={<UrlScraper />} />
+            <Route path="/video-transcripts" element={<VideoTranscripts />} />
+            <Route path="/json-editor" element={<JsonEditor />} />
+          </Routes>
+        </Suspense>
       </Layout>
     </Router>
   )

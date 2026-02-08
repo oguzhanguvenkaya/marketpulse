@@ -13,5 +13,16 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-plotly': ['plotly.js', 'react-plotly.js'],
+          'vendor-axios': ['axios'],
+        }
+      }
+    }
   }
 })
