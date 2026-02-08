@@ -270,3 +270,44 @@ class ScrapeResult(Base):
     
     class Config:
         from_attributes = True
+
+
+class TranscriptJob(Base):
+    __tablename__ = "transcript_jobs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    status = Column(String(20), default="pending")
+    total_videos = Column(Integer, default=0)
+    completed_videos = Column(Integer, default=0)
+    failed_videos = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+    error_message = Column(Text)
+    
+    transcript_results = relationship("TranscriptResult", back_populates="transcript_job", cascade="all, delete-orphan")
+    
+    class Config:
+        from_attributes = True
+
+
+class TranscriptResult(Base):
+    __tablename__ = "transcript_results"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    transcript_job_id = Column(UUID(as_uuid=True), ForeignKey("transcript_jobs.id"), nullable=False, index=True)
+    video_url = Column(Text, nullable=False)
+    product_name = Column(Text)
+    barcode = Column(Text)
+    status = Column(String(20), default="pending")
+    language = Column(String(50))
+    language_code = Column(String(10))
+    is_generated = Column(Boolean)
+    transcript_text = Column(Text)
+    transcript_snippets = Column(JSON)
+    error_message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    transcript_job = relationship("TranscriptJob", back_populates="transcript_results")
+    
+    class Config:
+        from_attributes = True
