@@ -1,61 +1,11 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 
-interface SubType {
-  id: string;
-  name: string;
-  description: string;
-}
-
-interface Metadata {
-  group_id: string;
-  group_name: string;
-  total_products: number;
-  description: string;
-  sub_types?: SubType[];
-  template_fields?: Record<string, string>;
-  [key: string]: unknown;
-}
-
-interface Product {
-  sku: string;
-  template: {
-    group: string;
-    sub_type: string;
-    fields: Record<string, unknown>;
-  };
-  content: {
-    short_description: string;
-    full_description: string;
-    how_to_use: string;
-    when_to_use: string;
-    target_surface: string;
-    why_this_product: string;
-  };
-  relations: {
-    use_before: string[];
-    use_after: string[];
-    use_with: string[];
-    accessories: string[];
-    alternatives: string[];
-  };
-  faq: { question: string; answer: string }[];
-  price: number;
-  image_url: string;
-  category: {
-    main_cat: string;
-    sub_cat: string;
-    sub_cat2: string;
-  };
-}
-
 interface CategoryData {
-  metadata: Metadata;
-  products: Product[];
+  metadata: Record<string, unknown>;
+  products: Record<string, unknown>[];
   _fileName: string;
   _originalProducts: string;
 }
-
-type SectionKey = 'basic' | 'template' | 'content' | 'relations' | 'faq' | 'metadata';
 
 export default function JsonEditor() {
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -63,25 +13,34 @@ export default function JsonEditor() {
   const [activeProduct, setActiveProduct] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  const [collapsedSections, setCollapsedSections] = useState<Record<SectionKey, boolean>>({
-    basic: false, template: false, content: false, relations: false, faq: false, metadata: true,
-  });
-  const [relationInputs, setRelationInputs] = useState<Record<string, string>>({});
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [loadErrors, setLoadErrors] = useState<string[]>([]);
+  const [addFieldState, setAddFieldState] = useState<Record<string, { key: string; type: string }>>({});
+  const [deleteFieldConfirm, setDeleteFieldConfirm] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentCategory = categories[activeTab] || null;
   const products = currentCategory?.products || [];
+
+  const getProductLabel = (p: Record<string, unknown>): string => {
+    const sku = String(p.sku || p.SKU || p.id || p.ID || '');
+    const desc =
+      typeof p.content === 'object' && p.content !== null
+        ? String((p.content as Record<string, unknown>).short_description || '')
+        : typeof p.name === 'string'
+          ? p.name
+          : typeof p.title === 'string'
+            ? p.title
+            : '';
+    return sku ? `${sku} — ${desc.slice(0, 60)}` : desc.slice(0, 80) || `Product`;
+  };
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products.map((p, i) => ({ product: p, originalIndex: i }));
     const q = searchQuery.toLowerCase();
     return products
       .map((p, i) => ({ product: p, originalIndex: i }))
-      .filter(({ product }) =>
-        product.sku.toLowerCase().includes(q) ||
-        (product.content?.short_description || '').toLowerCase().includes(q)
-      );
+      .filter(({ product }) => getProductLabel(product).toLowerCase().includes(q));
   }, [products, searchQuery]);
 
   const currentProduct = products[activeProduct] || null;
@@ -112,7 +71,7 @@ export default function JsonEditor() {
         } else {
           errors.push(`${file.name}: Missing metadata or products`);
         }
-      } catch (e) {
+      } catch {
         errors.push(`${file.name}: Invalid JSON`);
       }
     }
@@ -138,27 +97,18 @@ export default function JsonEditor() {
     handleFiles(e.dataTransfer.files);
   };
 
-  const toggleSection = (key: SectionKey) => {
+  const toggleSection = (key: string) => {
     setCollapsedSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const ensureProductDefaults = (p: Product): Product => ({
-    ...p,
-    template: p.template ?? { group: '', sub_type: '', fields: {} },
-    content: p.content ?? { short_description: '', full_description: '', how_to_use: '', when_to_use: '', target_surface: '', why_this_product: '' },
-    relations: p.relations ?? { use_before: [], use_after: [], use_with: [], accessories: [], alternatives: [] },
-    faq: p.faq ?? [],
-    category: p.category ?? { main_cat: '', sub_cat: '', sub_cat2: '' },
-  });
-
-  const updateProduct = useCallback((updater: (product: Product) => Product) => {
+  const updateProduct = useCallback((updater: (product: Record<string, unknown>) => Record<string, unknown>) => {
     setCategories(prev => {
       if (activeTab >= prev.length) return prev;
       const updated = [...prev];
       const cat = { ...updated[activeTab] };
       const prods = [...cat.products];
       if (activeProduct >= prods.length) return prev;
-      prods[activeProduct] = updater(ensureProductDefaults({ ...prods[activeProduct] }));
+      prods[activeProduct] = updater({ ...prods[activeProduct] });
       cat.products = prods;
       cat.metadata = { ...cat.metadata, total_products: prods.length };
       updated[activeTab] = cat;
@@ -175,6 +125,51 @@ export default function JsonEditor() {
       return updated;
     });
   }, [activeTab]);
+
+  const setValueAtPath = (obj: unknown, path: string[], value: unknown): unknown => {
+    if (path.length === 0) return value;
+    const [head, ...rest] = path;
+    if (Array.isArray(obj)) {
+      const idx = parseInt(head, 10);
+      const arr = [...obj];
+      arr[idx] = setValueAtPath(arr[idx], rest, value);
+      return arr;
+    }
+    const record = (obj ?? {}) as Record<string, unknown>;
+    return { ...record, [head]: setValueAtPath(record[head], rest, value) };
+  };
+
+  const deleteKeyAtPath = (obj: unknown, path: string[]): unknown => {
+    if (path.length === 0) return obj;
+    const [head, ...rest] = path;
+    if (Array.isArray(obj)) {
+      const idx = parseInt(head, 10);
+      if (rest.length === 0) {
+        const arr = [...obj];
+        arr.splice(idx, 1);
+        return arr;
+      }
+      const arr = [...obj];
+      arr[idx] = deleteKeyAtPath(arr[idx], rest);
+      return arr;
+    }
+    const record = (obj ?? {}) as Record<string, unknown>;
+    if (rest.length === 0) {
+      const copy = { ...record };
+      delete copy[head];
+      return copy;
+    }
+    return { ...record, [head]: deleteKeyAtPath(record[head], rest) };
+  };
+
+  const updateAtPath = (path: string[], value: unknown) => {
+    updateProduct(p => setValueAtPath(p, path, value) as Record<string, unknown>);
+  };
+
+  const deleteAtPath = (path: string[]) => {
+    updateProduct(p => deleteKeyAtPath(p, path) as Record<string, unknown>);
+    setDeleteFieldConfirm(null);
+  };
 
   const resetCurrentProduct = () => {
     if (!currentCategory) return;
@@ -221,36 +216,160 @@ export default function JsonEditor() {
     });
   };
 
-  const setFieldAtPath = (fields: Record<string, unknown>, fullPath: string[], newValue: unknown): Record<string, unknown> => {
-    if (fullPath.length === 0) return fields;
-    if (fullPath.length === 1) {
-      return { ...fields, [fullPath[0]]: newValue };
+  const isLongString = (val: unknown): boolean => typeof val === 'string' && val.length > 100;
+  const isFaqArray = (val: unknown): boolean =>
+    Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null && 'question' in val[0] && 'answer' in val[0];
+  const isStringArray = (val: unknown): boolean =>
+    Array.isArray(val) && (val.length === 0 || typeof val[0] === 'string');
+  const isObjectArray = (val: unknown): boolean =>
+    Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null;
+
+  const inputClass = "w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors";
+
+  const AddFieldButton = ({ path, target }: { path: string[]; target: 'product' | 'metadata' }) => {
+    const stateKey = path.join('.');
+    const state = addFieldState[stateKey];
+
+    if (!state) {
+      return (
+        <button
+          onClick={() => setAddFieldState(prev => ({ ...prev, [stateKey]: { key: '', type: 'string' } }))}
+          className="w-full px-4 py-2.5 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 border border-white/10 border-dashed text-sm flex items-center justify-center gap-2 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Field
+        </button>
+      );
     }
-    const [head, ...rest] = fullPath;
-    const nested = (fields[head] ?? {}) as Record<string, unknown>;
-    return { ...fields, [head]: setFieldAtPath({ ...nested }, rest, newValue) };
+
+    const addField = () => {
+      const key = state.key.trim();
+      if (!key) return;
+      let defaultValue: unknown;
+      switch (state.type) {
+        case 'string': defaultValue = ''; break;
+        case 'number': defaultValue = 0; break;
+        case 'boolean': defaultValue = false; break;
+        case 'array': defaultValue = []; break;
+        case 'object': defaultValue = {}; break;
+        case 'textarea': defaultValue = ''; break;
+        default: defaultValue = '';
+      }
+      if (target === 'metadata') {
+        const metaPath = path.length > 0 ? [...path.slice(1), key] : [key];
+        if (metaPath.length === 1) {
+          updateMetadata(metaPath[0], defaultValue);
+        } else {
+          const topKey = metaPath[0];
+          const subPath = metaPath.slice(1);
+          const current = (currentCategory?.metadata || {})[topKey] || {};
+          const updated = setValueAtPath(current, subPath, defaultValue);
+          updateMetadata(topKey, updated);
+        }
+      } else {
+        updateAtPath([...path, key], defaultValue);
+      }
+      setAddFieldState(prev => {
+        const copy = { ...prev };
+        delete copy[stateKey];
+        return copy;
+      });
+    };
+
+    return (
+      <div className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg p-3 border border-[#00d4ff]/20">
+        <input
+          className="flex-1 bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+          placeholder="Field name"
+          value={state.key}
+          onChange={(e) => setAddFieldState(prev => ({ ...prev, [stateKey]: { ...prev[stateKey], key: e.target.value } }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') addField(); }}
+          autoFocus
+        />
+        <select
+          className="bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00d4ff]"
+          value={state.type}
+          onChange={(e) => setAddFieldState(prev => ({ ...prev, [stateKey]: { ...prev[stateKey], type: e.target.value } }))}
+        >
+          <option value="string">Text</option>
+          <option value="textarea">Long Text</option>
+          <option value="number">Number</option>
+          <option value="boolean">Boolean</option>
+          <option value="array">Array</option>
+          <option value="object">Object</option>
+        </select>
+        <button
+          onClick={addField}
+          disabled={!state.key.trim()}
+          className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium disabled:opacity-30"
+        >
+          Add
+        </button>
+        <button
+          onClick={() => setAddFieldState(prev => {
+            const copy = { ...prev };
+            delete copy[stateKey];
+            return copy;
+          })}
+          className="p-2 text-gray-400 hover:text-gray-300"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    );
   };
 
-  const updateFieldValue = (path: string[], key: string, newValue: unknown) => {
-    updateProduct(p => {
-      const fields = { ...(p.template?.fields ?? {}) };
-      const fullPath = [...path, key];
-      const updated = setFieldAtPath(fields, fullPath, newValue);
-      return { ...p, template: { ...(p.template ?? { group: '', sub_type: '' }), fields: updated } };
-    });
+  const DeleteFieldButton = ({ path }: { path: string[] }) => {
+    const pathKey = path.join('.');
+    if (deleteFieldConfirm === pathKey) {
+      return (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => deleteAtPath(path)}
+            className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 border border-red-500/30"
+          >
+            Confirm
+          </button>
+          <button
+            onClick={() => setDeleteFieldConfirm(null)}
+            className="px-2 py-1 text-gray-400 rounded text-xs hover:text-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      );
+    }
+    return (
+      <button
+        onClick={() => setDeleteFieldConfirm(pathKey)}
+        className="p-1 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+        title="Delete field"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    );
   };
 
-  const renderDynamicField = (key: string, value: unknown, path: string[]) => {
-    const inputClass = "w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors";
+  const renderValue = (key: string, value: unknown, path: string[], showDelete = true): React.ReactNode => {
+    const fullPath = [...path, key];
 
     if (value === null || value === undefined) {
       return (
-        <div key={key} className="flex flex-col gap-1">
-          <label className="text-xs text-gray-400">{key}</label>
+        <div key={key} className="flex flex-col gap-1 group">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400">{key}</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
           <input
             className={inputClass}
             value=""
-            onChange={(e) => updateFieldValue(path, key, e.target.value)}
+            onChange={(e) => updateAtPath(fullPath, e.target.value)}
             placeholder={`Enter ${key}`}
           />
         </div>
@@ -259,148 +378,674 @@ export default function JsonEditor() {
 
     if (typeof value === 'boolean') {
       return (
-        <div key={key} className="flex items-center gap-3 py-1">
+        <div key={key} className="flex items-center gap-3 py-1 group">
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
               checked={value}
-              onChange={(e) => updateFieldValue(path, key, e.target.checked)}
+              onChange={(e) => updateAtPath(fullPath, e.target.checked)}
               className="sr-only peer"
             />
             <div className="w-9 h-5 bg-[#3a3a3a] peer-focus:ring-2 peer-focus:ring-[#00d4ff]/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00d4ff]/30 peer-checked:after:bg-[#00d4ff]"></div>
           </label>
           <span className="text-xs text-gray-400">{key}</span>
+          {showDelete && <DeleteFieldButton path={fullPath} />}
         </div>
       );
     }
 
     if (typeof value === 'number') {
       return (
-        <div key={key} className="flex flex-col gap-1">
-          <label className="text-xs text-gray-400">{key}</label>
+        <div key={key} className="flex flex-col gap-1 group">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400">{key}</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
           <input
             type="number"
             className={inputClass}
             value={value}
-            onChange={(e) => updateFieldValue(path, key, Number(e.target.value) || 0)}
+            onChange={(e) => updateAtPath(fullPath, Number(e.target.value) || 0)}
           />
+        </div>
+      );
+    }
+
+    if (isFaqArray(value)) {
+      const items = value as { question: string; answer: string }[];
+      return (
+        <div key={key} className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 group">
+            <label className="text-xs text-gray-400 font-medium">{key} ({items.length})</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          {items.map((item, i) => (
+            <div key={i} className="bg-[#1e1e1e] rounded-lg p-4 border border-white/5 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs text-gray-500">Q{i + 1}</span>
+                <button
+                  onClick={() => {
+                    const arr = [...items];
+                    arr.splice(i, 1);
+                    updateAtPath(fullPath, arr);
+                  }}
+                  className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-400">Question</label>
+                <input
+                  className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
+                  value={item.question || ''}
+                  onChange={(e) => {
+                    const arr = [...items];
+                    arr[i] = { ...arr[i], question: e.target.value };
+                    updateAtPath(fullPath, arr);
+                  }}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-400">Answer</label>
+                <textarea
+                  className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors resize-y"
+                  rows={3}
+                  value={item.answer || ''}
+                  onChange={(e) => {
+                    const arr = [...items];
+                    arr[i] = { ...arr[i], answer: e.target.value };
+                    updateAtPath(fullPath, arr);
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          <button
+            onClick={() => updateAtPath(fullPath, [...items, { question: '', answer: '' }])}
+            className="w-full px-4 py-3 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 border-dashed text-sm flex items-center justify-center gap-2 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Entry
+          </button>
+        </div>
+      );
+    }
+
+    if (isStringArray(value)) {
+      const items = value as string[];
+      return (
+        <div key={key} className="flex flex-col gap-2 group">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400 font-medium">{key.replace(/_/g, ' ')}</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          <TagInput values={items} onChange={(v) => updateAtPath(fullPath, v)} />
+        </div>
+      );
+    }
+
+    if (isObjectArray(value)) {
+      const items = value as Record<string, unknown>[];
+      return (
+        <div key={key} className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 group">
+            <label className="text-xs text-gray-400 font-medium">{key} ({items.length})</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          {items.map((item, i) => (
+            <div key={i} className="bg-[#1e1e1e] rounded-lg p-4 border border-white/5 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs text-gray-500">#{i + 1}</span>
+                <button
+                  onClick={() => {
+                    const arr = [...items];
+                    arr.splice(i, 1);
+                    updateAtPath(fullPath, arr);
+                  }}
+                  className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {Object.entries(item).map(([k, v]) => renderValue(k, v, [...fullPath, String(i)], true))}
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              const template = items.length > 0
+                ? Object.fromEntries(Object.keys(items[0]).map(k => [k, '']))
+                : {};
+              updateAtPath(fullPath, [...items, template]);
+            }}
+            className="w-full px-4 py-3 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 border-dashed text-sm flex items-center justify-center gap-2 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Entry
+          </button>
         </div>
       );
     }
 
     if (Array.isArray(value)) {
       return (
-        <div key={key} className="flex flex-col gap-1">
-          <label className="text-xs text-gray-400">{key}</label>
-          <input
-            className={inputClass}
-            value={value.join(', ')}
-            onChange={(e) => updateFieldValue(path, key, e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-            placeholder="Comma-separated values"
+        <div key={key} className="flex flex-col gap-1 group">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400">{key}</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          <textarea
+            className={inputClass + " resize-y"}
+            rows={3}
+            value={JSON.stringify(value, null, 2)}
+            onChange={(e) => {
+              try {
+                updateAtPath(fullPath, JSON.parse(e.target.value));
+              } catch {}
+            }}
           />
         </div>
       );
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
+      const entries = Object.entries(value as Record<string, unknown>);
       return (
         <div key={key} className="flex flex-col gap-2">
-          <label className="text-xs text-gray-400 font-medium">{key}</label>
-          <div className="pl-3 border-l border-white/10 space-y-2">
-            {Object.entries(value as Record<string, unknown>).map(([k, v]) =>
-              renderDynamicField(k, v, [...path, key])
-            )}
+          <div className="flex items-center gap-2 group">
+            <label className="text-xs text-gray-400 font-medium">{key}</label>
+            <span className="text-xs text-gray-600">({entries.length} fields)</span>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          <div className="pl-3 border-l-2 border-white/5 space-y-3">
+            {entries.map(([k, v]) => renderValue(k, v, fullPath, true))}
+            <AddFieldButton path={fullPath} target="product" />
           </div>
         </div>
       );
     }
 
+    if (isLongString(value)) {
+      return (
+        <div key={key} className="flex flex-col gap-1 group">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-400">{key.replace(/_/g, ' ')}</label>
+            {showDelete && <DeleteFieldButton path={fullPath} />}
+          </div>
+          <textarea
+            className={inputClass + " resize-y"}
+            rows={Math.min(12, Math.max(3, Math.ceil(String(value).length / 120)))}
+            value={String(value)}
+            onChange={(e) => updateAtPath(fullPath, e.target.value)}
+          />
+        </div>
+      );
+    }
+
     return (
-      <div key={key} className="flex flex-col gap-1">
-        <label className="text-xs text-gray-400">{key}</label>
+      <div key={key} className="flex flex-col gap-1 group">
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-400">{key.replace(/_/g, ' ')}</label>
+          {showDelete && <DeleteFieldButton path={fullPath} />}
+        </div>
         <input
           className={inputClass}
           value={String(value)}
-          onChange={(e) => updateFieldValue(path, key, e.target.value)}
+          onChange={(e) => updateAtPath(fullPath, e.target.value)}
         />
       </div>
     );
   };
 
-  const renderTagInput = (relationKey: keyof Product['relations']) => {
-    const values: string[] = currentProduct?.relations?.[relationKey] || [];
-    const inputKey = `${activeTab}-${activeProduct}-${relationKey}`;
-    const inputValue = relationInputs[inputKey] || '';
-
-    const addTag = () => {
-      const val = inputValue.trim();
-      if (!val) return;
-      updateProduct(p => {
-        const relations = { ...p.relations };
-        const arr = [...(relations[relationKey] || [])];
-        if (!arr.includes(val)) arr.push(val);
-        relations[relationKey] = arr;
-        return { ...p, relations };
-      });
-      setRelationInputs(prev => ({ ...prev, [inputKey]: '' }));
-    };
-
-    const removeTag = (idx: number) => {
-      updateProduct(p => {
-        const relations = { ...p.relations };
-        const arr = [...(relations[relationKey] || [])];
-        arr.splice(idx, 1);
-        relations[relationKey] = arr;
-        return { ...p, relations };
-      });
-    };
-
+  const TagInput = ({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) => {
+    const [inputVal, setInputVal] = useState('');
     return (
-      <div className="flex flex-col gap-2">
-        <label className="text-xs text-gray-400 font-medium">{relationKey.replace(/_/g, ' ')}</label>
-        <div className="flex flex-wrap gap-1.5 min-h-[36px] bg-[#1e1e1e] border border-white/10 rounded-lg p-2">
-          {values.map((v, i) => (
-            <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#00d4ff]/10 text-[#00d4ff] text-xs border border-[#00d4ff]/20">
-              {v}
-              <button onClick={() => removeTag(i)} className="hover:text-red-400 transition-colors ml-0.5">×</button>
-            </span>
-          ))}
-          <input
-            className="flex-1 min-w-[120px] bg-transparent text-white text-sm outline-none placeholder-gray-500"
-            placeholder="Type SKU & press Enter"
-            value={inputValue}
-            onChange={(e) => setRelationInputs(prev => ({ ...prev, [inputKey]: e.target.value }))}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-          />
-        </div>
+      <div className="flex flex-wrap gap-1.5 min-h-[36px] bg-[#1e1e1e] border border-white/10 rounded-lg p-2">
+        {values.map((v, i) => (
+          <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#00d4ff]/10 text-[#00d4ff] text-xs border border-[#00d4ff]/20">
+            {v}
+            <button onClick={() => onChange(values.filter((_, idx) => idx !== i))} className="hover:text-red-400 transition-colors ml-0.5">×</button>
+          </span>
+        ))}
+        <input
+          className="flex-1 min-w-[120px] bg-transparent text-white text-sm outline-none placeholder-gray-500"
+          placeholder="Type & press Enter"
+          value={inputVal}
+          onChange={(e) => setInputVal(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const val = inputVal.trim();
+              if (val && !values.includes(val)) {
+                onChange([...values, val]);
+                setInputVal('');
+              }
+            }
+          }}
+        />
       </div>
     );
   };
 
-  const SectionHeader = ({ title, sectionKey, icon }: { title: string; sectionKey: SectionKey; icon: React.ReactNode }) => (
-    <button
-      onClick={() => toggleSection(sectionKey)}
-      className="w-full flex items-center justify-between py-3 px-1 group"
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-[#00d4ff]">{icon}</span>
-        <span className="text-lg font-semibold text-white">{title}</span>
+  const sectionIcons: Record<string, React.ReactNode> = {
+    template: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>,
+    content: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
+    relations: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>,
+    faq: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+    category: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
+    cleaned_content: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+  };
+
+  const defaultIcon = <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h7" /></svg>;
+
+  const primitiveKeys = useMemo(() => {
+    if (!currentProduct) return [];
+    return Object.keys(currentProduct).filter(k => {
+      const v = currentProduct[k];
+      return typeof v !== 'object' || v === null;
+    });
+  }, [currentProduct]);
+
+  const objectKeys = useMemo(() => {
+    if (!currentProduct) return [];
+    return Object.keys(currentProduct).filter(k => {
+      const v = currentProduct[k];
+      return v !== null && typeof v === 'object';
+    });
+  }, [currentProduct]);
+
+  const renderPrimitiveFields = () => {
+    if (!currentProduct || primitiveKeys.length === 0) return null;
+
+    const priceKey = primitiveKeys.find(k => k === 'price');
+    const imageKey = primitiveKeys.find(k => k === 'image_url' || k === 'imageUrl' || k === 'image');
+    const skuKey = primitiveKeys.find(k => k === 'sku' || k === 'SKU' || k === 'id');
+    const otherKeys = primitiveKeys.filter(k => k !== priceKey && k !== imageKey && k !== skuKey);
+
+    return (
+      <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
+        <button
+          onClick={() => toggleSection('_basic')}
+          className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-[#00d4ff]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            <span className="text-lg font-semibold text-white">Basic Info</span>
+            <span className="text-xs text-gray-500">({primitiveKeys.length} fields)</span>
+          </div>
+          <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${collapsedSections['_basic'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {!collapsedSections['_basic'] && (
+          <div className="p-6 space-y-4 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {skuKey && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-400">{skuKey}</label>
+                  <input className={inputClass + " !text-gray-500 cursor-not-allowed"} value={String(currentProduct[skuKey] || '')} readOnly />
+                </div>
+              )}
+              {priceKey && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-400">Price (TL) — stored as kuruş</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      className={inputClass + " pr-12"}
+                      value={currentProduct[priceKey] != null ? (Number(currentProduct[priceKey]) / 100).toFixed(2) : ''}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        updateAtPath([priceKey], isNaN(val) ? 0 : Math.round(val * 100));
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TL</span>
+                  </div>
+                </div>
+              )}
+              {imageKey && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-400">{imageKey}</label>
+                  <input
+                    className={inputClass}
+                    value={String(currentProduct[imageKey] || '')}
+                    onChange={(e) => updateAtPath([imageKey], e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+              )}
+            </div>
+            {imageKey && typeof currentProduct[imageKey] === 'string' && currentProduct[imageKey] && (
+              <div className="flex items-start gap-3">
+                <img
+                  src={String(currentProduct[imageKey])}
+                  alt="Product"
+                  className="w-20 h-20 object-cover rounded-lg border border-white/10"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <span className="text-xs text-gray-500 break-all">{String(currentProduct[imageKey])}</span>
+              </div>
+            )}
+            {otherKeys.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {otherKeys.map(key => renderValue(key, currentProduct[key], [], true))}
+              </div>
+            )}
+            <AddFieldButton path={[]} target="product" />
+          </div>
+        )}
       </div>
-      <svg
-        className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${collapsedSections[sectionKey] ? '' : 'rotate-180'}`}
-        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
-  );
+    );
+  };
+
+  const renderObjectSection = (key: string) => {
+    if (!currentProduct) return null;
+    const value = currentProduct[key];
+    if (value === null || typeof value !== 'object') return null;
+
+    const sectionId = `_sec_${key}`;
+    const isCollapsed = collapsedSections[sectionId];
+    const icon = sectionIcons[key] || defaultIcon;
+    const displayName = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    if (isFaqArray(value)) {
+      return (
+        <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
+          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-[#00d4ff]">{icon}</span>
+              <span className="text-lg font-semibold text-white">{displayName}</span>
+              <span className="text-xs text-gray-500">({(value as unknown[]).length} entries)</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {!isCollapsed && (
+            <div className="p-6 animate-fade-in">
+              {renderValue(key, value, [], false)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (Array.isArray(value)) {
+      return (
+        <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
+          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-[#00d4ff]">{icon}</span>
+              <span className="text-lg font-semibold text-white">{displayName}</span>
+              <span className="text-xs text-gray-500">({value.length} items)</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {!isCollapsed && (
+            <div className="p-6 animate-fade-in">
+              {renderValue(key, value, [], false)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>);
+    return (
+      <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
+        <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <span className="text-[#00d4ff]">{icon}</span>
+            <span className="text-lg font-semibold text-white">{displayName}</span>
+            <span className="text-xs text-gray-500">({entries.length} fields)</span>
+          </div>
+          <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {!isCollapsed && (
+          <div className="p-6 space-y-4 animate-fade-in">
+            {key === 'template' ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {entries.filter(([k]) => k !== 'fields').map(([k, v]) => {
+                    if (k === 'sub_type' && currentCategory?.metadata) {
+                      const subTypes = currentCategory.metadata.sub_types as { id: string; name: string }[] | undefined;
+                      if (subTypes && subTypes.length > 0) {
+                        return (
+                          <div key={k} className="flex flex-col gap-1">
+                            <label className="text-xs text-gray-400">Sub Type</label>
+                            <select
+                              className={inputClass}
+                              value={String(v || '')}
+                              onChange={(e) => updateAtPath([key, k], e.target.value)}
+                            >
+                              <option value="">— Select —</option>
+                              {subTypes.map(st => (
+                                <option key={st.id} value={st.id}>{st.name} ({st.id})</option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      }
+                    }
+                    return renderValue(k, v, [key], true);
+                  })}
+                </div>
+                {(value as Record<string, unknown>).fields && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-300 mb-3">Dynamic Fields</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries((value as Record<string, unknown>).fields as Record<string, unknown>).map(([k, v]) =>
+                        renderValue(k, v, [key, 'fields'], true)
+                      )}
+                    </div>
+                    <div className="mt-3">
+                      <AddFieldButton path={[key, 'fields']} target="product" />
+                    </div>
+                  </div>
+                )}
+                {!(value as Record<string, unknown>).fields && (
+                  <AddFieldButton path={[key]} target="product" />
+                )}
+              </>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {entries.map(([k, v]) => renderValue(k, v, [key], true))}
+                </div>
+                <AddFieldButton path={[key]} target="product" />
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderMetadataSection = () => {
+    if (!currentCategory) return null;
+    const meta = currentCategory.metadata;
+    const metaEntries = Object.entries(meta);
+
+    return (
+      <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
+        <button onClick={() => toggleSection('_metadata')} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <span className="text-[#00d4ff]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </span>
+            <span className="text-lg font-semibold text-white">Metadata</span>
+            <span className="text-xs text-gray-500">({metaEntries.length} fields)</span>
+          </div>
+          <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${collapsedSections['_metadata'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {!collapsedSections['_metadata'] && (
+          <div className="p-6 space-y-4 animate-fade-in">
+            {metaEntries.map(([key, value]) => {
+              if (key === 'total_products') {
+                return (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-400">total_products (auto)</label>
+                    <input className={inputClass + " !text-gray-500 cursor-not-allowed"} value={String(currentCategory.products.length)} readOnly />
+                  </div>
+                );
+              }
+              if (key === 'sub_types' && Array.isArray(value)) {
+                const subTypes = value as { id: string; name: string; description?: string }[];
+                return (
+                  <div key={key}>
+                    <h4 className="text-sm font-medium text-gray-300 mb-2">Sub Types ({subTypes.length})</h4>
+                    <div className="space-y-2">
+                      {subTypes.map((st, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg p-2">
+                          <input
+                            className="w-32 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-[#00d4ff] font-mono focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+                            value={st.id || ''}
+                            onChange={(e) => {
+                              const subs = [...subTypes];
+                              subs[i] = { ...subs[i], id: e.target.value };
+                              updateMetadata('sub_types', subs);
+                            }}
+                          />
+                          <input
+                            className="flex-1 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+                            value={st.name || ''}
+                            onChange={(e) => {
+                              const subs = [...subTypes];
+                              subs[i] = { ...subs[i], name: e.target.value };
+                              updateMetadata('sub_types', subs);
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              const subs = [...subTypes];
+                              subs.splice(i, 1);
+                              updateMetadata('sub_types', subs);
+                            }}
+                            className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => updateMetadata('sub_types', [...subTypes, { id: '', name: '', description: '' }])}
+                        className="w-full px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 border-dashed text-sm flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Sub Type
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+              if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                return (
+                  <div key={key} className="flex flex-col gap-2">
+                    <label className="text-xs text-gray-400 font-medium">{key}</label>
+                    <div className="bg-[#1e1e1e] rounded-lg p-3 space-y-2">
+                      {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+                        <div key={k} className="flex flex-col gap-1">
+                          <label className="text-xs text-gray-500">{k}</label>
+                          <input
+                            className={inputClass}
+                            value={String(v || '')}
+                            onChange={(e) => {
+                              const updated = { ...(meta[key] as Record<string, unknown>), [k]: e.target.value };
+                              updateMetadata(key, updated);
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              if (typeof value === 'string' && value.length > 100) {
+                return (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-400">{key}</label>
+                    <textarea
+                      className={inputClass + " resize-y"}
+                      rows={3}
+                      value={value}
+                      onChange={(e) => updateMetadata(key, e.target.value)}
+                    />
+                  </div>
+                );
+              }
+              if (typeof value === 'number') {
+                return (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-400">{key}</label>
+                    <input
+                      type="number"
+                      className={inputClass}
+                      value={value}
+                      onChange={(e) => updateMetadata(key, Number(e.target.value) || 0)}
+                    />
+                  </div>
+                );
+              }
+              if (typeof value === 'boolean') {
+                return (
+                  <div key={key} className="flex items-center gap-3 py-1">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={value} onChange={(e) => updateMetadata(key, e.target.checked)} className="sr-only peer" />
+                      <div className="w-9 h-5 bg-[#3a3a3a] peer-focus:ring-2 peer-focus:ring-[#00d4ff]/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00d4ff]/30 peer-checked:after:bg-[#00d4ff]"></div>
+                    </label>
+                    <span className="text-xs text-gray-400">{key}</span>
+                  </div>
+                );
+              }
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-400">{key}</label>
+                  <input
+                    className={inputClass}
+                    value={String(value || '')}
+                    onChange={(e) => updateMetadata(key, e.target.value)}
+                  />
+                </div>
+              );
+            })}
+            <AddFieldButton path={['_metadata']} target="metadata" />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (categories.length === 0) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">JSON Product Editor</h1>
-          <p className="text-gray-400">Load product catalog JSON files to edit metadata, products, and content.</p>
+          <p className="text-gray-400">Load product catalog JSON files to edit. All fields are auto-detected — any JSON structure works.</p>
         </div>
 
         <div
@@ -414,19 +1059,12 @@ export default function JsonEditor() {
               : 'border-white/10 hover:border-white/20 bg-[#2a2a2a]'
           }`}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".json"
-            className="hidden"
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
-          />
+          <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
           <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           <p className="text-lg font-medium text-white mb-2">Drop JSON files here or click to browse</p>
-          <p className="text-sm text-gray-500">Accepts multiple .json product catalog files</p>
+          <p className="text-sm text-gray-500">Accepts multiple .json product catalog files — any structure</p>
         </div>
 
         {loadErrors.length > 0 && (
@@ -443,7 +1081,6 @@ export default function JsonEditor() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Bar: File upload + Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-white">JSON Editor</h1>
@@ -455,47 +1092,17 @@ export default function JsonEditor() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm flex items-center gap-1.5"
-          >
+          <button onClick={() => fileInputRef.current?.click()} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Add Files
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".json"
-            className="hidden"
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
-          />
-          <button
-            onClick={resetCurrentProduct}
-            className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm"
-          >
-            Reset Product
-          </button>
-          <button
-            onClick={downloadCurrent}
-            className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium"
-          >
-            Download Current
-          </button>
-          <button
-            onClick={downloadAll}
-            className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-sm"
-          >
-            Download All
-          </button>
-          <button
-            onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); }}
-            className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-sm"
-          >
-            Clear All
-          </button>
+          <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
+          <button onClick={resetCurrentProduct} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm">Reset Product</button>
+          <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium">Download Current</button>
+          <button onClick={downloadAll} className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-sm">Download All</button>
+          <button onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); }} className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-sm">Clear All</button>
         </div>
       </div>
 
@@ -512,7 +1119,6 @@ export default function JsonEditor() {
         </div>
       )}
 
-      {/* Category Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         {categories.map((cat, i) => (
           <button
@@ -524,40 +1130,25 @@ export default function JsonEditor() {
                 : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300 border border-transparent'
             }`}
           >
-            {cat.metadata.group_name || cat._fileName}
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-              i === activeTab ? 'bg-[#00d4ff]/20 text-[#00d4ff]' : 'bg-white/10 text-gray-500'
-            }`}>
+            {String((cat.metadata as Record<string, unknown>).group_name || cat._fileName)}
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${i === activeTab ? 'bg-[#00d4ff]/20 text-[#00d4ff]' : 'bg-white/10 text-gray-500'}`}>
               {cat.products.length}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Product Navigation */}
       <div className="bg-[#2a2a2a] border border-white/5 rounded-xl p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <button
-              onClick={() => setActiveProduct(Math.max(0, activeProduct - 1))}
-              disabled={activeProduct === 0}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+            <button onClick={() => setActiveProduct(Math.max(0, activeProduct - 1))} disabled={activeProduct === 0} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <span className="text-sm text-gray-400 tabular-nums min-w-[60px] text-center">
               {products.length > 0 ? `${activeProduct + 1} / ${products.length}` : '0 / 0'}
             </span>
-            <button
-              onClick={() => setActiveProduct(Math.min(products.length - 1, activeProduct + 1))}
-              disabled={activeProduct >= products.length - 1}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+            <button onClick={() => setActiveProduct(Math.min(products.length - 1, activeProduct + 1))} disabled={activeProduct >= products.length - 1} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
             <select
               value={activeProduct}
@@ -565,9 +1156,7 @@ export default function JsonEditor() {
               className="flex-1 min-w-0 bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 truncate"
             >
               {products.map((p, i) => (
-                <option key={i} value={i}>
-                  {p.sku} — {(p.content?.short_description || '').slice(0, 60)}
-                </option>
+                <option key={i} value={i}>{getProductLabel(p)}</option>
               ))}
             </select>
           </div>
@@ -593,13 +1182,10 @@ export default function JsonEditor() {
                   key={originalIndex}
                   onClick={() => { setActiveProduct(originalIndex); setSearchQuery(''); }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    originalIndex === activeProduct
-                      ? 'bg-[#00d4ff]/10 text-[#00d4ff]'
-                      : 'text-gray-300 hover:bg-white/5'
+                    originalIndex === activeProduct ? 'bg-[#00d4ff]/10 text-[#00d4ff]' : 'text-gray-300 hover:bg-white/5'
                   }`}
                 >
-                  <span className="font-mono text-xs text-gray-500 mr-2">{product.sku}</span>
-                  {(product.content?.short_description || '').slice(0, 80)}
+                  {getProductLabel(product)}
                 </button>
               ))
             )}
@@ -609,395 +1195,9 @@ export default function JsonEditor() {
 
       {currentProduct && (
         <div className="space-y-4">
-          {/* Metadata Panel */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title="Metadata"
-                sectionKey="metadata"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.metadata && currentCategory && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Group ID</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
-                      value={currentCategory.metadata.group_id || ''}
-                      readOnly
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Group Name</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentCategory.metadata.group_name || ''}
-                      onChange={(e) => updateMetadata('group_name', e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Total Products (auto)</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
-                      value={currentCategory.products.length}
-                      readOnly
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1 md:col-span-2">
-                    <label className="text-xs text-gray-400">Description</label>
-                    <textarea
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors resize-y min-h-[60px]"
-                      rows={2}
-                      value={currentCategory.metadata.description || ''}
-                      onChange={(e) => updateMetadata('description', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {currentCategory.metadata.sub_types && currentCategory.metadata.sub_types.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Sub Types</h4>
-                    <div className="space-y-2">
-                      {currentCategory.metadata.sub_types.map((st, i) => (
-                        <div key={i} className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg p-2">
-                          <input
-                            className="w-32 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-[#00d4ff] font-mono focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
-                            value={st.id}
-                            onChange={(e) => {
-                              const subs = [...(currentCategory.metadata.sub_types || [])];
-                              subs[i] = { ...subs[i], id: e.target.value };
-                              updateMetadata('sub_types', subs);
-                            }}
-                          />
-                          <input
-                            className="flex-1 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
-                            value={st.name}
-                            onChange={(e) => {
-                              const subs = [...(currentCategory.metadata.sub_types || [])];
-                              subs[i] = { ...subs[i], name: e.target.value };
-                              updateMetadata('sub_types', subs);
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              const subs = [...(currentCategory.metadata.sub_types || [])];
-                              subs.splice(i, 1);
-                              updateMetadata('sub_types', subs);
-                            }}
-                            className="p-1 text-red-400 hover:text-red-300 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {currentCategory.metadata.template_fields && Object.keys(currentCategory.metadata.template_fields).length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Template Fields Reference</h4>
-                    <div className="bg-[#1e1e1e] rounded-lg p-3 space-y-1">
-                      {Object.entries(currentCategory.metadata.template_fields).map(([k, v]) => (
-                        <div key={k} className="flex gap-2 text-xs">
-                          <span className="text-[#00d4ff] font-mono min-w-[140px]">{k}</span>
-                          <span className="text-gray-400">{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Basic Info */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title="Basic Info"
-                sectionKey="basic"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.basic && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">SKU</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 font-mono cursor-not-allowed"
-                      value={currentProduct.sku || ''}
-                      readOnly
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Price (TL) — stored as kuruş</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors pr-12"
-                        value={currentProduct.price != null ? (currentProduct.price / 100).toFixed(2) : ''}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          updateProduct(p => ({ ...p, price: isNaN(val) ? 0 : Math.round(val * 100) }));
-                        }}
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">TL</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Image URL</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentProduct.image_url || ''}
-                      onChange={(e) => updateProduct(p => ({ ...p, image_url: e.target.value }))}
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
-                {currentProduct.image_url && (
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={currentProduct.image_url}
-                      alt="Product"
-                      className="w-20 h-20 object-cover rounded-lg border border-white/10"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <span className="text-xs text-gray-500 break-all">{currentProduct.image_url}</span>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Main Category</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentProduct.category?.main_cat || ''}
-                      onChange={(e) => updateProduct(p => ({ ...p, category: { ...p.category, main_cat: e.target.value } }))}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Sub Category</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentProduct.category?.sub_cat || ''}
-                      onChange={(e) => updateProduct(p => ({ ...p, category: { ...p.category, sub_cat: e.target.value } }))}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Sub Category 2</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentProduct.category?.sub_cat2 || ''}
-                      onChange={(e) => updateProduct(p => ({ ...p, category: { ...p.category, sub_cat2: e.target.value } }))}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Template */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title="Template"
-                sectionKey="template"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.template && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Group</label>
-                    <input
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
-                      value={currentProduct.template?.group || ''}
-                      readOnly
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">Sub Type</label>
-                    <select
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                      value={currentProduct.template?.sub_type || ''}
-                      onChange={(e) => updateProduct(p => ({
-                        ...p,
-                        template: { ...p.template, sub_type: e.target.value }
-                      }))}
-                    >
-                      <option value="">— Select —</option>
-                      {(currentCategory?.metadata.sub_types || []).map(st => (
-                        <option key={st.id} value={st.id}>{st.name} ({st.id})</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {currentProduct.template?.fields && Object.keys(currentProduct.template.fields).length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-3">Dynamic Fields</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(currentProduct.template.fields).map(([key, value]) =>
-                        renderDynamicField(key, value, [])
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title="Content"
-                sectionKey="content"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.content && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                {(['short_description', 'full_description', 'how_to_use', 'when_to_use', 'target_surface', 'why_this_product'] as const).map(field => (
-                  <div key={field} className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-400">{field.replace(/_/g, ' ')}</label>
-                    <textarea
-                      className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors resize-y"
-                      rows={field === 'full_description' ? 10 : field === 'short_description' ? 2 : 4}
-                      value={currentProduct.content?.[field] || ''}
-                      onChange={(e) => updateProduct(p => ({
-                        ...p,
-                        content: { ...p.content, [field]: e.target.value }
-                      }))}
-                      placeholder={`Enter ${field.replace(/_/g, ' ')}...`}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Relations */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title="Relations"
-                sectionKey="relations"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.relations && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                {renderTagInput('use_before')}
-                {renderTagInput('use_after')}
-                {renderTagInput('use_with')}
-                {renderTagInput('accessories')}
-                {renderTagInput('alternatives')}
-              </div>
-            )}
-          </div>
-
-          {/* FAQ */}
-          <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-            <div className="px-6 border-b border-white/5">
-              <SectionHeader
-                title={`FAQ (${currentProduct.faq?.length || 0})`}
-                sectionKey="faq"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
-              />
-            </div>
-            {!collapsedSections.faq && (
-              <div className="p-6 space-y-4 animate-fade-in">
-                {(currentProduct.faq || []).map((item, i) => (
-                  <div key={i} className="bg-[#1e1e1e] rounded-lg p-4 border border-white/5 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs text-gray-500 mt-1">Q{i + 1}</span>
-                      <button
-                        onClick={() => updateProduct(p => {
-                          const faq = [...(p.faq || [])];
-                          faq.splice(i, 1);
-                          return { ...p, faq };
-                        })}
-                        className="p-1 text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-gray-400">Question</label>
-                      <input
-                        className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors"
-                        value={item.question || ''}
-                        onChange={(e) => updateProduct(p => {
-                          const faq = [...(p.faq || [])];
-                          faq[i] = { ...faq[i], question: e.target.value };
-                          return { ...p, faq };
-                        })}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-gray-400">Answer</label>
-                      <textarea
-                        className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 transition-colors resize-y"
-                        rows={3}
-                        value={item.answer || ''}
-                        onChange={(e) => updateProduct(p => {
-                          const faq = [...(p.faq || [])];
-                          faq[i] = { ...faq[i], answer: e.target.value };
-                          return { ...p, faq };
-                        })}
-                      />
-                    </div>
-                  </div>
-                ))}
-                <button
-                  onClick={() => updateProduct(p => ({
-                    ...p,
-                    faq: [...(p.faq || []), { question: '', answer: '' }]
-                  }))}
-                  className="w-full px-4 py-3 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 border-dashed text-sm flex items-center justify-center gap-2 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add FAQ Entry
-                </button>
-              </div>
-            )}
-          </div>
+          {renderMetadataSection()}
+          {renderPrimitiveFields()}
+          {objectKeys.map(key => renderObjectSection(key))}
         </div>
       )}
     </div>
