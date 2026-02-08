@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 _stop_signals: dict[str, bool] = {}
 
+IP_BLOCK_ERRORS = (RequestBlocked, IpBlocked)
+IP_BLOCK_THRESHOLD = 3
+
 
 def request_stop(job_id: str):
     _stop_signals[job_id] = True
@@ -45,6 +48,8 @@ def _build_scraperapi_proxy_url():
 
 
 def _create_proxy_api(proxy_url: str) -> YouTubeTranscriptApi:
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     from requests import Session
     proxy_config = GenericProxyConfig(
         http_url=proxy_url,
@@ -64,7 +69,7 @@ def _fetch_with_api(ytt_api: YouTubeTranscriptApi, video_id: str):
             manual = [t for t in available if not t.is_generated]
             chosen = manual[0] if manual else available[0]
             transcript = ytt_api.fetch(video_id, languages=[chosen.language_code])
-    except (RequestBlocked, IpBlocked):
+    except IP_BLOCK_ERRORS:
         raise
     except Exception:
         pass
@@ -75,44 +80,49 @@ def _fetch_with_api(ytt_api: YouTubeTranscriptApi, video_id: str):
     return transcript
 
 
-IP_BLOCK_ERRORS = (RequestBlocked, IpBlocked)
-
-
 class TranscriptService:
     MAX_CONCURRENT = 10
 
-    def fetch_transcript(self, video_url: str) -> dict:
+    def fetch_transcript(self, video_url: str, force_proxy: bool = False) -> dict:
         video_id = extract_video_id(video_url)
         if not video_id:
             return {'video_url': video_url, 'error': f'Could not extract video ID from URL: {video_url}'}
 
-        try:
-            ytt_direct = YouTubeTranscriptApi()
-            transcript = _fetch_with_api(ytt_direct, video_id)
-            return self._format_result(video_url, video_id, transcript, proxy_used=None)
+        proxy_url = _build_scraperapi_proxy_url()
 
-        except IP_BLOCK_ERRORS as e:
-            logger.warning(f"[TRANSCRIPT] IP blocked for {video_id}, retrying with ScraperAPI proxy...")
-            proxy_url = _build_scraperapi_proxy_url()
-            if not proxy_url:
-                logger.error(f"[TRANSCRIPT] ScraperAPI key not configured, cannot retry {video_id}")
-                return {'video_url': video_url, 'video_id': video_id, 'error': f'IP blocked and no proxy available: {e}'}
+        ip_was_blocked = False
 
+        if not force_proxy:
             try:
-                import urllib3
-                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-                ytt_proxy = _create_proxy_api(proxy_url)
-                transcript = _fetch_with_api(ytt_proxy, video_id)
-                return self._format_result(video_url, video_id, transcript, proxy_used='scraperapi')
-            except Exception as proxy_err:
-                error_msg = str(proxy_err)
-                logger.error(f"[TRANSCRIPT] ScraperAPI proxy also failed for {video_id}: {error_msg}")
-                return {'video_url': video_url, 'video_id': video_id, 'error': f'Failed with proxy: {error_msg}'}
+                ytt_direct = YouTubeTranscriptApi()
+                transcript = _fetch_with_api(ytt_direct, video_id)
+                return self._format_result(video_url, video_id, transcript, proxy_used=None)
+            except IP_BLOCK_ERRORS:
+                ip_was_blocked = True
+                logger.warning(f"[TRANSCRIPT] IP blocked for {video_id}, retrying with ScraperAPI proxy...")
+                if not proxy_url:
+                    return {'video_url': video_url, 'video_id': video_id, 'error': 'IP blocked and no proxy configured', 'ip_blocked': True}
+            except Exception as e:
+                error_msg = str(e)
+                logger.error(f"[TRANSCRIPT] Error fetching transcript for {video_id}: {error_msg}")
+                return {'video_url': video_url, 'video_id': video_id, 'error': error_msg}
+        else:
+            logger.info(f"[TRANSCRIPT] Using ScraperAPI proxy directly for {video_id} (proxy mode active)")
 
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"[TRANSCRIPT] Error fetching transcript for {video_id}: {error_msg}")
-            return {'video_url': video_url, 'video_id': video_id, 'error': error_msg}
+        if not proxy_url:
+            return {'video_url': video_url, 'video_id': video_id, 'error': 'ScraperAPI key not configured'}
+
+        try:
+            ytt_proxy = _create_proxy_api(proxy_url)
+            transcript = _fetch_with_api(ytt_proxy, video_id)
+            result = self._format_result(video_url, video_id, transcript, proxy_used='scraperapi')
+            if ip_was_blocked:
+                result['ip_blocked'] = True
+            return result
+        except Exception as proxy_err:
+            error_msg = str(proxy_err)
+            logger.error(f"[TRANSCRIPT] ScraperAPI proxy failed for {video_id}: {error_msg}")
+            return {'video_url': video_url, 'video_id': video_id, 'error': f'Failed with proxy: {error_msg}', 'ip_blocked': ip_was_blocked}
 
     def _format_result(self, video_url: str, video_id: str, transcript, proxy_used: str | None) -> dict:
         full_text = ' '.join(snippet.text for snippet in transcript.snippets)
@@ -143,6 +153,8 @@ class TranscriptService:
         total = len(result_ids_urls)
         completed_count = 0
         failed_count = 0
+        ip_block_count = 0
+        proxy_mode_event = asyncio.Event()
         batch_start = time.time()
         stopped = False
         jid = (job_id or '?')[:8]
@@ -156,7 +168,7 @@ class TranscriptService:
         write_lock = asyncio.Lock()
 
         async def worker():
-            nonlocal completed_count, failed_count, stopped
+            nonlocal completed_count, failed_count, stopped, ip_block_count
             while True:
                 if job_id and is_stop_requested(job_id):
                     stopped = True
@@ -176,10 +188,21 @@ class TranscriptService:
                 transcript_snippets = None
                 error_message = None
 
+                use_proxy = proxy_mode_event.is_set()
+
                 try:
                     result = await asyncio.get_event_loop().run_in_executor(
-                        None, self.fetch_transcript, video_url
+                        None, self.fetch_transcript, video_url, use_proxy
                     )
+
+                    if result.get('ip_blocked') and not proxy_mode_event.is_set():
+                        ip_block_count += 1
+                        if ip_block_count >= IP_BLOCK_THRESHOLD:
+                            proxy_mode_event.set()
+                            logger.warning(
+                                f"[TRANSCRIPT {jid}] IP blocked {ip_block_count} times, "
+                                f"switching ALL remaining videos to ScraperAPI proxy"
+                            )
 
                     if 'error' not in result:
                         status = 'completed'
@@ -199,8 +222,9 @@ class TranscriptService:
 
                 url_elapsed = round(time.time() - url_start, 1)
                 done = completed_count + failed_count
+                proxy_label = " [PROXY]" if use_proxy else ""
                 logger.info(
-                    f"[TRANSCRIPT {jid}] [{done}/{total}] "
+                    f"[TRANSCRIPT {jid}] [{done}/{total}]{proxy_label} "
                     f"{'OK' if status == 'completed' else 'FAIL'} "
                     f"{video_url[:70]} — {url_elapsed}s"
                 )
@@ -256,9 +280,11 @@ class TranscriptService:
                 db.close()
 
         batch_elapsed = round(time.time() - batch_start, 1)
+        proxy_info = f", proxy_mode={'ON' if proxy_mode_event.is_set() else 'OFF'} (blocks: {ip_block_count})"
         logger.info(
             f"[TRANSCRIPT {jid}] Batch finished in {batch_elapsed}s — "
             f"OK: {completed_count}, FAIL: {failed_count}, SKIPPED: {skipped_count}, TOTAL: {total}"
+            f"{proxy_info}"
             + (" (STOPPED by user)" if stopped else "")
         )
 
