@@ -1,30 +1,31 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import axios from 'axios';
 
-const LS_KEY = 'json-editor-data';
-const LS_TAB_KEY = 'json-editor-active-tab';
-const LS_PRODUCT_KEY = 'json-editor-active-product';
+const API_BASE = '/api/json-editor';
 
 interface CategoryData {
   metadata: Record<string, unknown>;
   products: Record<string, unknown>[];
   _fileName: string;
   _originalProducts: string;
+  _dbId?: string;
+}
+
+interface DbFileSummary {
+  id: string;
+  filename: string;
+  product_count: number;
+  group_name: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export default function JsonEditor() {
-  const [categories, setCategories] = useState<CategoryData[]>(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) return JSON.parse(saved) as CategoryData[];
-    } catch {}
-    return [];
-  });
-  const [activeTab, setActiveTab] = useState(() => {
-    try { return parseInt(localStorage.getItem(LS_TAB_KEY) || '0', 10); } catch { return 0; }
-  });
-  const [activeProduct, setActiveProduct] = useState(() => {
-    try { return parseInt(localStorage.getItem(LS_PRODUCT_KEY) || '0', 10); } catch { return 0; }
-  });
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [activeTab, setActiveTab] = useState(0);
+  const [activeProduct, setActiveProduct] = useState(0);
+  const [dbFiles, setDbFiles] = useState<DbFileSummary[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -70,23 +71,18 @@ export default function JsonEditor() {
     return categories.some(cat => JSON.stringify(cat.products) !== cat._originalProducts);
   }, [categories]);
 
-  useEffect(() => {
+  const fetchDbFileList = useCallback(async () => {
     try {
-      if (categories.length > 0) {
-        localStorage.setItem(LS_KEY, JSON.stringify(categories));
-      } else {
-        localStorage.removeItem(LS_KEY);
-      }
-    } catch {}
-  }, [categories]);
+      const res = await axios.get(`${API_BASE}/files`);
+      setDbFiles(res.data);
+    } catch {} finally {
+      setLoadingFiles(false);
+    }
+  }, []);
 
   useEffect(() => {
-    try { localStorage.setItem(LS_TAB_KEY, String(activeTab)); } catch {}
-  }, [activeTab]);
-
-  useEffect(() => {
-    try { localStorage.setItem(LS_PRODUCT_KEY, String(activeProduct)); } catch {}
-  }, [activeProduct]);
+    fetchDbFileList();
+  }, [fetchDbFileList]);
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -101,20 +97,28 @@ export default function JsonEditor() {
 
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const saveToLocalStorage = () => {
+  const showToast = (message: string, duration = 2000) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setSaveToast(message);
+    toastTimerRef.current = setTimeout(() => setSaveToast(null), duration);
+  };
+
+  const saveToDb = async () => {
+    const cat = currentCategory;
+    if (!cat) return;
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(categories));
-      setCategories(prev => prev.map(cat => ({
-        ...cat,
-        _originalProducts: JSON.stringify(cat.products),
-      })));
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      setSaveToast('Saved successfully!');
-      toastTimerRef.current = setTimeout(() => setSaveToast(null), 2000);
+      const content = { metadata: cat.metadata, products: cat.products };
+      if (cat._dbId) {
+        await axios.put(`${API_BASE}/files/${cat._dbId}`, { content });
+      } else {
+        const res = await axios.post(`${API_BASE}/files`, { filename: cat._fileName, content });
+        setCategories(prev => prev.map((c, i) => i === activeTab ? { ...c, _dbId: res.data.id } : c));
+      }
+      setCategories(prev => prev.map((c, i) => i === activeTab ? { ...c, _originalProducts: JSON.stringify(c.products) } : c));
+      showToast('Saved to database!');
+      fetchDbFileList();
     } catch {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      setSaveToast('Save failed — storage may be full');
-      toastTimerRef.current = setTimeout(() => setSaveToast(null), 3000);
+      showToast('Save failed', 3000);
     }
   };
 
@@ -124,11 +128,13 @@ export default function JsonEditor() {
     };
   }, []);
 
-  const clearLocalStorage = () => {
+  const clearAllFiles = async () => {
     try {
-      localStorage.removeItem(LS_KEY);
-      localStorage.removeItem(LS_TAB_KEY);
-      localStorage.removeItem(LS_PRODUCT_KEY);
+      await axios.delete(`${API_BASE}/files`);
+      setCategories([]);
+      setActiveTab(0);
+      setActiveProduct(0);
+      setDbFiles([]);
     } catch {}
   };
 
@@ -144,17 +150,20 @@ export default function JsonEditor() {
         const text = await file.text();
         const data = JSON.parse(text);
         if (data.metadata && data.products) {
+          const content = { metadata: data.metadata, products: data.products };
+          const res = await axios.post(`${API_BASE}/files`, { filename: file.name, content });
           newCategories.push({
             metadata: data.metadata,
             products: data.products,
             _fileName: file.name,
             _originalProducts: JSON.stringify(data.products),
+            _dbId: res.data.id,
           });
         } else {
           errors.push(`${file.name}: Missing metadata or products`);
         }
       } catch {
-        errors.push(`${file.name}: Invalid JSON`);
+        errors.push(`${file.name}: Invalid JSON or upload failed`);
       }
     }
     if (errors.length > 0) {
@@ -170,8 +179,9 @@ export default function JsonEditor() {
         }
         return updated;
       });
+      fetchDbFileList();
     }
-  }, []);
+  }, [fetchDbFileList]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -1122,7 +1132,16 @@ export default function JsonEditor() {
     );
   };
 
+  const removeFileFromDb = async (dbId: string) => {
+    try {
+      await axios.delete(`${API_BASE}/files/${dbId}`);
+      fetchDbFileList();
+    } catch {}
+  };
+
   const removeFile = (index: number) => {
+    const cat = categories[index];
+    if (cat?._dbId) removeFileFromDb(cat._dbId);
     setCategories(prev => {
       const updated = prev.filter((_, i) => i !== index);
       if (updated.length === 0) {
@@ -1136,10 +1155,34 @@ export default function JsonEditor() {
     });
   };
 
-  const openFile = (index: number) => {
-    setActiveTab(index);
-    setActiveProduct(0);
-    setFileListView(false);
+  const openDbFile = async (dbFile: DbFileSummary) => {
+    const alreadyLoaded = categories.findIndex(c => c._dbId === dbFile.id);
+    if (alreadyLoaded >= 0) {
+      setActiveTab(alreadyLoaded);
+      setActiveProduct(0);
+      setFileListView(false);
+      return;
+    }
+    try {
+      const res = await axios.get(`${API_BASE}/files/${dbFile.id}`);
+      const data = res.data.json_content;
+      const cat: CategoryData = {
+        metadata: data.metadata || {},
+        products: data.products || [],
+        _fileName: res.data.filename,
+        _originalProducts: JSON.stringify(data.products || []),
+        _dbId: res.data.id,
+      };
+      setCategories(prev => {
+        const newIdx = prev.length;
+        setActiveTab(newIdx);
+        setActiveProduct(0);
+        return [...prev, cat];
+      });
+      setFileListView(false);
+    } catch {
+      showToast('Failed to load file', 3000);
+    }
   };
 
   if (categories.length === 0 || fileListView) {
@@ -1178,25 +1221,31 @@ export default function JsonEditor() {
           </div>
         )}
 
-        {categories.length > 0 && (
+        {loadingFiles && (
+          <div className="mt-6 text-center py-8">
+            <div className="w-6 h-6 border-2 border-[#00d4ff] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-sm text-gray-500">Loading files...</p>
+          </div>
+        )}
+
+        {!loadingFiles && dbFiles.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Loaded Files ({categories.length})</h2>
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Saved Files ({dbFiles.length})</h2>
               <button
-                onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); clearLocalStorage(); }}
+                onClick={clearAllFiles}
                 className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-xs"
               >
                 Clear All
               </button>
             </div>
             <div className="space-y-2">
-              {categories.map((cat, i) => {
-                const productCount = cat.products.length;
-                const hasUnsaved = JSON.stringify(cat.products) !== cat._originalProducts;
-                const metaGroup = typeof cat.metadata?.group === 'string' ? cat.metadata.group : '';
+              {dbFiles.map((f) => {
+                const inMemory = categories.find(c => c._dbId === f.id);
+                const hasUnsaved = inMemory ? JSON.stringify(inMemory.products) !== inMemory._originalProducts : false;
                 return (
                   <div
-                    key={`${cat._fileName}-${i}`}
+                    key={f.id}
                     className="flex items-center gap-3 bg-[#1e1e1e] border border-white/10 rounded-lg p-3 hover:border-white/20 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-lg bg-[#00d4ff]/10 flex items-center justify-center shrink-0">
@@ -1205,11 +1254,11 @@ export default function JsonEditor() {
                       </svg>
                     </div>
                     <button
-                      onClick={() => openFile(i)}
+                      onClick={() => openDbFile(f)}
                       className="flex-1 text-left min-w-0"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white truncate">{cat._fileName}</span>
+                        <span className="text-sm font-medium text-white truncate">{f.filename}</span>
                         {hasUnsaved && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
                             <span className="w-1 h-1 rounded-full bg-yellow-400 animate-pulse" />
@@ -1218,12 +1267,12 @@ export default function JsonEditor() {
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs text-gray-500">{productCount} product{productCount !== 1 ? 's' : ''}</span>
-                        {metaGroup && <span className="text-xs text-gray-600">| {metaGroup}</span>}
+                        <span className="text-xs text-gray-500">{f.product_count} product{f.product_count !== 1 ? 's' : ''}</span>
+                        {f.group_name && <span className="text-xs text-gray-600">| {f.group_name}</span>}
                       </div>
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                      onClick={async (e) => { e.stopPropagation(); await removeFileFromDb(f.id); const idx = categories.findIndex(c => c._dbId === f.id); if (idx >= 0) removeFile(idx); }}
                       className="p-2 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
                       title="Remove file"
                     >
@@ -1272,7 +1321,7 @@ export default function JsonEditor() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={saveToLocalStorage} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-sm font-medium flex items-center gap-1.5">
+          <button onClick={saveToDb} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-sm font-medium flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -1297,24 +1346,16 @@ export default function JsonEditor() {
         </div>
       )}
 
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-        {categories.map((cat, i) => (
-          <button
-            key={i}
-            onClick={() => { setActiveTab(i); setActiveProduct(0); setSearchQuery(''); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-2 transition-all ${
-              i === activeTab
-                ? 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20'
-                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300 border border-transparent'
-            }`}
-          >
-            {String((cat.metadata as Record<string, unknown>).group_name || cat._fileName)}
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${i === activeTab ? 'bg-[#00d4ff]/20 text-[#00d4ff]' : 'bg-white/10 text-gray-500'}`}>
-              {cat.products.length}
+      {currentCategory && (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          <div className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-2 bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20">
+            {String((currentCategory.metadata as Record<string, unknown>).group_name || currentCategory._fileName)}
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-[#00d4ff]/20 text-[#00d4ff]">
+              {currentCategory.products.length}
             </span>
-          </button>
-        ))}
-      </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-[#2a2a2a] border border-white/5 rounded-xl p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">

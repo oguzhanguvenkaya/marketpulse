@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from app.api.routes import router
 from app.api.url_scraper_routes import router as url_scraper_router
 from app.api.transcript_routes import router as transcript_router
+from app.api.json_editor_routes import router as json_editor_router
 from app.db.database import engine, Base
 from app.core.logger import setup_uvicorn_log_filter
 
@@ -30,6 +31,7 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 app.include_router(url_scraper_router)
 app.include_router(transcript_router)
+app.include_router(json_editor_router)
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 if os.path.exists(frontend_dist):

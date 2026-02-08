@@ -233,6 +233,19 @@ class PriceMonitorTask(Base):
         from_attributes = True
 
 
+class JsonFile(Base):
+    __tablename__ = "json_files"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    filename = Column(String(255), nullable=False)
+    json_content = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    class Config:
+        from_attributes = True
+
+
 class ScrapeJob(Base):
     """URL kazıma görevi"""
     __tablename__ = "scrape_jobs"
