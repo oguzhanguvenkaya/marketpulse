@@ -8,6 +8,7 @@ import Sellers from './pages/Sellers'
 import SellerDetail from './pages/SellerDetail'
 import UrlScraper from './pages/UrlScraper'
 import VideoTranscripts from './pages/VideoTranscripts'
+import JsonEditor from './pages/JsonEditor'
 import Layout from './components/Layout'
 import './App.css'
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/sellers/:merchantId" element={<SellerDetail />} />
           <Route path="/url-scraper" element={<UrlScraper />} />
           <Route path="/video-transcripts" element={<VideoTranscripts />} />
+          <Route path="/json-editor" element={<JsonEditor />} />
         </Routes>
       </Layout>
     </Router>
