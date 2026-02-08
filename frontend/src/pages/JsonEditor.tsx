@@ -1,4 +1,8 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+
+const LS_KEY = 'json-editor-data';
+const LS_TAB_KEY = 'json-editor-active-tab';
+const LS_PRODUCT_KEY = 'json-editor-active-product';
 
 interface CategoryData {
   metadata: Record<string, unknown>;
@@ -8,15 +12,26 @@ interface CategoryData {
 }
 
 export default function JsonEditor() {
-  const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [activeTab, setActiveTab] = useState(0);
-  const [activeProduct, setActiveProduct] = useState(0);
+  const [categories, setCategories] = useState<CategoryData[]>(() => {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) return JSON.parse(saved) as CategoryData[];
+    } catch {}
+    return [];
+  });
+  const [activeTab, setActiveTab] = useState(() => {
+    try { return parseInt(localStorage.getItem(LS_TAB_KEY) || '0', 10); } catch { return 0; }
+  });
+  const [activeProduct, setActiveProduct] = useState(() => {
+    try { return parseInt(localStorage.getItem(LS_PRODUCT_KEY) || '0', 10); } catch { return 0; }
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [loadErrors, setLoadErrors] = useState<string[]>([]);
   const [addFieldState, setAddFieldState] = useState<Record<string, { key: string; type: string }>>({});
   const [deleteFieldConfirm, setDeleteFieldConfirm] = useState<string | null>(null);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentCategory = categories[activeTab] || null;
@@ -49,6 +64,72 @@ export default function JsonEditor() {
     if (!currentCategory) return false;
     return JSON.stringify(currentCategory.products) !== currentCategory._originalProducts;
   }, [currentCategory]);
+
+  const anyFileHasChanges = useMemo(() => {
+    return categories.some(cat => JSON.stringify(cat.products) !== cat._originalProducts);
+  }, [categories]);
+
+  useEffect(() => {
+    try {
+      if (categories.length > 0) {
+        localStorage.setItem(LS_KEY, JSON.stringify(categories));
+      } else {
+        localStorage.removeItem(LS_KEY);
+      }
+    } catch {}
+  }, [categories]);
+
+  useEffect(() => {
+    try { localStorage.setItem(LS_TAB_KEY, String(activeTab)); } catch {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    try { localStorage.setItem(LS_PRODUCT_KEY, String(activeProduct)); } catch {}
+  }, [activeProduct]);
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (anyFileHasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [anyFileHasChanges]);
+
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveToLocalStorage = () => {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(categories));
+      setCategories(prev => prev.map(cat => ({
+        ...cat,
+        _originalProducts: JSON.stringify(cat.products),
+      })));
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      setSaveToast('Saved successfully!');
+      toastTimerRef.current = setTimeout(() => setSaveToast(null), 2000);
+    } catch {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      setSaveToast('Save failed — storage may be full');
+      toastTimerRef.current = setTimeout(() => setSaveToast(null), 3000);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  const clearLocalStorage = () => {
+    try {
+      localStorage.removeItem(LS_KEY);
+      localStorage.removeItem(LS_TAB_KEY);
+      localStorage.removeItem(LS_PRODUCT_KEY);
+    } catch {}
+  };
 
   const handleFiles = useCallback(async (files: FileList | File[]) => {
     const newCategories: CategoryData[] = [];
@@ -1099,10 +1180,16 @@ export default function JsonEditor() {
             Add Files
           </button>
           <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
+          <button onClick={saveToLocalStorage} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-sm font-medium flex items-center gap-1.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Save
+          </button>
           <button onClick={resetCurrentProduct} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm">Reset Product</button>
           <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium">Download Current</button>
           <button onClick={downloadAll} className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-sm">Download All</button>
-          <button onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); }} className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-sm">Clear All</button>
+          <button onClick={() => { setCategories([]); setActiveTab(0); setActiveProduct(0); clearLocalStorage(); }} className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-sm">Clear All</button>
         </div>
       </div>
 
@@ -1200,6 +1287,16 @@ export default function JsonEditor() {
           {objectKeys.map(key => renderObjectSection(key))}
         </div>
       )}
+
+      {saveToast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg animate-fade-in flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          {saveToast}
+        </div>
+      )}
+
     </div>
   );
 }
