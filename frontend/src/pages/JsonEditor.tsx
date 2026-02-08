@@ -371,9 +371,9 @@ export default function JsonEditor() {
     };
 
     return (
-      <div className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg p-3 border border-[#00d4ff]/20">
+      <div className="flex flex-wrap items-center gap-2 bg-[#1e1e1e] rounded-lg p-3 border border-[#00d4ff]/20">
         <input
-          className="flex-1 bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+          className="flex-1 min-w-[120px] bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
           placeholder="Field name"
           value={state.key}
           onChange={(e) => setAddFieldState(prev => ({ ...prev, [stateKey]: { ...prev[stateKey], key: e.target.value } }))}
@@ -438,7 +438,7 @@ export default function JsonEditor() {
     return (
       <button
         onClick={() => setDeleteFieldConfirm(pathKey)}
-        className="p-1 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+        className="p-1 text-gray-600 hover:text-red-400 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
         title="Delete field"
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -766,7 +766,7 @@ export default function JsonEditor() {
       <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
         <button
           onClick={() => toggleSection('_basic')}
-          className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5"
+          className="w-full flex items-center justify-between py-3 px-4 md:px-6 border-b border-white/5"
         >
           <div className="flex items-center gap-2">
             <span className="text-[#00d4ff]">
@@ -774,16 +774,16 @@ export default function JsonEditor() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
-            <span className="text-lg font-semibold text-white">Basic Info</span>
-            <span className="text-xs text-gray-500">({primitiveKeys.length} fields)</span>
+            <span className="text-base md:text-lg font-semibold text-white">Basic Info</span>
+            <span className="text-xs text-gray-500">({primitiveKeys.length})</span>
           </div>
           <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${collapsedSections['_basic'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {!collapsedSections['_basic'] && (
-          <div className="p-6 space-y-4 animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-4 md:p-6 space-y-4 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {skuKey && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-gray-400">{skuKey}</label>
@@ -832,7 +832,7 @@ export default function JsonEditor() {
               </div>
             )}
             {otherKeys.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 {otherKeys.map(key => renderValue(key, currentProduct[key], [], true))}
               </div>
             )}
@@ -856,18 +856,18 @@ export default function JsonEditor() {
     if (isFaqArray(value)) {
       return (
         <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[#00d4ff]">{icon}</span>
-              <span className="text-lg font-semibold text-white">{displayName}</span>
-              <span className="text-xs text-gray-500">({(value as unknown[]).length} entries)</span>
+          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-4 md:px-6 border-b border-white/5">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[#00d4ff] shrink-0">{icon}</span>
+              <span className="text-base md:text-lg font-semibold text-white truncate">{displayName}</span>
+              <span className="text-xs text-gray-500 shrink-0">({(value as unknown[]).length})</span>
             </div>
-            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           {!isCollapsed && (
-            <div className="p-6 animate-fade-in">
+            <div className="p-4 md:p-6 animate-fade-in">
               {renderValue(key, value, [], false)}
             </div>
           )}
@@ -878,18 +878,18 @@ export default function JsonEditor() {
     if (Array.isArray(value)) {
       return (
         <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-[#00d4ff]">{icon}</span>
-              <span className="text-lg font-semibold text-white">{displayName}</span>
-              <span className="text-xs text-gray-500">({value.length} items)</span>
+          <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-4 md:px-6 border-b border-white/5">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[#00d4ff] shrink-0">{icon}</span>
+              <span className="text-base md:text-lg font-semibold text-white truncate">{displayName}</span>
+              <span className="text-xs text-gray-500 shrink-0">({value.length})</span>
             </div>
-            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           {!isCollapsed && (
-            <div className="p-6 animate-fade-in">
+            <div className="p-4 md:p-6 animate-fade-in">
               {renderValue(key, value, [], false)}
             </div>
           )}
@@ -900,18 +900,18 @@ export default function JsonEditor() {
     const entries = Object.entries(value as Record<string, unknown>);
     return (
       <div key={key} className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-        <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <span className="text-[#00d4ff]">{icon}</span>
-            <span className="text-lg font-semibold text-white">{displayName}</span>
-            <span className="text-xs text-gray-500">({entries.length} fields)</span>
+        <button onClick={() => toggleSection(sectionId)} className="w-full flex items-center justify-between py-3 px-4 md:px-6 border-b border-white/5">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[#00d4ff] shrink-0">{icon}</span>
+            <span className="text-base md:text-lg font-semibold text-white truncate">{displayName}</span>
+            <span className="text-xs text-gray-500 shrink-0">({entries.length})</span>
           </div>
-          <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {!isCollapsed && (
-          <div className="p-6 space-y-4 animate-fade-in">
+          <div className="p-4 md:p-6 space-y-4 animate-fade-in">
             {key === 'template' ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -977,22 +977,22 @@ export default function JsonEditor() {
 
     return (
       <div className="bg-[#2a2a2a] border border-white/5 rounded-xl">
-        <button onClick={() => toggleSection('_metadata')} className="w-full flex items-center justify-between py-3 px-6 border-b border-white/5">
+        <button onClick={() => toggleSection('_metadata')} className="w-full flex items-center justify-between py-3 px-4 md:px-6 border-b border-white/5">
           <div className="flex items-center gap-2">
             <span className="text-[#00d4ff]">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </span>
-            <span className="text-lg font-semibold text-white">Metadata</span>
-            <span className="text-xs text-gray-500">({metaEntries.length} fields)</span>
+            <span className="text-base md:text-lg font-semibold text-white">Metadata</span>
+            <span className="text-xs text-gray-500">({metaEntries.length})</span>
           </div>
           <svg className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${collapsedSections['_metadata'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
         {!collapsedSections['_metadata'] && (
-          <div className="p-6 space-y-4 animate-fade-in">
+          <div className="p-4 md:p-6 space-y-4 animate-fade-in">
             {metaEntries.map(([key, value]) => {
               if (key === 'total_products') {
                 return (
@@ -1009,9 +1009,9 @@ export default function JsonEditor() {
                     <h4 className="text-sm font-medium text-gray-300 mb-2">Sub Types ({subTypes.length})</h4>
                     <div className="space-y-2">
                       {subTypes.map((st, i) => (
-                        <div key={i} className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg p-2">
+                        <div key={i} className="flex flex-wrap items-center gap-2 bg-[#1e1e1e] rounded-lg p-2">
                           <input
-                            className="w-32 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-[#00d4ff] font-mono focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+                            className="w-full sm:w-32 bg-transparent border border-white/10 rounded px-2 py-1 text-xs text-[#00d4ff] font-mono focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
                             value={st.id || ''}
                             onChange={(e) => {
                               const subs = [...subTypes];
@@ -1188,9 +1188,9 @@ export default function JsonEditor() {
   if (categories.length === 0 || fileListView) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">JSON Product Editor</h1>
-          <p className="text-gray-400">Load product catalog JSON files to edit. All fields are auto-detected — any JSON structure works.</p>
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">JSON Product Editor</h1>
+          <p className="text-sm md:text-base text-gray-400">Load product catalog JSON files to edit. All fields are auto-detected.</p>
         </div>
 
         <div
@@ -1198,18 +1198,18 @@ export default function JsonEditor() {
           onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 ${
+          className={`border-2 border-dashed rounded-xl p-6 md:p-10 text-center cursor-pointer transition-all duration-200 ${
             isDragging
               ? 'border-[#00d4ff] bg-[#00d4ff]/5'
               : 'border-white/10 hover:border-white/20 bg-[#2a2a2a]'
           }`}
         >
           <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
-          <svg className="w-12 h-12 mx-auto mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
-          <p className="text-lg font-medium text-white mb-1">Drop JSON files here or click to browse</p>
-          <p className="text-sm text-gray-500">Accepts multiple .json product catalog files — any structure</p>
+          <p className="text-base md:text-lg font-medium text-white mb-1">Drop JSON files here or click to browse</p>
+          <p className="text-xs md:text-sm text-gray-500">Accepts multiple .json product catalog files</p>
         </div>
 
         {loadErrors.length > 0 && (
@@ -1273,7 +1273,7 @@ export default function JsonEditor() {
                     </button>
                     <button
                       onClick={async (e) => { e.stopPropagation(); await removeFileFromDb(f.id); const idx = categories.findIndex(c => c._dbId === f.id); if (idx >= 0) removeFile(idx); }}
-                      className="p-2 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                      className="p-2 text-gray-600 hover:text-red-400 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shrink-0"
                       title="Remove file"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1300,36 +1300,42 @@ export default function JsonEditor() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-3 md:gap-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={() => setFileListView(true)}
-            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors shrink-0"
             title="Back to files"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-white">{currentCategory?._fileName || 'JSON Editor'}</h1>
+          <h1 className="text-base md:text-xl font-bold text-white truncate">{currentCategory?._fileName || 'JSON Editor'}</h1>
           {hasChanges && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-              Unsaved Changes
+              <span className="hidden sm:inline">Unsaved</span>
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={saveToDb} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-sm font-medium flex items-center gap-1.5">
+          <button onClick={saveToDb} className="px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-xs md:text-sm font-medium flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             Save
           </button>
-          <button onClick={resetCurrentProduct} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-sm">Reset Product</button>
-          <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-sm font-medium">Download</button>
-          <button onClick={downloadAll} className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-sm">Download All</button>
+          <button onClick={resetCurrentProduct} className="px-3 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 border border-white/10 text-xs md:text-sm">Reset</button>
+          <button onClick={downloadCurrent} className="px-3 py-2 bg-[#00d4ff]/10 text-[#00d4ff] rounded-lg hover:bg-[#00d4ff]/20 border border-[#00d4ff]/20 text-xs md:text-sm font-medium">
+            <span className="hidden sm:inline">Download</span>
+            <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          </button>
+          <button onClick={downloadAll} className="px-3 py-2 bg-[#00d4ff] text-[#1e1e1e] rounded-lg font-medium hover:bg-[#00d4ff]/90 text-xs md:text-sm">
+            <span className="hidden sm:inline">Download All</span>
+            <span className="sm:hidden">All</span>
+          </button>
         </div>
       </div>
 
@@ -1357,34 +1363,34 @@ export default function JsonEditor() {
         </div>
       )}
 
-      <div className="bg-[#2a2a2a] border border-white/5 rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <button onClick={() => setActiveProduct(Math.max(0, activeProduct - 1))} disabled={activeProduct === 0} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors">
+      <div className="bg-[#2a2a2a] border border-white/5 rounded-xl p-3 md:p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 w-full min-w-0">
+            <button onClick={() => setActiveProduct(Math.max(0, activeProduct - 1))} disabled={activeProduct === 0} className="p-1.5 md:p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span className="text-sm text-gray-400 tabular-nums min-w-[60px] text-center">
-              {products.length > 0 ? `${activeProduct + 1} / ${products.length}` : '0 / 0'}
+            <span className="text-xs md:text-sm text-gray-400 tabular-nums shrink-0">
+              {products.length > 0 ? `${activeProduct + 1}/${products.length}` : '0/0'}
             </span>
-            <button onClick={() => setActiveProduct(Math.min(products.length - 1, activeProduct + 1))} disabled={activeProduct >= products.length - 1} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors">
+            <button onClick={() => setActiveProduct(Math.min(products.length - 1, activeProduct + 1))} disabled={activeProduct >= products.length - 1} className="p-1.5 md:p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300 transition-colors shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
             <select
               value={activeProduct}
               onChange={(e) => setActiveProduct(Number(e.target.value))}
-              className="flex-1 min-w-0 bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 truncate"
+              className="flex-1 min-w-0 bg-[#1e1e1e] border border-white/10 rounded-lg px-2 md:px-3 py-2 text-white text-xs md:text-sm focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30 truncate"
             >
               {products.map((p, i) => (
                 <option key={i} value={i}>{getProductLabel(p)}</option>
               ))}
             </select>
           </div>
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full">
             <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
-              className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg pl-9 pr-4 py-2 text-white text-sm placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
+              className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg pl-9 pr-4 py-2 text-white text-xs md:text-sm placeholder-gray-500 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/30"
               placeholder="Search by SKU or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

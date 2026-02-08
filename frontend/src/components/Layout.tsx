@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -6,6 +7,11 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: (
@@ -53,22 +59,41 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-dark-900 flex">
-      <aside className="w-64 bg-dark-800 border-r border-white/5 flex flex-col fixed h-full">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`w-64 bg-dark-800 border-r border-white/5 flex flex-col fixed h-full z-50 transition-transform duration-300 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0`}>
         <div className="p-6 border-b border-white/5">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
-              <svg className="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
+                <svg className="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div>
+                <span className="text-lg font-bold text-white">Pazaryeri</span>
+                <span className="text-xs text-neutral-400 block">Analytics Platform</span>
+              </div>
+            </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </div>
-            <div>
-              <span className="text-lg font-bold text-white">Pazaryeri</span>
-              <span className="text-xs text-neutral-400 block">Analytics Platform</span>
-            </div>
-          </Link>
+            </button>
+          </div>
         </div>
         
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -105,16 +130,26 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </aside>
 
-      <main className="flex-1 ml-64">
-        <header className="h-16 bg-dark-800/50 backdrop-blur-sm border-b border-white/5 flex items-center px-8 sticky top-0 z-10">
+      <main className="flex-1 ml-0 md:ml-64 min-w-0">
+        <header className="h-14 md:h-16 bg-dark-800/50 backdrop-blur-sm border-b border-white/5 flex items-center px-4 md:px-8 sticky top-0 z-30">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 -ml-1 mr-3 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
           <div className="flex items-center gap-2 text-sm text-neutral-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            <span className="text-xs sm:text-sm">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
           </div>
         </header>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {children}
         </div>
       </main>
