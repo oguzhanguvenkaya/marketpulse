@@ -1,0 +1,77 @@
+2026-01-27T16:00:59Z info: Deployment: c24c51cd-2aea-40e7-8eac-8aebf8e91edc
+2026-01-27T16:00:59Z info: Build: d4de2f60-4ef0-4f83-b29b-75f4fe6272e6
+2026-01-27T16:00:59Z info: Running Security Scan
+2026-01-27T16:01:08Z info: Security Scan Complete
+2026-01-27T16:01:08Z info: Connecting to builder
+2026-01-27T16:01:09Z info: Builder connected
+2026-01-27T16:01:10Z info: Installing packages
+--> npm install
+
+
+up to date, audited 1 package in 274ms
+
+
+found 0 vulnerabilities
+
+2026-01-27T16:01:12Z info: Starting Build
+
+> pazaryeri-platform@1.0.0 build
+> cd frontend && npm install && npm run build
+
+
+
+added 2 packages, and audited 490 packages in 3s
+
+
+74 packages are looking for funding
+
+  run `npm fund` for details
+
+
+2 vulnerabilities (1 moderate, 1 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+
+vite v7.2.7 building client environment for production...
+
+transforming...
+
+✓ 112 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                     0.46 kB │ gzip:     0.29 kB
+
+dist/assets/index-DJbA5hUq.css     26.11 kB │ gzip:     5.91 kB
+
+dist/assets/index-C4wG3aql.js   5,222.43 kB │ gzip: 1,575.79 kB
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+✓ built in 29.45s
+
+2026-01-27T16:01:51Z info: Pushing pid1 binary layer...
+2026-01-27T16:01:59Z info: Pushing hosting layer...
+2026-01-27T16:01:59Z info: Pushing Repl layer...
+2026-01-27T16:02:00Z info: Nix layers for this Repl are uncached.
+2026-01-27T16:02:00Z info: Pushing nix-0 layer...
+2026-01-27T16:02:01Z info: Created hosting layer
+2026-01-27T16:02:02Z info: Created pid1 binary layer
+2026-01-27T16:04:24Z info: Created Repl layer
+2026-01-27T16:04:24Z info: Pushing Repl (cache) layer...
+2026-01-27T16:04:27Z info: Created Repl (cache) layer
+Deployment timed out. Check the Logs tab for more details. - 2026-01-27T16:09:59
