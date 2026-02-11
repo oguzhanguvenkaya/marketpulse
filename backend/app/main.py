@@ -1,8 +1,8 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from app.api.routes import router
 from app.api.url_scraper_routes import router as url_scraper_router
 from app.api.transcript_routes import router as transcript_router
@@ -28,6 +28,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
 app.include_router(router, prefix="/api")
 app.include_router(url_scraper_router)
 app.include_router(transcript_router)
@@ -35,19 +39,22 @@ app.include_router(json_editor_router)
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 if os.path.exists(frontend_dist):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
-    
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
+        if full_path.startswith("api/"):
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
         file_path = os.path.join(frontend_dist, full_path)
-        if os.path.isfile(file_path):
+        if full_path and os.path.isfile(file_path):
             return FileResponse(file_path)
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+        index_path = os.path.join(frontend_dist, "index.html")
+        if os.path.isfile(index_path):
+            return FileResponse(index_path, headers={"Cache-Control": "no-cache"})
+        return JSONResponse(status_code=404, content={"detail": "Frontend not built"})
 else:
     @app.get("/")
     async def root():
         return {"message": "Pazaryeri Veri Analiz API", "status": "running"}
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
