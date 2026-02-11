@@ -60,19 +60,53 @@ def _create_proxy_api(proxy_url: str) -> YouTubeTranscriptApi:
     return YouTubeTranscriptApi(proxy_config=proxy_config, http_client=session)
 
 
+def _pick_best_transcript(available: list, video_id: str):
+    auto_generated = [t for t in available if t.is_generated]
+    manual = [t for t in available if not t.is_generated]
+
+    langs_info = ', '.join(f"{t.language_code}({'m' if not t.is_generated else 'a'})" for t in available)
+    logger.info(f"[TRANSCRIPT] {video_id}: available=[{langs_info}]")
+
+    original_lang = None
+    if auto_generated:
+        original_lang = auto_generated[0].language_code
+
+    if original_lang:
+        manual_orig = [t for t in manual if t.language_code == original_lang]
+        if manual_orig:
+            return manual_orig[0]
+        auto_orig = [t for t in auto_generated if t.language_code == original_lang]
+        if auto_orig:
+            return auto_orig[0]
+
+    for lang_prefix in ['en', 'tr']:
+        manual_match = [t for t in manual if t.language_code.startswith(lang_prefix)]
+        if manual_match:
+            return manual_match[0]
+        auto_match = [t for t in auto_generated if t.language_code.startswith(lang_prefix)]
+        if auto_match:
+            return auto_match[0]
+
+    if manual:
+        return manual[0]
+    if auto_generated:
+        return auto_generated[0]
+    return available[0]
+
+
 def _fetch_with_api(ytt_api: YouTubeTranscriptApi, video_id: str):
     transcript = None
     try:
         transcript_list = ytt_api.list(video_id)
         available = list(transcript_list)
         if available:
-            manual = [t for t in available if not t.is_generated]
-            chosen = manual[0] if manual else available[0]
+            chosen = _pick_best_transcript(available, video_id)
             transcript = ytt_api.fetch(video_id, languages=[chosen.language_code])
+            logger.info(f"[TRANSCRIPT] {video_id}: selected '{chosen.language}' ({chosen.language_code}), generated={chosen.is_generated}")
     except IP_BLOCK_ERRORS:
         raise
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"[TRANSCRIPT] {video_id}: list/select failed ({e}), falling back to default fetch")
 
     if transcript is None:
         transcript = ytt_api.fetch(video_id)
