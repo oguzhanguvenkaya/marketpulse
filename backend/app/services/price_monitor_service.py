@@ -639,5 +639,17 @@ class PriceMonitorService:
         
         logger.info(f"Fetch task completed: {completed} success, {failed} failed, {len(inactive_skus)} marked inactive")
 
+    async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
+        """Tek bir ürünü çekip DB'ye kaydet."""
+        try:
+            result = await self.fetch_product_data(product)
+            success = self.save_product_result(db, product, result)
+            db.commit()
+            return success
+        except Exception as e:
+            logger.error(f"Single fetch error for SKU {product.sku}: {e}")
+            db.rollback()
+            return False
+
 
 price_monitor_service = PriceMonitorService()

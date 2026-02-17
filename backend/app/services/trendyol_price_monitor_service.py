@@ -370,5 +370,24 @@ class TrendyolPriceMonitorService:
         
         logger.info(f"Trendyol fetch task completed: {completed} success, {failed} failed")
 
+    async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
+        """Tek bir Trendyol ürününü çekip DB'ye kaydet."""
+        self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=1)
+
+        try:
+            async with aiohttp.ClientSession(connector=connector) as http_session:
+                result = await self.fetch_single_product(str(product.id), product.sku, product.product_url, http_session)
+                return self.save_product_result(db, product, result["html"])
+        except Exception as e:
+            logger.error(f"Single Trendyol fetch error for SKU {product.sku}: {e}")
+            db.rollback()
+            return False
+
 
 trendyol_price_monitor_service = TrendyolPriceMonitorService()
