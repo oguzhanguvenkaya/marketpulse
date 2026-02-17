@@ -149,6 +149,43 @@ def _calculate_price_alerts(
         "has_campaign_alert": has_campaign_alert,
     }
 
+
+def _parse_review_date(value: Any) -> Optional[date]:
+    if value is None:
+        return None
+
+    if isinstance(value, datetime):
+        return value.date()
+
+    if isinstance(value, date):
+        return value
+
+    if not isinstance(value, str):
+        return None
+
+    text = value.strip()
+    if not text:
+        return None
+
+    formats = [
+        "%Y-%m-%d",
+        "%d.%m.%Y",
+        "%d/%m/%Y",
+        "%Y/%m/%d",
+        "%d-%m-%Y",
+    ]
+
+    for fmt in formats:
+        try:
+            return datetime.strptime(text, fmt).date()
+        except ValueError:
+            continue
+
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).date()
+    except ValueError:
+        return None
+
 async def run_scraping_background(task_id: str):
     db = SessionLocal()
     try:
@@ -333,7 +370,7 @@ async def run_scraping_background(task_id: str):
                             author=review.get("author"),
                             rating=review.get("rating"),
                             review_text=review.get("review_text"),
-                            review_date=review.get("review_date"),
+                            review_date=_parse_review_date(review.get("review_date")),
                             seller_name=review.get("seller_name")
                         )
                         db.add(pr)
