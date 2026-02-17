@@ -214,7 +214,7 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
               </div>
             )}
             <div className="absolute top-2 left-2 badge badge-warning text-[10px]">
-              #{product.order_index + 1} Position
+              #{product.order_index} Position
             </div>
             <div className="absolute top-2 right-2 badge badge-danger text-[10px]">
               Ad
