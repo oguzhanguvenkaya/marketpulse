@@ -107,6 +107,48 @@ class SnapshotResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+def _to_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    return float(value)
+
+
+def _calculate_price_alerts(
+    platform: str,
+    snapshot: SellerSnapshot,
+    threshold: Optional[float],
+    campaign_threshold: Optional[float]
+) -> Dict[str, Optional[float]]:
+    current_price = _to_float(snapshot.price)
+    original_price = _to_float(snapshot.original_price)
+    campaign_price = _to_float(snapshot.campaign_price)
+
+    if platform == "trendyol":
+        list_price = original_price if original_price is not None else current_price
+        selling_price = current_price
+        has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+        has_campaign_alert = (
+            campaign_threshold is not None
+            and original_price is not None
+            and current_price is not None
+            and current_price < campaign_threshold
+        )
+    else:
+        list_price = original_price if original_price is not None else current_price
+        selling_price = campaign_price if campaign_price is not None else current_price
+        has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+        has_campaign_alert = campaign_threshold is not None and campaign_price is not None and campaign_price < campaign_threshold
+
+    return {
+        "list_price": list_price,
+        "selling_price": selling_price,
+        "original_price": original_price,
+        "campaign_price": campaign_price,
+        "has_price_alert": has_price_alert,
+        "has_campaign_alert": has_campaign_alert,
+    }
+
 async def run_scraping_background(task_id: str):
     db = SessionLocal()
     try:
@@ -826,34 +868,29 @@ async def get_monitored_products(
     for product in products:
         latest_snapshots = db.query(SellerSnapshot).filter(
             SellerSnapshot.monitored_product_id == product.id
-        ).order_by(desc(SellerSnapshot.snapshot_date)).limit(20).all()
-        
-        seller_count = len(set(s.merchant_id for s in latest_snapshots))
+        ).order_by(desc(SellerSnapshot.snapshot_date)).all()
+
+        seen_merchants = set()
+        unique_snapshots = []
+        for snapshot in latest_snapshots:
+            if snapshot.merchant_id not in seen_merchants:
+                seen_merchants.add(snapshot.merchant_id)
+                unique_snapshots.append(snapshot)
+
+        seller_count = len(unique_snapshots)
         
         threshold = float(product.threshold_price) if product.threshold_price else None
         campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
         
         price_alert_count = 0
         campaign_alert_count = 0
-        
-        if latest_snapshots:
-            for s in latest_snapshots:
-                seller_price = float(s.price) if s.price else None
-                orig_price = float(s.original_price) if s.original_price else None
-                camp_price = float(s.campaign_price) if s.campaign_price else None
-                
-                if product.platform == 'trendyol':
-                    if orig_price and seller_price:
-                        if campaign_threshold and seller_price < campaign_threshold:
-                            campaign_alert_count += 1
-                    elif threshold and seller_price and seller_price < threshold:
-                        price_alert_count += 1
-                else:
-                    if threshold and orig_price and orig_price < threshold:
-                        price_alert_count += 1
-                    
-                    if campaign_threshold and camp_price and camp_price < campaign_threshold:
-                        campaign_alert_count += 1
+
+        for snapshot in unique_snapshots:
+            alerts = _calculate_price_alerts(product.platform, snapshot, threshold, campaign_threshold)
+            if alerts["has_price_alert"]:
+                price_alert_count += 1
+            if alerts["has_campaign_alert"]:
+                campaign_alert_count += 1
         
         has_price_alert = price_alert_count > 0
         has_campaign_alert = campaign_alert_count > 0
@@ -1035,38 +1072,12 @@ async def get_monitored_product_detail(
                 merchant_url = f"https://www.trendyol.com{s.merchant_url_postfix}" if s.merchant_url_postfix else None
             else:
                 merchant_url = None
-            
-            current_price = float(s.price) if s.price else None  # Güncel satış fiyatı
-            orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı (Trendyol)
-            camp_price = float(s.campaign_price) if s.campaign_price else None  # Hepsiburada sepete özel
-            
-            # Trendyol için:
-            # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
-            # - selling_price = Güncel satış fiyatı (current_price)
-            # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
-            # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
-            if product.platform == 'trendyol':
-                list_price = orig_price if orig_price else current_price
-                selling_price = current_price
-                # Price Alert: Liste fiyatı threshold'dan düşük mü?
-                has_price_alert = threshold is not None and list_price is not None and list_price < threshold
-                
-                if orig_price and current_price:
-                    # Kampanya var - Campaign Alert kontrolü
-                    has_campaign_alert = campaign_threshold is not None and current_price < campaign_threshold
-                else:
-                    # Kampanya yok
-                    has_campaign_alert = False
-            else:
-                # Hepsiburada için:
-                # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
-                # - selling_price = Güncel satış fiyatı (campaign_price varsa o, yoksa current_price)
-                list_price = orig_price if orig_price else current_price
-                selling_price = camp_price if camp_price else current_price
-                # Price Alert: Liste fiyatı threshold'dan düşük mü?
-                has_price_alert = threshold is not None and list_price is not None and list_price < threshold
-                # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
-                has_campaign_alert = campaign_threshold is not None and camp_price is not None and camp_price < campaign_threshold
+
+            alerts = _calculate_price_alerts(product.platform, s, threshold, campaign_threshold)
+            list_price = alerts["list_price"]
+            selling_price = alerts["selling_price"]
+            has_price_alert = alerts["has_price_alert"]
+            has_campaign_alert = alerts["has_campaign_alert"]
             
             if has_price_alert:
                 price_alert_count += 1
@@ -1084,7 +1095,7 @@ async def get_monitored_product_detail(
                 "merchant_city": s.merchant_city,
                 "price": selling_price,  # Güncel satış fiyatı (kampanyalı olabilir)
                 "list_price": list_price,  # Liste fiyatı (threshold ile karşılaştırılır)
-                "original_price": orig_price,  # Raw original_price
+                "original_price": alerts["original_price"],  # Raw original_price
                 "minimum_price": float(s.minimum_price) if s.minimum_price else None,
                 "discount_rate": s.discount_rate,
                 "stock_quantity": s.stock_quantity,
@@ -1093,7 +1104,7 @@ async def get_monitored_product_detail(
                 "fast_shipping": s.fast_shipping,
                 "is_fulfilled_by_hb": s.is_fulfilled_by_hb,
                 "campaigns": s.campaigns if s.campaigns else [],
-                "campaign_price": camp_price,
+                "campaign_price": alerts["campaign_price"],
                 "snapshot_date": s.snapshot_date.isoformat(),
                 "price_alert": has_price_alert,
                 "campaign_alert": has_campaign_alert
@@ -1708,5 +1719,4 @@ async def export_seller_products(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
-
 
