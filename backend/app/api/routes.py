@@ -961,6 +961,7 @@ async def export_price_monitor_data(
         
         sellers = []
         min_price_seller = None
+        min_price_value = None
         seen_merchants = set()
         
         for s in snapshots:
@@ -993,13 +994,15 @@ async def export_price_monitor_data(
                     "snapshot_date": s.snapshot_date.isoformat() if s.snapshot_date else ""
                 }
                 sellers.append(seller_data)
-                
-                if s.buybox_order == 1:
+
+                seller_price = seller_data["price"]
+                if seller_price is not None and (min_price_value is None or seller_price < min_price_value):
+                    min_price_value = seller_price
                     min_price_seller = {
                         "merchant_name": s.merchant_name,
                         "merchant_url": merchant_url,
-                        "price": float(s.price) if s.price else None,
-                        "buybox_order": 1
+                        "price": seller_price,
+                        "buybox_order": s.buybox_order
                     }
         
         product_data = {
@@ -1719,4 +1722,3 @@ async def export_seller_products(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
-
