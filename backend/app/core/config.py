@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     
     def has_bright_data(self) -> bool:
         return bool(self.BRIGHT_DATA_ACCOUNT_ID and self.BRIGHT_DATA_ZONE_PASSWORD)
+
+    def require_database_url(self) -> str:
+        db_url = (self.DATABASE_URL or "").strip()
+        if not db_url:
+            raise ValueError(
+                "DATABASE_URL is not set. Configure it in environment variables or backend/.env before starting the backend."
+            )
+        return db_url
     
     class Config:
         env_file = ".env"
