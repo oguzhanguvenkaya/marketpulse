@@ -1,9 +1,11 @@
 import os
 from pydantic_settings import BaseSettings
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    INTERNAL_API_KEY: str = os.getenv("INTERNAL_API_KEY", "")
+    CORS_ALLOWED_ORIGINS: str = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     
@@ -66,6 +68,20 @@ class Settings(BaseSettings):
                 "DATABASE_URL is not set. Configure it in environment variables or backend/.env before starting the backend."
             )
         return db_url
+
+    def require_internal_api_key(self) -> str:
+        api_key = (self.INTERNAL_API_KEY or "").strip()
+        if not api_key:
+            raise ValueError(
+                "INTERNAL_API_KEY is not set. Configure it in environment variables or backend/.env before starting the backend."
+            )
+        return api_key
+
+    def cors_allowed_origins(self) -> List[str]:
+        origins = [origin.strip() for origin in (self.CORS_ALLOWED_ORIGINS or "").split(",") if origin.strip()]
+        if not origins:
+            raise ValueError("CORS_ALLOWED_ORIGINS must contain at least one allowed origin.")
+        return origins
     
     class Config:
         env_file = ".env"

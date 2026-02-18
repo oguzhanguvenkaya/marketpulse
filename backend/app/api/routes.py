@@ -13,8 +13,9 @@ from app.services.llm_service import LLMService
 from app.services.price_monitor_service import price_monitor_service
 from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
 from app.core.logger import api_logger as logger
+from app.core.security import require_mutating_api_key
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
 
 class SearchRequest(BaseModel):
     keyword: str

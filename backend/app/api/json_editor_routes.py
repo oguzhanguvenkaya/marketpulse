@@ -8,8 +8,13 @@ from pydantic import BaseModel
 
 from app.db.database import get_db
 from app.db.models import JsonFile
+from app.core.security import require_mutating_api_key
 
-router = APIRouter(prefix="/api/json-editor", tags=["JSON Editor"])
+router = APIRouter(
+    prefix="/api/json-editor",
+    tags=["JSON Editor"],
+    dependencies=[Depends(require_mutating_api_key)],
+)
 
 
 def parse_uuid(file_id: str):

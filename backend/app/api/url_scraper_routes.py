@@ -12,8 +12,13 @@ from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
 from app.db.models import ScrapeJob, ScrapeResult
+from app.core.security import require_mutating_api_key
 
-router = APIRouter(prefix="/api/url-scraper", tags=["URL Scraper"])
+router = APIRouter(
+    prefix="/api/url-scraper",
+    tags=["URL Scraper"],
+    dependencies=[Depends(require_mutating_api_key)],
+)
 
 
 class SingleUrlRequest(BaseModel):

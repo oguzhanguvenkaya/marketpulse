@@ -7,12 +7,16 @@ from app.api.routes import router
 from app.api.url_scraper_routes import router as url_scraper_router
 from app.api.transcript_routes import router as transcript_router
 from app.api.json_editor_routes import router as json_editor_router
+from app.core.config import settings
 from app.db.database import engine, Base
 from app.core.logger import setup_uvicorn_log_filter
 
 Base.metadata.create_all(bind=engine)
 
 setup_uvicorn_log_filter()
+
+settings.require_internal_api_key()
+cors_allowed_origins = settings.cors_allowed_origins()
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",
@@ -22,10 +26,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
 
 @app.get("/health")

@@ -4,6 +4,11 @@ const api = axios.create({
   baseURL: '/api',
 });
 
+const internalApiKey = import.meta.env.VITE_INTERNAL_API_KEY;
+if (internalApiKey) {
+  api.defaults.headers.common['X-API-Key'] = internalApiKey;
+}
+
 export interface SearchTask {
   id: string;
   keyword: string;

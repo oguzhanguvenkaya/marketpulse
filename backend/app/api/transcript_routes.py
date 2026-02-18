@@ -12,8 +12,13 @@ from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
 from app.db.models import TranscriptJob, TranscriptResult
+from app.core.security import require_mutating_api_key
 
-router = APIRouter(prefix="/api/transcripts", tags=["Video Transcripts"])
+router = APIRouter(
+    prefix="/api/transcripts",
+    tags=["Video Transcripts"],
+    dependencies=[Depends(require_mutating_api_key)],
+)
 
 
 class SingleVideoRequest(BaseModel):
