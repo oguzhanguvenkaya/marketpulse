@@ -67,7 +67,8 @@ async def scrape_and_save(scraper: ScrapingService, keyword: str, platform: str,
         await scraper.init_browser()
         
         if platform == "hepsiburada":
-            products_data = await scraper.scrape_hepsiburada_search(keyword, max_products=100)
+            search_result = await scraper.scrape_hepsiburada_search(keyword, max_products=100)
+            products_data = search_result.get('products', [])
         else:
             products_data = []
         
