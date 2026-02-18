@@ -197,10 +197,11 @@ async def run_scraping_background(task_id: str):
         db.commit()
         
         scraper = ScrapingService()
+        browser_initialized = False
         try:
-            await scraper.init_browser()
-            
             if task.platform == "hepsiburada":
+                await scraper.init_browser()
+                browser_initialized = True
                 search_result = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
                 products_data = search_result.get('products', [])
                 sponsored_brands = search_result.get('sponsored_brands', [])
@@ -384,7 +385,8 @@ async def run_scraping_background(task_id: str):
             task.completed_at = datetime.utcnow()
             db.commit()
         finally:
-            await scraper.close_browser()
+            if browser_initialized:
+                await scraper.close_browser()
     except Exception as e:
         logger.error(f"Search task {task_id} failed: {e}")
         task = db.query(SearchTask).filter(SearchTask.id == task_id).first()
