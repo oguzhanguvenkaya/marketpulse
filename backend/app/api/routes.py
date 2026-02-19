@@ -2,18 +2,24 @@ import asyncio
 from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
-from typing import List, Optional, Dict, Any
+from sqlalchemy import desc, or_, text
+from sqlalchemy.exc import OperationalError
+from typing import List, Optional, Dict, Any, Callable
 from pydantic import BaseModel
 from uuid import UUID
+from urllib.parse import quote_plus
+from time import perf_counter
+from redis import Redis
 from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, MonitoredProduct, SellerSnapshot, PriceMonitorTask
 from app.services.scraping import ScrapingService, get_proxy_status
 from app.services.llm_service import LLMService
 from app.services.price_monitor_service import price_monitor_service
 from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
-from app.core.logger import api_logger as logger
+from app.core.config import settings
+from app.core.logger import api_logger as logger, log_endpoint_metric
 from app.core.security import require_mutating_api_key
+from app.tasks import run_price_monitor_fetch_task
 
 router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
 
@@ -186,6 +192,92 @@ def _parse_review_date(value: Any) -> Optional[date]:
         return datetime.fromisoformat(text.replace("Z", "+00:00")).date()
     except ValueError:
         return None
+
+
+def _is_valid_http_url(url: Optional[str]) -> bool:
+    return isinstance(url, str) and url.strip().lower().startswith(("http://", "https://"))
+
+
+def _build_product_search_url(platform: str, sku: Optional[str]) -> Optional[str]:
+    if not isinstance(sku, str):
+        return None
+
+    normalized = sku.strip()
+    if not normalized:
+        return None
+
+    encoded = quote_plus(normalized)
+    if platform.lower() == "trendyol":
+        return f"https://www.trendyol.com/arama?q={encoded}"
+    return f"https://www.hepsiburada.com/ara?q={encoded}"
+
+
+def _resolve_product_url(platform: str, sku: Optional[str], product_url: Optional[str]) -> str:
+    if _is_valid_http_url(product_url):
+        return product_url.strip()
+
+    return _build_product_search_url(platform, sku) or ""
+
+
+def _require_scraper_api_or_503() -> str:
+    try:
+        return settings.require_scraper_api_key()
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+def _is_queue_reachable() -> bool:
+    client = None
+    try:
+        client = Redis.from_url(
+            settings.REDIS_URL,
+            socket_connect_timeout=1,
+            socket_timeout=1,
+        )
+        return bool(client.ping())
+    except Exception:
+        return False
+    finally:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
+
+
+def _require_queue_or_503() -> None:
+    if not _is_queue_reachable():
+        raise HTTPException(status_code=503, detail="Fetch queue unavailable. Check Redis/Celery worker.")
+
+
+def _is_retryable_db_operational_error(exc: OperationalError) -> bool:
+    text = str(exc).lower()
+    retryable_markers = (
+        "ssl connection has been closed unexpectedly",
+        "server closed the connection unexpectedly",
+        "connection not open",
+        "could not receive data from server",
+    )
+    return any(marker in text for marker in retryable_markers)
+
+
+def _run_read_query_with_retry(
+    db: Session,
+    operation: Callable[[], Any],
+    endpoint_name: str,
+) -> Any:
+    attempts = 2
+    for attempt in range(1, attempts + 1):
+        try:
+            return operation()
+        except OperationalError as exc:
+            db.rollback()
+            if attempt >= attempts or not _is_retryable_db_operational_error(exc):
+                raise
+            logger.warning(
+                f"Retrying read endpoint '{endpoint_name}' after OperationalError (attempt {attempt}/{attempts}): {exc}"
+            )
+    return operation()
 
 async def run_scraping_background(task_id: str):
     db = SessionLocal()
@@ -823,6 +915,8 @@ async def add_monitored_products(
             if not sku:
                 errors.append({"url": item.productUrl, "error": "SKU bulunamadı"})
                 continue
+
+            resolved_product_url = _resolve_product_url(platform, sku, item.productUrl)
             
             existing = db.query(MonitoredProduct).filter(
                 MonitoredProduct.sku == sku,
@@ -830,8 +924,8 @@ async def add_monitored_products(
             ).first()
             
             if existing:
-                if item.productUrl:
-                    existing.product_url = item.productUrl
+                if resolved_product_url:
+                    existing.product_url = resolved_product_url
                 if item.productName:
                     existing.product_name = item.productName
                 if item.barcode:
@@ -858,7 +952,7 @@ async def add_monitored_products(
                     platform=platform,
                     sku=sku,
                     barcode=item.barcode,
-                    product_url=item.productUrl,
+                    product_url=resolved_product_url,
                     product_name=item.productName,
                     brand=item.brand,
                     threshold_price=item.price,
@@ -891,84 +985,254 @@ async def get_monitored_products(
     brand: Optional[str] = None,
     price_alert_only: bool = False,
     campaign_alert_only: bool = False,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
 ):
     """İzlenen ürün listesini getir - platform, marka, price/campaign alert ve arama filtresi ile"""
-    query = db.query(MonitoredProduct)
+    start_time = perf_counter()
+    # --- 1. Build product query with all SQL-level filters ---
+    base_query = db.query(MonitoredProduct)
+    if platform:
+        base_query = base_query.filter(MonitoredProduct.platform == platform.lower())
+    if brand:
+        base_query = base_query.filter(MonitoredProduct.brand == brand)
+    if search:
+        search_lower = f"%{search.lower()}%"
+        base_query = base_query.filter(
+            or_(
+                MonitoredProduct.sku.ilike(search_lower),
+                MonitoredProduct.barcode.ilike(search_lower),
+                MonitoredProduct.product_name.ilike(search_lower),
+                MonitoredProduct.seller_stock_code.ilike(search_lower),
+            )
+        )
+
+    query = base_query
     if active_only:
         query = query.filter(MonitoredProduct.is_active == True)
-    if platform:
-        query = query.filter(MonitoredProduct.platform == platform.lower())
-    if brand:
-        query = query.filter(MonitoredProduct.brand == brand)
-    
-    products = query.order_by(desc(MonitoredProduct.created_at)).all()
-    
-    result = []
-    for product in products:
-        latest_snapshots = db.query(SellerSnapshot).filter(
-            SellerSnapshot.monitored_product_id == product.id
-        ).order_by(desc(SellerSnapshot.snapshot_date)).all()
 
-        seen_merchants = set()
-        unique_snapshots = []
-        for snapshot in latest_snapshots:
-            if snapshot.merchant_id not in seen_merchants:
-                seen_merchants.add(snapshot.merchant_id)
-                unique_snapshots.append(snapshot)
+    query = query.order_by(desc(MonitoredProduct.created_at))
 
-        seller_count = len(unique_snapshots)
-        
-        threshold = float(product.threshold_price) if product.threshold_price else None
-        campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
-        
-        price_alert_count = 0
-        campaign_alert_count = 0
+    # When alert filters are active we need to check all products (can't paginate before filtering)
+    needs_alert_filter = price_alert_only or campaign_alert_only
 
-        for snapshot in unique_snapshots:
-            alerts = _calculate_price_alerts(product.platform, snapshot, threshold, campaign_threshold)
-            if alerts["has_price_alert"]:
-                price_alert_count += 1
-            if alerts["has_campaign_alert"]:
-                campaign_alert_count += 1
-        
-        has_price_alert = price_alert_count > 0
-        has_campaign_alert = campaign_alert_count > 0
-        
-        if price_alert_only and not has_price_alert:
-            continue
-        
-        if campaign_alert_only and not has_campaign_alert:
-            continue
-        
-        if search:
-            search_lower = search.lower()
-            searchable = f"{product.sku or ''} {product.barcode or ''} {product.product_name or ''} {product.seller_stock_code or ''}".lower()
-            if search_lower not in searchable:
+    if not needs_alert_filter:
+        # --- Single round-trip: products + counts + snapshots via CTE + LATERAL JOIN ---
+        combined_rows = _run_read_query_with_retry(
+            db,
+            lambda: db.execute(
+                text("""
+                    WITH paged AS (
+                        SELECT id, platform, sku, barcode, product_url, product_name, brand,
+                               seller_stock_code, threshold_price, alert_campaign_price,
+                               image_url, is_active, last_fetched_at,
+                               COUNT(*) OVER() AS _total,
+                               SUM(CASE WHEN is_active THEN 1 ELSE 0 END) OVER() AS _active
+                        FROM monitored_products
+                        WHERE TRUE
+                          {platform_clause}
+                          {brand_clause}
+                          {active_clause}
+                          {search_clause}
+                        ORDER BY created_at DESC
+                        LIMIT :limit OFFSET :offset
+                    )
+                    SELECT p.id, p.platform, p.sku, p.barcode, p.product_url, p.product_name,
+                           p.brand, p.seller_stock_code, p.threshold_price, p.alert_campaign_price,
+                           p.image_url, p.is_active, p.last_fetched_at, p._total, p._active,
+                           s.merchant_id, s.price AS s_price, s.original_price AS s_original, s.campaign_price AS s_campaign
+                    FROM paged p
+                    LEFT JOIN LATERAL (
+                        SELECT DISTINCT ON (merchant_id) merchant_id, price, original_price, campaign_price
+                        FROM seller_snapshots ss
+                        WHERE ss.monitored_product_id = p.id
+                        ORDER BY merchant_id, snapshot_date DESC
+                    ) s ON true
+                """.format(
+                    platform_clause="AND platform = :platform" if platform else "",
+                    brand_clause="AND brand = :brand" if brand else "",
+                    active_clause="AND is_active = true" if active_only else "",
+                    search_clause="AND (sku ILIKE :search OR barcode ILIKE :search OR product_name ILIKE :search OR seller_stock_code ILIKE :search)" if search else "",
+                )),
+                {
+                    **({"platform": platform.lower()} if platform else {}),
+                    **({"brand": brand} if brand else {}),
+                    **({"search": f"%{search.lower()}%"} if search else {}),
+                    "limit": limit,
+                    "offset": offset,
+                },
+            ).fetchall(),
+            "price-monitor/products",
+        )
+
+        if not combined_rows:
+            response = {"products": [], "total": 0, "active_count": 0, "inactive_count": 0, "limit": limit, "offset": offset}
+            log_endpoint_metric(
+                logger,
+                "price-monitor/products",
+                latency_ms=(perf_counter() - start_time) * 1000,
+                platform=platform or "all",
+                total=0,
+                limit=limit,
+                offset=offset,
+            )
+            return response
+
+        total_count = combined_rows[0][13]
+        active_count = combined_rows[0][14] or 0
+        inactive_count = total_count - active_count
+
+        # Group rows by product (each product may have multiple seller rows from LEFT JOIN)
+        from collections import OrderedDict
+        product_map: Dict[str, dict] = OrderedDict()
+        for r in combined_rows:
+            pid = str(r[0])
+            if pid not in product_map:
+                product_map[pid] = {
+                    "id": pid, "platform": r[1], "sku": r[2], "barcode": r[3],
+                    "product_url": r[4], "product_name": r[5], "brand": r[6],
+                    "seller_stock_code": r[7],
+                    "threshold_price": float(r[8]) if r[8] else None,
+                    "alert_campaign_price": float(r[9]) if r[9] else None,
+                    "image_url": r[10], "is_active": r[11],
+                    "last_fetched_at": r[12].isoformat() if r[12] else None,
+                    "_snapshots": [],
+                }
+            if r[15] is not None:  # merchant_id from LEFT JOIN
+                product_map[pid]["_snapshots"].append({
+                    "price": r[16], "original_price": r[17], "campaign_price": r[18],
+                })
+
+        result = []
+        for p in product_map.values():
+            snaps = p.pop("_snapshots")
+            p["seller_count"] = len(snaps)
+            threshold = p["threshold_price"]
+            campaign_threshold = p["alert_campaign_price"]
+            price_alert_count = 0
+            campaign_alert_count = 0
+            for snap in snaps:
+                s_price = _to_float(snap["price"])
+                s_original = _to_float(snap["original_price"])
+                s_campaign = _to_float(snap["campaign_price"])
+                list_price = s_original if s_original is not None else s_price
+                if p["platform"] == "trendyol":
+                    if threshold is not None and list_price is not None and list_price < threshold:
+                        price_alert_count += 1
+                    if campaign_threshold is not None and s_original is not None and s_price is not None and s_price < campaign_threshold:
+                        campaign_alert_count += 1
+                else:
+                    if threshold is not None and list_price is not None and list_price < threshold:
+                        price_alert_count += 1
+                    if campaign_threshold is not None and s_campaign is not None and s_campaign < campaign_threshold:
+                        campaign_alert_count += 1
+            p["has_price_alert"] = price_alert_count > 0
+            p["price_alert_count"] = price_alert_count
+            p["has_campaign_alert"] = campaign_alert_count > 0
+            p["campaign_alert_count"] = campaign_alert_count
+            result.append(p)
+    else:
+        # Alert filter path: need all products (can't paginate before checking alerts)
+        products = _run_read_query_with_retry(db, query.all, "price-monitor/products")
+        if not products:
+            response = {"products": [], "total": 0, "active_count": 0, "inactive_count": 0, "limit": limit, "offset": offset}
+            log_endpoint_metric(
+                logger,
+                "price-monitor/products",
+                latency_ms=(perf_counter() - start_time) * 1000,
+                platform=platform or "all",
+                total=0,
+                limit=limit,
+                offset=offset,
+            )
+            return response
+        product_ids = [p.id for p in products]
+        snap_rows = _run_read_query_with_retry(
+            db,
+            lambda: db.execute(
+                text("""
+                    SELECT DISTINCT ON (monitored_product_id, merchant_id)
+                           monitored_product_id, merchant_id, price, original_price, campaign_price
+                    FROM seller_snapshots
+                    WHERE monitored_product_id = ANY(:product_ids)
+                    ORDER BY monitored_product_id, merchant_id, snapshot_date DESC
+                """),
+                {"product_ids": product_ids},
+            ).fetchall(),
+            "price-monitor/products",
+        )
+        snapshot_map: Dict[str, list] = {}
+        for row in snap_rows:
+            pid = str(row[0])
+            snapshot_map.setdefault(pid, []).append({
+                "price": row[2], "original_price": row[3], "campaign_price": row[4],
+            })
+        result = []
+        for product in products:
+            pid = str(product.id)
+            snaps = snapshot_map.get(pid, [])
+            threshold = float(product.threshold_price) if product.threshold_price else None
+            campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
+            price_alert_count = 0
+            campaign_alert_count = 0
+            for snap in snaps:
+                s_price = _to_float(snap["price"])
+                s_original = _to_float(snap["original_price"])
+                s_campaign = _to_float(snap["campaign_price"])
+                list_price = s_original if s_original is not None else s_price
+                if product.platform == "trendyol":
+                    if threshold is not None and list_price is not None and list_price < threshold:
+                        price_alert_count += 1
+                    if campaign_threshold is not None and s_original is not None and s_price is not None and s_price < campaign_threshold:
+                        campaign_alert_count += 1
+                else:
+                    if threshold is not None and list_price is not None and list_price < threshold:
+                        price_alert_count += 1
+                    if campaign_threshold is not None and s_campaign is not None and s_campaign < campaign_threshold:
+                        campaign_alert_count += 1
+            has_price_alert = price_alert_count > 0
+            has_campaign_alert = campaign_alert_count > 0
+            if price_alert_only and not has_price_alert:
                 continue
-        
-        result.append({
-            "id": str(product.id),
-            "platform": product.platform,
-            "sku": product.sku,
-            "barcode": product.barcode,
-            "product_url": product.product_url,
-            "product_name": product.product_name,
-            "brand": product.brand,
-            "seller_stock_code": product.seller_stock_code,
-            "threshold_price": float(product.threshold_price) if product.threshold_price else None,
-            "alert_campaign_price": float(product.alert_campaign_price) if product.alert_campaign_price else None,
-            "image_url": product.image_url,
-            "is_active": product.is_active,
-            "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
-            "seller_count": seller_count,
-            "has_price_alert": has_price_alert,
-            "price_alert_count": price_alert_count,
-            "has_campaign_alert": has_campaign_alert,
-            "campaign_alert_count": campaign_alert_count
-        })
-    
-    return {"products": result, "total": len(result)}
+            if campaign_alert_only and not has_campaign_alert:
+                continue
+            result.append({
+                "id": pid, "platform": product.platform, "sku": product.sku,
+                "barcode": product.barcode, "product_url": product.product_url,
+                "product_name": product.product_name, "brand": product.brand,
+                "seller_stock_code": product.seller_stock_code,
+                "threshold_price": float(product.threshold_price) if product.threshold_price else None,
+                "alert_campaign_price": float(product.alert_campaign_price) if product.alert_campaign_price else None,
+                "image_url": product.image_url, "is_active": product.is_active,
+                "last_fetched_at": product.last_fetched_at.isoformat() if product.last_fetched_at else None,
+                "seller_count": len(snaps),
+                "has_price_alert": has_price_alert, "price_alert_count": price_alert_count,
+                "has_campaign_alert": has_campaign_alert, "campaign_alert_count": campaign_alert_count,
+            })
+        total_count = len(result)
+        active_count = sum(1 for item in result if item["is_active"])
+        inactive_count = total_count - active_count
+        result = result[offset:offset + limit]
+
+    response = {
+        "products": result,
+        "total": total_count,
+        "active_count": active_count,
+        "inactive_count": inactive_count,
+        "limit": limit,
+        "offset": offset
+    }
+    log_endpoint_metric(
+        logger,
+        "price-monitor/products",
+        latency_ms=(perf_counter() - start_time) * 1000,
+        platform=platform or "all",
+        total=total_count,
+        limit=limit,
+        offset=offset,
+    )
+    return response
 
 
 @router.get("/price-monitor/export")
@@ -1241,6 +1505,15 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
     db = SessionLocal()
     try:
         task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+        try:
+            _require_scraper_api_or_503()
+        except HTTPException as exc:
+            if task:
+                task.status = "failed"
+                task.error_message = str(exc.detail)
+                task.completed_at = datetime.utcnow()
+                db.commit()
+            return
         if task:
             if platform == "trendyol":
                 await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
@@ -1252,7 +1525,6 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
 
 @router.post("/price-monitor/fetch")
 async def start_fetch_task(
-    background_tasks: BackgroundTasks,
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
     fetch_type: str = Query("active", description="Fetch type: active, last_inactive, inactive"),
     db: Session = Depends(get_db),
@@ -1265,17 +1537,33 @@ async def start_fetch_task(
     - last_inactive: Son fetch'te inactive olan ürünleri tekrar dene
     - inactive: Tüm inactive ürünleri çek
     """
+    _require_scraper_api_or_503()
+    executor = settings.price_monitor_executor()
+    if executor != "local":
+        _require_queue_or_503()
+
     task = PriceMonitorTask(platform=platform, status="pending", fetch_type=fetch_type)
     db.add(task)
     db.commit()
     db.refresh(task)
-    
-    background_tasks.add_task(run_fetch_task, str(task.id), platform, product_ids, fetch_type)
-    
+
+    if executor == "local":
+        asyncio.create_task(run_fetch_task(str(task.id), platform, product_ids, fetch_type))
+    else:
+        try:
+            run_price_monitor_fetch_task.delay(str(task.id), platform, fetch_type, product_ids)
+        except Exception as exc:
+            task.status = "failed"
+            task.error_message = f"Celery enqueue failed: {exc}"
+            task.completed_at = datetime.utcnow()
+            db.commit()
+            raise HTTPException(status_code=503, detail="Fetch queue unavailable. Check Redis/Celery worker.")
+
     return {
         "task_id": str(task.id),
         "platform": platform,
         "fetch_type": fetch_type,
+        "executor": executor,
         "status": "started",
         "message": f"{platform.capitalize()} için {fetch_type} ürünler çekme işlemi başlatıldı"
     }
@@ -1322,6 +1610,7 @@ async def get_fetch_task_status(
         "completed_products": task.completed_products,
         "failed_products": task.failed_products,
         "fetch_type": task.fetch_type,
+        "executor": settings.price_monitor_executor(),
         "last_inactive_count": len(task.last_inactive_skus) if task.last_inactive_skus else 0,
         "created_at": task.created_at.isoformat(),
         "completed_at": task.completed_at.isoformat() if task.completed_at else None
@@ -1334,41 +1623,54 @@ async def get_last_inactive_skus(
     db: Session = Depends(get_db)
 ):
     """Son tamamlanan fetch görevinde inactive olan SKU'ları getir"""
-    last_task = db.query(PriceMonitorTask).filter(
-        PriceMonitorTask.platform == platform,
-        PriceMonitorTask.status == "completed"
-    ).order_by(PriceMonitorTask.completed_at.desc()).first()
-    
-    if not last_task:
-        return {"skus": [], "count": 0, "task_id": None}
-    
-    skus = last_task.last_inactive_skus or []
-    
-    products = []
-    if skus:
-        product_records = db.query(MonitoredProduct).filter(
-            MonitoredProduct.sku.in_(skus),
-            MonitoredProduct.platform == platform
-        ).all()
+    start_time = perf_counter()
+
+    def _query_last_inactive() -> Dict[str, Any]:
+        last_task = db.query(PriceMonitorTask).filter(
+            PriceMonitorTask.platform == platform,
+            PriceMonitorTask.status == "completed"
+        ).order_by(PriceMonitorTask.completed_at.desc()).first()
         
-        products = [
-            {
-                "id": str(p.id),
-                "sku": p.sku,
-                "product_name": p.product_name,
-                "brand": p.brand,
-                "is_active": p.is_active
-            }
-            for p in product_records
-        ]
-    
-    return {
-        "skus": skus,
-        "count": len(skus),
-        "products": products,
-        "task_id": str(last_task.id),
-        "completed_at": last_task.completed_at.isoformat() if last_task.completed_at else None
-    }
+        if not last_task:
+            return {"skus": [], "count": 0, "task_id": None}
+        
+        skus = last_task.last_inactive_skus or []
+        
+        products = []
+        if skus:
+            product_records = db.query(MonitoredProduct).filter(
+                MonitoredProduct.sku.in_(skus),
+                MonitoredProduct.platform == platform
+            ).all()
+            
+            products = [
+                {
+                    "id": str(p.id),
+                    "sku": p.sku,
+                    "product_name": p.product_name,
+                    "brand": p.brand,
+                    "is_active": p.is_active
+                }
+                for p in product_records
+            ]
+        
+        return {
+            "skus": skus,
+            "count": len(skus),
+            "products": products,
+            "task_id": str(last_task.id),
+            "completed_at": last_task.completed_at.isoformat() if last_task.completed_at else None
+        }
+
+    response = _run_read_query_with_retry(db, _query_last_inactive, "price-monitor/last-inactive")
+    log_endpoint_metric(
+        logger,
+        "price-monitor/last-inactive",
+        latency_ms=(perf_counter() - start_time) * 1000,
+        platform=platform,
+        count=response.get("count", 0),
+    )
+    return response
 
 
 @router.post("/price-monitor/fetch-single/{product_id}")
@@ -1377,6 +1679,8 @@ async def fetch_single_product(
     db: Session = Depends(get_db)
 ):
     """Tek bir ürün için satıcı fiyatlarını çek - platform otomatik belirlenir"""
+    _require_scraper_api_or_503()
+
     product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
     
     if not product:
@@ -1396,93 +1700,320 @@ async def fetch_single_product(
 @router.get("/sellers")
 async def get_sellers(
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
+    limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
     """Tüm satıcıları listele - her satıcının ürün sayısı, price alert ve campaign alert sayısı ile"""
-    from sqlalchemy import func, distinct, case
-    
-    products = db.query(MonitoredProduct).filter(
-        MonitoredProduct.platform == platform,
-        MonitoredProduct.is_active == True
-    ).all()
-    
-    product_ids = [p.id for p in products]
-    product_thresholds = {str(p.id): float(p.threshold_price) if p.threshold_price else None for p in products}
-    product_campaign_thresholds = {str(p.id): float(p.alert_campaign_price) if p.alert_campaign_price else None for p in products}
-    
-    if not product_ids:
-        return {"sellers": [], "total": 0}
-    
-    latest_snapshots_subq = db.query(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id,
-        func.max(SellerSnapshot.snapshot_date).label('max_date')
-    ).filter(
-        SellerSnapshot.monitored_product_id.in_(product_ids)
-    ).group_by(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id
-    ).subquery()
-    
-    snapshots = db.query(SellerSnapshot).join(
-        latest_snapshots_subq,
-        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
-        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
-        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
-    ).all()
-    
-    sellers_data = {}
-    for s in snapshots:
-        if s.merchant_id not in sellers_data:
-            sellers_data[s.merchant_id] = {
-                'merchant_id': s.merchant_id,
-                'merchant_name': s.merchant_name,
-                'merchant_logo': s.merchant_logo,
-                'merchant_url_postfix': s.merchant_url_postfix,
-                'merchant_rating': float(s.merchant_rating) if s.merchant_rating else None,
-                'product_count': 0,
-                'price_alert_count': 0,
-                'campaign_alert_count': 0,
-                'products': []
-            }
-        
-        sellers_data[s.merchant_id]['product_count'] += 1
-        
-        threshold = product_thresholds.get(str(s.monitored_product_id))
-        seller_price = float(s.price) if s.price else None
-        orig_price = float(s.original_price) if s.original_price else None
-        campaign_price = float(s.campaign_price) if s.campaign_price else None
-        campaign_threshold = product_campaign_thresholds.get(str(s.monitored_product_id))
-        
-        if platform.lower() == "trendyol":
-            # Trendyol için:
-            # - list_price = original_price varsa o, yoksa price
-            list_price = orig_price if orig_price else seller_price
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            if threshold and list_price and list_price < threshold:
-                sellers_data[s.merchant_id]['price_alert_count'] += 1
-            # Campaign Alert: Kampanya varsa (orig_price != price), satış fiyatı campaign_threshold'dan düşük mü?
-            if orig_price and seller_price and orig_price != seller_price:
-                if campaign_threshold and seller_price < campaign_threshold:
-                    sellers_data[s.merchant_id]['campaign_alert_count'] += 1
-        else:
-            # Hepsiburada için:
-            # - list_price = original_price varsa o, yoksa price
-            list_price = orig_price if orig_price else seller_price
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            if threshold and list_price and list_price < threshold:
-                sellers_data[s.merchant_id]['price_alert_count'] += 1
-            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
-            if campaign_threshold and campaign_price and campaign_price < campaign_threshold:
-                sellers_data[s.merchant_id]['campaign_alert_count'] += 1
-    
-    sellers_list = sorted(
-        sellers_data.values(), 
-        key=lambda x: (x['price_alert_count'] + x['campaign_alert_count']), 
-        reverse=True
+    start_time = perf_counter()
+    is_trendyol = platform.lower() == "trendyol"
+
+    def _query_sellers() -> Dict[str, Any]:
+        rows = db.execute(
+            text(
+                """
+                WITH latest AS (
+                    SELECT DISTINCT ON (ss.merchant_id, ss.monitored_product_id)
+                        ss.merchant_id,
+                        ss.monitored_product_id,
+                        ss.merchant_name,
+                        ss.merchant_logo,
+                        ss.merchant_url_postfix,
+                        ss.merchant_rating,
+                        ss.price,
+                        ss.original_price,
+                        ss.campaign_price
+                    FROM seller_snapshots ss
+                    JOIN monitored_products mp ON mp.id = ss.monitored_product_id
+                    WHERE mp.platform = :platform
+                      AND mp.is_active = true
+                    ORDER BY ss.merchant_id, ss.monitored_product_id, ss.snapshot_date DESC
+                ),
+                aggregated AS (
+                    SELECT
+                        l.merchant_id,
+                        MAX(l.merchant_name) AS merchant_name,
+                        MAX(l.merchant_logo) AS merchant_logo,
+                        MAX(l.merchant_url_postfix) AS merchant_url_postfix,
+                        MAX(l.merchant_rating) AS merchant_rating,
+                        COUNT(*)::int AS product_count,
+                        SUM(
+                            CASE
+                                WHEN mp.threshold_price IS NOT NULL
+                                     AND COALESCE(l.original_price, l.price) IS NOT NULL
+                                     AND COALESCE(l.original_price, l.price) < mp.threshold_price
+                                THEN 1
+                                ELSE 0
+                            END
+                        )::int AS price_alert_count,
+                        SUM(
+                            CASE
+                                WHEN :is_trendyol
+                                    THEN CASE
+                                        WHEN mp.alert_campaign_price IS NOT NULL
+                                             AND l.original_price IS NOT NULL
+                                             AND l.price IS NOT NULL
+                                             AND l.price < mp.alert_campaign_price
+                                        THEN 1
+                                        ELSE 0
+                                    END
+                                ELSE CASE
+                                    WHEN mp.alert_campaign_price IS NOT NULL
+                                         AND l.campaign_price IS NOT NULL
+                                         AND l.campaign_price < mp.alert_campaign_price
+                                    THEN 1
+                                    ELSE 0
+                                END
+                            END
+                        )::int AS campaign_alert_count
+                    FROM latest l
+                    JOIN monitored_products mp ON mp.id = l.monitored_product_id
+                    GROUP BY l.merchant_id
+                ),
+                counted AS (
+                    SELECT
+                        a.*,
+                        COUNT(*) OVER()::int AS total_count
+                    FROM aggregated a
+                )
+                SELECT
+                    merchant_id,
+                    merchant_name,
+                    merchant_logo,
+                    merchant_url_postfix,
+                    merchant_rating,
+                    product_count,
+                    price_alert_count,
+                    campaign_alert_count,
+                    total_count
+                FROM counted
+                ORDER BY (price_alert_count + campaign_alert_count) DESC, merchant_name ASC
+                LIMIT :limit OFFSET :offset
+                """
+            ),
+            {
+                "platform": platform.lower(),
+                "is_trendyol": is_trendyol,
+                "limit": limit,
+                "offset": offset,
+            },
+        ).mappings().all()
+
+        if not rows:
+            total_count = db.execute(
+                text(
+                    """
+                    SELECT COUNT(DISTINCT ss.merchant_id)::int
+                    FROM seller_snapshots ss
+                    JOIN monitored_products mp ON mp.id = ss.monitored_product_id
+                    WHERE mp.platform = :platform
+                      AND mp.is_active = true
+                    """
+                ),
+                {"platform": platform.lower()},
+            ).scalar() or 0
+            return {"sellers": [], "total": int(total_count), "limit": limit, "offset": offset}
+
+        sellers = []
+        for row in rows:
+            sellers.append(
+                {
+                    "merchant_id": row["merchant_id"],
+                    "merchant_name": row["merchant_name"],
+                    "merchant_logo": row["merchant_logo"],
+                    "merchant_url_postfix": row["merchant_url_postfix"],
+                    "merchant_rating": float(row["merchant_rating"]) if row["merchant_rating"] is not None else None,
+                    "product_count": int(row["product_count"] or 0),
+                    "price_alert_count": int(row["price_alert_count"] or 0),
+                    "campaign_alert_count": int(row["campaign_alert_count"] or 0),
+                }
+            )
+
+        return {
+            "sellers": sellers,
+            "total": int(rows[0]["total_count"] or 0),
+            "limit": limit,
+            "offset": offset,
+        }
+
+    response = _run_read_query_with_retry(db, _query_sellers, "sellers")
+    log_endpoint_metric(
+        logger,
+        "sellers",
+        latency_ms=(perf_counter() - start_time) * 1000,
+        platform=platform,
+        total=response.get("total", 0),
+        limit=limit,
+        offset=offset,
     )
-    
-    return {"sellers": sellers_list, "total": len(sellers_list)}
+    return response
+
+
+def _compute_seller_pricing(
+    platform: str,
+    threshold: Optional[float],
+    campaign_threshold: Optional[float],
+    current_price: Optional[float],
+    original_price: Optional[float],
+    campaign_price_value: Optional[float],
+) -> Dict[str, Any]:
+    if platform == "trendyol":
+        list_price = original_price if original_price is not None else current_price
+        campaign_price = current_price
+        has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+        if original_price is not None and current_price is not None:
+            has_campaign_alert = campaign_threshold is not None and current_price < campaign_threshold
+            campaign_difference = round(original_price - current_price, 2)
+        else:
+            has_campaign_alert = False
+            campaign_difference = None
+    else:
+        list_price = original_price if original_price is not None else current_price
+        campaign_price = campaign_price_value
+        has_price_alert = threshold is not None and list_price is not None and list_price < threshold
+        has_campaign_alert = (
+            campaign_threshold is not None
+            and campaign_price_value is not None
+            and campaign_price_value < campaign_threshold
+        )
+        campaign_difference = (
+            round(campaign_threshold - campaign_price_value, 2)
+            if campaign_threshold is not None and campaign_price_value is not None
+            else None
+        )
+
+    return {
+        "list_price": list_price,
+        "campaign_price": campaign_price,
+        "has_price_alert": has_price_alert,
+        "has_campaign_alert": has_campaign_alert,
+        "campaign_difference": campaign_difference,
+    }
+
+
+def _build_seller_products(
+    db: Session,
+    merchant_id: str,
+    platform: str,
+    price_alert_only: bool,
+    campaign_alert_only: bool,
+) -> Dict[str, Any]:
+    rows = db.execute(
+        text(
+            """
+            WITH latest AS (
+                SELECT DISTINCT ON (ss.monitored_product_id)
+                    ss.monitored_product_id,
+                    ss.merchant_name,
+                    ss.price,
+                    ss.original_price,
+                    ss.campaign_price,
+                    ss.campaigns,
+                    ss.snapshot_date
+                FROM seller_snapshots ss
+                JOIN monitored_products mp ON mp.id = ss.monitored_product_id
+                WHERE mp.platform = :platform
+                  AND mp.is_active = true
+                  AND ss.merchant_id = :merchant_id
+                ORDER BY ss.monitored_product_id, ss.snapshot_date DESC
+            )
+            SELECT
+                mp.id AS product_id,
+                mp.sku,
+                mp.barcode,
+                mp.product_name,
+                mp.product_url,
+                mp.brand,
+                mp.seller_stock_code,
+                mp.image_url,
+                mp.threshold_price,
+                mp.alert_campaign_price,
+                latest.merchant_name,
+                latest.price,
+                latest.original_price,
+                latest.campaign_price,
+                latest.campaigns,
+                latest.snapshot_date
+            FROM latest
+            JOIN monitored_products mp ON mp.id = latest.monitored_product_id
+            ORDER BY mp.created_at DESC
+            """
+        ),
+        {"platform": platform.lower(), "merchant_id": merchant_id},
+    ).mappings().all()
+
+    products = []
+    merchant_name = rows[0]["merchant_name"] if rows else ""
+
+    for row in rows:
+        threshold = float(row["threshold_price"]) if row["threshold_price"] is not None else None
+        campaign_threshold = float(row["alert_campaign_price"]) if row["alert_campaign_price"] is not None else None
+        current_price = float(row["price"]) if row["price"] is not None else None
+        original_price = float(row["original_price"]) if row["original_price"] is not None else None
+        campaign_price_value = float(row["campaign_price"]) if row["campaign_price"] is not None else None
+
+        pricing = _compute_seller_pricing(
+            platform=platform.lower(),
+            threshold=threshold,
+            campaign_threshold=campaign_threshold,
+            current_price=current_price,
+            original_price=original_price,
+            campaign_price_value=campaign_price_value,
+        )
+
+        has_price_alert = pricing["has_price_alert"]
+        has_campaign_alert = pricing["has_campaign_alert"]
+        if price_alert_only and not has_price_alert:
+            continue
+        if campaign_alert_only and not has_campaign_alert:
+            continue
+
+        raw_product_url = row["product_url"]
+        resolved_product_url = _resolve_product_url(platform, row["sku"], raw_product_url)
+        had_valid_product_url = _is_valid_http_url(raw_product_url)
+
+        seller_url = resolved_product_url
+        if platform.lower() == "hepsiburada" and merchant_id and had_valid_product_url and resolved_product_url:
+            separator = "&" if "?" in resolved_product_url else "?"
+            seller_url = f"{resolved_product_url}{separator}magaza={merchant_id}"
+
+        campaigns = row["campaigns"] if isinstance(row["campaigns"], list) else []
+        list_price = pricing["list_price"]
+        price_difference = round(threshold - list_price, 2) if threshold is not None and list_price is not None else None
+
+        products.append(
+            {
+                "product_id": str(row["product_id"]),
+                "sku": row["sku"],
+                "barcode": row["barcode"],
+                "product_name": row["product_name"],
+                "product_url": resolved_product_url,
+                "seller_url": seller_url,
+                "brand": row["brand"],
+                "seller_stock_code": row["seller_stock_code"],
+                "image_url": row["image_url"],
+                "threshold_price": threshold,
+                "seller_price": list_price,
+                "original_price": original_price,
+                "campaign_price": pricing["campaign_price"],
+                "alert_campaign_price": campaign_threshold,
+                "campaigns": campaigns,
+                "price_alert": has_price_alert,
+                "campaign_alert": has_campaign_alert,
+                "price_difference": price_difference,
+                "campaign_difference": pricing["campaign_difference"],
+                "snapshot_date": row["snapshot_date"].isoformat() if row["snapshot_date"] else None,
+            }
+        )
+
+    products.sort(key=lambda item: (not item["price_alert"], not item["campaign_alert"], item["product_name"] or ""))
+
+    return {
+        "merchant_name": merchant_name,
+        "products": products,
+        "price_alert_count": sum(1 for item in products if item["price_alert"]),
+        "campaign_alert_count": sum(1 for item in products if item["campaign_alert"]),
+    }
 
 
 @router.get("/sellers/{merchant_id}/products")
@@ -1491,133 +2022,45 @@ async def get_seller_products(
     platform: str = Query("hepsiburada", description="Platform"),
     price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri göster"),
     campaign_alert_only: bool = Query(False, description="Sadece campaign alert olan ürünleri göster"),
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
     """Satıcının sattığı ürünleri listele - price alert ve campaign alert filtresi ile"""
-    from sqlalchemy import func
-    
-    products = db.query(MonitoredProduct).filter(
-        MonitoredProduct.platform == platform,
-        MonitoredProduct.is_active == True
-    ).all()
-    
-    product_ids = [p.id for p in products]
-    product_map = {str(p.id): p for p in products}
-    
-    if not product_ids:
-        return {"products": [], "total": 0, "merchant_name": ""}
-    
-    latest_snapshots_subq = db.query(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id,
-        func.max(SellerSnapshot.snapshot_date).label('max_date')
-    ).filter(
-        SellerSnapshot.monitored_product_id.in_(product_ids),
-        SellerSnapshot.merchant_id == merchant_id
-    ).group_by(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id
-    ).subquery()
-    
-    snapshots = db.query(SellerSnapshot).join(
-        latest_snapshots_subq,
-        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
-        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
-        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
-    ).all()
-    
-    result = []
-    merchant_name = ""
-    
-    for s in snapshots:
-        if not merchant_name:
-            merchant_name = s.merchant_name
-        
-        product = product_map.get(str(s.monitored_product_id))
-        if not product:
-            continue
-        
-        threshold = float(product.threshold_price) if product.threshold_price else None
-        current_price = float(s.price) if s.price else None  # Güncel satış fiyatı
-        orig_price = float(s.original_price) if s.original_price else None  # Liste fiyatı
-        alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
-        campaign_price_val = float(s.campaign_price) if s.campaign_price else None  # Hepsiburada sepete özel
-        
-        # Trendyol için:
-        # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
-        # - campaign_price = Güncel satış fiyatı (current_price - kampanyalıysa indirimli)
-        # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
-        # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
-        if platform == 'trendyol':
-            list_price = orig_price if orig_price else current_price  # Liste fiyatı
-            campaign_price = current_price  # Güncel satış fiyatı (her zaman)
-            
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            has_alert = threshold is not None and list_price is not None and list_price < threshold
-            
-            if orig_price and current_price:
-                # Kampanya var - Campaign Alert kontrolü
-                has_campaign_alert = alert_campaign_threshold is not None and current_price < alert_campaign_threshold
-                campaign_discount = round(orig_price - current_price, 2)
-            else:
-                # Kampanya yok
-                has_campaign_alert = False
-                campaign_discount = None
-        else:
-            # Hepsiburada için:
-            # - list_price = Liste fiyatı (original_price varsa o, yoksa current_price)
-            # - campaign_price = Sepete özel fiyat
-            list_price = orig_price if orig_price else current_price
-            campaign_price = campaign_price_val
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            has_alert = threshold is not None and list_price is not None and list_price < threshold
-            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
-            has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
-            campaign_discount = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
-        
-        if price_alert_only and not has_alert:
-            continue
-        if campaign_alert_only and not has_campaign_alert:
-            continue
-        
-        base_url = product.product_url or ""
-        if platform == "hepsiburada" and merchant_id:
-            if "?" in base_url:
-                seller_url = f"{base_url}&magaza={merchant_id}"
-            else:
-                seller_url = f"{base_url}?magaza={merchant_id}"
-        else:
-            seller_url = base_url
-        
-        result.append({
-            "product_id": str(product.id),
-            "sku": product.sku,
-            "barcode": product.barcode,
-            "product_name": product.product_name,
-            "product_url": product.product_url,
-            "seller_url": seller_url,
-            "brand": product.brand,
-            "seller_stock_code": product.seller_stock_code,
-            "image_url": product.image_url,
-            "threshold_price": threshold,
-            "seller_price": list_price,  # Liste fiyatı
-            "original_price": orig_price,
-            "campaign_price": campaign_price,  # Güncel satış fiyatı
-            "alert_campaign_price": alert_campaign_threshold,
-            "campaigns": s.campaigns if s.campaigns else [],
-            "price_alert": has_alert,
-            "campaign_alert": has_campaign_alert,
-            "price_difference": round(threshold - list_price, 2) if threshold and list_price else None,
-            "campaign_difference": campaign_discount,
-            "snapshot_date": s.snapshot_date.isoformat()
-        })
-    
-    result.sort(key=lambda x: (not x['price_alert'], not x['campaign_alert'], x['product_name'] or ''))
-    
-    price_alert_count = sum(1 for r in result if r['price_alert'])
-    campaign_alert_count = sum(1 for r in result if r['campaign_alert'])
-    
-    return {"products": result, "total": len(result), "merchant_name": merchant_name, "price_alert_count": price_alert_count, "campaign_alert_count": campaign_alert_count}
+    start_time = perf_counter()
+
+    def _query_seller_products() -> Dict[str, Any]:
+        payload = _build_seller_products(
+            db=db,
+            merchant_id=merchant_id,
+            platform=platform,
+            price_alert_only=price_alert_only,
+            campaign_alert_only=campaign_alert_only,
+        )
+        total = len(payload["products"])
+        paged_products = payload["products"][offset: offset + limit]
+        return {
+            "products": paged_products,
+            "total": total,
+            "merchant_name": payload["merchant_name"],
+            "price_alert_count": payload["price_alert_count"],
+            "campaign_alert_count": payload["campaign_alert_count"],
+            "limit": limit,
+            "offset": offset,
+        }
+
+    response = _run_read_query_with_retry(db, _query_seller_products, "sellers/products")
+    log_endpoint_metric(
+        logger,
+        "sellers/products",
+        latency_ms=(perf_counter() - start_time) * 1000,
+        platform=platform,
+        merchant_id=merchant_id,
+        total=response.get("total", 0),
+        limit=limit,
+        offset=offset,
+    )
+    return response
 
 
 @router.get("/sellers/{merchant_id}/export")
@@ -1632,35 +2075,19 @@ async def export_seller_products(
     from fastapi.responses import StreamingResponse
     import csv
     import io
-    from sqlalchemy import func
-    
-    products = db.query(MonitoredProduct).filter(
-        MonitoredProduct.platform == platform,
-        MonitoredProduct.is_active == True
-    ).all()
-    
-    product_ids = [p.id for p in products]
-    product_map = {str(p.id): p for p in products}
-    
-    latest_snapshots_subq = db.query(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id,
-        func.max(SellerSnapshot.snapshot_date).label('max_date')
-    ).filter(
-        SellerSnapshot.monitored_product_id.in_(product_ids),
-        SellerSnapshot.merchant_id == merchant_id
-    ).group_by(
-        SellerSnapshot.merchant_id,
-        SellerSnapshot.monitored_product_id
-    ).subquery()
-    
-    snapshots = db.query(SellerSnapshot).join(
-        latest_snapshots_subq,
-        (SellerSnapshot.merchant_id == latest_snapshots_subq.c.merchant_id) &
-        (SellerSnapshot.monitored_product_id == latest_snapshots_subq.c.monitored_product_id) &
-        (SellerSnapshot.snapshot_date == latest_snapshots_subq.c.max_date)
-    ).all()
-    
+
+    payload = _run_read_query_with_retry(
+        db,
+        lambda: _build_seller_products(
+            db=db,
+            merchant_id=merchant_id,
+            platform=platform,
+            price_alert_only=price_alert_only,
+            campaign_alert_only=campaign_alert_only,
+        ),
+        "sellers/export",
+    )
+
     output = io.StringIO()
     writer = csv.writer(output, delimiter=';')
     
@@ -1670,81 +2097,34 @@ async def export_seller_products(
         'Price Difference', 'Price Alert', 'Campaign Threshold', 'Campaign Price',
         'Campaign Difference', 'Campaign Alert', 'Campaigns', 'Snapshot Date'
     ])
-    
-    merchant_name = ""
-    for s in snapshots:
-        if not merchant_name:
-            merchant_name = s.merchant_name
-            
-        product = product_map.get(str(s.monitored_product_id))
-        if not product:
-            continue
-        
-        threshold = float(product.threshold_price) if product.threshold_price else None
-        seller_price = float(s.price) if s.price else None
-        orig_price = float(s.original_price) if s.original_price else None
-        alert_campaign_threshold = float(product.alert_campaign_price) if product.alert_campaign_price else None
-        campaign_price_val = float(s.campaign_price) if s.campaign_price else None
-        
-        # Trendyol için:
-        # - seller_price = Liste fiyatı (original_price varsa o, yoksa current_price)
-        # - campaign_price = Güncel satış fiyatı
-        # - Price Alert: Liste fiyatı < threshold (her zaman kontrol edilir)
-        # - Campaign Alert: Kampanya fiyatı < campaign_threshold (sadece kampanya varsa)
-        if platform == 'trendyol':
-            list_price = orig_price if orig_price else seller_price
-            campaign_price = seller_price  # current selling price
-            
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            has_alert = threshold is not None and list_price is not None and list_price < threshold
-            
-            if orig_price and seller_price:
-                # Kampanya var - Campaign Alert kontrolü
-                has_campaign_alert = alert_campaign_threshold is not None and seller_price < alert_campaign_threshold
-                campaign_diff = round(orig_price - seller_price, 2)
-            else:
-                # Kampanya yok
-                has_campaign_alert = False
-                campaign_diff = None
-        else:
-            # Hepsiburada için:
-            # - list_price = Liste fiyatı (original_price varsa o, yoksa seller_price)
-            # - campaign_price = Sepete özel fiyat
-            list_price = orig_price if orig_price else seller_price
-            campaign_price = campaign_price_val
-            # Price Alert: Liste fiyatı threshold'dan düşük mü?
-            has_alert = threshold is not None and list_price is not None and list_price < threshold
-            # Campaign Alert: Sepete özel fiyat campaign_threshold'dan düşük mü?
-            has_campaign_alert = alert_campaign_threshold is not None and campaign_price_val is not None and campaign_price_val < alert_campaign_threshold
-            campaign_diff = round(alert_campaign_threshold - campaign_price_val, 2) if alert_campaign_threshold and campaign_price_val else None
-        
-        if price_alert_only and not has_alert:
-            continue
-        if campaign_alert_only and not has_campaign_alert:
-            continue
-        
-        price_diff = round(threshold - list_price, 2) if threshold and list_price else None
-        campaigns_str = ", ".join(s.campaigns) if s.campaigns else ""
-        
+
+    def _csv_value(value: Any) -> Any:
+        return value if value is not None else ''
+
+    merchant_name = payload["merchant_name"] or ""
+    for product in payload["products"]:
+        campaigns = product.get("campaigns") if isinstance(product.get("campaigns"), list) else []
+        campaigns_str = ", ".join(campaigns) if campaigns else ""
+
         writer.writerow([
-            product.sku or '',
-            product.barcode or '',
-            product.product_name or '',
-            product.brand or '',
-            product.seller_stock_code or '',
-            product.product_url or '',
-            threshold or '',
-            list_price or '',  # Liste fiyatı
-            price_diff or '',
-            'YES' if has_alert else 'NO',
-            alert_campaign_threshold or '',
-            campaign_price or '',  # Güncel satış fiyatı
-            campaign_diff or '',
-            'YES' if has_campaign_alert else 'NO',
+            _csv_value(product.get("sku")),
+            _csv_value(product.get("barcode")),
+            _csv_value(product.get("product_name")),
+            _csv_value(product.get("brand")),
+            _csv_value(product.get("seller_stock_code")),
+            _csv_value(product.get("product_url")),
+            _csv_value(product.get("threshold_price")),
+            _csv_value(product.get("seller_price")),
+            _csv_value(product.get("price_difference")),
+            'YES' if product.get("price_alert") else 'NO',
+            _csv_value(product.get("alert_campaign_price")),
+            _csv_value(product.get("campaign_price")),
+            _csv_value(product.get("campaign_difference")),
+            'YES' if product.get("campaign_alert") else 'NO',
             campaigns_str,
-            s.snapshot_date.isoformat()
+            _csv_value(product.get("snapshot_date")),
         ])
-    
+
     output.seek(0)
     
     tr_to_ascii = str.maketrans('İıĞğÜüŞşÖöÇç', 'IiGgUuSsOoCc')

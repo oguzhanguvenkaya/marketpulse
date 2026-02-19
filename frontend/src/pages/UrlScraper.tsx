@@ -36,6 +36,14 @@ export default function UrlScraper() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    if (error && typeof error === 'object') {
+      const withResponse = error as { response?: { data?: { detail?: string } }; message?: string };
+      return withResponse.response?.data?.detail || withResponse.message || fallback;
+    }
+    return fallback;
+  };
+
   const loadJobs = useCallback(async () => {
     try {
       const data = await getScrapeJobs(20);
@@ -86,8 +94,8 @@ export default function UrlScraper() {
       setProductName('');
       setBarcode('');
       loadJobs();
-    } catch (e: any) {
-      setError(e.response?.data?.detail || e.message || 'Failed to start scraping');
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e, 'Failed to start scraping'));
     } finally {
       setScraping(false);
     }
@@ -130,8 +138,8 @@ export default function UrlScraper() {
         setJsonInput('');
       }
       loadJobs();
-    } catch (e: any) {
-      setError(e.response?.data?.detail || e.message || 'Failed to start bulk scraping');
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e, 'Failed to start bulk scraping'));
     } finally {
       setScraping(false);
     }
@@ -181,9 +189,9 @@ export default function UrlScraper() {
     try {
       await stopScrapeJob(jobId);
       loadJobs();
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error stopping job:', e);
-      setError(e.response?.data?.detail || 'Failed to stop job');
+      setError(getApiErrorMessage(e, 'Failed to stop job'));
     }
   };
 
@@ -242,37 +250,59 @@ export default function UrlScraper() {
 
   const renderScrapedData = (item: ScrapeResultItem) => {
     if (!item.scraped_data || Object.keys(item.scraped_data).length === 0) return null;
-    const data = item.scraped_data;
+    const data = item.scraped_data as Record<string, unknown>;
+    const asString = (value: unknown): string | null => {
+      if (value === null || value === undefined) return null;
+      if (typeof value === 'string') return value.trim() ? value : null;
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      return null;
+    };
+
+    const productName = asString(data.product_name);
+    const productBrand = asString(data.product_brand);
+    const productSku = asString(data.product_sku);
+    const productBarcode = asString(data.product_barcode);
+    const productCategory = asString(data.product_category);
+    const price = asString(data.price);
+    const currency = asString(data.currency) || '';
+    const originalPrice = asString(data.original_price);
+    const productDescription = asString(data.product_description);
+    const metaDescription = asString(data.meta_description);
+    const productSpecs = typeof data.product_specs === 'object' && data.product_specs !== null && !Array.isArray(data.product_specs)
+      ? (data.product_specs as Record<string, unknown>)
+      : null;
+    const images = Array.isArray(data.images) ? data.images : null;
+
     return (
       <div className="mt-3 space-y-3">
-        {data.product_name && (
-          <div className="text-sm"><span className="text-neutral-400">Name:</span> <span className="text-white font-medium">{data.product_name}</span></div>
+        {productName && (
+          <div className="text-sm"><span className="text-neutral-400">Name:</span> <span className="text-white font-medium">{productName}</span></div>
         )}
-        {(data.product_brand || data.product_sku || data.product_barcode || data.product_category) && (
+        {(productBrand || productSku || productBarcode || productCategory) && (
           <div className="flex flex-wrap gap-3">
-            {data.product_brand && <div className="text-sm"><span className="text-neutral-400">Brand:</span> <span className="text-neutral-200">{data.product_brand}</span></div>}
-            {data.product_sku && <div className="text-sm"><span className="text-neutral-400">SKU:</span> <span className="text-neutral-200">{data.product_sku}</span></div>}
-            {data.product_barcode && <div className="text-sm"><span className="text-neutral-400">Barcode:</span> <span className="text-neutral-200">{data.product_barcode}</span></div>}
-            {data.product_category && <div className="text-sm"><span className="text-neutral-400">Category:</span> <span className="text-neutral-200">{data.product_category}</span></div>}
+            {productBrand && <div className="text-sm"><span className="text-neutral-400">Brand:</span> <span className="text-neutral-200">{productBrand}</span></div>}
+            {productSku && <div className="text-sm"><span className="text-neutral-400">SKU:</span> <span className="text-neutral-200">{productSku}</span></div>}
+            {productBarcode && <div className="text-sm"><span className="text-neutral-400">Barcode:</span> <span className="text-neutral-200">{productBarcode}</span></div>}
+            {productCategory && <div className="text-sm"><span className="text-neutral-400">Category:</span> <span className="text-neutral-200">{productCategory}</span></div>}
           </div>
         )}
-        {data.price !== undefined && (
+        {price && (
           <div className="text-sm flex items-center gap-3">
-            <span><span className="text-neutral-400">Price:</span> <span className="text-accent-primary font-bold">{data.price} {data.currency || ''}</span></span>
-            {data.original_price && <span><span className="text-neutral-400">Was:</span> <span className="text-neutral-500 line-through">{data.original_price}</span></span>}
+            <span><span className="text-neutral-400">Price:</span> <span className="text-accent-primary font-bold">{price} {currency}</span></span>
+            {originalPrice && <span><span className="text-neutral-400">Was:</span> <span className="text-neutral-500 line-through">{originalPrice}</span></span>}
           </div>
         )}
-        {(data.product_description || data.meta_description) && (
+        {(productDescription || metaDescription) && (
           <div className="text-sm">
             <span className="text-neutral-400">Description:</span>
-            <div className="text-neutral-300 mt-1 whitespace-pre-line line-clamp-4 bg-dark-800/50 rounded px-3 py-2 border border-dark-600/30">{data.product_description || data.meta_description}</div>
+            <div className="text-neutral-300 mt-1 whitespace-pre-line line-clamp-4 bg-dark-800/50 rounded px-3 py-2 border border-dark-600/30">{productDescription || metaDescription}</div>
           </div>
         )}
-        {data.product_specs && typeof data.product_specs === 'object' && Object.keys(data.product_specs).length > 0 && (
+        {productSpecs && Object.keys(productSpecs).length > 0 && (
           <div className="text-sm">
             <span className="text-neutral-400">Specifications:</span>
             <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 bg-dark-800/50 rounded px-3 py-2 border border-dark-600/30">
-              {Object.entries(data.product_specs).slice(0, 10).map(([k, v]) => (
+              {Object.entries(productSpecs).slice(0, 10).map(([k, v]) => (
                 <div key={k} className="text-xs">
                   <span className="text-neutral-500">{k}:</span> <span className="text-neutral-300">{String(v)}</span>
                 </div>
@@ -280,8 +310,8 @@ export default function UrlScraper() {
             </div>
           </div>
         )}
-        {data.images && Array.isArray(data.images) && data.images.length > 0 && (
-          <div className="text-sm"><span className="text-neutral-400">Images:</span> <span className="text-neutral-300">{data.images.length} found</span></div>
+        {images && images.length > 0 && (
+          <div className="text-sm"><span className="text-neutral-400">Images:</span> <span className="text-neutral-300">{images.length} found</span></div>
         )}
         {Object.entries(data).filter(([key]) => !HIDDEN_KEYS.includes(key)).map(([key, value]) => {
           if (value === null || value === undefined || value === '') return null;
@@ -297,14 +327,14 @@ export default function UrlScraper() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">URL Scraper</h1>
-        <p className="text-neutral-400 mt-1">Scrape product data from URLs - single or bulk</p>
+        <h1 className="text-xl md:text-2xl font-bold text-white">URL Scraper</h1>
+        <p className="text-sm md:text-base text-neutral-400 mt-1">Scrape product data from URLs - single or bulk</p>
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm flex items-center justify-between">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm flex items-start sm:items-center justify-between gap-2">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -313,7 +343,7 @@ export default function UrlScraper() {
       )}
 
       {success && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm flex items-center justify-between">
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm flex items-start sm:items-center justify-between gap-2">
           <span>{success}</span>
           <button onClick={() => setSuccess(null)} className="text-green-400 hover:text-green-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -321,8 +351,8 @@ export default function UrlScraper() {
         </div>
       )}
 
-      <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
-        <div className="flex gap-2 mb-6">
+      <div className="bg-dark-800 border border-white/5 rounded-xl p-4 md:p-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setInputMode('single')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -357,7 +387,7 @@ export default function UrlScraper() {
                 className="w-full bg-dark-700 border border-white/10 text-white rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-neutral-400 mb-1.5">Product Name (optional)</label>
                 <input
@@ -382,7 +412,7 @@ export default function UrlScraper() {
             <button
               onClick={handleSingleScrape}
               disabled={scraping || !url.trim()}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
             >
               {scraping ? (
                 <>
@@ -401,7 +431,7 @@ export default function UrlScraper() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4">
               <button
                 onClick={() => setBulkMode('csv')}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
@@ -481,7 +511,7 @@ export default function UrlScraper() {
             <button
               onClick={handleBulkScrape}
               disabled={scraping || (bulkMode === 'csv' ? !csvFile : !jsonInput.trim())}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
             >
               {scraping ? (
                 <>
@@ -501,8 +531,8 @@ export default function UrlScraper() {
         )}
       </div>
 
-      <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-dark-800 border border-white/5 rounded-xl p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-white">Scrape Jobs</h2>
           <button
             onClick={loadJobs}
@@ -529,7 +559,7 @@ export default function UrlScraper() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[760px]">
               <thead>
                 <tr className="text-left text-xs text-neutral-400 uppercase tracking-wider border-b border-white/5">
                   <th className="pb-3 pr-4">Status</th>
@@ -605,15 +635,15 @@ export default function UrlScraper() {
       </div>
 
       {expandedJobId && (
-        <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-dark-800 border border-white/5 rounded-xl p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">Job Results</h2>
               <p className="text-neutral-400 text-sm mt-0.5">ID: {expandedJobId.slice(0, 12)}...</p>
             </div>
             <button
               onClick={() => handleDownload(expandedJobId)}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-sm"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -639,7 +669,7 @@ export default function UrlScraper() {
                         : 'bg-dark-700/30 border-white/5'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {getStatusBadge(result.status)}

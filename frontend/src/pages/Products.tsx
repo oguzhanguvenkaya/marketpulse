@@ -11,6 +11,7 @@ export default function Products() {
 
   useEffect(() => {
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProducts = async () => {
@@ -36,15 +37,15 @@ export default function Products() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between mb-2">
+    <div className="space-y-5 md:space-y-6 animate-fade-in">
+      <div className="mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-white">Products</h1>
-          <p className="text-neutral-400 mt-1">Browse and analyze collected product data</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Products</h1>
+          <p className="text-sm md:text-base text-neutral-400 mt-1">Browse and analyze collected product data</p>
         </div>
       </div>
 
-      <div className="card-dark p-5">
+      <div className="card-dark p-4 md:p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
             <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +54,7 @@ export default function Products() {
           </div>
           <h2 className="text-lg font-semibold text-white">Filter Products</h2>
         </div>
-        <form onSubmit={handleSearch} className="flex gap-4">
+        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <input
             type="text"
             value={searchTerm}
@@ -64,26 +65,26 @@ export default function Products() {
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="input-dark min-w-[160px]"
+            className="input-dark w-full md:w-auto md:min-w-[180px]"
           >
             <option value="">All Platforms</option>
             <option value="hepsiburada">Hepsiburada</option>
             <option value="trendyol">Trendyol</option>
             <option value="amazon">Amazon</option>
           </select>
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary w-full md:w-auto flex items-center justify-center">
             Filter
           </button>
         </form>
       </div>
 
       {loading ? (
-        <div className="card-dark p-12 text-center">
+        <div className="card-dark p-10 md:p-12 text-center">
           <div className="w-10 h-10 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mx-auto" />
           <p className="mt-4 text-neutral-400">Loading products...</p>
         </div>
       ) : products.length === 0 ? (
-        <div className="card-dark p-12 text-center">
+        <div className="card-dark p-10 md:p-12 text-center">
           <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -94,7 +95,8 @@ export default function Products() {
         </div>
       ) : (
         <div className="card-dark overflow-hidden">
-          <table className="table-dark">
+          <div className="overflow-x-auto">
+          <table className="table-dark min-w-[760px]">
             <thead>
               <tr>
                 <th>Product</th>
@@ -119,7 +121,7 @@ export default function Products() {
                           </svg>
                         </div>
                       )}
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium text-sm text-neutral-200 group-hover:text-accent-primary transition-colors line-clamp-2">
                           {product.name}
                         </div>
@@ -163,6 +165,7 @@ export default function Products() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

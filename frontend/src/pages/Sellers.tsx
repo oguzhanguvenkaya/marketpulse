@@ -23,6 +23,7 @@ export default function Sellers() {
 
   useEffect(() => {
     fetchSellers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform]);
 
   const fetchSellers = async () => {
@@ -58,6 +59,10 @@ export default function Sellers() {
     }
     return 'bg-[#3a3a3a]';
   };
+
+  const exportProgressPercent = exportProgress.total > 0
+    ? Math.min(100, Math.round((exportProgress.current / exportProgress.total) * 100))
+    : 0;
 
   const handleBulkExport = async (exportType: 'price' | 'campaign') => {
     setShowBulkExportMenu(false);
@@ -106,11 +111,11 @@ export default function Sellers() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 md:space-y-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Sellers</h1>
-          <p className="text-neutral-400 mt-1">View all sellers and their alert products</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Sellers</h1>
+          <p className="text-sm md:text-base text-neutral-400 mt-1">View all sellers and their alert products</p>
         </div>
         {sellersWithAlerts.length > 0 && (
           <div className="relative">
@@ -137,7 +142,7 @@ export default function Sellers() {
               )}
             </button>
             {showBulkExportMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
+              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
                 <button
                   onClick={() => handleBulkExport('price')}
                   disabled={filteredSellers.filter(s => s.price_alert_count > 0).length === 0}
@@ -178,13 +183,13 @@ export default function Sellers() {
           <div className="mt-3 bg-dark-700 rounded-full h-2 overflow-hidden">
             <div 
               className="bg-accent-primary h-full transition-all duration-300"
-              style={{ width: `${(exportProgress.current / exportProgress.total) * 100}%` }}
+              style={{ width: `${exportProgressPercent}%` }}
             ></div>
           </div>
         </div>
       )}
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-2">
         <button
           onClick={() => setPlatform('hepsiburada')}
           className={`px-4 py-2 rounded-lg transition-all ${
@@ -208,7 +213,7 @@ export default function Sellers() {
       </div>
 
       <div className="card-dark p-4">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
           <input
             type="text"
             placeholder="Search seller name..."
@@ -216,7 +221,7 @@ export default function Sellers() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input-dark flex-1"
           />
-          <div className="text-neutral-400 text-sm">
+          <div className="text-neutral-400 text-xs md:text-sm">
             {filteredSellers.length} sellers
           </div>
         </div>
@@ -231,21 +236,21 @@ export default function Sellers() {
             No sellers found
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
             {filteredSellers.map((seller) => (
               <div
                 key={seller.merchant_id}
                 onClick={() => navigate(`/sellers/${seller.merchant_id}?platform=${platform}`)}
-                className={`p-4 rounded-lg cursor-pointer transition-all hover:bg-[#555555] ${getCardBackground(seller)}`}
+                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-dark-600/45 ${getCardBackground(seller)}`}
               >
                 <div className="flex items-start gap-3">
                   {seller.merchant_logo && (
                     <img
                       src={seller.merchant_logo}
                       alt={seller.merchant_name}
-                      className="w-12 h-12 rounded-lg object-contain bg-white p-1"
-                    />
-                  )}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-white p-1"
+                  />
+                )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-white truncate">{seller.merchant_name}</h3>
                     {seller.merchant_rating && (
@@ -257,19 +262,19 @@ export default function Sellers() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-dark-600">
+                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-dark-600">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">{seller.product_count}</div>
+                    <div className="text-xl md:text-2xl font-bold text-white">{seller.product_count}</div>
                     <div className="text-xs text-neutral-400">Products</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500'}`}>
                       {seller.price_alert_count}
                     </div>
                     <div className="text-xs text-neutral-400">Price</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500'}`}>
                       {seller.campaign_alert_count}
                     </div>
                     <div className="text-xs text-neutral-400">Campaign</div>

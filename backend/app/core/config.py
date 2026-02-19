@@ -1,6 +1,74 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
-from typing import Optional, Literal, List
+from typing import Optional, List
+
+_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
+_BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+_SCRAPER_KEY_NAMES = ("SCRAPER_API_KEY", "SCRAPPER_API", "SCRAPPPER_API")
+
+
+def _normalize_secret(value: str) -> str:
+    cleaned = (value or "").strip()
+    if len(cleaned) >= 2 and cleaned[0] == cleaned[-1] and cleaned[0] in {"'", '"'}:
+        cleaned = cleaned[1:-1].strip()
+    return cleaned
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def _read_env_value_from_file(env_file: Path, key_names: tuple[str, ...]) -> str:
+    if not env_file.exists():
+        return ""
+
+    try:
+        for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            if key.strip() in key_names:
+                normalized = _normalize_secret(value)
+                if normalized:
+                    return normalized
+    except Exception:
+        return ""
+
+    return ""
+
+
+def _resolve_scraper_api_key() -> str:
+    for key_name in _SCRAPER_KEY_NAMES:
+        value = _normalize_secret(os.getenv(key_name, ""))
+        if value:
+            return value
+
+    for env_file in (_ENV_FILE, _BACKEND_ENV_FILE):
+        value = _read_env_value_from_file(env_file, _SCRAPER_KEY_NAMES)
+        if value:
+            return value
+
+    for secret_file in (
+        "/etc/secrets/SCRAPER_API_KEY",
+        "/etc/secrets/SCRAPPER_API",
+        "/etc/secrets/SCRAPPPER_API",
+    ):
+        try:
+            value = _normalize_secret(Path(secret_file).read_text(encoding="utf-8"))
+            if value:
+                return value
+        except Exception:
+            continue
+
+    return ""
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
@@ -8,12 +76,18 @@ class Settings(BaseSettings):
     CORS_ALLOWED_ORIGINS: str = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    PRICE_MONITOR_EXECUTOR: str = os.getenv("PRICE_MONITOR_EXECUTOR", "celery")
+    PRICE_MONITOR_MAX_CONCURRENT_REQUESTS: int = _env_int("PRICE_MONITOR_MAX_CONCURRENT_REQUESTS", 17)
+    DB_POOL_SIZE: int = _env_int("DB_POOL_SIZE", 5)
+    DB_MAX_OVERFLOW: int = _env_int("DB_MAX_OVERFLOW", 10)
+    DB_POOL_TIMEOUT_SECONDS: int = _env_int("DB_POOL_TIMEOUT_SECONDS", 30)
+    DB_POOL_RECYCLE_SECONDS: int = _env_int("DB_POOL_RECYCLE_SECONDS", 180)
     
     BRIGHT_DATA_ACCOUNT_ID: str = os.getenv("BRIGHT_DATA_ACCOUNT_ID", "")
     BRIGHT_DATA_ZONE_NAME: str = os.getenv("BRIGHT_DATA_ZONE_NAME", "")
     BRIGHT_DATA_ZONE_PASSWORD: str = os.getenv("BRIGHT_DATA_ZONE_PASSWORD", "")
     
-    SCRAPER_API_KEY: str = os.getenv("SCRAPPER_API", "")
+    SCRAPER_API_KEY: str = _resolve_scraper_api_key()
     
     PROXY_PROVIDER: str = os.getenv("PROXY_PROVIDER", "auto")
     
@@ -56,7 +130,7 @@ class Settings(BaseSettings):
         return None
     
     def has_scraper_api(self) -> bool:
-        return bool(self.SCRAPER_API_KEY)
+        return bool((self.SCRAPER_API_KEY or "").strip())
     
     def has_bright_data(self) -> bool:
         return bool(self.BRIGHT_DATA_ACCOUNT_ID and self.BRIGHT_DATA_ZONE_PASSWORD)
@@ -77,6 +151,20 @@ class Settings(BaseSettings):
             )
         return api_key
 
+    def require_scraper_api_key(self) -> str:
+        api_key = (self.SCRAPER_API_KEY or "").strip()
+        if not api_key:
+            raise ValueError(
+                "SCRAPER_API_KEY is not set. Configure SCRAPER_API_KEY (or SCRAPPER_API/SCRAPPPER_API) in environment variables or .env before starting fetch operations."
+            )
+        return api_key
+
+    def price_monitor_executor(self) -> str:
+        raw = (self.PRICE_MONITOR_EXECUTOR or "").strip().lower()
+        if raw in {"local", "celery"}:
+            return raw
+        return "celery"
+
     def cors_allowed_origins(self) -> List[str]:
         origins = [origin.strip() for origin in (self.CORS_ALLOWED_ORIGINS or "").split(",") if origin.strip()]
         if not origins:
@@ -84,6 +172,7 @@ class Settings(BaseSettings):
         return origins
     
     class Config:
-        env_file = ".env"
+        env_file = str(_ENV_FILE)
+        extra = "ignore"
 
 settings = Settings()

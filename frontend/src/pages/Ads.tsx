@@ -22,6 +22,7 @@ export default function Ads() {
     if (selectedTaskId) {
       loadAdsData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTaskId]);
 
   const loadTasks = async () => {
@@ -73,17 +74,17 @@ export default function Ads() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 md:space-y-6 animate-fade-in">
+      <div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Ads</h1>
-          <p className="text-neutral-400 mt-1">Analyze sponsored products and brand advertisements</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Ads</h1>
+          <p className="text-sm md:text-base text-neutral-400 mt-1">Analyze sponsored products and brand advertisements</p>
         </div>
       </div>
 
-      <div className="card-dark p-5">
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-64">
+      <div className="card-dark p-4 md:p-5">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
+          <div className="flex-1 min-w-0 sm:min-w-64">
             <label className="block text-sm font-medium text-neutral-400 mb-2">
               Search Keyword
             </label>
@@ -102,9 +103,9 @@ export default function Ads() {
           </div>
 
           {selectedKeyword && (
-            <div className="px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20">
+            <div className="px-3 md:px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 w-full sm:w-auto">
               <span className="text-sm text-neutral-400">Selected:</span>
-              <span className="ml-2 text-accent-primary font-medium">"{selectedKeyword}"</span>
+              <span className="ml-2 text-accent-primary font-medium break-all">"{selectedKeyword}"</span>
             </div>
           )}
         </div>
@@ -112,10 +113,10 @@ export default function Ads() {
 
       <div className="card-dark overflow-hidden">
         <div className="border-b border-white/5">
-          <nav className="flex">
+          <nav className="flex overflow-x-auto scrollbar-thin">
             <button
               onClick={() => setActiveTab('sponsored')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-all ${
+              className={`px-4 md:px-6 py-3.5 md:py-4 text-xs md:text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'sponsored'
                   ? 'border-accent-primary text-accent-primary'
                   : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -130,7 +131,7 @@ export default function Ads() {
             </button>
             <button
               onClick={() => setActiveTab('brands')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-all ${
+              className={`px-4 md:px-6 py-3.5 md:py-4 text-xs md:text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'brands'
                   ? 'border-accent-primary text-accent-primary'
                   : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -146,7 +147,7 @@ export default function Ads() {
           </nav>
         </div>
 
-        <div className="p-5">
+        <div className="p-4 md:p-5">
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin" />
@@ -196,7 +197,7 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
       {products.map((product, index) => (
         <div key={index} className="card-dark border border-white/5 overflow-hidden hover:border-accent-primary/30 transition-all group">
           <div className="relative">
@@ -288,14 +289,14 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
         <div key={index} className="rounded-lg border border-white/5 overflow-hidden">
           <button
             onClick={() => setExpandedBrand(expandedBrand === brand.seller_name ? null : brand.seller_name)}
-            className="w-full px-4 py-4 flex items-center justify-between bg-dark-700/50 hover:bg-dark-600/50 transition-colors"
+            className="w-full px-4 py-4 flex items-start sm:items-center justify-between gap-2 bg-dark-700/50 hover:bg-dark-600/50 transition-colors"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <span className="badge badge-info text-[10px]">
                 #{brand.position || index + 1}
               </span>
-              <span className="font-medium text-neutral-200">{brand.seller_name}</span>
-              <span className="text-sm text-neutral-500">
+              <span className="font-medium text-neutral-200 truncate">{brand.seller_name}</span>
+              <span className="text-xs md:text-sm text-neutral-500 whitespace-nowrap">
                 ({brand.products?.length || 0} products)
               </span>
             </div>
@@ -310,8 +311,8 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
           </button>
           
           {expandedBrand === brand.seller_name && brand.products && brand.products.length > 0 && (
-            <div className="p-4 border-t border-white/5 bg-dark-800/50">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="p-3 md:p-4 border-t border-white/5 bg-dark-800/50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {brand.products.map((product, pIndex) => (
                   <div key={pIndex} className="rounded-lg border border-white/5 overflow-hidden hover:border-accent-primary/20 transition-all bg-dark-700/30">
                     <div className="relative bg-dark-900 h-28">

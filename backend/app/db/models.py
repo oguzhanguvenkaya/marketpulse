@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, date
-from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON
+from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -170,7 +170,11 @@ class MonitoredProduct(Base):
     last_fetched_at = Column(DateTime)
     
     seller_snapshots = relationship("SellerSnapshot", back_populates="monitored_product", cascade="all, delete-orphan")
-    
+
+    __table_args__ = (
+        Index('ix_monitored_products_platform_active', 'platform', 'is_active'),
+    )
+
     class Config:
         from_attributes = True
 
@@ -204,7 +208,12 @@ class SellerSnapshot(Base):
     snapshot_date = Column(DateTime, default=datetime.utcnow, index=True)
     
     monitored_product = relationship("MonitoredProduct", back_populates="seller_snapshots")
-    
+
+    __table_args__ = (
+        Index('ix_seller_snapshots_product_merchant_date',
+              'monitored_product_id', 'merchant_id', 'snapshot_date'),
+    )
+
     class Config:
         from_attributes = True
 

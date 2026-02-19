@@ -37,6 +37,14 @@ export default function VideoTranscripts() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    if (error && typeof error === 'object') {
+      const withResponse = error as { response?: { data?: { detail?: string } }; message?: string };
+      return withResponse.response?.data?.detail || withResponse.message || fallback;
+    }
+    return fallback;
+  };
+
   const loadJobs = useCallback(async () => {
     try {
       const data = await getTranscriptJobs(20);
@@ -87,8 +95,8 @@ export default function VideoTranscripts() {
       setProductName('');
       setBarcode('');
       loadJobs();
-    } catch (e: any) {
-      setError(e.response?.data?.detail || e.message || 'Failed to start transcript fetch');
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e, 'Failed to start transcript fetch'));
     } finally {
       setFetching(false);
     }
@@ -132,8 +140,8 @@ export default function VideoTranscripts() {
         setJsonInput('');
       }
       loadJobs();
-    } catch (e: any) {
-      setError(e.response?.data?.detail || e.message || 'Failed to start bulk transcript fetch');
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e, 'Failed to start bulk transcript fetch'));
     } finally {
       setFetching(false);
     }
@@ -183,9 +191,9 @@ export default function VideoTranscripts() {
     try {
       await stopTranscriptJob(jobId);
       loadJobs();
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error stopping job:', e);
-      setError(e.response?.data?.detail || 'Failed to stop job');
+      setError(getApiErrorMessage(e, 'Failed to stop job'));
     }
   };
 
@@ -239,13 +247,13 @@ export default function VideoTranscripts() {
   const renderTranscriptResult = (item: TranscriptResultItem) => {
     const isExpanded = expandedTranscript === item.id;
     return (
-      <div key={item.id} className="border border-white/5 rounded-lg p-4 bg-dark-700/30">
-        <div className="flex items-start justify-between gap-4">
+      <div key={item.id} className="border border-white/5 rounded-lg p-3 sm:p-4 bg-dark-700/30">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               {getStatusBadge(item.status)}
               {item.language && (
-                <span className="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <span className="text-xs px-2 py-0.5 rounded bg-accent-secondary/20 text-accent-secondary border border-accent-secondary/30">
                   {item.language} ({item.language_code})
                 </span>
               )}
@@ -279,14 +287,14 @@ export default function VideoTranscripts() {
           {item.status === 'completed' && item.transcript_text && (
             <button
               onClick={() => setExpandedTranscript(isExpanded ? null : item.id)}
-              className="flex-shrink-0 text-xs px-3 py-1.5 rounded-lg bg-dark-600 hover:bg-dark-500 text-neutral-300 transition-all"
+              className="w-full sm:w-auto flex-shrink-0 text-xs px-3 py-1.5 rounded-lg bg-dark-600 hover:bg-dark-500 text-neutral-300 transition-all"
             >
               {isExpanded ? 'Hide' : 'Show'} Transcript
             </button>
           )}
         </div>
         {isExpanded && item.transcript_text && (
-          <div className="mt-3 bg-dark-800/50 rounded-lg border border-white/5 p-4">
+          <div className="mt-3 bg-dark-800/50 rounded-lg border border-white/5 p-3 sm:p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-neutral-400 font-medium">Full Transcript</span>
               <button
@@ -309,15 +317,15 @@ export default function VideoTranscripts() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Video Transcripts</h1>
-        <p className="text-neutral-400 mt-1">Extract transcripts from YouTube videos - single or bulk</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Video Transcripts</h1>
+        <p className="text-sm sm:text-base text-neutral-400 mt-1">Extract transcripts from YouTube videos - single or bulk</p>
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm flex items-center justify-between">
-          <span>{error}</span>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <span className="break-words">{error}</span>
           <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -325,19 +333,19 @@ export default function VideoTranscripts() {
       )}
 
       {success && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm flex items-center justify-between">
-          <span>{success}</span>
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <span className="break-words">{success}</span>
           <button onClick={() => setSuccess(null)} className="text-green-400 hover:text-green-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       )}
 
-      <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
-        <div className="flex gap-2 mb-6">
+      <div className="bg-dark-800 border border-white/5 rounded-xl p-4 sm:p-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
           <button
             onClick={() => setInputMode('single')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
               inputMode === 'single'
                 ? 'bg-accent-primary text-dark-900'
                 : 'bg-dark-700 text-neutral-300 hover:bg-dark-600 hover:text-white'
@@ -347,7 +355,7 @@ export default function VideoTranscripts() {
           </button>
           <button
             onClick={() => setInputMode('bulk')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
               inputMode === 'bulk'
                 ? 'bg-accent-primary text-dark-900'
                 : 'bg-dark-700 text-neutral-300 hover:bg-dark-600 hover:text-white'
@@ -369,7 +377,7 @@ export default function VideoTranscripts() {
                 className="w-full bg-dark-700 border border-white/10 text-white rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-neutral-400 mb-1.5">Product Name (optional)</label>
                 <input
@@ -394,7 +402,7 @@ export default function VideoTranscripts() {
             <button
               onClick={handleSingleFetch}
               disabled={fetching || !videoUrl.trim()}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="w-full sm:w-auto bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {fetching ? (
                 <>
@@ -413,7 +421,7 @@ export default function VideoTranscripts() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4">
               <button
                 onClick={() => setBulkMode('csv')}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
@@ -443,7 +451,7 @@ export default function VideoTranscripts() {
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                  className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all ${
                     isDragging
                       ? 'border-accent-primary bg-accent-primary/5'
                       : csvFile
@@ -493,7 +501,7 @@ export default function VideoTranscripts() {
             <button
               onClick={handleBulkFetch}
               disabled={fetching || (bulkMode === 'csv' ? !csvFile : !jsonInput.trim())}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="w-full sm:w-auto bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {fetching ? (
                 <>
@@ -513,12 +521,12 @@ export default function VideoTranscripts() {
         )}
       </div>
 
-      <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-dark-800 border border-white/5 rounded-xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-white">Transcript Jobs</h2>
           <button
             onClick={loadJobs}
-            className="bg-dark-700 hover:bg-dark-600 text-neutral-300 px-3 py-1.5 rounded-lg text-sm transition-all flex items-center gap-1.5"
+            className="w-full sm:w-auto bg-dark-700 hover:bg-dark-600 text-neutral-300 px-3 py-1.5 rounded-lg text-sm transition-all flex items-center justify-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -541,7 +549,7 @@ export default function VideoTranscripts() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="text-left text-xs text-neutral-400 uppercase tracking-wider border-b border-white/5">
                   <th className="pb-3 pr-4">Status</th>
@@ -605,7 +613,7 @@ export default function VideoTranscripts() {
       </div>
 
       {expandedJobId && (
-        <div className="bg-dark-800 border border-white/5 rounded-xl p-6">
+        <div className="bg-dark-800 border border-white/5 rounded-xl p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">
             Job Results
             {jobDetail && (

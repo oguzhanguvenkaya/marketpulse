@@ -1,4 +1,3 @@
-import os
 import re
 import ssl
 import asyncio
@@ -9,6 +8,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import exists
 from app.core.logger import price_monitor_logger as logger
+from app.core.config import settings
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
 
@@ -17,17 +17,16 @@ class PriceMonitorService:
     
     LISTINGS_API_URL = "https://www.hepsiburada.com/api/v1/product/listings/{sku}"
     CAMPAIGN_API_URL = "https://obiwan-gw.hepsiburada.com/api/v2/Campaign/pdp"
-    MAX_CONCURRENT_REQUESTS = 17
+    DEFAULT_MAX_CONCURRENT_REQUESTS = 17
     
     def __init__(self):
-        self.api_key = os.environ.get('SCRAPPER_API', '')
         self._semaphore = None  # Lazy initialization
-        if not self.api_key:
-            try:
-                with open('/etc/secrets/SCRAPPER_API', 'r') as f:
-                    self.api_key = f.read().strip()
-            except:
-                pass
+        configured_limit = getattr(settings, "PRICE_MONITOR_MAX_CONCURRENT_REQUESTS", self.DEFAULT_MAX_CONCURRENT_REQUESTS)
+        self.max_concurrent_requests = max(1, int(configured_limit or self.DEFAULT_MAX_CONCURRENT_REQUESTS))
+
+    @property
+    def api_key(self) -> str:
+        return (settings.SCRAPER_API_KEY or "").strip()
     
     def _extract_sku_from_url(self, url: str) -> Optional[str]:
         """URL'den SKU çıkar: -p-SKU veya -pm-SKU formatından"""
@@ -187,8 +186,13 @@ class PriceMonitorService:
         """Campaign API'ye ScraperAPI proxy üzerinden istek at"""
         import json
         
+        api_key = self.api_key
+        if not api_key:
+            logger.warning(f"{log_context} ScraperAPI key missing, campaign fallback skipped")
+            return None
+
         encoded_url = urllib.parse.quote(self.CAMPAIGN_API_URL, safe='')
-        api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
+        api_url = f"https://api.scraperapi.com?api_key={api_key}&url={encoded_url}"
         
         headers = {
             'Accept': 'application/json, text/plain, */*',
@@ -249,12 +253,30 @@ class PriceMonitorService:
             logger.debug(f"{log_context} Campaign API: evaluateResult boş")
         return None
 
-    async def fetch_listings(self, sku: str) -> Optional[Dict[str, Any]]:
-        """Tek bir SKU için listings API'sinden satıcı verilerini çek - ScraperAPI HTTP API"""
-        
+    async def fetch_listings(self, sku: str) -> Dict[str, Any]:
+        """Tek bir SKU için listings API'sinden satıcı verilerini çek.
+
+        Returns:
+            {
+                "success": bool,
+                "data": Optional[Dict[str, Any]],
+                "error_type": Optional[str],  # auth_error | upstream_error | no_data
+                "status_code": Optional[int],
+            }
+        """
+        api_key = self.api_key
+        if not api_key:
+            logger.error(f"Listings API auth_error for {sku}: ScraperAPI key missing")
+            return {
+                "success": False,
+                "data": None,
+                "error_type": "auth_error",
+                "status_code": None,
+            }
+
         target_url = self.LISTINGS_API_URL.format(sku=sku)
         encoded_url = urllib.parse.quote(target_url, safe='')
-        api_url = f"https://api.scraperapi.com?api_key={self.api_key}&url={encoded_url}"
+        api_url = f"https://api.scraperapi.com?api_key={api_key}&url={encoded_url}"
         
         headers = {
             'Accept': 'application/json, text/plain, */*',
@@ -277,13 +299,60 @@ class PriceMonitorService:
                     if resp.status == 200:
                         data = await resp.json()
                         if data.get('statusCode') == 200 and 'data' in data:
-                            return data['data']
-                    else:
-                        logger.warning(f"Listings API error for {sku}: status {resp.status}")
-                        return None
+                            return {
+                                "success": True,
+                                "data": data['data'],
+                                "error_type": None,
+                                "status_code": 200,
+                            }
+                        logger.warning(
+                            f"Listings API upstream_error for {sku}: unexpected payload statusCode={data.get('statusCode')}"
+                        )
+                        return {
+                            "success": False,
+                            "data": None,
+                            "error_type": "upstream_error",
+                            "status_code": data.get('statusCode'),
+                        }
+                    if resp.status in (401, 403):
+                        logger.warning(f"Listings API auth_error for {sku}: status {resp.status}")
+                        return {
+                            "success": False,
+                            "data": None,
+                            "error_type": "auth_error",
+                            "status_code": resp.status,
+                        }
+                    if resp.status in (404, 410):
+                        logger.warning(f"Listings API no_data for {sku}: status {resp.status}")
+                        return {
+                            "success": False,
+                            "data": None,
+                            "error_type": "no_data",
+                            "status_code": resp.status,
+                        }
+                    logger.warning(f"Listings API upstream_error for {sku}: status {resp.status}")
+                    return {
+                        "success": False,
+                        "data": None,
+                        "error_type": "upstream_error",
+                        "status_code": resp.status,
+                    }
+        except asyncio.TimeoutError:
+            logger.error(f"Listings API upstream_error for {sku}: timeout")
+            return {
+                "success": False,
+                "data": None,
+                "error_type": "upstream_error",
+                "status_code": None,
+            }
         except Exception as e:
-            logger.error(f"Error fetching listings for {sku}: {e}")
-            return None
+            logger.error(f"Listings API upstream_error for {sku}: {type(e).__name__}: {e}")
+            return {
+                "success": False,
+                "data": None,
+                "error_type": "upstream_error",
+                "status_code": None,
+            }
     
     def _parse_campaign_tags(self, tag_list: List[Dict[str, Any]]) -> List[str]:
         """tagList'ten indirim ve kampanya tag'lerini filtrele ve okunabilir formata çevir"""
@@ -396,12 +465,20 @@ class PriceMonitorService:
         }
         
         try:
-            data = await self.fetch_listings(sku)
-            if not data:
-                result['inactive'] = True
-                result['error'] = 'no_data'
-                logger.warning(f"No data for SKU {sku} - will be marked inactive")
+            fetch_result = await self.fetch_listings(sku)
+            if not fetch_result.get('success'):
+                error_type = fetch_result.get('error_type') or 'upstream_error'
+                result['error'] = error_type
+                if error_type == 'no_data':
+                    result['inactive'] = True
+                    logger.warning(f"No data for SKU {sku} - will be marked inactive")
+                else:
+                    logger.warning(
+                        f"Fetch failed for SKU {sku}: error_type={error_type}, status={fetch_result.get('status_code')} - keeping current active state"
+                    )
                 return result
+            
+            data = fetch_result['data']
             
             sellers = self.parse_listings(data)
             if not sellers:
@@ -563,12 +640,14 @@ class PriceMonitorService:
             logger.info("No products to process")
             return
         
-        logger.info(f"PARALEL İŞLEME BAŞLIYOR: {len(products)} ürün, {self.MAX_CONCURRENT_REQUESTS} eşzamanlı istek")
+        logger.info(f"PARALEL İŞLEME BAŞLIYOR: {len(products)} ürün, {self.max_concurrent_requests} eşzamanlı istek")
         
-        semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+        semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         completed = 0
         failed = 0
         inactive_skus = []
+        auth_failed_skus = []
+        upstream_failed_skus = []
         product_map = {str(p.id): p for p in products}
         
         async def fetch_with_semaphore(product: MonitoredProduct) -> Dict[str, Any]:
@@ -620,24 +699,42 @@ class PriceMonitorService:
                     self.save_product_result(db, product, result)
                 else:
                     failed += 1
+                    if result.get('error') == 'auth_error':
+                        auth_failed_skus.append(result['sku'])
+                    elif result.get('error') == 'upstream_error':
+                        upstream_failed_skus.append(result['sku'])
             
             db.commit()
             
             task.completed_products = completed
             task.failed_products = failed
             task.last_processed_index = end_idx
+            if auth_failed_skus or upstream_failed_skus:
+                task.error_message = (
+                    f"auth_errors={len(auth_failed_skus)};upstream_errors={len(upstream_failed_skus)}"
+                )
             db.commit()
             
-            logger.info(f"Batch {batch_idx + 1} tamamlandı: toplam {completed} başarılı, {failed} başarısız, {len(inactive_skus)} inactive")
+            logger.info(
+                f"Batch {batch_idx + 1} tamamlandı: toplam {completed} başarılı, {failed} başarısız, "
+                f"{len(inactive_skus)} inactive, {len(auth_failed_skus)} auth_error, {len(upstream_failed_skus)} upstream_error"
+            )
         
         task.completed_products = completed
         task.failed_products = failed
         task.status = "completed"
         task.completed_at = datetime.utcnow()
         task.last_inactive_skus = inactive_skus
+        if auth_failed_skus or upstream_failed_skus:
+            task.error_message = (
+                f"auth_errors={len(auth_failed_skus)};upstream_errors={len(upstream_failed_skus)}"
+            )
         db.commit()
         
-        logger.info(f"Fetch task completed: {completed} success, {failed} failed, {len(inactive_skus)} marked inactive")
+        logger.info(
+            f"Fetch task completed: {completed} success, {failed} failed, {len(inactive_skus)} marked inactive, "
+            f"{len(auth_failed_skus)} auth_error, {len(upstream_failed_skus)} upstream_error"
+        )
 
     async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
         """Tek bir ürünü çekip DB'ye kaydet."""

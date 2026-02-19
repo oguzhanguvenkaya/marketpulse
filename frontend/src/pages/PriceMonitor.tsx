@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getMonitoredProducts,
   getMonitoredProductDetail,
@@ -14,7 +14,7 @@ import {
   getBrands,
   getLastInactiveSkus,
 } from '../services/api';
-import type { FetchType, LastInactiveProduct } from '../services/api';
+import type { FetchType } from '../services/api';
 import type {
   MonitoredProduct,
   SellerSnapshot,
@@ -22,6 +22,9 @@ import type {
 } from '../services/api';
 
 type Platform = 'hepsiburada' | 'trendyol';
+const PAGE_SIZE = 100;
+const SEARCH_DEBOUNCE_MS = 400;
+const FETCH_STATUS_POLL_MS = 2000;
 
 export default function PriceMonitor() {
   const [platform, setPlatform] = useState<Platform>('hepsiburada');
@@ -43,22 +46,29 @@ export default function PriceMonitor() {
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [priceAlertOnly, setPriceAlertOnly] = useState(false);
   const [campaignAlertOnly, setCampaignAlertOnly] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [_lastInactiveProducts, _setLastInactiveProducts] = useState<LastInactiveProduct[]>([]);
   const [lastInactiveCount, setLastInactiveCount] = useState(0);
   const [showFetchMenu, setShowFetchMenu] = useState(false);
   const [currentFetchType, setCurrentFetchType] = useState<FetchType>('active');
   const [showDeleteModal, setShowDeleteModal] = useState<'all' | 'inactive' | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [activeTotalCount, setActiveTotalCount] = useState(0);
+  const [inactiveTotalCount, setInactiveTotalCount] = useState(0);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const currentOffsetRef = useRef(0);
+  const productLoadAbortRef = useRef<AbortController | null>(null);
+  const firstFilterRunRef = useRef(true);
+  const mountedPlatformRef = useRef<Platform | null>(null);
+  const terminalRefreshTaskIdsRef = useRef<Set<string>>(new Set());
 
   const activeProducts = products.filter(p => p.is_active !== false);
   const inactiveProducts = products.filter(p => p.is_active === false);
 
   useEffect(() => {
-    loadProducts();
-    loadBrands();
-    loadLastInactive();
-  }, [platform]);
+    currentOffsetRef.current = currentOffset;
+  }, [currentOffset]);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -69,70 +79,141 @@ export default function PriceMonitor() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const loadLastInactive = async () => {
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+    }, SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    return () => {
+      productLoadAbortRef.current?.abort();
+    };
+  }, []);
+
+  const loadLastInactive = useCallback(async () => {
     try {
       const data = await getLastInactiveSkus(platform);
-      _setLastInactiveProducts(data.products);
       setLastInactiveCount(data.count);
     } catch (e) {
       console.error('Error loading last inactive:', e);
     }
-  };
+  }, [platform]);
 
-  useEffect(() => {
-    loadProducts();
-  }, [selectedBrand, priceAlertOnly, campaignAlertOnly, searchQuery]);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (fetchTaskId) {
-      interval = setInterval(async () => {
-        try {
-          const status = await getFetchTaskStatus(fetchTaskId);
-          setFetchStatus(status.status);
-          setFetchProgress({ completed: status.completed_products, total: status.total_products });
-          if (status.status === 'completed' || status.status === 'stopped' || status.status === 'failed') {
-            setFetchTaskId(null);
-            loadProducts();
-            loadLastInactive();
-          }
-        } catch (e) {
-          console.error('Error checking fetch status:', e);
-        }
-      }, 2000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [fetchTaskId]);
-
-  const loadBrands = async () => {
+  const loadBrands = useCallback(async () => {
     try {
       const data = await getBrands(platform);
       setBrands(data.brands);
     } catch (e) {
       console.error('Error loading brands:', e);
     }
+  }, [platform]);
+
+  const isAbortError = (error: unknown) => {
+    if (!error || typeof error !== 'object') return false;
+    const err = error as { name?: string; code?: string };
+    return err.name === 'CanceledError' || err.name === 'AbortError' || err.code === 'ERR_CANCELED';
   };
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async (offsetOverride?: number) => {
+    const useOffset = offsetOverride !== undefined ? offsetOverride : currentOffsetRef.current;
+    productLoadAbortRef.current?.abort();
+    const controller = new AbortController();
+    productLoadAbortRef.current = controller;
+
     try {
       setLoading(true);
       setSelectedProduct(null);
       setSellers([]);
-      const params: Record<string, any> = {};
+
+      const params: Record<string, string | number | boolean> = { limit: PAGE_SIZE, offset: useOffset };
       if (selectedBrand) params.brand = selectedBrand;
       if (priceAlertOnly) params.price_alert_only = true;
       if (campaignAlertOnly) params.campaign_alert_only = true;
       if (searchQuery) params.search = searchQuery;
-      const data = await getMonitoredProducts(platform, params);
+
+      const data = await getMonitoredProducts(platform, params, { signal: controller.signal });
+      if (productLoadAbortRef.current !== controller) {
+        return;
+      }
+
       setProducts(data.products);
+      setTotalProducts(data.total);
+      setActiveTotalCount(data.active_count ?? data.products.filter((p) => p.is_active !== false).length);
+      setInactiveTotalCount(data.inactive_count ?? data.products.filter((p) => p.is_active === false).length);
     } catch (e) {
-      console.error('Error loading products:', e);
-    } finally {
-      setLoading(false);
+      if (!isAbortError(e)) {
+        console.error('Error loading products:', e);
+      }
     }
-  };
+    finally {
+      if (productLoadAbortRef.current === controller) {
+        setLoading(false);
+      }
+    }
+  }, [campaignAlertOnly, platform, priceAlertOnly, searchQuery, selectedBrand]);
+
+  useEffect(() => {
+    if (mountedPlatformRef.current === platform) {
+      return;
+    }
+    mountedPlatformRef.current = platform;
+
+    setCurrentOffset(0);
+    currentOffsetRef.current = 0;
+    void Promise.all([loadProducts(0), loadBrands(), loadLastInactive()]);
+  }, [platform, loadBrands, loadLastInactive, loadProducts]);
+
+  useEffect(() => {
+    if (firstFilterRunRef.current) {
+      firstFilterRunRef.current = false;
+      return;
+    }
+
+    setCurrentOffset(0);
+    currentOffsetRef.current = 0;
+    void loadProducts(0);
+  }, [selectedBrand, priceAlertOnly, campaignAlertOnly, searchQuery, loadProducts]);
+
+  useEffect(() => {
+    if (!fetchTaskId) {
+      return;
+    }
+
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let isChecking = false;
+
+    interval = setInterval(async () => {
+      if (isChecking) {
+        return;
+      }
+      isChecking = true;
+      try {
+        const status = await getFetchTaskStatus(fetchTaskId);
+        setFetchStatus(status.status);
+        setFetchProgress({ completed: status.completed_products, total: status.total_products });
+
+        if (status.status === 'completed' || status.status === 'stopped' || status.status === 'failed') {
+          if (!terminalRefreshTaskIdsRef.current.has(fetchTaskId)) {
+            terminalRefreshTaskIdsRef.current.add(fetchTaskId);
+            await Promise.all([loadProducts(), loadLastInactive()]);
+          }
+          setFetchTaskId(null);
+        }
+      } catch (e) {
+        console.error('Error checking fetch status:', e);
+      } finally {
+        isChecking = false;
+      }
+    }, FETCH_STATUS_POLL_MS);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [fetchTaskId, loadLastInactive, loadProducts]);
 
   const handleProductClick = async (product: MonitoredProduct) => {
     setSelectedProduct(product);
@@ -157,9 +238,10 @@ export default function PriceMonitor() {
       alert(`${result.added} products added, ${result.updated} updated (${result.platform}).`);
       setShowImportModal(false);
       setImportJson('');
-      loadProducts();
-    } catch (e: any) {
-      alert('JSON parse error: ' + e.message);
+      void loadProducts();
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      alert('JSON parse error: ' + message);
     } finally {
       setImportLoading(false);
     }
@@ -170,6 +252,7 @@ export default function PriceMonitor() {
       setCurrentFetchType(fetchType);
       setShowFetchMenu(false);
       const result = await startFetchTask(platform, fetchType);
+      terminalRefreshTaskIdsRef.current.delete(result.task_id);
       setFetchTaskId(result.task_id);
       setFetchStatus('started');
     } catch (e) {
@@ -193,9 +276,9 @@ export default function PriceMonitor() {
     try {
       await fetchSingleProduct(productId);
       if (selectedProduct?.id === productId) {
-        handleProductClick(selectedProduct);
+        void handleProductClick(selectedProduct);
       }
-      loadProducts();
+      void Promise.all([loadProducts(), loadLastInactive()]);
     } catch (e) {
       console.error('Error fetching single product:', e);
       alert('Could not fetch price');
@@ -210,7 +293,7 @@ export default function PriceMonitor() {
         setSelectedProduct(null);
         setSellers([]);
       }
-      loadProducts();
+      void loadProducts();
     } catch (e) {
       console.error('Error deleting product:', e);
     }
@@ -243,7 +326,7 @@ export default function PriceMonitor() {
       setShowDeleteModal(null);
       setSelectedProduct(null);
       setSellers([]);
-      loadProducts();
+      void Promise.all([loadProducts(), loadLastInactive()]);
     } catch (e) {
       console.error('Error deleting products:', e);
       alert('Delete failed');
@@ -295,14 +378,18 @@ export default function PriceMonitor() {
 ]`;
   };
 
+  const progressPercent = fetchProgress.total > 0
+    ? Math.min(100, Math.round((fetchProgress.completed / fetchProgress.total) * 100))
+    : 0;
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Price Monitor</h1>
-          <p className="text-neutral-400 mt-1">Track seller prices and identify violations</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Price Monitor</h1>
+          <p className="text-sm md:text-base text-neutral-400 mt-1">Track seller prices and identify violations</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 md:gap-3">
           <button onClick={() => setShowImportModal(true)} className="btn-secondary flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -311,7 +398,7 @@ export default function PriceMonitor() {
           </button>
           {fetchTaskId ? (
             <>
-              <div className="px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-accent-primary text-sm flex items-center gap-2">
+              <div className="px-3 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-accent-primary text-xs md:text-sm flex items-center gap-2 w-full sm:w-auto">
                 <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
                 {fetchStatus === 'stopping' ? 'Stopping...' : `Fetching ${currentFetchType === 'last_inactive' ? 'last inactive' : currentFetchType}... (${fetchProgress.completed}/${fetchProgress.total})`}
               </div>
@@ -323,7 +410,7 @@ export default function PriceMonitor() {
             <div className="relative">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowFetchMenu(!showFetchMenu); }} 
-                disabled={activeProducts.length === 0 && inactiveProducts.length === 0 && lastInactiveCount === 0} 
+                disabled={activeTotalCount === 0 && inactiveTotalCount === 0 && lastInactiveCount === 0} 
                 className="btn-primary flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,14 +422,14 @@ export default function PriceMonitor() {
                 </svg>
               </button>
               {showFetchMenu && (
-                <div className="absolute right-0 mt-2 w-56 card-dark border border-white/10 z-20 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] card-dark border border-white/10 z-20 overflow-hidden">
                   <button 
                     onClick={() => handleFetchAll('active')} 
-                    disabled={activeProducts.length === 0}
+                    disabled={activeTotalCount === 0}
                     className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium">Active Products</div>
-                    <div className="text-xs text-neutral-400">{activeProducts.length} products</div>
+                    <div className="text-xs text-neutral-400">{activeTotalCount} products</div>
                   </button>
                   <button 
                     onClick={() => handleFetchAll('last_inactive')} 
@@ -354,11 +441,11 @@ export default function PriceMonitor() {
                   </button>
                   <button 
                     onClick={() => handleFetchAll('inactive')} 
-                    disabled={inactiveProducts.length === 0}
+                    disabled={inactiveTotalCount === 0}
                     className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors border-t border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium text-red-400">All Inactive</div>
-                    <div className="text-xs text-neutral-400">{inactiveProducts.length} products</div>
+                    <div className="text-xs text-neutral-400">{inactiveTotalCount} products</div>
                   </button>
                 </div>
               )}
@@ -367,7 +454,7 @@ export default function PriceMonitor() {
           <div className="relative">
             <button
               onClick={(e) => { e.stopPropagation(); setShowExportMenu(!showExportMenu); }}
-              disabled={exportLoading || products.length === 0}
+              disabled={exportLoading || totalProducts === 0}
               className="btn-secondary flex items-center gap-2"
             >
               {exportLoading ? 'Exporting...' : 'Export'}
@@ -376,29 +463,29 @@ export default function PriceMonitor() {
               </svg>
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 card-dark border border-white/10 z-20 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] card-dark border border-white/10 z-20 overflow-hidden">
                 <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
-                  All ({products.length})
+                  All ({totalProducts})
                 </button>
                 <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
-                  Active Only ({activeProducts.length})
+                  Active Only ({activeTotalCount})
                 </button>
                 <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
-                  Inactive Only ({inactiveProducts.length})
+                  Inactive Only ({inactiveTotalCount})
                 </button>
               </div>
             )}
           </div>
           <button
             onClick={() => setShowDeleteModal('inactive')}
-            disabled={inactiveProducts.length === 0}
+            disabled={inactiveTotalCount === 0}
             className="btn-secondary text-orange-400 border-orange-400/30 hover:bg-orange-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete Inactive
           </button>
           <button
             onClick={() => setShowDeleteModal('all')}
-            disabled={products.length === 0}
+            disabled={totalProducts === 0}
             className="btn-secondary text-red-400 border-red-400/30 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete All
@@ -406,7 +493,7 @@ export default function PriceMonitor() {
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setPlatform('hepsiburada')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
@@ -431,35 +518,35 @@ export default function PriceMonitor() {
 
       {fetchStatus === 'running' && (
         <div className="p-4 rounded-lg bg-accent-primary/5 border border-accent-primary/20">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 text-sm md:text-base">
             <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
             <span className="text-accent-primary">Fetching prices: {fetchProgress.completed} / {fetchProgress.total} products completed</span>
           </div>
           <div className="mt-2 progress-bar">
-            <div className="progress-bar-fill" style={{ width: `${(fetchProgress.completed / fetchProgress.total) * 100}%` }} />
+            <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card-dark p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card-dark p-4 md:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
                 <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-white">Monitored Products</h2>
+              <h2 className="text-base md:text-lg font-semibold text-white">Monitored Products</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setShowInactive(false)}
                 className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
                   !showInactive ? 'bg-success/20 text-success border border-success/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
                 }`}
               >
-                Active ({activeProducts.length})
+                Active ({activeTotalCount}{totalProducts > 0 ? `/${totalProducts}` : ''})
               </button>
               <button
                 onClick={() => setShowInactive(true)}
@@ -467,23 +554,23 @@ export default function PriceMonitor() {
                   showInactive ? 'bg-neutral-500/20 text-neutral-300 border border-neutral-500/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
                 }`}
               >
-                Inactive ({inactiveProducts.length})
+                Inactive ({inactiveTotalCount})
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mb-4">
             <input
               type="text"
               placeholder="Search by SKU, barcode, stock code or name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-dark flex-1 text-sm"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="input-dark text-sm w-full xl:col-span-2"
             />
             <select
               value={selectedBrand}
               onChange={(e) => setSelectedBrand(e.target.value)}
-              className="input-dark text-sm min-w-[140px]"
+              className="input-dark text-sm w-full"
             >
               <option value="">All Brands</option>
               {brands.map(brand => (
@@ -533,7 +620,7 @@ export default function PriceMonitor() {
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product)}
-                  className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                  className={`p-3 md:p-4 rounded-lg border cursor-pointer transition-all ${
                     selectedProduct?.id === product.id
                       ? 'border-accent-primary/50 bg-accent-primary/5'
                       : showInactive
@@ -541,7 +628,7 @@ export default function PriceMonitor() {
                         : 'border-white/5 bg-dark-700/30 hover:border-white/10 hover:bg-dark-600/30'
                   }`}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex gap-1.5 mb-2 flex-wrap">
                         {showInactive && (
@@ -605,7 +692,7 @@ export default function PriceMonitor() {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1 flex-shrink-0">
+                    <div className="flex gap-1 flex-shrink-0 self-start sm:self-auto">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleFetchSingle(product.id); }}
                         className="text-accent-primary hover:text-accent-primary/80 text-xs px-2 py-1 rounded hover:bg-accent-primary/10 transition-colors cursor-pointer"
@@ -624,9 +711,44 @@ export default function PriceMonitor() {
               ))}
             </div>
           )}
+
+          {/* Pagination */}
+          {totalProducts > PAGE_SIZE && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-white/5">
+              <span className="text-xs text-neutral-500">
+                {currentOffset + 1}–{Math.min(currentOffset + PAGE_SIZE, totalProducts)} of {totalProducts}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={currentOffset === 0 || loading}
+                  onClick={() => {
+                    const newOff = Math.max(0, currentOffset - PAGE_SIZE);
+                    setCurrentOffset(newOff);
+                    currentOffsetRef.current = newOff;
+                    void loadProducts(newOff);
+                  }}
+                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-dark-600 text-neutral-400 hover:bg-dark-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={currentOffset + PAGE_SIZE >= totalProducts || loading}
+                  onClick={() => {
+                    const newOff = currentOffset + PAGE_SIZE;
+                    setCurrentOffset(newOff);
+                    currentOffsetRef.current = newOff;
+                    void loadProducts(newOff);
+                  }}
+                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-dark-600 text-neutral-400 hover:bg-dark-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="card-dark p-5">
+        <div className="card-dark p-4 md:p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -690,12 +812,12 @@ export default function PriceMonitor() {
                 return (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-4 rounded-lg transition-all cursor-pointer hover:bg-[#555555] ${
+                  className={`p-3 md:p-4 rounded-lg border transition-all cursor-pointer hover:bg-dark-600/35 ${
                     seller.price_alert
-                      ? 'bg-red-900/40'
+                      ? 'bg-danger/20 border-danger/35'
                       : seller.buybox_order === 1
-                        ? 'bg-green-900/40'
-                        : 'bg-[#3a3a3a]'
+                        ? 'bg-success/15 border-success/30'
+                        : 'bg-dark-700/45 border-white/10'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -703,11 +825,11 @@ export default function PriceMonitor() {
                       <img
                         src={seller.merchant_logo}
                         alt={seller.merchant_name}
-                        className="w-10 h-10 rounded-lg object-contain bg-white border border-white/10"
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-lg object-contain bg-white border border-white/10"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                         <div>
                           <div className="font-medium text-sm flex items-center gap-2 flex-wrap">
                             {seller.merchant_url ? (
@@ -747,8 +869,8 @@ export default function PriceMonitor() {
                             )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-bold text-lg text-white flex items-center gap-2 justify-end">
+                        <div className="text-left sm:text-right">
+                          <div className="font-bold text-lg text-white flex items-center gap-2 justify-start sm:justify-end">
                             {formatPrice(seller.list_price || seller.price)}
                             {seller.campaign_price && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
@@ -808,8 +930,8 @@ export default function PriceMonitor() {
       </div>
 
       {showImportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="card-dark border border-white/10 p-6 w-full max-w-2xl mx-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="card-dark border border-white/10 p-5 md:p-6 w-full max-w-2xl mx-auto my-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">
                 Import Products - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'}
@@ -833,7 +955,7 @@ export default function PriceMonitor() {
               className="input-dark w-full h-48 font-mono text-sm resize-none"
               placeholder='[{"productUrl": "...", "sku": "..."}]'
             />
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-4">
               <button
                 onClick={() => { setShowImportModal(false); setImportJson(''); }}
                 className="btn-secondary"
@@ -853,18 +975,18 @@ export default function PriceMonitor() {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="card-dark p-6 max-w-md w-full mx-4 border border-red-500/30">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="card-dark p-5 md:p-6 max-w-md w-full mx-auto border border-red-500/30">
             <h3 className="text-lg font-semibold text-white mb-4">
               {showDeleteModal === 'all' ? 'Delete All Products' : 'Delete Inactive Products'}
             </h3>
             <p className="text-neutral-300 mb-6">
               {showDeleteModal === 'all' 
-                ? `Are you sure you want to delete all ${products.length} products for ${platform}? This action cannot be undone.`
-                : `Are you sure you want to delete ${inactiveProducts.length} inactive products for ${platform}? This action cannot be undone.`
+                ? `Are you sure you want to delete all ${totalProducts} products for ${platform}? This action cannot be undone.`
+                : `Are you sure you want to delete ${inactiveTotalCount} inactive products for ${platform}? This action cannot be undone.`
               }
             </p>
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
                 onClick={() => setShowDeleteModal(null)}
                 disabled={deleteLoading}

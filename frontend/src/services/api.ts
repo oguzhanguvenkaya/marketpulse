@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { buildCacheKey, getCachedOrFetch, invalidateCacheByPrefix } from './queryCache';
 
 const api = axios.create({
   baseURL: '/api',
@@ -8,6 +9,29 @@ const internalApiKey = import.meta.env.VITE_INTERNAL_API_KEY;
 if (internalApiKey) {
   api.defaults.headers.common['X-API-Key'] = internalApiKey;
 }
+
+const CACHE_PREFIX = {
+  tasks: 'tasks',
+  stats: 'stats',
+  priceMonitorProducts: 'price-monitor/products',
+  priceMonitorBrands: 'price-monitor/brands',
+  priceMonitorLastInactive: 'price-monitor/last-inactive',
+  sellers: 'sellers',
+  sellerProducts: 'seller-products',
+} as const;
+
+const invalidateDashboardCache = () => {
+  invalidateCacheByPrefix(CACHE_PREFIX.tasks);
+  invalidateCacheByPrefix(CACHE_PREFIX.stats);
+};
+
+const invalidatePriceMonitorCache = () => {
+  invalidateCacheByPrefix(CACHE_PREFIX.priceMonitorProducts);
+  invalidateCacheByPrefix(CACHE_PREFIX.priceMonitorBrands);
+  invalidateCacheByPrefix(CACHE_PREFIX.priceMonitorLastInactive);
+  invalidateCacheByPrefix(CACHE_PREFIX.sellers);
+  invalidateCacheByPrefix(CACHE_PREFIX.sellerProducts);
+};
 
 export interface SearchTask {
   id: string;
@@ -102,6 +126,7 @@ export interface Stats {
 
 export const createSearchTask = async (keyword: string, platform: string = 'hepsiburada'): Promise<SearchTask> => {
   const response = await api.post('/search', { keyword, platform });
+  invalidateDashboardCache();
   return response.data;
 };
 
@@ -111,8 +136,11 @@ export const getSearchTask = async (taskId: string): Promise<SearchTask> => {
 };
 
 export const getTasks = async (limit: number = 10): Promise<SearchTask[]> => {
-  const response = await api.get('/tasks', { params: { limit } });
-  return response.data;
+  const cacheKey = buildCacheKey(CACHE_PREFIX.tasks, { limit });
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get('/tasks', { params: { limit } });
+    return response.data;
+  });
 };
 
 export const getProducts = async (keyword?: string, platform?: string, limit: number = 50): Promise<Product[]> => {
@@ -136,8 +164,11 @@ export const analyzeProducts = async (productIds: string[], question?: string): 
 };
 
 export const getStats = async (): Promise<Stats> => {
-  const response = await api.get('/stats');
-  return response.data;
+  const cacheKey = buildCacheKey(CACHE_PREFIX.stats);
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get('/stats');
+    return response.data;
+  });
 };
 
 export interface SponsoredProduct {
@@ -238,6 +269,10 @@ export interface SellerSnapshot {
 export interface MonitoredProductsResponse {
   products: MonitoredProduct[];
   total: number;
+  active_count: number;
+  inactive_count: number;
+  limit: number;
+  offset: number;
 }
 
 export interface ProductWithSellers {
@@ -272,19 +307,46 @@ export interface GetProductsParams {
   price_alert_only?: boolean;
   campaign_alert_only?: boolean;
   search?: string;
+  limit?: number;
+  offset?: number;
 }
 
-export const getMonitoredProducts = async (platform?: string, params?: Partial<GetProductsParams>): Promise<MonitoredProductsResponse> => {
-  const queryParams: Record<string, any> = { ...params };
+export interface RequestOptions {
+  signal?: AbortSignal;
+  forceRefresh?: boolean;
+}
+
+export const getMonitoredProducts = async (
+  platform?: string,
+  params?: Partial<GetProductsParams>,
+  options: RequestOptions = {},
+): Promise<MonitoredProductsResponse> => {
+  const queryParams: Record<string, unknown> = { ...params };
   if (platform) queryParams.platform = platform;
-  const response = await api.get('/price-monitor/products', { params: queryParams });
-  return response.data;
+  const cacheKey = buildCacheKey(CACHE_PREFIX.priceMonitorProducts, queryParams);
+  return getCachedOrFetch(
+    cacheKey,
+    async () => {
+      const response = await api.get('/price-monitor/products', {
+        params: queryParams,
+        signal: options.signal,
+      });
+      return response.data;
+    },
+    {
+      forceRefresh: options.forceRefresh,
+      skipDedupe: Boolean(options.signal),
+    },
+  );
 };
 
 export const getBrands = async (platform?: string): Promise<{ brands: string[] }> => {
   const params = platform ? { platform } : {};
-  const response = await api.get('/price-monitor/brands', { params });
-  return response.data;
+  const cacheKey = buildCacheKey(CACHE_PREFIX.priceMonitorBrands, params);
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get('/price-monitor/brands', { params });
+    return response.data;
+  });
 };
 
 export const getMonitoredProductDetail = async (productId: string): Promise<ProductWithSellers> => {
@@ -292,40 +354,46 @@ export const getMonitoredProductDetail = async (productId: string): Promise<Prod
   return response.data;
 };
 
-export const addMonitoredProducts = async (products: BulkProductInput[], platform: string = 'hepsiburada'): Promise<{ added: number; updated: number; errors: any[]; total: number; platform: string }> => {
+export const addMonitoredProducts = async (products: BulkProductInput[], platform: string = 'hepsiburada'): Promise<{ added: number; updated: number; errors: unknown[]; total: number; platform: string }> => {
   const response = await api.post('/price-monitor/products', { products, platform });
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
 export const deleteMonitoredProduct = async (productId: string): Promise<void> => {
   await api.delete(`/price-monitor/products/${productId}`);
+  invalidatePriceMonitorCache();
 };
 
 export const deleteAllMonitoredProducts = async (platform: string): Promise<{ success: boolean; deleted_count: number; message: string }> => {
   const response = await api.delete('/price-monitor/products/bulk/all', { params: { platform } });
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
 export const deleteInactiveMonitoredProducts = async (platform: string): Promise<{ success: boolean; deleted_count: number; message: string }> => {
   const response = await api.delete('/price-monitor/products/bulk/inactive', { params: { platform } });
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
 export type FetchType = 'active' | 'last_inactive' | 'inactive';
 
-export const startFetchTask = async (platform: string = 'hepsiburada', fetchType: FetchType = 'active'): Promise<{ task_id: string; platform: string; fetch_type: string; status: string; message: string }> => {
+export const startFetchTask = async (platform: string = 'hepsiburada', fetchType: FetchType = 'active'): Promise<{ task_id: string; platform: string; fetch_type: string; status: string; message: string; executor?: string }> => {
   const response = await api.post('/price-monitor/fetch', null, {
     params: { platform, fetch_type: fetchType }
   });
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
 export const stopFetchTask = async (taskId: string): Promise<{ success: boolean; message: string }> => {
   const response = await api.post(`/price-monitor/fetch/${taskId}/stop`);
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
-export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask & { fetch_type?: string; last_inactive_count?: number }> => {
+export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask & { fetch_type?: string; last_inactive_count?: number; executor?: string }> => {
   const response = await api.get(`/price-monitor/fetch/${taskId}`);
   return response.data;
 };
@@ -345,14 +413,19 @@ export const getLastInactiveSkus = async (platform: string = 'hepsiburada'): Pro
   task_id: string | null;
   completed_at: string | null;
 }> => {
-  const response = await api.get('/price-monitor/last-inactive', {
-    params: { platform }
+  const params = { platform };
+  const cacheKey = buildCacheKey(CACHE_PREFIX.priceMonitorLastInactive, params);
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get('/price-monitor/last-inactive', {
+      params,
+    });
+    return response.data;
   });
-  return response.data;
 };
 
 export const fetchSingleProduct = async (productId: string): Promise<{ success: boolean; message: string }> => {
   const response = await api.post(`/price-monitor/fetch-single/${productId}`);
+  invalidatePriceMonitorCache();
   return response.data;
 };
 
@@ -395,6 +468,13 @@ export interface SellerInfo {
   campaign_alert_count: number;
 }
 
+export interface SellersResponse {
+  sellers: SellerInfo[];
+  total: number;
+  limit?: number;
+  offset?: number;
+}
+
 export interface SellerProduct {
   product_id: string;
   sku?: string;
@@ -418,19 +498,49 @@ export interface SellerProduct {
   snapshot_date: string;
 }
 
-export const getSellers = async (platform: string): Promise<{ sellers: SellerInfo[]; total: number }> => {
-  const response = await api.get(`/sellers?platform=${platform}`);
-  return response.data;
+export interface SellerProductsResponse {
+  products: SellerProduct[];
+  total: number;
+  merchant_name: string;
+  price_alert_count: number;
+  campaign_alert_count: number;
+  limit?: number;
+  offset?: number;
+}
+
+export const getSellers = async (
+  platform: string,
+  options: { limit?: number; offset?: number } = {},
+): Promise<SellersResponse> => {
+  const params = { platform, limit: options.limit, offset: options.offset };
+  const cacheKey = buildCacheKey(CACHE_PREFIX.sellers, params);
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get('/sellers', { params });
+    return response.data;
+  });
 };
 
 export const getSellerProducts = async (
   merchantId: string,
   platform: string,
   priceAlertOnly: boolean = false,
-  campaignAlertOnly: boolean = false
-): Promise<{ products: SellerProduct[]; total: number; merchant_name: string; price_alert_count: number; campaign_alert_count: number }> => {
-  const response = await api.get(`/sellers/${merchantId}/products?platform=${platform}&price_alert_only=${priceAlertOnly}&campaign_alert_only=${campaignAlertOnly}`);
-  return response.data;
+  campaignAlertOnly: boolean = false,
+  options: { limit?: number; offset?: number } = {},
+): Promise<SellerProductsResponse> => {
+  const params = {
+    platform,
+    price_alert_only: priceAlertOnly,
+    campaign_alert_only: campaignAlertOnly,
+    limit: options.limit,
+    offset: options.offset,
+  };
+  const cacheKey = buildCacheKey(CACHE_PREFIX.sellerProducts, { merchantId, ...params });
+  return getCachedOrFetch(cacheKey, async () => {
+    const response = await api.get(`/sellers/${merchantId}/products`, {
+      params,
+    });
+    return response.data;
+  });
 };
 
 export const exportSellerProducts = async (
@@ -440,8 +550,15 @@ export const exportSellerProducts = async (
   campaignAlertOnly: boolean = false
 ): Promise<void> => {
   const response = await api.get(
-    `/sellers/${merchantId}/export?platform=${platform}&price_alert_only=${priceAlertOnly}&campaign_alert_only=${campaignAlertOnly}`,
-    { responseType: 'blob' }
+    `/sellers/${merchantId}/export`,
+    {
+      params: {
+        platform,
+        price_alert_only: priceAlertOnly,
+        campaign_alert_only: campaignAlertOnly,
+      },
+      responseType: 'blob',
+    }
   );
   
   const contentDisposition = response.headers['content-disposition'];
@@ -478,7 +595,7 @@ export interface ScrapeResultItem {
   product_name?: string;
   barcode?: string;
   status: string;
-  scraped_data?: Record<string, any>;
+  scraped_data?: Record<string, unknown>;
   error_message?: string;
 }
 

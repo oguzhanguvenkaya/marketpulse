@@ -67,6 +67,21 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
+def log_endpoint_metric(
+    logger: logging.Logger,
+    endpoint: str,
+    latency_ms: float,
+    **fields,
+) -> None:
+    field_parts = []
+    for key, value in fields.items():
+        if value is None:
+            continue
+        field_parts.append(f"{key}={value}")
+    extra = f" {' '.join(field_parts)}" if field_parts else ""
+    logger.info(f"metric endpoint={endpoint} latency_ms={latency_ms:.2f}{extra}")
+
+
 scraping_logger = get_logger('scraping')
 price_monitor_logger = get_logger('price_monitor')
 api_logger = get_logger('api')

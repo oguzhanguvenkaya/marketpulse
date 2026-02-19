@@ -25,6 +25,7 @@ export default function SellerDetail() {
     if (merchantId) {
       fetchProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [merchantId, platform, priceAlertOnly, campaignAlertOnly]);
 
   const fetchProducts = async () => {
@@ -78,32 +79,32 @@ export default function SellerDetail() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-5 md:space-y-6">
+      <div className="flex items-start gap-3 md:gap-4">
         <button
           onClick={() => navigate(`/sellers?platform=${platform}`)}
-          className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors"
+          className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors shrink-0"
         >
           <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-white">{merchantName || 'Seller'}</h1>
-          <p className="text-neutral-400 mt-1">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-bold text-white truncate">{merchantName || 'Seller'}</h1>
+          <p className="text-sm md:text-base text-neutral-400 mt-1">
             {products.length} products • {priceAlertCount} price alerts • {campaignAlertCount} campaign alerts
           </p>
         </div>
       </div>
 
       <div className="card-dark p-4">
-        <div className="flex flex-wrap items-center gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 md:gap-4 mb-4">
           <input
             type="text"
             placeholder="Search by name, SKU, barcode, brand..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-dark flex-1 min-w-[200px]"
+            className="input-dark w-full xl:col-span-2"
           />
           
           <button
@@ -138,7 +139,7 @@ export default function SellerDetail() {
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
               disabled={exporting || filteredProducts.length === 0}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
               {exporting ? (
                 <>
@@ -158,7 +159,7 @@ export default function SellerDetail() {
               )}
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
+              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
                 <button
                   onClick={() => handleExport('all')}
                   className="w-full px-4 py-2 text-left text-neutral-300 hover:bg-dark-600 rounded-t-lg"
@@ -197,7 +198,7 @@ export default function SellerDetail() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table-dark w-full">
+            <table className="table-dark w-full min-w-[980px]">
               <thead>
                 <tr>
                   <th className="text-left" rowSpan={2}>Product</th>
@@ -220,7 +221,10 @@ export default function SellerDetail() {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product) => {
+                  const resolvedProductUrl = product.seller_url || product.product_url || '';
+                  const hasValidProductUrl = /^https?:\/\//i.test(resolvedProductUrl);
+                  return (
                   <tr 
                     key={product.product_id}
                     className={`${product.price_alert || product.campaign_alert ? (product.price_alert ? 'bg-red-900/20' : 'bg-orange-900/20') : ''} hover:bg-dark-600 transition-colors`}
@@ -238,9 +242,9 @@ export default function SellerDetail() {
                           <div className="text-white font-medium truncate" title={product.product_name}>
                             {product.product_name || 'Unnamed Product'}
                           </div>
-                          {(product.seller_url || product.product_url) && (
+                          {hasValidProductUrl && (
                             <a
-                              href={product.seller_url || product.product_url}
+                              href={resolvedProductUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-accent-primary hover:underline"
@@ -311,7 +315,8 @@ export default function SellerDetail() {
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

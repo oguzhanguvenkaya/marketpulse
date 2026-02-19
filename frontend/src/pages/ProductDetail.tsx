@@ -18,6 +18,7 @@ export default function ProductDetail() {
     if (id) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadData = async () => {
@@ -82,8 +83,8 @@ export default function ProductDetail() {
     type: 'scatter' as const,
     mode: 'lines+markers' as const,
     name: 'Price',
-    line: { color: '#00d4ff', width: 2 },
-    marker: { color: '#00d4ff', size: 6 }
+    line: { color: '#38bdf8', width: 2 },
+    marker: { color: '#38bdf8', size: 6 }
   };
 
   const ratingData = {
@@ -92,8 +93,8 @@ export default function ProductDetail() {
     type: 'scatter' as const,
     mode: 'lines+markers' as const,
     name: 'Rating',
-    line: { color: '#00e676', width: 2 },
-    marker: { color: '#00e676', size: 6 }
+    line: { color: '#22c55e', width: 2 },
+    marker: { color: '#22c55e', size: 6 }
   };
 
   const plotLayout = {
@@ -116,8 +117,8 @@ export default function ProductDetail() {
   const hasDiscount = product.discounted_price && product.latest_price && product.discounted_price < product.latest_price;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-2 text-sm text-neutral-500">
+    <div className="space-y-5 md:space-y-6 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-neutral-500">
         <Link to="/products" className="hover:text-accent-primary transition-colors">Products</Link>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -125,24 +126,24 @@ export default function ProductDetail() {
         <span className="text-neutral-300">Detail</span>
       </div>
 
-      <div className="card-dark p-6">
-        <div className="flex gap-6">
+      <div className="card-dark p-4 md:p-6">
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
           {product.image_url ? (
-            <img src={product.image_url} alt="" className="w-48 h-48 object-cover rounded-lg border border-white/10" />
+            <img src={product.image_url} alt="" className="w-full sm:w-56 md:w-64 lg:w-48 h-56 md:h-64 lg:h-48 object-cover rounded-lg border border-white/10" />
           ) : (
-            <div className="w-48 h-48 rounded-lg bg-dark-600 flex items-center justify-center">
+            <div className="w-full sm:w-56 md:w-64 lg:w-48 h-56 md:h-64 lg:h-48 rounded-lg bg-dark-600 flex items-center justify-center">
               <svg className="w-12 h-12 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
           )}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {product.brand && (
               <span className="badge badge-info mb-2">{product.brand}</span>
             )}
-            <h1 className="text-2xl font-bold text-white mb-3">{product.name}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-white mb-3 break-words">{product.name}</h1>
             
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-xs md:text-sm mb-4">
               <p className="text-neutral-400">Platform: <span className="text-neutral-200">{product.platform}</span></p>
               {product.seller_name && (
                 <p className="text-neutral-400">
@@ -158,8 +159,8 @@ export default function ProductDetail() {
               {product.barcode && <p className="text-neutral-400">Barcode: <span className="text-neutral-200">{product.barcode}</span></p>}
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-4">
-              <div className="stat-card py-3 px-4" style={{ '--stat-color': '#00e676' } as React.CSSProperties}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
+              <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#22c55e' } as React.CSSProperties}>
                 {hasDiscount ? (
                   <>
                     <div className="text-sm line-through text-neutral-500">{formatPrice(product.latest_price)}</div>
@@ -170,17 +171,17 @@ export default function ProductDetail() {
                 )}
                 <div className="text-xs text-neutral-500">Current Price</div>
               </div>
-              <div className="stat-card py-3 px-4" style={{ '--stat-color': '#ffab00' } as React.CSSProperties}>
+              <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#f59e0b' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-warning">
                   {product.latest_rating ? product.latest_rating.toFixed(1) : '-'}
                 </div>
                 <div className="text-xs text-neutral-500">Rating</div>
               </div>
-              <div className="stat-card py-3 px-4" style={{ '--stat-color': '#00d4ff' } as React.CSSProperties}>
+              <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#38bdf8' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-accent-primary">{product.reviews_count || 0}</div>
                 <div className="text-xs text-neutral-500">Reviews</div>
               </div>
-              <div className="stat-card py-3 px-4" style={{ '--stat-color': '#7c4dff' } as React.CSSProperties}>
+              <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#2dd4bf' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-purple-400">
                   {product.stock_count ? (product.stock_count < 50 ? `<${product.stock_count}` : product.stock_count) : (product.in_stock ? 'Yes' : 'No')}
                 </div>
@@ -231,10 +232,10 @@ export default function ProductDetail() {
 
       <div className="card-dark overflow-hidden">
         <div className="border-b border-white/5">
-          <nav className="flex">
+          <nav className="flex overflow-x-auto scrollbar-thin">
             <button
               onClick={() => setActiveTab('info')}
-              className={`px-6 py-4 border-b-2 font-medium text-sm transition-all ${
+              className={`px-4 md:px-6 py-3.5 md:py-4 border-b-2 font-medium text-xs md:text-sm transition-all whitespace-nowrap ${
                 activeTab === 'info' ? 'border-accent-primary text-accent-primary' : 'border-transparent text-neutral-400 hover:text-neutral-200'
               }`}
             >
@@ -242,7 +243,7 @@ export default function ProductDetail() {
             </button>
             <button
               onClick={() => setActiveTab('sellers')}
-              className={`px-6 py-4 border-b-2 font-medium text-sm transition-all ${
+              className={`px-4 md:px-6 py-3.5 md:py-4 border-b-2 font-medium text-xs md:text-sm transition-all whitespace-nowrap ${
                 activeTab === 'sellers' ? 'border-accent-primary text-accent-primary' : 'border-transparent text-neutral-400 hover:text-neutral-200'
               }`}
             >
@@ -250,7 +251,7 @@ export default function ProductDetail() {
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`px-6 py-4 border-b-2 font-medium text-sm transition-all ${
+              className={`px-4 md:px-6 py-3.5 md:py-4 border-b-2 font-medium text-xs md:text-sm transition-all whitespace-nowrap ${
                 activeTab === 'reviews' ? 'border-accent-primary text-accent-primary' : 'border-transparent text-neutral-400 hover:text-neutral-200'
               }`}
             >
@@ -259,7 +260,7 @@ export default function ProductDetail() {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {activeTab === 'info' && (
             <div>
               {product.description ? (
@@ -317,7 +318,7 @@ export default function ProductDetail() {
                 <div className="space-y-4">
                   {product.reviews.map((review, i) => (
                     <div key={i} className="border-b border-white/5 pb-4 last:border-b-0">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                         <div className="flex items-center gap-3">
                           <span className="font-medium text-neutral-200">{review.author || 'Anonymous'}</span>
                           {review.rating && (
@@ -349,8 +350,8 @@ export default function ProductDetail() {
       </div>
 
       {snapshots.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card-dark p-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="card-dark p-4 md:p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
                 <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -369,7 +370,7 @@ export default function ProductDetail() {
               style={{ width: '100%' }}
             />
           </div>
-          <div className="card-dark p-5">
+          <div className="card-dark p-4 md:p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
                 <svg className="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,7 +392,7 @@ export default function ProductDetail() {
         </div>
       )}
 
-      <div className="card-dark p-5">
+      <div className="card-dark p-4 md:p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
             <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +401,7 @@ export default function ProductDetail() {
           </div>
           <h2 className="text-lg font-semibold text-white">AI Analysis</h2>
         </div>
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-4">
           <input
             type="text"
             value={question}
@@ -411,7 +412,7 @@ export default function ProductDetail() {
           <button
             onClick={handleAnalyze}
             disabled={analyzing}
-            className="btn-primary"
+            className="btn-primary w-full md:w-auto flex items-center justify-center"
           >
             {analyzing ? (
               <span className="flex items-center gap-2">

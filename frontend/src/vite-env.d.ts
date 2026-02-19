@@ -1,17 +1,26 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+  readonly VITE_INTERNAL_API_KEY?: string;
+  readonly VITE_QUERY_CACHE_TTL_MS?: string;
+  readonly VITE_DISABLE_STRICT_MODE?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module 'react-plotly.js' {
-  import { Component } from 'react';
-  import { PlotParams } from 'plotly.js';
+  import { Component, type CSSProperties } from 'react';
   
   export interface PlotProps {
-    data: any[];
-    layout?: any;
-    config?: any;
-    style?: React.CSSProperties;
+    data: unknown[];
+    layout?: unknown;
+    config?: unknown;
+    style?: CSSProperties;
     className?: string;
-    onInitialized?: (figure: any, graphDiv: HTMLElement) => void;
-    onUpdate?: (figure: any, graphDiv: HTMLElement) => void;
+    onInitialized?: (figure: unknown, graphDiv: HTMLElement) => void;
+    onUpdate?: (figure: unknown, graphDiv: HTMLElement) => void;
     onError?: (err: Error) => void;
   }
   

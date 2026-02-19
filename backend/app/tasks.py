@@ -1,11 +1,15 @@
 import asyncio
 from datetime import datetime, date
+from typing import List, Optional
 from celery import Celery
 from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.database import SessionLocal
-from app.db.models import Product, ProductSnapshot, SearchTask
+from app.db.models import Product, ProductSnapshot, SearchTask, PriceMonitorTask
+from app.core.logger import price_monitor_logger as logger
 from app.services.scraping import ScrapingService
+from app.services.price_monitor_service import price_monitor_service
+from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
 
 celery_app = Celery(
     'tasks',
@@ -119,3 +123,66 @@ async def scrape_and_save(scraper: ScrapingService, keyword: str, platform: str,
     
     finally:
         await scraper.close_browser()
+
+
+@celery_app.task(bind=True, max_retries=0)
+def run_price_monitor_fetch_task(
+    self,
+    task_id: str,
+    platform: str,
+    fetch_type: str = "active",
+    product_ids: Optional[List[str]] = None,
+):
+    db = SessionLocal()
+    try:
+        task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+        if not task:
+            return {"error": "Task not found"}
+
+        try:
+            settings.require_scraper_api_key()
+        except ValueError as exc:
+            task.status = "failed"
+            task.error_message = str(exc)
+            task.completed_at = datetime.utcnow()
+            db.commit()
+            return {"status": "failed", "reason": "missing_scraper_key"}
+
+        logger.info(
+            f"Starting celery price-monitor fetch task_id={task_id} platform={platform} fetch_type={fetch_type}"
+        )
+
+        if platform == "trendyol":
+            run_async(
+                trendyol_price_monitor_service.fetch_all_products(
+                    db=db,
+                    task=task,
+                    product_ids=product_ids,
+                    platform=platform,
+                    fetch_type=fetch_type,
+                )
+            )
+        else:
+            run_async(
+                price_monitor_service.fetch_all_products(
+                    db=db,
+                    task=task,
+                    product_ids=product_ids,
+                    platform=platform,
+                    fetch_type=fetch_type,
+                )
+            )
+
+        return {"status": "completed", "task_id": task_id}
+    except Exception as exc:
+        db.rollback()
+        task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+        if task:
+            task.status = "failed"
+            task.error_message = str(exc)
+            task.completed_at = datetime.utcnow()
+            db.commit()
+        logger.error(f"Price monitor celery task failed task_id={task_id}: {exc}")
+        raise
+    finally:
+        db.close()

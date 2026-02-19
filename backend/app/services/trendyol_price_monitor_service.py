@@ -1,4 +1,3 @@
-import os
 import ssl
 import random
 import asyncio
@@ -9,6 +8,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from app.core.logger import price_monitor_logger as logger
+from app.core.config import settings
 from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
 
 
@@ -21,25 +21,28 @@ class TrendyolPriceMonitorService:
     Bu sayede render=true gerekmez, daha hızlı ve ucuz!
     """
     
-    MAX_CONCURRENT_REQUESTS = 17  # Basic mode hızlı, yüksek concurrent limit
+    DEFAULT_MAX_CONCURRENT_REQUESTS = 17  # Basic mode hızlı, yüksek concurrent limit
     
     def __init__(self):
-        self.api_key = os.environ.get('SCRAPPER_API', '')
         self._semaphore = None
-        if not self.api_key:
-            try:
-                with open('/etc/secrets/SCRAPPER_API', 'r') as f:
-                    self.api_key = f.read().strip()
-            except:
-                pass
+        configured_limit = getattr(settings, "PRICE_MONITOR_MAX_CONCURRENT_REQUESTS", self.DEFAULT_MAX_CONCURRENT_REQUESTS)
+        self.max_concurrent_requests = max(1, int(configured_limit or self.DEFAULT_MAX_CONCURRENT_REQUESTS))
+
+    @property
+    def api_key(self) -> str:
+        return (settings.SCRAPER_API_KEY or "").strip()
     
-    async def fetch_product_page(self, url: str, session: aiohttp.ClientSession) -> Optional[str]:
+    async def fetch_product_page(self, url: str, session: aiohttp.ClientSession) -> Dict[str, Any]:
         """ScraperAPI ile Trendyol ürün sayfasını çek - BASIC MODE (JSON SSR'da mevcut)"""
+        api_key = self.api_key
+        if not api_key:
+            return {"html": None, "error_type": "auth_error", "status_code": None}
+
         session_num = random.randint(1, 999999)
         proxy_url = 'http://proxy-server.scraperapi.com:8001'
         # render=true KALDIRILDI - JSON verisi basic modda mevcut
         proxy_user = f'scraperapi.session_number={session_num}'
-        proxy_pass = self.api_key
+        proxy_pass = api_key
         
         proxy_auth = aiohttp.BasicAuth(proxy_user, proxy_pass)
         
@@ -62,16 +65,24 @@ class TrendyolPriceMonitorService:
                     html = await resp.text()
                     if 'merchantListing' in html:
                         logger.debug("Trendyol page fetched with merchantListing data")
-                        return html
+                        return {"html": html, "error_type": None, "status_code": 200}
                     else:
                         logger.debug("Trendyol page fetched but no merchantListing found")
-                        return html
-                else:
-                    logger.warning(f"Trendyol page error: status {resp.status}")
-                    return None
+                        return {"html": html, "error_type": None, "status_code": 200}
+                if resp.status in (401, 403):
+                    logger.warning(f"Trendyol page auth_error: status {resp.status}")
+                    return {"html": None, "error_type": "auth_error", "status_code": resp.status}
+                if resp.status in (404, 410):
+                    logger.warning(f"Trendyol page no_data: status {resp.status}")
+                    return {"html": None, "error_type": "no_data", "status_code": resp.status}
+                logger.warning(f"Trendyol page upstream_error: status {resp.status}")
+                return {"html": None, "error_type": "upstream_error", "status_code": resp.status}
+        except asyncio.TimeoutError:
+            logger.error("Error fetching Trendyol page: timeout")
+            return {"html": None, "error_type": "upstream_error", "status_code": None}
         except Exception as e:
             logger.error(f"Error fetching Trendyol page: {e}")
-            return None
+            return {"html": None, "error_type": "upstream_error", "status_code": None}
     
     def parse_merchants_from_json(self, html: str) -> List[Dict[str, Any]]:
         """HTML içindeki JSON verisinden tüm satıcıları parse et (main + others)
@@ -194,24 +205,40 @@ class TrendyolPriceMonitorService:
     async def fetch_single_product(self, product_id: str, sku: str, product_url: str, http_session: aiohttp.ClientSession) -> Dict[str, Any]:
         """Tek bir ürün için HTTP isteği yap ve sonucu döndür (thread-safe)"""
         if self._semaphore is None:
-            self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+            self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         async with self._semaphore:
-            html = await self.fetch_product_page(product_url, http_session)
+            fetch_result = await self.fetch_product_page(product_url, http_session)
             return {
                 "product_id": product_id,
                 "sku": sku,
-                "html": html,
-                "success": html is not None
+                "html": fetch_result.get("html"),
+                "success": fetch_result.get("html") is not None,
+                "error_type": fetch_result.get("error_type"),
             }
     
-    def save_product_result(self, db: Session, product: MonitoredProduct, html: Optional[str]) -> bool:
+    def save_product_result(
+        self,
+        db: Session,
+        product: MonitoredProduct,
+        html: Optional[str],
+        error_type: Optional[str] = None
+    ) -> Dict[str, bool]:
         """Ürün sonucunu veritabanına kaydet (sequential - thread-safe)"""
+        outcome = {"success": False, "inactive": False}
+
+        if error_type in {"auth_error", "upstream_error"}:
+            logger.warning(
+                f"Trendyol fetch failed for SKU {product.sku}: error_type={error_type} - keeping current active state"
+            )
+            return outcome
+
         if not html:
             product.is_active = False
             product.last_fetched_at = datetime.utcnow()
             db.commit()
             logger.warning(f"No HTML for Trendyol SKU {product.sku} - marked as inactive")
-            return False
+            outcome["inactive"] = True
+            return outcome
         
         has_merchant_listing = 'merchantListing' in html
         
@@ -224,7 +251,8 @@ class TrendyolPriceMonitorService:
             product.last_fetched_at = datetime.utcnow()
             db.commit()
             logger.warning(f"No sellers found for Trendyol SKU {product.sku} (HTML={len(html)} bytes, merchantListing={has_merchant_listing}) - marked as inactive")
-            return False
+            outcome["inactive"] = True
+            return outcome
         
         valid_sellers = [s for s in sellers if s.get('price') is not None]
         
@@ -233,7 +261,8 @@ class TrendyolPriceMonitorService:
             product.last_fetched_at = datetime.utcnow()
             db.commit()
             logger.warning(f"No valid sellers (with price) for Trendyol SKU {product.sku} - marked as inactive")
-            return False
+            outcome["inactive"] = True
+            return outcome
         
         if not product.is_active:
             product.is_active = True
@@ -262,7 +291,8 @@ class TrendyolPriceMonitorService:
         db.commit()
         
         logger.info(f"Saved {len(valid_sellers)} sellers for Trendyol SKU {product.sku}")
-        return True
+        outcome["success"] = True
+        return outcome
     
     async def fetch_all_products(self, db: Session, task: PriceMonitorTask, product_ids: List[str] = None, platform: str = "trendyol", fetch_type: str = "active"):
         """Tüm Trendyol izlenen ürünler için satıcı verilerini çek - 17 concurrent threads
@@ -307,13 +337,13 @@ class TrendyolPriceMonitorService:
             logger.info(f"No Trendyol products to fetch (fetch_type={fetch_type})")
             return
         
-        self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+        self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
         
-        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=self.MAX_CONCURRENT_REQUESTS)
+        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=self.max_concurrent_requests)
         
         completed = 0
         failed = 0
@@ -344,12 +374,18 @@ class TrendyolPriceMonitorService:
                     product = product_map.get(result["product_id"])
                     sku = sku_map.get(result["product_id"], "unknown")
                     if product:
-                        success = self.save_product_result(db, product, result["html"])
-                        if success:
+                        save_result = self.save_product_result(
+                            db,
+                            product,
+                            result["html"],
+                            result.get("error_type")
+                        )
+                        if save_result["success"]:
                             completed += 1
                         else:
                             failed += 1
-                            failed_skus.append(sku)
+                            if save_result["inactive"]:
+                                failed_skus.append(sku)
                 except Exception as e:
                     logger.error(f"Error processing Trendyol product: {e}")
                     db.rollback()
@@ -372,7 +408,7 @@ class TrendyolPriceMonitorService:
 
     async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
         """Tek bir Trendyol ürününü çekip DB'ye kaydet."""
-        self._semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_REQUESTS)
+        self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
 
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
@@ -383,7 +419,8 @@ class TrendyolPriceMonitorService:
         try:
             async with aiohttp.ClientSession(connector=connector) as http_session:
                 result = await self.fetch_single_product(str(product.id), product.sku, product.product_url, http_session)
-                return self.save_product_result(db, product, result["html"])
+                save_result = self.save_product_result(db, product, result["html"], result.get("error_type"))
+                return save_result["success"]
         except Exception as e:
             logger.error(f"Single Trendyol fetch error for SKU {product.sku}: {e}")
             db.rollback()

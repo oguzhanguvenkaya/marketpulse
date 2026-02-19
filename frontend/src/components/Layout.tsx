@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -9,11 +9,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
-
-  const navItems = [
+  const navItems = useMemo(() => [
     { path: '/', label: 'Dashboard', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -55,31 +51,38 @@ export default function Layout({ children }: LayoutProps) {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
     )},
-  ];
+  ], []);
+
+  const activeLabel = useMemo(() => {
+    const activeItem = navItems.find((item) => item.path === location.pathname);
+    return activeItem?.label || 'Workspace';
+  }, [location.pathname, navItems]);
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
+    <div className="min-h-screen app-shell text-neutral-200 flex">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          className="fixed inset-0 bg-black/65 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <aside className={`w-64 bg-dark-800 border-r border-white/5 flex flex-col fixed h-full z-50 transition-transform duration-300 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0`}>
-        <div className="p-6 border-b border-white/5">
+      <aside
+        className={`w-72 sidebar-surface flex flex-col fixed h-full z-50 transition-transform duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
+              <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center">
                 <svg className="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               <div>
-                <span className="text-lg font-bold text-white">Pazaryeri</span>
-                <span className="text-xs text-neutral-400 block">Analytics Platform</span>
+                <span className="text-xl font-bold text-white tracking-tight">MarketPulse</span>
+                <span className="text-xs text-neutral-400 block">Intelligence Console</span>
               </div>
             </Link>
             <button
@@ -92,27 +95,26 @@ export default function Layout({ children }: LayoutProps) {
             </button>
           </div>
         </div>
-        
+
         <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-accent-primary/10 text-accent-primary border border-accent-primary/20'
-                      : 'text-neutral-300 hover:bg-white/5 hover:text-white border border-transparent'
+                  onClick={() => setSidebarOpen(false)}
+                  className={`nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    isActive ? 'nav-item-active text-white' : 'text-neutral-300'
                   }`}
                 >
-                  <span className={isActive ? 'text-accent-primary' : 'text-neutral-400'}>
+                  <span className={isActive ? 'text-accent-secondary' : 'text-neutral-400'}>
                     {item.icon}
                   </span>
                   {item.label}
                   {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-primary shadow-glow-cyan" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-secondary shadow-glow-cyan" />
                   )}
                 </Link>
               );
@@ -120,36 +122,47 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
 
-        <div className="p-4 border-t border-white/5">
-          <div className="px-4 py-3 rounded-lg bg-dark-700/50">
-            <div className="flex items-center gap-2 text-xs text-neutral-400">
+        <div className="p-4 border-t border-white/10">
+          <div className="px-4 py-3 rounded-xl bg-dark-700/45 border border-white/10">
+            <div className="flex items-center gap-2 text-xs text-neutral-300">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              System Online
+              Realtime services active
             </div>
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 ml-0 md:ml-64 min-w-0">
-        <header className="h-14 md:h-16 bg-dark-800/50 backdrop-blur-sm border-b border-white/5 flex items-center px-4 md:px-8 sticky top-0 z-30">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 -ml-1 mr-3 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex items-center gap-2 text-sm text-neutral-400">
-            <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-xs sm:text-sm">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
+      <main className="flex-1 ml-0 md:ml-72 min-w-0">
+        <header className="h-16 topbar-surface flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div>
+              <p className="text-xs uppercase tracking-[0.15em] text-neutral-500">Workspace</p>
+              <h1 className="text-base md:text-lg font-bold text-white">{activeLabel}</h1>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="badge badge-info">Live analytics</div>
+            <div className="text-sm text-neutral-400">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </div>
           </div>
         </header>
-        <div className="p-4 md:p-8">
+
+        <div className="content-wrap p-4 md:p-8 animate-fade-in">
           {children}
         </div>
       </main>

@@ -1,4 +1,3 @@
-import os
 import re
 import json
 import asyncio
@@ -7,6 +6,7 @@ import aiohttp
 import logging
 from urllib.parse import quote_plus
 from bs4 import BeautifulSoup
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +31,7 @@ class UrlScraperService:
     MAX_CONCURRENT = 15
 
     def __init__(self):
-        self.api_key = os.environ.get('SCRAPPER_API', '')
-        if not self.api_key:
-            try:
-                with open('/etc/secrets/SCRAPPER_API', 'r') as f:
-                    self.api_key = f.read().strip()
-            except:
-                pass
+        self.api_key = (settings.SCRAPER_API_KEY or "").strip()
         self._semaphore = None
 
     async def fetch_url(self, url: str) -> str | None:
