@@ -1,11 +1,11 @@
-# Pazaryeri Veri Analiz Platformu
+# Pazaryeri Veri Analiz Platformu (MarketPulse)
 
 ## Overview
-The Marketplace Data Analysis Platform is designed to empower marketplace sellers and marketing agencies with data-driven decision-making capabilities. It achieves this by scraping product data from major Turkish marketplaces, analyzing market trends, and delivering AI-powered insights. The platform's vision is to become a crucial tool for competitive analysis, strategic pricing, and understanding market dynamics within the e-commerce landscape.
+The Marketplace Data Analysis Platform empowers marketplace sellers and marketing agencies with data-driven decision-making capabilities. It scrapes product data from major Turkish marketplaces (Hepsiburada, Trendyol), analyzes market trends, tracks seller prices, monitors sponsored ads, and delivers AI-powered insights. The platform serves as a tool for competitive analysis, strategic pricing, and understanding market dynamics within the e-commerce landscape.
 
 ## User Preferences
 - English language UI with Palantir-style dark theme
-- Focus on Hepsiburada marketplace initially
+- Focus on Hepsiburada marketplace initially, Trendyol support added for price monitoring
 - Limit to 8 products per search to manage costs
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
@@ -17,50 +17,109 @@ The Marketplace Data Analysis Platform is designed to empower marketplace seller
 - Subtle animations: fade-in, slide-in, pulse-glow effects
 
 ## System Architecture
-The platform is built with a clear separation of concerns, featuring a FastAPI backend and a React frontend. It employs a robust, two-stage scraping strategy for comprehensive data collection and a modular proxy architecture for reliable data acquisition.
+The platform is built with a clear separation of concerns, featuring a FastAPI backend (port 8000) and a React frontend (port 5173 dev / static served by backend in production). It employs a robust, two-stage scraping strategy for comprehensive data collection and a modular proxy architecture for reliable data acquisition. Celery + Redis handle async task execution for price monitoring and search jobs.
 
-**UI/UX Decisions:**
-The frontend utilizes React, Vite, and TailwindCSS for a modern, responsive, and efficient user experience. Key UI components include:
-- A dashboard for overall market insights.
-- Product listings and detailed product pages with tabs for various data points.
-- Dedicated pages for "Reklamlar" (sponsored products) and "Fiyat Takip" (price monitoring).
-- Data visualization through charts for price and rating trends (Plotly.js).
+### Backend Structure
+```
+backend/app/
+├── api/           → Route handlers (routes.py, url_scraper_routes.py, transcript_routes.py, json_editor_routes.py)
+├── core/          → config.py (Settings), security.py (API key auth), logger.py
+├── db/            → database.py (SQLAlchemy engine), models.py (13 ORM models)
+├── services/      → scraping.py, price_monitor_service.py, trendyol_price_monitor_service.py,
+│                    proxy_providers.py, llm_service.py, url_scraper_service.py, transcript_service.py
+├── tasks.py       → Celery app + task definitions (run_scraping_task, run_price_monitor_fetch_task)
+└── main.py        → FastAPI app init, CORS, health endpoint, SPA serving
+```
 
-**Technical Implementations & Feature Specifications:**
-- **Two-Stage Scraping:** Products are first identified from search/listing pages, then individual product detail pages are visited to extract extensive data. This includes parsing `utagData` JavaScript objects, JSON-LD schema, and various HTML elements to gather product name, brand, category, price, SKU, barcode, seller information, ratings, reviews, stock status, discounted prices, coupons, and campaign details.
-- **Price Monitoring System:** Allows distributors to track seller prices across multiple platforms (Hepsiburada, Trendyol) for specific SKUs. It supports bulk product imports and initiates tasks for fetching price data, capturing details like merchant name, price, stock, buybox order, and shipping information.
-- **Sponsored Ads Tracking:** Identifies individual sponsored products and groups them to track brand advertisers. This involves parsing advertisement-specific HTML classes and decoding tracking URLs to extract real product information and associated seller data.
-- **AI Analysis:** Integrates OpenAI's GPT-4o-mini for generating insights from collected product data.
-- **Modular Proxy System:** Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass) if ScraperAPI fails. This system includes debug logging and HTML saving for troubleshooting scraping issues.
-- **URL Scraper:** A generic URL scraping system that can scrape any product URL. Supports single URL input, bulk JSON input, and CSV file upload. Uses ScraperAPI to fetch pages, then extracts product data via HTML meta tags, JSON-LD schema, Open Graph data, and general HTML parsing. Results are stored in DB and downloadable as JSON. DB models: `ScrapeJob`, `ScrapeResult`. API routes at `/api/url-scraper/`. 15 concurrent workers with stop/resume support.
-- **YouTube Video Transcript Scraper:** Extracts transcripts from YouTube videos using `youtube-transcript-api`. Supports single URL input, bulk JSON input, and CSV file upload (auto-detects `Video_URL`, `Video_URL1`...`Video_URL4` columns). Fetches transcripts in original language (prefers manual over auto-generated). Features: 10 concurrent workers, stop/resume mechanism, duplicate URL removal, real-time progress tracking, downloadable JSON results. DB models: `TranscriptJob`, `TranscriptResult`. API routes at `/api/transcripts/`. Frontend at `/video-transcripts`.
-- **JSON Product Editor:** Full-stack tool for editing product catalog JSON files with PostgreSQL persistence. Supports drag & drop / file picker for multiple .json files, stored in DB via `JsonFile` model (UUID, filename, json_content, timestamps). File list view loads from DB API, enabling cross-browser/cross-device access. **Fully dynamic rendering**: no hardcoded field interface — all product keys are auto-detected and rendered based on value type (string→text input, long string→textarea, number→number input, boolean→toggle, string array→tag input, object array→item editor, nested object→collapsible sub-section with recursive rendering). Every object section has "Add Field" button (with key name + type selector: Text/Long Text/Number/Boolean/Array/Object) and every field has a "Delete" button with confirmation. Special handling: price field converts kuruş↔TL, image_url shows preview, template.sub_type uses dropdown from metadata.sub_types, FAQ arrays get Q&A editor. Metadata section also fully dynamic. Tab bar shows only current file's group_name and product count. Supports any JSON structure. Download current/all as formatted JSON. DB models: `JsonFile`. API routes at `/api/json-editor/`. Frontend at `/json-editor`.
-- **Database Schema:** Designed to store rich product information, including `Products`, `ProductSnapshots`, `ProductSellers`, `ProductReviews`, `SponsoredBrandAds`, `ScrapeJob`, `ScrapeResult`, `TranscriptJob`, and `TranscriptResult`. This allows for historical tracking of prices, ratings, and seller activities.
-- **Backend Services:** Implemented with FastAPI, utilizing background tasks for asynchronous operations like scraping. SQLAlchemy is used for ORM with PostgreSQL.
-- **Frontend Services:** Uses React with TypeScript, TailwindCSS, and a custom API client for interacting with the backend.
+### Frontend Structure
+```
+frontend/src/
+├── pages/         → 10 lazy-loaded pages (Dashboard, Products, ProductDetail, Ads, PriceMonitor,
+│                    Sellers, SellerDetail, UrlScraper, VideoTranscripts, JsonEditor)
+├── components/    → Layout.tsx (sidebar, header, mobile menu)
+├── services/      → api.ts (Axios client, 700+ lines), queryCache.ts (TTL-based cache)
+├── App.tsx        → Router setup
+└── main.tsx       → Entry point
+```
 
-**System Design Choices:**
-- **Containerization Readiness:** Though not explicitly stated, the project structure implies a readiness for containerization with separate frontend and backend folders.
-- **Asynchronous Operations:** Leverages FastAPI's background tasks for non-blocking operations, crucial for long-running scraping processes.
-- **Robust Error Handling:** The proxy system incorporates fallback logic and debug logging to ensure resilience against scraping failures and bot detection.
-- **Extensible Data Model:** The database schema is designed to accommodate various product attributes and relationships, supporting future expansions.
+## Features
+
+### Two-Stage Scraping
+Products are first identified from search/listing pages, then individual product detail pages are visited to extract extensive data. This includes parsing `utagData` JavaScript objects, JSON-LD schema, and various HTML elements to gather product name, brand, category, price, SKU, barcode, seller information, ratings, reviews, stock status, discounted prices, coupons, and campaign details.
+
+### Price Monitoring System
+Allows distributors to track seller prices across Hepsiburada and Trendyol for specific SKUs. Supports bulk product imports and initiates Celery tasks for fetching price data. Captures merchant name, price, original price, campaign price, stock, buybox order, shipping info, and campaign tags. Features threshold alerts, inactive SKU tracking, stop/resume, and CSV export.
+
+### Sponsored Ads Tracking
+Identifies individual sponsored products and groups them to track brand advertisers. Parses advertisement-specific HTML classes and decodes tracking URLs to extract real product information and associated seller data.
+
+### AI Analysis
+Integrates OpenAI's GPT-4o-mini for generating insights from collected product data.
+
+### Modular Proxy System
+Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass). Includes debug logging and HTML saving to `/tmp/scraping_debug/` for troubleshooting.
+
+### URL Scraper
+Generic URL scraping system. Supports single URL, bulk JSON, and CSV upload. Uses ScraperAPI to fetch pages, extracts data via meta tags, JSON-LD, Open Graph, and HTML parsing. 15 concurrent workers with stop/resume. DB models: `ScrapeJob`, `ScrapeResult`. Routes: `/api/url-scraper/`.
+
+### YouTube Video Transcript Scraper
+Extracts transcripts using `youtube-transcript-api`. Supports single URL, bulk JSON, and CSV upload (auto-detects Video_URL columns). 10 concurrent workers with stop/resume. DB models: `TranscriptJob`, `TranscriptResult`. Routes: `/api/transcripts/`. Frontend: `/video-transcripts`.
+
+### JSON Product Editor
+Full-stack tool for editing product catalog JSON files with PostgreSQL persistence. Fully dynamic rendering: all product keys auto-detected and rendered based on value type. Supports any JSON structure. DB model: `JsonFile`. Routes: `/api/json-editor/`. Frontend: `/json-editor`.
+
+## Database Models (13 tables)
+- `Product`, `ProductSnapshot`, `ProductSeller`, `ProductReview`
+- `SearchTask`, `SponsoredBrandAd`, `SearchSponsoredProduct`
+- `MonitoredProduct`, `SellerSnapshot`, `PriceMonitorTask`
+- `ScrapeJob`, `ScrapeResult`
+- `TranscriptJob`, `TranscriptResult`
+- `JsonFile`
+
+## Key API Route Groups
+- `/api/search`, `/api/products`, `/api/stats` → Main search and product routes
+- `/api/price-monitor/*` → Price monitoring (products, fetch, sellers, export)
+- `/api/sellers/*` → Seller analysis and export
+- `/api/url-scraper/*` → URL scraping jobs
+- `/api/transcripts/*` → YouTube transcript jobs
+- `/api/json-editor/*` → JSON file management
+- `/health` → System health check
+
+## Celery Tasks
+- `run_scraping_task`: Execute keyword search via Playwright and save products
+- `run_price_monitor_fetch_task`: Fetch prices for monitored products (Hepsiburada or Trendyol)
+- Broker/Backend: Redis (`REDIS_URL`)
 
 ## External Dependencies
-- **Database:** PostgreSQL (Replit built-in)
+- **Database:** PostgreSQL (Neon-backed on Replit)
+- **Queue:** Redis (Celery broker/backend)
 - **AI Service:** OpenAI (GPT-4o-mini)
 - **Proxy Services:**
-    - ScraperAPI (Primary for cost-effective scraping)
-    - Bright Data Residential Proxy (Fallback for advanced bot protection bypass, especially with Playwright)
+    - ScraperAPI (Primary, cost-effective)
+    - Bright Data Residential Proxy (Fallback, premium)
 - **Frontend Libraries:**
-    - React 18
-    - TypeScript
-    - TailwindCSS v4
-    - Plotly.js (for charting)
-    - React Router
+    - React 19, TypeScript, Vite 7, TailwindCSS v4, Plotly.js, React Router DOM v7, Axios
 - **Backend Libraries:**
-    - Python 3.11
-    - FastAPI
-    - SQLAlchemy
-    - Playwright (for advanced web scraping, often with Bright Data)
-    - playwright-stealth (for bot detection evasion)
-    - BeautifulSoup4 (for HTML parsing)
+    - Python 3.11, FastAPI 0.109, SQLAlchemy 2.0, Celery 5.3, Redis 5.0
+    - Playwright 1.41 + playwright-stealth 2.0, BeautifulSoup4 4.12, aiohttp 3.13
+    - OpenAI 1.12, youtube-transcript-api 1.2
+
+## Environment Variables
+### Required
+- `DATABASE_URL` - PostgreSQL connection string
+- `INTERNAL_API_KEY` - API key for mutating endpoints
+- `SCRAPER_API_KEY` (aliases: `SCRAPPER_API`, `SCRAPPPER_API`)
+- `OPENAI_API_KEY` - OpenAI API key
+- `REDIS_URL` - Redis connection (default: `redis://localhost:6379/0`)
+
+### Optional
+- `PRICE_MONITOR_EXECUTOR` (celery|local, default: celery)
+- `PROXY_PROVIDER` (auto|scraperapi|brightdata|direct, default: auto)
+- `CORS_ALLOWED_ORIGINS` - Comma-separated origins
+- `DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`, `DB_POOL_TIMEOUT_SECONDS=30`, `DB_POOL_RECYCLE_SECONDS=180`
+- `BRIGHT_DATA_ACCOUNT_ID`, `BRIGHT_DATA_ZONE_NAME`, `BRIGHT_DATA_ZONE_PASSWORD`
+- `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
+
+## Recent Changes
+- 2025-02-19: Cleaned up outdated planning/architecture documentation files
+- 2025-02-19: Created comprehensive project documentation (README.md, ARCHITECTURE.md, backend/README.md, frontend/README.md)
