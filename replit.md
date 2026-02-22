@@ -9,12 +9,16 @@ The Marketplace Data Analysis Platform empowers marketplace sellers and marketin
 - Limit to 8 products per search to manage costs
 - ScraperAPI as primary (cheaper), Bright Data for fallback
 
-## UI Theme
-- Dark color palette: dark-900 (#0a0b0d) to dark-300 (#3d434e)
-- Accent color: Cyan (#00d4ff) for primary actions and highlights
-- Status colors: Success green, Warning orange, Danger red with glow variants
+## UI Theme (Honey)
+- Light warm color palette: Background #fffbef, Card #fefbf0, Muted #f7eede, Border #e5e0d2
+- Primary accent: Dark brown (#5b4824), Secondary accent: Honey gold (#f7ce86), Tertiary: Sage (#e6ecd3)
+- Text colors: Primary #0f1419, Secondary #5f471d, Muted #9e8b66, Subtle #b5a382
+- Status colors: Success green (#22c55e), Warning orange (#f59e0b), Danger red (#cb5150)
+- Typography: Inter (body), Lora (headings), Space Grotesk (monospace)
+- Border radius: 0.875rem (14px) for cards and buttons
 - Reusable components: card-dark, btn-primary/secondary, input-dark, table-dark, badges, stat-card
 - Subtle animations: fade-in, slide-in, pulse-glow effects
+- Chart colors: #1e9df1, #00b87a, #f7b928, #17bf63, #e6245e
 
 ## System Architecture
 The platform is built with a clear separation of concerns, featuring a FastAPI backend (port 8000) and a React frontend (port 5173 dev / static served by backend in production). It employs a robust, two-stage scraping strategy for comprehensive data collection and a modular proxy architecture for reliable data acquisition. Celery + Redis handle async task execution for price monitoring and search jobs.
@@ -131,6 +135,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Theme change: Switched from Palantir dark theme to Honey light theme. Updated CSS variables, Tailwind config, Layout, and all 14 pages. Colors: cream backgrounds (#fffbef), dark brown primary (#5b4824), honey gold accent (#f7ce86). Typography: Inter body, Lora headings, Space Grotesk monospace. Chart colors updated to Honey palette
 - 2026-02-22: Hybrid detail fetch: Listings API (sellers/prices/stock/buybox/campaigns as clean JSON) + HTML (brand/description/specs via utagData) in parallel. SKU extracted from product URLs (pm-HBCXXXXX pattern) during category scrape. Removed dead _extract_hb_product_data_from_scripts(). Deferred Listings API call when SKU discovered from HTML. Price hierarchy: Listings API buybox #1 > utagData > parsed
 - 2026-02-22: Enhanced detail fetch: utagData parsing for brand, seller_list, SKU, barcode, category_path, stock_status, shipping_type, specs, description. New DB columns on CategoryProduct. Price fix: CSS class-based extraction (originalPrice/currentPrice/discountRate) replacing regex that captured campaign text. Duplicate handling: URL-based dedup with UPDATE on re-scrape. Sponsored ad URL resolution via redirect param. Frontend detail panel shows all new fields
 - 2026-02-22: Marketplace sidebar filter extraction: HB VerticalFilter brand links (19 brands), Satıcı facet script data with €XX→%XX URL decode (18 sellers), price ranges from Fiyat Aralığı. TY filters from __SEARCH_APP_INITIAL_STATE__. filter_data JSON column on CategorySession. category-filters endpoint merges marketplace + product-derived filters. Frontend instantly populates filter dropdowns from session.filter_data after scrape

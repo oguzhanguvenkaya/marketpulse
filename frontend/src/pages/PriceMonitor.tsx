@@ -386,8 +386,8 @@ export default function PriceMonitor() {
     <div className="space-y-4 md:space-y-6 animate-fade-in">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-white">Price Monitor</h1>
-          <p className="text-sm md:text-base text-neutral-400 mt-1">Track seller prices and identify violations</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419]">Price Monitor</h1>
+          <p className="text-sm md:text-base text-[#9e8b66] mt-1">Track seller prices and identify violations</p>
         </div>
         <div className="flex flex-wrap gap-2 md:gap-3">
           <button onClick={() => setShowImportModal(true)} className="btn-secondary flex items-center gap-2">
@@ -422,30 +422,30 @@ export default function PriceMonitor() {
                 </svg>
               </button>
               {showFetchMenu && (
-                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] card-dark border border-white/10 z-20 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] card-dark border border-[#5b4824]/12 z-20 overflow-hidden">
                   <button 
                     onClick={() => handleFetchAll('active')} 
                     disabled={activeTotalCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium">Active Products</div>
-                    <div className="text-xs text-neutral-400">{activeTotalCount} products</div>
+                    <div className="text-xs text-[#9e8b66]">{activeTotalCount} products</div>
                   </button>
                   <button 
                     onClick={() => handleFetchAll('last_inactive')} 
                     disabled={lastInactiveCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors border-t border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors border-t border-[#5b4824]/8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium text-orange-400">Last Inactive</div>
-                    <div className="text-xs text-neutral-400">{lastInactiveCount} SKUs from last fetch</div>
+                    <div className="text-xs text-[#9e8b66]">{lastInactiveCount} SKUs from last fetch</div>
                   </button>
                   <button 
                     onClick={() => handleFetchAll('inactive')} 
                     disabled={inactiveTotalCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors border-t border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors border-t border-[#5b4824]/8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium text-red-400">All Inactive</div>
-                    <div className="text-xs text-neutral-400">{inactiveTotalCount} products</div>
+                    <div className="text-xs text-[#9e8b66]">{inactiveTotalCount} products</div>
                   </button>
                 </div>
               )}
@@ -463,14 +463,14 @@ export default function PriceMonitor() {
               </svg>
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] card-dark border border-white/10 z-20 overflow-hidden">
-                <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] card-dark border border-[#5b4824]/12 z-20 overflow-hidden">
+                <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors">
                   All ({totalProducts})
                 </button>
-                <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+                <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors">
                   Active Only ({activeTotalCount})
                 </button>
-                <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-neutral-200 hover:bg-white/5 transition-colors">
+                <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] hover:bg-[#5b4824]/5 transition-colors">
                   Inactive Only ({inactiveTotalCount})
                 </button>
               </div>
@@ -498,8 +498,8 @@ export default function PriceMonitor() {
           onClick={() => setPlatform('hepsiburada')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'hepsiburada'
-              ? 'bg-[#ff6000] text-white shadow-glow-orange'
-              : 'bg-dark-600 text-neutral-300 hover:bg-dark-500'
+              ? 'bg-[#ff6000] text-[#0f1419] shadow-glow-orange'
+              : 'bg-[#f0e8d8] text-[#5f471d] hover:bg-[#e8dfcf]'
           }`}
         >
           Hepsiburada
@@ -508,8 +508,8 @@ export default function PriceMonitor() {
           onClick={() => setPlatform('trendyol')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'trendyol'
-              ? 'bg-[#ff6000] text-white shadow-glow-orange'
-              : 'bg-dark-600 text-neutral-300 hover:bg-dark-500'
+              ? 'bg-[#ff6000] text-[#0f1419] shadow-glow-orange'
+              : 'bg-[#f0e8d8] text-[#5f471d] hover:bg-[#e8dfcf]'
           }`}
         >
           Trendyol
@@ -537,13 +537,13 @@ export default function PriceMonitor() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h2 className="text-base md:text-lg font-semibold text-white">Monitored Products</h2>
+              <h2 className="text-base md:text-lg font-semibold text-[#0f1419]">Monitored Products</h2>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setShowInactive(false)}
                 className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
-                  !showInactive ? 'bg-success/20 text-success border border-success/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+                  !showInactive ? 'bg-success/20 text-success border border-success/30' : 'bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf]'
                 }`}
               >
                 Active ({activeTotalCount}{totalProducts > 0 ? `/${totalProducts}` : ''})
@@ -551,7 +551,7 @@ export default function PriceMonitor() {
               <button
                 onClick={() => setShowInactive(true)}
                 className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
-                  showInactive ? 'bg-neutral-500/20 text-neutral-300 border border-neutral-500/30' : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+                  showInactive ? 'bg-neutral-500/20 text-[#5f471d] border border-neutral-500/30' : 'bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf]'
                 }`}
               >
                 Inactive ({inactiveTotalCount})
@@ -582,7 +582,7 @@ export default function PriceMonitor() {
               className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
                 priceAlertOnly
                   ? 'bg-danger/20 text-danger border border-danger/30'
-                  : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+                  : 'bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf]'
               }`}
             >
               Price Alerts
@@ -592,7 +592,7 @@ export default function PriceMonitor() {
               className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
                 campaignAlertOnly
                   ? 'bg-warning/20 text-warning border border-warning/30'
-                  : 'bg-dark-600 text-neutral-400 hover:bg-dark-500'
+                  : 'bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf]'
               }`}
             >
               Campaign Alerts
@@ -606,12 +606,12 @@ export default function PriceMonitor() {
             </div>
           ) : (showInactive ? inactiveProducts : activeProducts).length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="text-neutral-400">{showInactive ? 'No inactive products' : 'No monitored products yet'}</p>
+              <p className="text-[#9e8b66]">{showInactive ? 'No inactive products' : 'No monitored products yet'}</p>
               <p className="text-sm text-neutral-500 mt-1">{showInactive ? '' : 'Click "Add SKU" to start monitoring'}</p>
             </div>
           ) : (
@@ -624,8 +624,8 @@ export default function PriceMonitor() {
                     selectedProduct?.id === product.id
                       ? 'border-accent-primary/50 bg-accent-primary/5'
                       : showInactive
-                        ? 'border-white/5 bg-dark-700/50 hover:bg-dark-600/50'
-                        : 'border-white/5 bg-dark-700/30 hover:border-white/10 hover:bg-dark-600/30'
+                        ? 'border-[#5b4824]/8 bg-[#f7eede]/50 hover:bg-[#f0e8d8]/50'
+                        : 'border-[#5b4824]/8 bg-[#f7eede]/30 hover:border-[#5b4824]/12 hover:bg-[#f0e8d8]/30'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
@@ -656,7 +656,7 @@ export default function PriceMonitor() {
                           onClick={(e) => e.stopPropagation()}
                           className={`font-medium text-sm truncate block ${
                             showInactive 
-                              ? 'text-neutral-400 hover:text-neutral-300' 
+                              ? 'text-[#9e8b66] hover:text-[#5f471d]' 
                               : 'text-accent-primary hover:text-accent-primary/80'
                           }`}
                         >
@@ -670,7 +670,7 @@ export default function PriceMonitor() {
                           onClick={(e) => e.stopPropagation()}
                           className={`font-medium text-sm ${
                             showInactive 
-                              ? 'text-neutral-400 hover:text-neutral-300' 
+                              ? 'text-[#9e8b66] hover:text-[#5f471d]' 
                               : 'text-accent-primary hover:text-accent-primary/80'
                           }`}
                         >
@@ -686,7 +686,7 @@ export default function PriceMonitor() {
                         <span>{product.seller_count} sellers</span>
                         {product.last_fetched_at && (
                           <>
-                            <span className="text-neutral-600">•</span>
+                            <span className="text-[#b5a382]">•</span>
                             <span>Last: {formatDate(product.last_fetched_at)}</span>
                           </>
                         )}
@@ -714,7 +714,7 @@ export default function PriceMonitor() {
 
           {/* Pagination */}
           {totalProducts > PAGE_SIZE && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-white/5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-[#5b4824]/8">
               <span className="text-xs text-neutral-500">
                 {currentOffset + 1}–{Math.min(currentOffset + PAGE_SIZE, totalProducts)} of {totalProducts}
               </span>
@@ -727,7 +727,7 @@ export default function PriceMonitor() {
                     currentOffsetRef.current = newOff;
                     void loadProducts(newOff);
                   }}
-                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-dark-600 text-neutral-400 hover:bg-dark-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   Previous
                 </button>
@@ -739,7 +739,7 @@ export default function PriceMonitor() {
                     currentOffsetRef.current = newOff;
                     void loadProducts(newOff);
                   }}
-                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-dark-600 text-neutral-400 hover:bg-dark-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-lg font-medium bg-[#f0e8d8] text-[#9e8b66] hover:bg-[#e8dfcf] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
                 </button>
@@ -755,7 +755,7 @@ export default function PriceMonitor() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-[#0f1419]">
               {selectedProduct ? `Sellers - ${selectedProduct.product_name || selectedProduct.sku}` : 'Seller Details'}
             </h2>
           </div>
@@ -782,12 +782,12 @@ export default function PriceMonitor() {
 
           {!selectedProduct ? (
             <div className="text-center py-12">
-              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                 </svg>
               </div>
-              <p className="text-neutral-400">Select a product to view sellers</p>
+              <p className="text-[#9e8b66]">Select a product to view sellers</p>
             </div>
           ) : sellersLoading ? (
             <div className="text-center py-12">
@@ -796,12 +796,12 @@ export default function PriceMonitor() {
             </div>
           ) : sellers.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-12 h-12 rounded-full bg-dark-600 flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
               </div>
-              <p className="text-neutral-400">No seller data yet</p>
+              <p className="text-[#9e8b66]">No seller data yet</p>
               <p className="text-sm text-neutral-500 mt-1">Click "Refresh" to fetch prices</p>
             </div>
           ) : (
@@ -812,12 +812,12 @@ export default function PriceMonitor() {
                 return (
                 <div
                   key={`${seller.merchant_id}-${idx}`}
-                  className={`p-3 md:p-4 rounded-lg border transition-all cursor-pointer hover:bg-dark-600/35 ${
+                  className={`p-3 md:p-4 rounded-lg border transition-all cursor-pointer hover:bg-[#f0e8d8]/35 ${
                     seller.price_alert
                       ? 'bg-danger/20 border-danger/35'
                       : seller.buybox_order === 1
                         ? 'bg-success/15 border-success/30'
-                        : 'bg-dark-700/45 border-white/10'
+                        : 'bg-[#f7eede]/45 border-[#5b4824]/12'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -825,7 +825,7 @@ export default function PriceMonitor() {
                       <img
                         src={seller.merchant_logo}
                         alt={seller.merchant_name}
-                        className="w-9 h-9 md:w-10 md:h-10 rounded-lg object-contain bg-white border border-white/10"
+                        className="w-9 h-9 md:w-10 md:h-10 rounded-lg object-contain bg-white border border-[#5b4824]/12"
                       />
                     )}
                     <div className="flex-1 min-w-0">
@@ -837,12 +837,12 @@ export default function PriceMonitor() {
                                 href={seller.merchant_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-white hover:text-accent-primary transition-colors font-semibold"
+                                className="text-[#0f1419] hover:text-accent-primary transition-colors font-semibold"
                               >
                                 {seller.merchant_name}
                               </a>
                             ) : (
-                              <span className="text-white font-semibold">{seller.merchant_name}</span>
+                              <span className="text-[#0f1419] font-semibold">{seller.merchant_name}</span>
                             )}
                             {seller.buybox_order === 1 && (
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/20 text-success">Buybox</span>
@@ -857,7 +857,7 @@ export default function PriceMonitor() {
                               <span className="badge badge-warning text-[10px]">Campaign Alert</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-neutral-300">
+                          <div className="flex items-center gap-2 mt-1 text-xs text-[#5f471d]">
                             {seller.merchant_rating && (
                               <span className="px-1.5 py-0.5 rounded bg-warning/20 text-warning font-medium">
                                 {seller.merchant_rating.toFixed(1)}
@@ -870,7 +870,7 @@ export default function PriceMonitor() {
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="font-bold text-lg text-white flex items-center gap-2 justify-start sm:justify-end">
+                          <div className="font-bold text-lg text-[#0f1419] flex items-center gap-2 justify-start sm:justify-end">
                             {formatPrice(seller.list_price || seller.price)}
                             {seller.campaign_price && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
@@ -931,22 +931,22 @@ export default function PriceMonitor() {
 
       {showImportModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="card-dark border border-white/10 p-5 md:p-6 w-full max-w-2xl mx-auto my-auto">
+          <div className="card-dark border border-[#5b4824]/12 p-5 md:p-6 w-full max-w-2xl mx-auto my-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-[#0f1419]">
                 Import Products - {platform === 'hepsiburada' ? 'Hepsiburada' : 'Trendyol'}
               </h3>
               <button
                 onClick={() => { setShowImportModal(false); setImportJson(''); }}
-                className="text-neutral-400 hover:text-white transition-colors"
+                className="text-[#9e8b66] hover:text-[#0f1419] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-neutral-400 mb-3">Paste JSON in the following format:</p>
-            <pre className="bg-dark-900 p-3 rounded-lg text-xs text-neutral-300 mb-4 overflow-x-auto border border-white/5">
+            <p className="text-sm text-[#9e8b66] mb-3">Paste JSON in the following format:</p>
+            <pre className="bg-[#fffbef] p-3 rounded-lg text-xs text-[#5f471d] mb-4 overflow-x-auto border border-[#5b4824]/8">
               {getImportExample()}
             </pre>
             <textarea
@@ -977,10 +977,10 @@ export default function PriceMonitor() {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="card-dark p-5 md:p-6 max-w-md w-full mx-auto border border-red-500/30">
-            <h3 className="text-lg font-semibold text-white mb-4">
+            <h3 className="text-lg font-semibold text-[#0f1419] mb-4">
               {showDeleteModal === 'all' ? 'Delete All Products' : 'Delete Inactive Products'}
             </h3>
-            <p className="text-neutral-300 mb-6">
+            <p className="text-[#5f471d] mb-6">
               {showDeleteModal === 'all' 
                 ? `Are you sure you want to delete all ${totalProducts} products for ${platform}? This action cannot be undone.`
                 : `Are you sure you want to delete ${inactiveTotalCount} inactive products for ${platform}? This action cannot be undone.`
@@ -997,7 +997,7 @@ export default function PriceMonitor() {
               <button
                 onClick={handleBulkDelete}
                 disabled={deleteLoading}
-                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-[#0f1419] font-medium transition-colors disabled:opacity-50"
               >
                 {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
               </button>

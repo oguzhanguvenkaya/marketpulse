@@ -477,14 +477,14 @@ export default function CategoryExplorer() {
       <div key={node.full_path}>
         <div
           className={`flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer text-sm transition-colors group ${
-            isSelected ? 'bg-cyan-500/15 text-cyan-300' : isAncestor ? 'text-cyan-400/70' : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
+            isSelected ? 'bg-[#5b4824]/10 text-[#5b4824]' : isAncestor ? 'text-[#7a6b4e]' : 'text-[#9e8b66] hover:text-[#3d3427] hover:bg-[#5b4824]/5'
           }`}
           style={{ paddingLeft: `${depth * 14 + 8}px` }}
         >
           {hasChildren && (
             <button
               onClick={(e) => { e.stopPropagation(); toggleCategory(node.full_path); }}
-              className="p-0.5 hover:bg-white/10 rounded flex-shrink-0"
+              className="p-0.5 hover:bg-[#5b4824]/8 rounded flex-shrink-0"
             >
               <svg className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -495,7 +495,7 @@ export default function CategoryExplorer() {
           <span className="flex-1 truncate" onClick={() => selectCategory(node.full_path)}>
             {node.name}
           </span>
-          <span className="text-[10px] text-neutral-600 group-hover:text-neutral-500 flex-shrink-0">{node.count}</span>
+          <span className="text-[10px] text-[#b5a382] group-hover:text-neutral-500 flex-shrink-0">{node.count}</span>
         </div>
         {hasChildren && isExpanded && (
           <div>
@@ -509,37 +509,37 @@ export default function CategoryExplorer() {
   const renderProductCard = (product: StoreProduct) => (
     <div
       key={product.id}
-      className="rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all cursor-pointer group"
-      style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
+      className="rounded-xl border border-[#5b4824]/12 overflow-hidden hover:border-[#5b4824]/15 transition-all cursor-pointer group"
+      style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}
       onClick={() => { setSelectedProduct(product); setSelectedCatProduct(null); }}
     >
       <div className="flex gap-3 p-3">
-        <div className="w-20 h-20 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-20 h-20 rounded-lg bg-[#5b4824]/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {product.image_url ? (
             <img src={product.image_url} alt="" className="max-h-full max-w-full object-contain" loading="lazy" />
           ) : (
-            <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <svg className="w-8 h-8 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
               product.platform === 'hepsiburada' ? 'bg-orange-500/20 text-orange-400' :
-              product.platform === 'trendyol' ? 'bg-purple-500/20 text-purple-400' :
+              product.platform === 'trendyol' ? 'bg-[#9e8b66]/15 text-[#9e8b66]' :
               'bg-blue-500/20 text-blue-400'
             }`}>
               {product.platform === 'hepsiburada' ? 'HB' : product.platform === 'trendyol' ? 'TY' : 'WEB'}
             </span>
-            {product.brand && <span className="text-[10px] text-cyan-400 font-medium uppercase truncate">{product.brand}</span>}
+            {product.brand && <span className="text-[10px] text-[#5b4824] font-medium uppercase truncate">{product.brand}</span>}
           </div>
-          <h3 className="text-sm text-neutral-200 line-clamp-2 leading-snug mb-1.5">{product.product_name || 'Unnamed'}</h3>
+          <h3 className="text-sm text-[#3d3427] line-clamp-2 leading-snug mb-1.5">{product.product_name || 'Unnamed'}</h3>
           <div className="flex items-end justify-between">
-            <span className="text-base font-bold text-white">{formatPrice(product.price)}</span>
+            <span className="text-base font-bold text-[#0f1419]">{formatPrice(product.price)}</span>
             {product.rating && (
               <div className="flex items-center gap-0.5">
                 <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                <span className="text-xs text-neutral-400">{product.rating}</span>
-                {product.review_count != null && <span className="text-[10px] text-neutral-600">({product.review_count})</span>}
+                <span className="text-xs text-[#9e8b66]">{product.rating}</span>
+                {product.review_count != null && <span className="text-[10px] text-[#b5a382]">({product.review_count})</span>}
               </div>
             )}
           </div>
@@ -547,7 +547,7 @@ export default function CategoryExplorer() {
       </div>
       {product.category && (
         <div className="px-3 pb-2.5">
-          <p className="text-[10px] text-neutral-600 truncate">{product.category}</p>
+          <p className="text-[10px] text-[#b5a382] truncate">{product.category}</p>
         </div>
       )}
     </div>
@@ -559,15 +559,15 @@ export default function CategoryExplorer() {
       <div
         key={product.id}
         className={`rounded-xl border overflow-hidden transition-all cursor-pointer group relative ${
-          isSelected ? 'border-cyan-500/40 ring-1 ring-cyan-500/20' : 'border-white/10 hover:border-white/20'
+          isSelected ? 'border-[#5b4824]/25 ring-1 ring-[#5b4824]/15' : 'border-[#5b4824]/12 hover:border-[#5b4824]/15'
         }`}
-        style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}
       >
         <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
           <button
             onClick={(e) => { e.stopPropagation(); toggleProductSelection(product.id); }}
             className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-              isSelected ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-white/20 hover:border-cyan-500/50'
+              isSelected ? 'bg-[#5b4824] border-[#5b4824] text-[#0f1419]' : 'border-[#5b4824]/15 hover:border-[#5b4824]/30'
             }`}
           >
             {isSelected && (
@@ -576,12 +576,12 @@ export default function CategoryExplorer() {
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
-            className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:bg-red-500/20"
+            className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:bg-red-500/20"
             title="Delete product"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 font-mono">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#5b4824]/8 text-[#9e8b66] font-mono">
             #{product.position}
           </span>
           {product.is_sponsored && (
@@ -590,7 +590,7 @@ export default function CategoryExplorer() {
             </span>
           )}
           {product.detail_fetched && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 font-medium">
               Detailed
             </span>
           )}
@@ -599,21 +599,21 @@ export default function CategoryExplorer() {
           className="flex gap-3 p-3"
           onClick={() => { setSelectedCatProduct(product); setSelectedProduct(null); }}
         >
-          <div className="w-20 h-20 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-20 h-20 rounded-lg bg-[#5b4824]/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {product.image_url ? (
               <img src={product.image_url} alt="" className="max-h-full max-w-full object-contain" loading="lazy" />
             ) : (
-              <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              <svg className="w-8 h-8 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-1">
-              {product.brand && <span className="text-[10px] text-cyan-400 font-medium uppercase truncate">{product.brand}</span>}
+              {product.brand && <span className="text-[10px] text-[#5b4824] font-medium uppercase truncate">{product.brand}</span>}
             </div>
-            <h3 className="text-sm text-neutral-200 line-clamp-2 leading-snug mb-1.5">{product.name || 'Unnamed'}</h3>
+            <h3 className="text-sm text-[#3d3427] line-clamp-2 leading-snug mb-1.5">{product.name || 'Unnamed'}</h3>
             <div className="flex items-end justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-white">{formatPrice(product.price)}</span>
+                <span className="text-base font-bold text-[#0f1419]">{formatPrice(product.price)}</span>
                 {product.original_price && product.original_price > (product.price || 0) && (
                   <span className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</span>
                 )}
@@ -621,8 +621,8 @@ export default function CategoryExplorer() {
               {product.rating && (
                 <div className="flex items-center gap-0.5">
                   <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  <span className="text-xs text-neutral-400">{product.rating}</span>
-                  {product.review_count != null && <span className="text-[10px] text-neutral-600">({product.review_count})</span>}
+                  <span className="text-xs text-[#9e8b66]">{product.rating}</span>
+                  {product.review_count != null && <span className="text-[10px] text-[#b5a382]">({product.review_count})</span>}
                 </div>
               )}
             </div>
@@ -630,12 +630,12 @@ export default function CategoryExplorer() {
         </div>
         <div className="px-3 pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] text-neutral-600">Page {product.page_number}</span>
-            {product.seller_name && <span className="text-[10px] text-neutral-600 truncate">| {product.seller_name}</span>}
-            {product.sku && <span className="text-[10px] text-neutral-600 font-mono truncate">SKU: {product.sku}</span>}
+            <span className="text-[10px] text-[#b5a382]">Page {product.page_number}</span>
+            {product.seller_name && <span className="text-[10px] text-[#b5a382] truncate">| {product.seller_name}</span>}
+            {product.sku && <span className="text-[10px] text-[#b5a382] font-mono truncate">SKU: {product.sku}</span>}
           </div>
           {product.campaign_text && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 truncate max-w-[120px]">{product.campaign_text}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 truncate max-w-[120px]">{product.campaign_text}</span>
           )}
         </div>
       </div>
@@ -648,44 +648,44 @@ export default function CategoryExplorer() {
         <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Platform</h3>
         <div className="space-y-0.5">
           {[
-            { key: '' as Platform, label: 'All Platforms', count: platformStats.total, color: 'text-neutral-300' },
+            { key: '' as Platform, label: 'All Platforms', count: platformStats.total, color: 'text-[#5f471d]' },
             { key: 'hepsiburada' as Platform, label: 'Hepsiburada', count: platformStats.hb, color: 'text-orange-400' },
-            { key: 'trendyol' as Platform, label: 'Trendyol', count: platformStats.ty, color: 'text-purple-400' },
+            { key: 'trendyol' as Platform, label: 'Trendyol', count: platformStats.ty, color: 'text-[#9e8b66]' },
             { key: 'web' as Platform, label: 'Web', count: platformStats.web, color: 'text-blue-400' },
           ].map(p => (
             <button
               key={p.key}
               onClick={() => handlePlatformChange(p.key)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                platform === p.key ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-200'
+                platform === p.key ? 'bg-[#5b4824]/8 text-[#0f1419]' : 'text-[#9e8b66] hover:bg-[#5b4824]/5 hover:text-[#3d3427]'
               }`}
             >
               <span className={platform === p.key ? p.color : ''}>{p.label}</span>
-              <span className="text-[10px] text-neutral-600">{p.count}</span>
+              <span className="text-[10px] text-[#b5a382]">{p.count}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-white/5 pt-3">
+      <div className="border-t border-[#5b4824]/8 pt-3">
         <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Categories</h3>
         <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
           {categoryTree.length > 0 ? (
             categoryTree.map(node => renderCategoryNode(node))
           ) : (
-            <p className="text-xs text-neutral-600 px-2">No categories</p>
+            <p className="text-xs text-[#b5a382] px-2">No categories</p>
           )}
         </div>
       </div>
 
       {viewMode === 'my_products' && (
         <>
-          <div className="border-t border-white/5 pt-3">
+          <div className="border-t border-[#5b4824]/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Brand</h3>
             <select
               value={selectedBrand}
               onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
-              className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-3 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30"
             >
               <option value="">All Brands</option>
               {filters?.brands.map(b => (
@@ -694,22 +694,22 @@ export default function CategoryExplorer() {
             </select>
           </div>
 
-          <div className="border-t border-white/5 pt-3">
+          <div className="border-t border-[#5b4824]/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Price Range</h3>
             <div className="flex gap-2 px-1">
               <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
-                className="w-1/2 bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+                className="w-1/2 bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-1.5 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30" />
               <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-1/2 bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+                className="w-1/2 bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-1.5 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30" />
             </div>
           </div>
 
-          <div className="border-t border-white/5 pt-3">
+          <div className="border-t border-[#5b4824]/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Min Rating</h3>
             <select
               value={minRating}
               onChange={(e) => { setMinRating(e.target.value); setPage(1); }}
-              className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-3 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30"
             >
               <option value="">Any</option>
               <option value="4">4+ Stars</option>
@@ -722,7 +722,7 @@ export default function CategoryExplorer() {
       )}
 
       {(selectedCategory || selectedBrand || minPrice || maxPrice || minRating) && (
-        <div className="border-t border-white/5 pt-3">
+        <div className="border-t border-[#5b4824]/8 pt-3">
           <button
             onClick={() => {
               setSelectedCategory('');
@@ -732,7 +732,7 @@ export default function CategoryExplorer() {
               setMinRating('');
               setExpandedCategories(new Set());
             }}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-red-500/20 text-red-600 hover:bg-red-500/10 transition-colors"
           >
             Clear All Filters
           </button>
@@ -746,7 +746,7 @@ export default function CategoryExplorer() {
     return (
       <div className="flex items-center justify-center gap-2 pt-4">
         <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-          className="px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5 disabled:opacity-30">Previous</button>
+          className="px-3 py-2 text-sm rounded-lg border border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/5 disabled:opacity-30">Previous</button>
         <div className="flex items-center gap-1">
           {Array.from({ length: Math.min(5, currentTotalPages) }, (_, i) => {
             let p: number;
@@ -756,14 +756,14 @@ export default function CategoryExplorer() {
             else p = page - 2 + i;
             return (
               <button key={p} onClick={() => setPage(p)}
-                className={`w-9 h-9 text-sm rounded-lg ${p === page ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'text-neutral-400 hover:bg-white/5'}`}
+                className={`w-9 h-9 text-sm rounded-lg ${p === page ? 'bg-[#5b4824]/10 text-[#5b4824] border border-[#5b4824]/20' : 'text-[#9e8b66] hover:bg-[#5b4824]/5'}`}
               >{p}</button>
             );
           })}
         </div>
         <button onClick={() => setPage(p => Math.min(currentTotalPages, p + 1))} disabled={page >= currentTotalPages}
-          className="px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5 disabled:opacity-30">Next</button>
-        <span className="text-xs text-neutral-600 ml-2">{currentTotal.toLocaleString()} products</span>
+          className="px-3 py-2 text-sm rounded-lg border border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/5 disabled:opacity-30">Next</button>
+        <span className="text-xs text-[#b5a382] ml-2">{currentTotal.toLocaleString()} products</span>
       </div>
     );
   };
@@ -771,7 +771,7 @@ export default function CategoryExplorer() {
   return (
     <div className="flex gap-6 pb-10 min-h-[calc(100vh-80px)]">
       <aside className="hidden lg:block w-64 flex-shrink-0">
-        <div className="sticky top-4 rounded-xl border border-white/10 p-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}>
+        <div className="sticky top-4 rounded-xl border border-[#5b4824]/12 p-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}>
           <FilterSidebar />
         </div>
       </aside>
@@ -780,18 +780,18 @@ export default function CategoryExplorer() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Competitive Analysis</div>
-            <h1 className="text-2xl font-bold text-white">Category Explorer</h1>
+            <h1 className="text-2xl font-bold text-[#0f1419]">Category Explorer</h1>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowMobileFilters(true)}
-              className="lg:hidden px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5">
+              className="lg:hidden px-3 py-2 text-sm rounded-lg border border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
             </button>
             {viewMode === 'category_page' && (
               <button
                 onClick={() => { setShowDetailPanel(!showDetailPanel); setSelectedForDetail(new Set()); }}
                 className={`px-3 py-2 text-sm rounded-lg border transition-colors flex items-center gap-1.5 ${
-                  showDetailPanel ? 'border-purple-500/30 bg-purple-500/10 text-purple-400' : 'border-white/10 text-neutral-300 hover:bg-white/5'
+                  showDetailPanel ? 'border-[#9e8b66]/20 bg-[#9e8b66]/8 text-[#9e8b66]' : 'border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/5'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -803,7 +803,7 @@ export default function CategoryExplorer() {
             <button
               onClick={() => setShowScraper(!showScraper)}
               className={`px-3 py-2 text-sm rounded-lg border transition-colors flex items-center gap-1.5 ${
-                showScraper ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400' : 'border-white/10 text-neutral-300 hover:bg-white/5'
+                showScraper ? 'border-[#5b4824]/20 bg-[#5b4824]/8 text-[#5b4824]' : 'border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/5'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -815,13 +815,13 @@ export default function CategoryExplorer() {
         </div>
 
         {showScraper && (
-          <div className="rounded-xl border border-cyan-500/20 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,212,255,0.02))' }}>
+          <div className="rounded-xl border border-[#5b4824]/10 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(247,206,134,0.08), rgba(247,206,134,0.04))' }}>
             <div className="p-4 space-y-3">
               <div className="flex items-center gap-2 mb-1">
-                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#5b4824]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
-                <span className="text-sm font-medium text-cyan-300">Scrape Category Page</span>
+                <span className="text-sm font-medium text-[#5b4824]">Scrape Category Page</span>
                 <span className="text-[10px] text-neutral-500 ml-auto">Step 1: Collect product listings from marketplace</span>
               </div>
 
@@ -832,13 +832,13 @@ export default function CategoryExplorer() {
                   onChange={(e) => setScrapeUrl(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !scraping) handleScrape(); }}
                   placeholder="Paste category URL — e.g. https://www.hepsiburada.com/hizli-cilalar-c-20035738"
-                  className="flex-1 bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50"
+                  className="flex-1 bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-4 py-2.5 text-sm text-[#3d3427] placeholder:text-[#b5a382] focus:outline-none focus:border-[#5b4824]/30"
                 />
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 whitespace-nowrap">Pages to scrape:</label>
+                  <label className="text-xs text-[#9e8b66] whitespace-nowrap">Pages to scrape:</label>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 5, 10].map(n => (
                       <button
@@ -846,8 +846,8 @@ export default function CategoryExplorer() {
                         onClick={() => setScrapePageCount(n)}
                         className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
                           scrapePageCount === n
-                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                            : 'bg-white/5 text-neutral-400 border border-white/10 hover:bg-white/10'
+                            ? 'bg-[#5b4824]/10 text-[#5b4824] border border-[#5b4824]/20'
+                            : 'bg-[#5b4824]/5 text-[#9e8b66] border border-[#5b4824]/12 hover:bg-[#5b4824]/8'
                         }`}
                       >
                         {n}
@@ -859,7 +859,7 @@ export default function CategoryExplorer() {
                       max={20}
                       value={scrapePageCount}
                       onChange={(e) => setScrapePageCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-                      className="w-14 bg-black/30 border border-white/10 rounded-md px-2 py-1 text-xs text-neutral-200 text-center focus:outline-none focus:border-cyan-500/50"
+                      className="w-14 bg-[#f7eede] border border-[#5b4824]/12 rounded-md px-2 py-1 text-xs text-[#3d3427] text-center focus:outline-none focus:border-[#5b4824]/30"
                     />
                   </div>
                 </div>
@@ -876,11 +876,11 @@ export default function CategoryExplorer() {
                   <button
                     onClick={handleScrape}
                     disabled={scraping || !scrapeUrl}
-                    className="px-5 py-2 text-sm rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-                    style={{ background: scraping ? '#334155' : 'linear-gradient(135deg, #00d4ff, #0099cc)' }}
+                    className="px-5 py-2 text-sm rounded-lg text-[#0f1419] font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+                    style={{ background: scraping ? '#d4cfc1' : 'linear-gradient(135deg, #f7ce86, #5b4824)' }}
                   >
                     {scraping ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#5b4824]/20 border-t-[#5b4824] rounded-full animate-spin" />
                     ) : (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     )}
@@ -890,24 +890,24 @@ export default function CategoryExplorer() {
               </div>
 
               {scrapeProgress && (
-                <div className="flex items-center gap-2 text-xs text-cyan-400">
-                  <div className="w-3 h-3 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-xs text-[#5b4824]">
+                  <div className="w-3 h-3 border-2 border-[#5b4824]/30 border-t-[#5b4824] rounded-full animate-spin" />
                   {scrapeProgress}
                 </div>
               )}
               {scrapeMsg && (
-                <p className={`text-xs ${scrapeMsg.includes('fail') || scrapeMsg.includes('Failed') ? 'text-red-400' : 'text-emerald-400'}`}>{scrapeMsg}</p>
+                <p className={`text-xs ${scrapeMsg.includes('fail') || scrapeMsg.includes('Failed') ? 'text-red-600' : 'text-emerald-600'}`}>{scrapeMsg}</p>
               )}
             </div>
           </div>
         )}
 
         {showDetailPanel && viewMode === 'category_page' && (
-          <div className="rounded-xl border border-purple-500/20 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.05), rgba(168,85,247,0.02))' }}>
+          <div className="rounded-xl border border-[#9e8b66]/15 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(91,72,36,0.05), rgba(91,72,36,0.03))' }}>
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[#9e8b66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                   <span className="text-sm font-medium text-purple-300">Get Product Details</span>
@@ -917,16 +917,16 @@ export default function CategoryExplorer() {
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="text-neutral-400">
-                    <span className="text-white font-medium">{detailStats.total}</span> products
+                  <span className="text-[#9e8b66]">
+                    <span className="text-[#0f1419] font-medium">{detailStats.total}</span> products
                   </span>
-                  <span className="text-emerald-400">
+                  <span className="text-emerald-600">
                     <span className="font-medium">{detailStats.fetched}</span> detailed
                   </span>
                   <span className="text-amber-400">
                     <span className="font-medium">{detailStats.unfetched}</span> pending
                   </span>
-                  <span className="text-cyan-400">
+                  <span className="text-[#5b4824]">
                     <span className="font-medium">{selectedForDetail.size}</span> selected
                   </span>
                 </div>
@@ -934,7 +934,7 @@ export default function CategoryExplorer() {
                 <div className="flex items-center gap-2 sm:ml-auto">
                   <button
                     onClick={selectAllForDetail}
-                    className="px-3 py-1.5 text-xs rounded-lg border border-white/10 text-neutral-300 hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                    className="px-3 py-1.5 text-xs rounded-lg border border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/8 transition-colors flex items-center gap-1.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -944,7 +944,7 @@ export default function CategoryExplorer() {
                   {selectedForDetail.size > 0 && (
                     <button
                       onClick={handleBulkDelete}
-                      className="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-600 hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       Delete ({selectedForDetail.size})
@@ -953,11 +953,11 @@ export default function CategoryExplorer() {
                   <button
                     onClick={handleFetchDetails}
                     disabled={detailFetching || selectedForDetail.size === 0}
-                    className="px-4 py-1.5 text-xs rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-                    style={{ background: detailFetching ? '#334155' : 'linear-gradient(135deg, #a855f7, #7c3aed)' }}
+                    className="px-4 py-1.5 text-xs rounded-lg text-[#0f1419] font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+                    style={{ background: detailFetching ? '#d4cfc1' : 'linear-gradient(135deg, #9e8b66, #5b4824)' }}
                   >
                     {detailFetching ? (
-                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-[#5b4824]/20 border-t-[#5b4824] rounded-full animate-spin" />
                     ) : (
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     )}
@@ -967,8 +967,8 @@ export default function CategoryExplorer() {
               </div>
 
               {detailProgress && (
-                <div className={`flex items-center gap-2 text-xs ${detailProgress.includes('failed') ? 'text-red-400' : detailProgress.includes('All details') ? 'text-emerald-400' : 'text-purple-400'}`}>
-                  {detailFetching && <div className="w-3 h-3 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />}
+                <div className={`flex items-center gap-2 text-xs ${detailProgress.includes('failed') ? 'text-red-600' : detailProgress.includes('All details') ? 'text-emerald-600' : 'text-[#9e8b66]'}`}>
+                  {detailFetching && <div className="w-3 h-3 border-2 border-[#9e8b66]/30 border-t-[#9e8b66] rounded-full animate-spin" />}
                   {!detailFetching && detailProgress.includes('All details') && (
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   )}
@@ -979,11 +979,11 @@ export default function CategoryExplorer() {
           </div>
         )}
 
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 w-fit">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#5b4824]/5 w-fit">
           <button
             onClick={() => setViewMode('my_products')}
             className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
-              viewMode === 'my_products' ? 'bg-white/10 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+              viewMode === 'my_products' ? 'bg-[#5b4824]/8 text-[#0f1419] shadow-sm' : 'text-[#9e8b66] hover:text-[#3d3427]'
             }`}
           >
             <span className="flex items-center gap-1.5">
@@ -994,7 +994,7 @@ export default function CategoryExplorer() {
           <button
             onClick={() => setViewMode('category_page')}
             className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
-              viewMode === 'category_page' ? 'bg-white/10 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+              viewMode === 'category_page' ? 'bg-[#5b4824]/8 text-[#0f1419] shadow-sm' : 'text-[#9e8b66] hover:text-[#3d3427]'
             }`}
           >
             <span className="flex items-center gap-1.5">
@@ -1006,17 +1006,17 @@ export default function CategoryExplorer() {
 
         {breadcrumbParts.length > 0 && (
           <div className="flex items-center gap-1.5 text-sm flex-wrap">
-            <button onClick={() => setSelectedCategory('')} className="text-neutral-500 hover:text-cyan-400 transition-colors">All</button>
+            <button onClick={() => setSelectedCategory('')} className="text-neutral-500 hover:text-[#5b4824] transition-colors">All</button>
             {breadcrumbParts.map((bc, i) => (
               <span key={i} className="flex items-center gap-1.5">
-                <svg className="w-3 h-3 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                <svg className="w-3 h-3 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 <button onClick={() => selectCategory(bc.path)}
-                  className={`hover:text-cyan-400 transition-colors ${i === breadcrumbParts.length - 1 ? 'text-cyan-300 font-medium' : 'text-neutral-400'}`}>
+                  className={`hover:text-[#5b4824] transition-colors ${i === breadcrumbParts.length - 1 ? 'text-[#5b4824] font-medium' : 'text-[#9e8b66]'}`}>
                   {bc.name}
                 </button>
               </span>
             ))}
-            <button onClick={() => { setSelectedCategory(''); setExpandedCategories(new Set()); }} className="ml-2 text-neutral-600 hover:text-red-400 transition-colors">
+            <button onClick={() => { setSelectedCategory(''); setExpandedCategories(new Set()); }} className="ml-2 text-[#b5a382] hover:text-red-600 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -1030,14 +1030,14 @@ export default function CategoryExplorer() {
             <input
               type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products, brands, SKU..."
-              className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#3d3427] placeholder:text-[#b5a382] focus:outline-none focus:border-[#5b4824]/30"
             />
           </div>
           {viewMode === 'my_products' ? (
             <select
               value={`${sortBy}:${sortDir}`}
               onChange={(e) => { const [s, d] = e.target.value.split(':'); setSortBy(s); setSortDir(d); }}
-              className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50"
+              className="bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-3 py-2.5 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30"
             >
               <option value="created_at:desc">Newest First</option>
               <option value="created_at:asc">Oldest First</option>
@@ -1050,7 +1050,7 @@ export default function CategoryExplorer() {
             <select
               value={`${catSortBy}:${catSortDir}`}
               onChange={(e) => { const [s, d] = e.target.value.split(':'); setCatSortBy(s); setCatSortDir(d); }}
-              className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50"
+              className="bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-3 py-2.5 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30"
             >
               <option value="position:asc">Marketplace Position</option>
               <option value="created_at:desc">Newest First</option>
@@ -1063,29 +1063,29 @@ export default function CategoryExplorer() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center">
-          <div className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="text-lg font-bold text-white">{dynamicStats.total.toLocaleString()}</div>
+          <div className="rounded-lg border border-[#5b4824]/8 p-3" style={{ background: 'rgba(91,72,36,0.03)' }}>
+            <div className="text-lg font-bold text-[#0f1419]">{dynamicStats.total.toLocaleString()}</div>
             <div className="text-xs text-neutral-500">Products</div>
           </div>
-          <div className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="text-lg font-bold text-cyan-400">{formatPrice(dynamicStats.avgPrice)}</div>
+          <div className="rounded-lg border border-[#5b4824]/8 p-3" style={{ background: 'rgba(91,72,36,0.03)' }}>
+            <div className="text-lg font-bold text-[#5b4824]">{formatPrice(dynamicStats.avgPrice)}</div>
             <div className="text-xs text-neutral-500">Avg Price</div>
           </div>
-          <div className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="text-lg font-bold text-purple-400">{dynamicStats.brandCount}</div>
+          <div className="rounded-lg border border-[#5b4824]/8 p-3" style={{ background: 'rgba(91,72,36,0.03)' }}>
+            <div className="text-lg font-bold text-[#9e8b66]">{dynamicStats.brandCount}</div>
             <div className="text-xs text-neutral-500">Brands</div>
           </div>
-          <div className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <div className="rounded-lg border border-[#5b4824]/8 p-3" style={{ background: 'rgba(91,72,36,0.03)' }}>
             {viewMode === 'category_page' ? (
               <>
-                <div className="text-sm font-bold text-emerald-400">
+                <div className="text-sm font-bold text-emerald-600">
                   {dynamicStats.lastScraped ? new Date(dynamicStats.lastScraped).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                 </div>
                 <div className="text-xs text-neutral-500">Last Scraped</div>
               </>
             ) : (
               <>
-                <div className="text-lg font-bold text-emerald-400">{dynamicStats.categoryCount}</div>
+                <div className="text-lg font-bold text-emerald-600">{dynamicStats.categoryCount}</div>
                 <div className="text-xs text-neutral-500">Categories</div>
               </>
             )}
@@ -1097,7 +1097,7 @@ export default function CategoryExplorer() {
             <div className="flex-1 min-w-[140px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Brand</label>
               <select value={catBrand} onChange={e => setCatBrand(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30">
                 <option value="">All Brands</option>
                 {(catFilterData?.brands || []).map(b => <option key={b} value={b}>{b}</option>)}
               </select>
@@ -1105,7 +1105,7 @@ export default function CategoryExplorer() {
             <div className="flex-1 min-w-[140px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Seller</label>
               <select value={catSeller} onChange={e => setCatSeller(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30">
                 <option value="">All Sellers</option>
                 {(catFilterData?.sellers || []).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -1113,17 +1113,17 @@ export default function CategoryExplorer() {
             <div className="min-w-[100px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Price</label>
               <input type="number" value={catMinPrice} onChange={e => setCatMinPrice(e.target.value)} placeholder="Min"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30" />
             </div>
             <div className="min-w-[100px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Max Price</label>
               <input type="number" value={catMaxPrice} onChange={e => setCatMaxPrice(e.target.value)} placeholder="Max"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30" />
             </div>
             <div className="min-w-[80px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Rating</label>
               <select value={catMinRating} onChange={e => setCatMinRating(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30">
                 <option value="">Any</option>
                 <option value="4">4+</option>
                 <option value="3">3+</option>
@@ -1133,7 +1133,7 @@ export default function CategoryExplorer() {
             <div className="min-w-[100px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Sponsored</label>
               <select value={catSponsored} onChange={e => setCatSponsored(e.target.value as '' | 'true' | 'false')}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                className="w-full bg-[#f7eede] border border-[#5b4824]/12 rounded-lg px-2.5 py-2 text-sm text-[#3d3427] focus:outline-none focus:border-[#5b4824]/30">
                 <option value="">All</option>
                 <option value="true">Sponsored Only</option>
                 <option value="false">Non-Sponsored</option>
@@ -1142,7 +1142,7 @@ export default function CategoryExplorer() {
             {(catBrand || catSeller || catMinPrice || catMaxPrice || catMinRating || catSponsored) && (
               <button
                 onClick={() => { setCatBrand(''); setCatSeller(''); setCatMinPrice(''); setCatMaxPrice(''); setCatMinRating(''); setCatSponsored(''); }}
-                className="text-xs text-neutral-400 hover:text-red-400 px-2 py-2 transition-colors whitespace-nowrap"
+                className="text-xs text-[#9e8b66] hover:text-red-600 px-2 py-2 transition-colors whitespace-nowrap"
               >
                 Clear Filters
               </button>
@@ -1152,7 +1152,7 @@ export default function CategoryExplorer() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#5b4824] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : viewMode === 'my_products' ? (
           currentProducts.length > 0 ? (
@@ -1174,19 +1174,19 @@ export default function CategoryExplorer() {
                     onClick={selectAllProducts}
                     className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border transition-colors ${
                       selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
-                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400'
-                        : 'border-white/10 text-neutral-300 hover:bg-white/10'
+                        ? 'border-[#5b4824]/25 bg-[#5b4824]/8 text-[#5b4824]'
+                        : 'border-[#5b4824]/12 text-[#5f471d] hover:bg-[#5b4824]/8'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded border flex items-center justify-center ${
                       selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
-                        ? 'bg-cyan-500 border-cyan-500'
+                        ? 'bg-[#5b4824] border-[#5b4824]'
                         : selectedForDetail.size > 0
-                        ? 'bg-cyan-500/50 border-cyan-500/50'
-                        : 'border-white/30'
+                        ? 'bg-cyan-500/50 border-[#5b4824]/30'
+                        : 'border-[#5b4824]/20'
                     }`}>
                       {selectedForDetail.size > 0 && (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-[#0f1419]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3}
                             d={selectedForDetail.size === (catData?.products?.length || 0) ? "M5 13l4 4L19 7" : "M20 12H4"} />
                         </svg>
@@ -1197,7 +1197,7 @@ export default function CategoryExplorer() {
                       : `Select All (${catData?.total || 0})`}
                   </button>
                   {selectedForDetail.size > 0 && (
-                    <span className="text-xs text-cyan-400">
+                    <span className="text-xs text-[#5b4824]">
                       {selectedForDetail.size} selected
                     </span>
                   )}
@@ -1205,7 +1205,7 @@ export default function CategoryExplorer() {
                 {selectedForDetail.size > 0 && (
                   <button
                     onClick={handleBulkDelete}
-                    className="flex items-center gap-2 px-4 py-1.5 text-xs rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors font-medium"
+                    className="flex items-center gap-2 px-4 py-1.5 text-xs rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 hover:bg-red-500/20 transition-colors font-medium"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     Delete Selected ({selectedForDetail.size})
@@ -1236,11 +1236,11 @@ export default function CategoryExplorer() {
       {showMobileFilters && createPortal(
         <>
           <div className="fixed inset-0 bg-black/60 z-[9996]" onClick={() => setShowMobileFilters(false)} />
-          <div className="fixed top-0 left-0 h-full w-80 z-[9997] overflow-y-auto border-r border-white/10 shadow-2xl p-4"
-            style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}>
+          <div className="fixed top-0 left-0 h-full w-80 z-[9997] overflow-y-auto border-r border-[#5b4824]/12 shadow-2xl p-4"
+            style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-white">Filters</h3>
-              <button onClick={() => setShowMobileFilters(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
+              <h3 className="text-base font-semibold text-[#0f1419]">Filters</h3>
+              <button onClick={() => setShowMobileFilters(false)} className="p-1.5 rounded-lg hover:bg-[#5b4824]/8 text-[#9e8b66]">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -1257,12 +1257,12 @@ export default function CategoryExplorer() {
 function EmptyState({ viewMode, hasFilters }: { viewMode: ViewMode; hasFilters: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
-        <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-16 h-16 rounded-2xl bg-[#5b4824]/5 flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       </div>
-      <h3 className="text-lg font-medium text-neutral-300 mb-2">
+      <h3 className="text-lg font-medium text-[#5f471d] mb-2">
         {viewMode === 'category_page' ? 'No Scraped Products' : 'No Products Found'}
       </h3>
       <p className="text-sm text-neutral-500 max-w-md">
@@ -1288,24 +1288,24 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
   return (
     <>
       <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={onClose} />
-      <div className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-white/10 shadow-2xl"
-        style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}>
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-white/10" style={{ background: 'rgba(20,22,25,0.95)', backdropFilter: 'blur(8px)' }}>
+      <div className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-[#5b4824]/12 shadow-2xl"
+        style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}>
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-[#5b4824]/12" style={{ background: 'rgba(254,251,240,0.98)', backdropFilter: 'blur(8px)' }}>
           <div className="flex items-center gap-2">
             <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
               product.platform === 'hepsiburada' ? 'bg-orange-500/20 text-orange-400' :
-              product.platform === 'trendyol' ? 'bg-purple-500/20 text-purple-400' :
+              product.platform === 'trendyol' ? 'bg-[#9e8b66]/15 text-[#9e8b66]' :
               'bg-blue-500/20 text-blue-400'
             }`}>
               {product.platform === 'hepsiburada' ? 'HB' : product.platform === 'trendyol' ? 'TY' : 'WEB'}
             </span>
-            <h3 className="text-base font-semibold text-white truncate">Product Details</h3>
+            <h3 className="text-base font-semibold text-[#0f1419] truncate">Product Details</h3>
           </div>
           <div className="flex items-center gap-2">
-            <a href={product.source_url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
+            <a href={product.source_url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-[#5b4824]/8 text-[#9e8b66]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
             </a>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#5b4824]/8 text-[#9e8b66]">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -1313,13 +1313,13 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
 
         <div className="p-4 space-y-4">
           {product.image_url && (
-            <div className="rounded-lg bg-white/5 p-4 flex items-center justify-center">
+            <div className="rounded-lg bg-[#5b4824]/5 p-4 flex items-center justify-center">
               <img src={product.image_url} alt="" className="max-h-64 object-contain" />
             </div>
           )}
           <div>
-            {product.brand && <div className="text-xs text-cyan-400 font-medium uppercase mb-1">{product.brand}</div>}
-            <h4 className="text-base font-medium text-white leading-snug">{product.product_name}</h4>
+            {product.brand && <div className="text-xs text-[#5b4824] font-medium uppercase mb-1">{product.brand}</div>}
+            <h4 className="text-base font-medium text-[#0f1419] leading-snug">{product.product_name}</h4>
           </div>
           {product.category && (
             <div>
@@ -1327,21 +1327,21 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
               <div className="flex items-center gap-1 flex-wrap">
                 {product.category.split(' > ').map((part, i, arr) => (
                   <span key={i} className="flex items-center gap-1">
-                    {i > 0 && <svg className="w-2.5 h-2.5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>}
-                    <button onClick={() => selectCategory(arr.slice(0, i + 1).join(' > '))} className="text-xs text-neutral-400 hover:text-cyan-400 transition-colors">{part.trim()}</button>
+                    {i > 0 && <svg className="w-2.5 h-2.5 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>}
+                    <button onClick={() => selectCategory(arr.slice(0, i + 1).join(' > '))} className="text-xs text-[#9e8b66] hover:text-[#5b4824] transition-colors">{part.trim()}</button>
                   </span>
                 ))}
               </div>
             </div>
           )}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-[#5b4824]/5 p-3">
               <div className="text-xs text-neutral-500 mb-1">Price</div>
-              <div className="text-lg font-bold text-white">{formatPrice(product.price)}</div>
+              <div className="text-lg font-bold text-[#0f1419]">{formatPrice(product.price)}</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-[#5b4824]/5 p-3">
               <div className="text-xs text-neutral-500 mb-1">Rating</div>
-              <div className="text-lg font-bold text-white flex items-center gap-1">
+              <div className="text-lg font-bold text-[#0f1419] flex items-center gap-1">
                 {product.rating || '-'}
                 {product.rating && <svg className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>}
               </div>
@@ -1349,17 +1349,17 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
             </div>
           </div>
           <div className="space-y-2 text-sm">
-            {product.sku && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">SKU</span><span className="text-white font-mono text-xs">{product.sku}</span></div>}
-            {product.barcode && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">Barcode</span><span className="text-white font-mono text-xs">{product.barcode}</span></div>}
-            {product.seller_name && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">Seller</span><span className="text-white">{product.seller_name}</span></div>}
-            {product.availability && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">Availability</span><span className={product.availability.toLowerCase().includes('instock') || product.availability.toLowerCase().includes('in stock') ? 'text-emerald-400' : 'text-red-400'}>{product.availability}</span></div>}
-            {product.shipping_info && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">Shipping</span><span className="text-white">{product.shipping_info.cost} {product.shipping_info.currency}</span></div>}
-            {product.return_policy && <div className="flex justify-between py-1.5 border-b border-white/5"><span className="text-neutral-500">Return Policy</span><span className="text-white">{product.return_policy.days} days {product.return_policy.free_return ? '(Free)' : ''}</span></div>}
+            {product.sku && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">SKU</span><span className="text-[#0f1419] font-mono text-xs">{product.sku}</span></div>}
+            {product.barcode && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">Barcode</span><span className="text-[#0f1419] font-mono text-xs">{product.barcode}</span></div>}
+            {product.seller_name && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">Seller</span><span className="text-[#0f1419]">{product.seller_name}</span></div>}
+            {product.availability && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">Availability</span><span className={product.availability.toLowerCase().includes('instock') || product.availability.toLowerCase().includes('in stock') ? 'text-emerald-600' : 'text-red-600'}>{product.availability}</span></div>}
+            {product.shipping_info && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">Shipping</span><span className="text-[#0f1419]">{product.shipping_info.cost} {product.shipping_info.currency}</span></div>}
+            {product.return_policy && <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8"><span className="text-neutral-500">Return Policy</span><span className="text-[#0f1419]">{product.return_policy.days} days {product.return_policy.free_return ? '(Free)' : ''}</span></div>}
           </div>
           {product.description && (
             <div>
               <div className="text-xs text-neutral-500 mb-1">Description</div>
-              <p className="text-xs text-neutral-300 leading-relaxed max-h-32 overflow-y-auto">{product.description}</p>
+              <p className="text-xs text-[#5f471d] leading-relaxed max-h-32 overflow-y-auto">{product.description}</p>
             </div>
           )}
           {product.product_specs && Object.keys(product.product_specs).length > 0 && (
@@ -1367,7 +1367,7 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
               <div className="text-xs text-neutral-500 mb-1">Specifications</div>
               <div className="space-y-1">
                 {Object.entries(product.product_specs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-neutral-300">{v}</span></div>
+                  <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-[#5f471d]">{v}</span></div>
                 ))}
               </div>
             </div>
@@ -1377,12 +1377,12 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
               <div className="text-xs text-neutral-500 mb-1">Reviews ({product.reviews.length})</div>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {product.reviews.slice(0, 5).map((r, i) => (
-                  <div key={i} className="rounded-lg bg-white/5 p-2 text-xs">
+                  <div key={i} className="rounded-lg bg-[#5b4824]/5 p-2 text-xs">
                     <div className="flex items-center gap-1 mb-1">
                       {r.rating && <span className="text-amber-400">{r.rating}★</span>}
-                      {r.author && <span className="text-neutral-400">{r.author}</span>}
+                      {r.author && <span className="text-[#9e8b66]">{r.author}</span>}
                     </div>
-                    <p className="text-neutral-300 line-clamp-3">{r.text}</p>
+                    <p className="text-[#5f471d] line-clamp-3">{r.text}</p>
                   </div>
                 ))}
               </div>
@@ -1405,26 +1405,26 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
   return (
     <>
       <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={onClose} />
-      <div className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-white/10 shadow-2xl"
-        style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}>
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-white/10" style={{ background: 'rgba(20,22,25,0.95)', backdropFilter: 'blur(8px)' }}>
+      <div className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-[#5b4824]/12 shadow-2xl"
+        style={{ background: 'linear-gradient(180deg, #fefbf0 0%, #fffbef 100%)' }}>
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-[#5b4824]/12" style={{ background: 'rgba(254,251,240,0.98)', backdropFilter: 'blur(8px)' }}>
           <div className="flex items-center gap-2">
-            <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-white/10 text-neutral-300 font-mono">#{product.position}</span>
-            <h3 className="text-base font-semibold text-white truncate">Category Product</h3>
+            <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-[#5b4824]/8 text-[#5f471d] font-mono">#{product.position}</span>
+            <h3 className="text-base font-semibold text-[#0f1419] truncate">Category Product</h3>
             {product.detail_fetched && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Detailed</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600">Detailed</span>
             )}
           </div>
           <div className="flex items-center gap-2">
             {product.url && (
-              <a href={product.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
+              <a href={product.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-[#5b4824]/8 text-[#9e8b66]">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
             )}
-            <button onClick={() => onDelete(product.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-400" title="Delete product">
+            <button onClick={() => onDelete(product.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-600" title="Delete product">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#5b4824]/8 text-[#9e8b66]">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -1432,30 +1432,30 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
 
         <div className="p-4 space-y-4">
           {product.image_url && (
-            <div className="rounded-lg bg-white/5 p-4 flex items-center justify-center">
+            <div className="rounded-lg bg-[#5b4824]/5 p-4 flex items-center justify-center">
               <img src={product.image_url} alt="" className="max-h-64 object-contain" />
             </div>
           )}
           <div>
-            {product.brand && <div className="text-xs text-cyan-400 font-medium uppercase mb-1">{product.brand}</div>}
-            <h4 className="text-base font-medium text-white leading-snug">{product.name}</h4>
+            {product.brand && <div className="text-xs text-[#5b4824] font-medium uppercase mb-1">{product.brand}</div>}
+            <h4 className="text-base font-medium text-[#0f1419] leading-snug">{product.name}</h4>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-white/5 p-3 text-center">
+            <div className="rounded-lg bg-[#5b4824]/5 p-3 text-center">
               <div className="text-xs text-neutral-500 mb-1">Price</div>
-              <div className="text-base font-bold text-white">{formatPrice(product.price)}</div>
+              <div className="text-base font-bold text-[#0f1419]">{formatPrice(product.price)}</div>
               {product.original_price && product.original_price > (product.price || 0) && (
                 <div className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</div>
               )}
             </div>
-            <div className="rounded-lg bg-white/5 p-3 text-center">
+            <div className="rounded-lg bg-[#5b4824]/5 p-3 text-center">
               <div className="text-xs text-neutral-500 mb-1">Position</div>
-              <div className="text-base font-bold text-white">#{product.position}</div>
+              <div className="text-base font-bold text-[#0f1419]">#{product.position}</div>
               <div className="text-xs text-neutral-500">Page {product.page_number}</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3 text-center">
+            <div className="rounded-lg bg-[#5b4824]/5 p-3 text-center">
               <div className="text-xs text-neutral-500 mb-1">Rating</div>
-              <div className="text-base font-bold text-white flex items-center justify-center gap-1">
+              <div className="text-base font-bold text-[#0f1419] flex items-center justify-center gap-1">
                 {product.rating || '-'}
                 {product.rating && <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>}
               </div>
@@ -1464,58 +1464,58 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
           </div>
           <div className="space-y-2 text-sm">
             {product.is_sponsored && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Type</span>
                 <span className="text-amber-400 font-medium">Sponsored Ad</span>
               </div>
             )}
             {product.seller_name && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Seller</span>
-                <span className="text-white">{product.seller_name}</span>
+                <span className="text-[#0f1419]">{product.seller_name}</span>
               </div>
             )}
             {product.sku && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">SKU</span>
-                <span className="text-white font-mono text-xs">{product.sku}</span>
+                <span className="text-[#0f1419] font-mono text-xs">{product.sku}</span>
               </div>
             )}
             {product.barcode && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Barcode</span>
-                <span className="text-white font-mono text-xs">{product.barcode}</span>
+                <span className="text-[#0f1419] font-mono text-xs">{product.barcode}</span>
               </div>
             )}
             {product.stock_status && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Stock</span>
-                <span className={product.stock_status === 'inStock' ? 'text-emerald-400' : 'text-orange-400'}>{product.stock_status}</span>
+                <span className={product.stock_status === 'inStock' ? 'text-emerald-600' : 'text-orange-400'}>{product.stock_status}</span>
               </div>
             )}
             {product.shipping_type && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Shipping</span>
-                <span className="text-white">{product.shipping_type}</span>
+                <span className="text-[#0f1419]">{product.shipping_type}</span>
               </div>
             )}
             {product.campaign_text && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Campaign</span>
-                <span className="text-emerald-400">{product.campaign_text}</span>
+                <span className="text-emerald-600">{product.campaign_text}</span>
               </div>
             )}
             {product.discount_percentage && (
-              <div className="flex justify-between py-1.5 border-b border-white/5">
+              <div className="flex justify-between py-1.5 border-b border-[#5b4824]/8">
                 <span className="text-neutral-500">Discount</span>
-                <span className="text-emerald-400">-{product.discount_percentage}%</span>
+                <span className="text-emerald-600">-{product.discount_percentage}%</span>
               </div>
             )}
           </div>
           {product.category_path && (
             <div>
               <div className="text-xs text-neutral-500 mb-1 font-medium">Category Path</div>
-              <p className="text-xs text-neutral-300">{product.category_path}</p>
+              <p className="text-xs text-[#5f471d]">{product.category_path}</p>
             </div>
           )}
           {product.seller_list && product.seller_list.length > 0 && (
@@ -1523,8 +1523,8 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
               <div className="text-xs text-neutral-500 mb-2 font-medium">All Sellers ({product.seller_list.length})</div>
               <div className="space-y-1">
                 {product.seller_list.map((s: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-white/5">
-                    <span className="text-white">{s.name}</span>
+                  <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#5b4824]/5">
+                    <span className="text-[#0f1419]">{s.name}</span>
                     {s.id && <span className="text-neutral-500 font-mono text-[10px]">ID: {s.id}</span>}
                   </div>
                 ))}
@@ -1534,7 +1534,7 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
           {product.description && (
             <div>
               <div className="text-xs text-neutral-500 mb-1 font-medium">Description</div>
-              <p className="text-xs text-neutral-300 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-line">{product.description}</p>
+              <p className="text-xs text-[#5f471d] leading-relaxed max-h-40 overflow-y-auto whitespace-pre-line">{product.description}</p>
             </div>
           )}
           {product.specs && Object.keys(product.specs).length > 0 && (
@@ -1542,9 +1542,9 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
               <div className="text-xs text-neutral-500 mb-2 font-medium">Specifications</div>
               <div className="space-y-1">
                 {Object.entries(product.specs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between text-xs py-1 px-2 rounded bg-white/5">
-                    <span className="text-neutral-400">{k}</span>
-                    <span className="text-white text-right max-w-[60%]">{String(v)}</span>
+                  <div key={k} className="flex justify-between text-xs py-1 px-2 rounded bg-[#5b4824]/5">
+                    <span className="text-[#9e8b66]">{k}</span>
+                    <span className="text-[#0f1419] text-right max-w-[60%]">{String(v)}</span>
                   </div>
                 ))}
               </div>
@@ -1556,13 +1556,13 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
               {detail.description && !product.description && (
                 <div className="mb-2">
                   <div className="text-xs text-neutral-500 mb-1">Description</div>
-                  <p className="text-xs text-neutral-300 leading-relaxed max-h-32 overflow-y-auto">{detail.description}</p>
+                  <p className="text-xs text-[#5f471d] leading-relaxed max-h-32 overflow-y-auto">{detail.description}</p>
                 </div>
               )}
               {detail.category && !product.category_path && (
                 <div className="mb-2">
                   <div className="text-xs text-neutral-500 mb-1">Category</div>
-                  <p className="text-xs text-neutral-300">{detail.category}</p>
+                  <p className="text-xs text-[#5f471d]">{detail.category}</p>
                 </div>
               )}
               {detail.product_specs && Object.keys(detail.product_specs).length > 0 && (
@@ -1570,7 +1570,7 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
                   <div className="text-xs text-neutral-500 mb-1">Specifications</div>
                   <div className="space-y-1">
                     {Object.entries(detail.product_specs).map(([k, v]) => (
-                      <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-neutral-300">{String(v)}</span></div>
+                      <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-[#5f471d]">{String(v)}</span></div>
                     ))}
                   </div>
                 </div>

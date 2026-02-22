@@ -51,13 +51,13 @@ export default function Sellers() {
 
   const getCardBackground = (seller: SellerInfo) => {
     if (seller.price_alert_count > 0 && seller.campaign_alert_count > 0) {
-      return 'bg-gradient-to-br from-red-900/30 to-orange-900/30 border border-red-500/30';
+      return 'bg-gradient-to-br from-red-50 to-orange-50 border border-red-300/40';
     } else if (seller.price_alert_count > 0) {
-      return 'bg-red-900/30 border border-red-500/30';
+      return 'bg-red-50 border border-red-300/40';
     } else if (seller.campaign_alert_count > 0) {
-      return 'bg-orange-900/30 border border-orange-500/30';
+      return 'bg-orange-50 border border-orange-300/40';
     }
-    return 'bg-[#3a3a3a]';
+    return 'bg-[#f7eede]';
   };
 
   const exportProgressPercent = exportProgress.total > 0
@@ -114,8 +114,8 @@ export default function Sellers() {
     <div className="space-y-5 md:space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-white">Sellers</h1>
-          <p className="text-sm md:text-base text-neutral-400 mt-1">View all sellers and their alert products</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419]">Sellers</h1>
+          <p className="text-sm md:text-base text-[#9e8b66] mt-1">View all sellers and their alert products</p>
         </div>
         {sellersWithAlerts.length > 0 && (
           <div className="relative">
@@ -142,11 +142,11 @@ export default function Sellers() {
               )}
             </button>
             {showBulkExportMenu && (
-              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-dark-700 rounded-lg shadow-lg border border-dark-500 z-10">
+              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-[#f7eede] rounded-lg shadow-lg border border-dark-500 z-10">
                 <button
                   onClick={() => handleBulkExport('price')}
                   disabled={filteredSellers.filter(s => s.price_alert_count > 0).length === 0}
-                  className="w-full px-4 py-3 text-left text-neutral-300 hover:bg-dark-600 rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="w-full px-4 py-3 text-left text-[#5f471d] hover:bg-[#f0e8d8] rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span className="w-2 h-2 bg-danger rounded-full"></span>
                   <span>Export Price Alerts</span>
@@ -157,7 +157,7 @@ export default function Sellers() {
                 <button
                   onClick={() => handleBulkExport('campaign')}
                   disabled={filteredSellers.filter(s => s.campaign_alert_count > 0).length === 0}
-                  className="w-full px-4 py-3 text-left text-neutral-300 hover:bg-dark-600 rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="w-full px-4 py-3 text-left text-[#5f471d] hover:bg-[#f0e8d8] rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span className="w-2 h-2 bg-warning rounded-full"></span>
                   <span>Export Campaign Alerts</span>
@@ -176,11 +176,11 @@ export default function Sellers() {
           <div className="flex items-center gap-3">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent-primary"></div>
             <div>
-              <div className="text-white font-medium">Exporting: {exportProgress.sellerName}</div>
-              <div className="text-neutral-400 text-sm">{exportProgress.current} of {exportProgress.total} sellers</div>
+              <div className="text-[#0f1419] font-medium">Exporting: {exportProgress.sellerName}</div>
+              <div className="text-[#9e8b66] text-sm">{exportProgress.current} of {exportProgress.total} sellers</div>
             </div>
           </div>
-          <div className="mt-3 bg-dark-700 rounded-full h-2 overflow-hidden">
+          <div className="mt-3 bg-[#f7eede] rounded-full h-2 overflow-hidden">
             <div 
               className="bg-accent-primary h-full transition-all duration-300"
               style={{ width: `${exportProgressPercent}%` }}
@@ -195,7 +195,7 @@ export default function Sellers() {
           className={`px-4 py-2 rounded-lg transition-all ${
             platform === 'hepsiburada'
               ? 'bg-accent-primary text-dark-900 font-medium'
-              : 'bg-dark-700 text-neutral-400 hover:bg-dark-600'
+              : 'bg-[#f7eede] text-[#9e8b66] hover:bg-[#f0e8d8]'
           }`}
         >
           Hepsiburada
@@ -205,7 +205,7 @@ export default function Sellers() {
           className={`px-4 py-2 rounded-lg transition-all ${
             platform === 'trendyol'
               ? 'bg-accent-primary text-dark-900 font-medium'
-              : 'bg-dark-700 text-neutral-400 hover:bg-dark-600'
+              : 'bg-[#f7eede] text-[#9e8b66] hover:bg-[#f0e8d8]'
           }`}
         >
           Trendyol
@@ -221,7 +221,7 @@ export default function Sellers() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input-dark flex-1"
           />
-          <div className="text-neutral-400 text-xs md:text-sm">
+          <div className="text-[#9e8b66] text-xs md:text-sm">
             {filteredSellers.length} sellers
           </div>
         </div>
@@ -229,10 +229,10 @@ export default function Sellers() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
-            <span className="ml-3 text-neutral-400">Loading sellers...</span>
+            <span className="ml-3 text-[#9e8b66]">Loading sellers...</span>
           </div>
         ) : filteredSellers.length === 0 ? (
-          <div className="text-center py-12 text-neutral-400">
+          <div className="text-center py-12 text-[#9e8b66]">
             No sellers found
           </div>
         ) : (
@@ -241,7 +241,7 @@ export default function Sellers() {
               <div
                 key={seller.merchant_id}
                 onClick={() => navigate(`/sellers/${seller.merchant_id}?platform=${platform}`)}
-                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-dark-600/45 ${getCardBackground(seller)}`}
+                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-[#f0e8d8]/45 ${getCardBackground(seller)}`}
               >
                 <div className="flex items-start gap-3">
                   {seller.merchant_logo && (
@@ -252,32 +252,32 @@ export default function Sellers() {
                   />
                 )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white truncate">{seller.merchant_name}</h3>
+                    <h3 className="font-semibold text-[#0f1419] truncate">{seller.merchant_name}</h3>
                     {seller.merchant_rating && (
                       <div className="flex items-center gap-1 mt-1">
                         <span className="text-warning text-sm">★</span>
-                        <span className="text-neutral-300 text-sm">{formatRating(seller.merchant_rating)}</span>
+                        <span className="text-[#5f471d] text-sm">{formatRating(seller.merchant_rating)}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-dark-600">
+                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-[#e5e0d2]">
                   <div className="text-center">
-                    <div className="text-xl md:text-2xl font-bold text-white">{seller.product_count}</div>
-                    <div className="text-xs text-neutral-400">Products</div>
+                    <div className="text-xl md:text-2xl font-bold text-[#0f1419]">{seller.product_count}</div>
+                    <div className="text-xs text-[#9e8b66]">Products</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500'}`}>
                       {seller.price_alert_count}
                     </div>
-                    <div className="text-xs text-neutral-400">Price</div>
+                    <div className="text-xs text-[#9e8b66]">Price</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500'}`}>
                       {seller.campaign_alert_count}
                     </div>
-                    <div className="text-xs text-neutral-400">Campaign</div>
+                    <div className="text-xs text-[#9e8b66]">Campaign</div>
                   </div>
                 </div>
 

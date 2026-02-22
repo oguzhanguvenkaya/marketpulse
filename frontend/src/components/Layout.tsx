@@ -91,10 +91,10 @@ export default function Layout({ children }: LayoutProps) {
   const mainMargin = collapsed ? 'md:ml-[72px]' : 'md:ml-72';
 
   return (
-    <div className="min-h-screen app-shell text-neutral-200 flex">
+    <div className="min-h-screen app-shell text-[#5f471d] flex">
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/65 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -104,24 +104,24 @@ export default function Layout({ children }: LayoutProps) {
           mobileOpen ? 'translate-x-0 !w-72' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className={`border-b border-white/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
+        <div className={`border-b border-[#5b4824]/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <span className="text-xl font-bold text-white tracking-tight">MarketPulse</span>
-                  <span className="text-xs text-neutral-400 block">Intelligence Console</span>
+                  <span className="text-xl font-bold text-[#3a2d14] tracking-tight">MarketPulse</span>
+                  <span className="text-xs text-[#9e8b66] block">Intelligence Console</span>
                 </div>
               )}
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
-              className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
+              className="p-2 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -142,16 +142,16 @@ export default function Layout({ children }: LayoutProps) {
                   title={collapsed ? item.label : undefined}
                   className={`nav-item flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${
                     collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-4 py-3'
-                  } ${isActive ? 'nav-item-active text-white' : 'text-neutral-300'}`}
+                  } ${isActive ? 'nav-item-active text-[#3a2d14]' : 'text-[#7a6b4e]'}`}
                 >
-                  <span className={`flex-shrink-0 ${isActive ? 'text-accent-secondary' : 'text-neutral-400'}`}>
+                  <span className={`flex-shrink-0 ${isActive ? 'text-[#5b4824]' : 'text-[#9e8b66]'}`}>
                     {item.icon}
                   </span>
                   {!collapsed && (
                     <>
                       <span className="truncate">{item.label}</span>
                       {isActive && (
-                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-secondary shadow-glow-cyan flex-shrink-0" />
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#f7ce86] shadow-glow-cyan flex-shrink-0" />
                       )}
                     </>
                   )}
@@ -161,10 +161,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
 
-        <div className={`border-t border-white/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
+        <div className={`border-t border-[#5b4824]/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
           <button
             onClick={() => setCollapsed(c => !c)}
-            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-neutral-400 hover:text-white hover:bg-white/10 ${
+            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 ${
               collapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'
             }`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -175,8 +175,8 @@ export default function Layout({ children }: LayoutProps) {
             {!collapsed && <span className="text-sm">Collapse</span>}
           </button>
           {!collapsed && (
-            <div className="px-4 py-3 mt-2 rounded-xl bg-dark-700/45 border border-white/10">
-              <div className="flex items-center gap-2 text-xs text-neutral-300">
+            <div className="px-4 py-3 mt-2 rounded-xl bg-[#f7eede] border border-[#5b4824]/10">
+              <div className="flex items-center gap-2 text-xs text-[#7a6b4e]">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Realtime services active
               </div>
@@ -195,21 +195,21 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
+              className="p-2 -ml-1 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-neutral-500">Workspace</p>
-              <h1 className="text-base md:text-lg font-bold text-white">{activeLabel}</h1>
+              <p className="text-xs uppercase tracking-[0.15em] text-[#b5a382]">Workspace</p>
+              <h1 className="text-base md:text-lg font-bold text-[#3a2d14]">{activeLabel}</h1>
             </div>
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
             <div className="badge badge-info">Live analytics</div>
-            <div className="text-sm text-neutral-400">
+            <div className="text-sm text-[#9e8b66]">
               {new Date().toLocaleDateString('en-US', {
                 weekday: 'short',
                 year: 'numeric',
