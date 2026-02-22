@@ -380,15 +380,39 @@ async def get_product_detail(product_id: int, db: Session = Depends(get_db)):
 async def session_url_lookup(
     category: Optional[str] = Query(None),
     platform: Optional[str] = Query(None),
+    session_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
+    if session_id:
+        try:
+            session = db.query(CategorySession).filter(CategorySession.id == uuid_mod.UUID(session_id)).first()
+            if session:
+                return {'category_url': session.category_url, 'session_id': str(session.id), 'category_name': session.category_name}
+        except (ValueError, Exception):
+            pass
+
     if not category:
         return {'category_url': None}
 
-    q = db.query(CategorySession).filter(CategorySession.category_name.ilike(f"%{category}%"))
+    base_q = db.query(CategorySession)
     if platform:
-        q = q.filter(CategorySession.platform == platform)
-    session = q.order_by(CategorySession.created_at.desc()).first()
+        base_q = base_q.filter(CategorySession.platform == platform)
+
+    session = base_q.filter(CategorySession.category_name.ilike(f"%{category}%")).order_by(CategorySession.created_at.desc()).first()
+
+    if not session:
+        slug = category.lower().replace(' ', '-').replace('ı', 'i').replace('ö', 'o').replace('ü', 'u').replace('ş', 's').replace('ç', 'c').replace('ğ', 'g')
+        session = base_q.filter(CategorySession.category_url.ilike(f"%{slug}%")).order_by(CategorySession.created_at.desc()).first()
+
+    if not session:
+        parts = [p.strip() for p in category.replace(' > ', '>').replace(' / ', '>').split('>') if p.strip()]
+        for part in reversed(parts):
+            if len(part) < 3:
+                continue
+            session = base_q.filter(CategorySession.category_name.ilike(f"%{part}%")).order_by(CategorySession.created_at.desc()).first()
+            if session:
+                break
+
     if session:
         return {'category_url': session.category_url, 'session_id': str(session.id), 'category_name': session.category_name}
     return {'category_url': None}
@@ -429,9 +453,7 @@ async def list_products_by_category(
     sessions_q = db.query(CategorySession)
     if platform:
         sessions_q = sessions_q.filter(CategorySession.platform == platform)
-    if category:
-        sessions_q = sessions_q.filter(CategorySession.category_name.ilike(f"%{category}%"))
-    related_sessions = sessions_q.order_by(CategorySession.created_at.desc()).limit(5).all()
+    related_sessions = sessions_q.order_by(CategorySession.created_at.desc()).limit(20).all()
 
     return {
         'total': total,
