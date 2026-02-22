@@ -326,9 +326,27 @@ async def delete_session(session_id: str, db: Session = Depends(get_db)):
 def _parse_utag_data(html: str) -> dict:
     utag = {}
     try:
-        m = re.search(r'(?:const|var)\s+utagData\s*=\s*(\{.+?\});\s*\n', html, re.DOTALL)
-        if m:
-            utag = json.loads(m.group(1))
+        idx = html.find('utagData')
+        if idx == -1:
+            return utag
+        brace_start = html.find('{', idx)
+        if brace_start == -1:
+            return utag
+        depth = 0
+        end = brace_start
+        for i in range(brace_start, min(brace_start + 30000, len(html))):
+            if html[i] == '{':
+                depth += 1
+            elif html[i] == '}':
+                depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+        if depth != 0:
+            return utag
+        raw = html[brace_start:end]
+        cleaned = re.sub(r'[\x00-\x1f\x7f]', ' ', raw)
+        utag = json.loads(cleaned)
     except (json.JSONDecodeError, Exception) as e:
         logger.debug(f"utagData parse error: {e}")
     return utag
@@ -389,7 +407,6 @@ async def _fetch_single_detail_inner(product_id: int):
         if not product or not product.url:
             return
         fetch_url = str(product.url)
-        original_price = float(product.price) if product.price else None
     finally:
         db.close()
 
@@ -546,7 +563,7 @@ async def _fetch_single_detail_inner(product_id: int):
             product.rating = rating_val
         if review_count_val:
             product.review_count = review_count_val
-        if utag_price and not original_price:
+        if utag_price:
             product.price = utag_price
 
         if fetch_url != str(product.url):

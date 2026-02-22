@@ -381,21 +381,36 @@ class CategoryScraperService:
                 if m:
                     discount_pct = float(m.group(1))
 
-            price_text = price_area.get_text()
-            price_candidates = re.findall(r'(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?)\s*TL', price_text)
-            parsed_prices = []
-            for pc in price_candidates:
-                val = float(pc.replace('.', '').replace(',', '.'))
-                parsed_prices.append(val)
+            final_el = price_area.find('div', class_=re.compile(r'price-module_finalPrice|finalPrice', re.I))
+            if final_el:
+                int_part = ''
+                for child in final_el.children:
+                    if isinstance(child, str):
+                        int_part += child.strip()
+                fraction_el = final_el.find('span', class_=re.compile(r'Fraction', re.I))
+                frac_part = ''
+                if fraction_el:
+                    frac_text = fraction_el.get_text(strip=True).replace('TL', '').strip()
+                    if frac_text:
+                        frac_part = frac_text
+                price_str = int_part + frac_part
+                price_str = price_str.strip()
+                if price_str:
+                    try:
+                        current_price = float(price_str.replace('.', '').replace(',', '.'))
+                    except ValueError:
+                        pass
 
-            if parsed_prices:
-                if orig_price and orig_price in parsed_prices:
-                    remaining = [p for p in parsed_prices if p != orig_price]
-                    current_price = min(remaining) if remaining else orig_price
-                else:
+            if not current_price:
+                price_text = price_area.get_text()
+                price_candidates = re.findall(r'(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?)\s*TL', price_text)
+                parsed_prices = []
+                for pc in price_candidates:
+                    val = float(pc.replace('.', '').replace(',', '.'))
+                    if val < 100000:
+                        parsed_prices.append(val)
+                if parsed_prices:
                     current_price = min(parsed_prices)
-                    if len(parsed_prices) > 1:
-                        orig_price = max(parsed_prices)
 
         if not current_price:
             price_el = card.find(attrs={'data-test-id': re.compile(r'price', re.I)})
