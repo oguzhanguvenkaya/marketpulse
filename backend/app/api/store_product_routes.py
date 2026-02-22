@@ -166,7 +166,10 @@ async def scrape_from_price_monitor(
 
     products = q.all()
     if not products:
-        raise HTTPException(status_code=404, detail="No active monitored products found")
+        msg = f"No active monitored products found for platform '{platform}'" if platform else "No active monitored products found"
+        if platform and platform not in ('hepsiburada', 'trendyol'):
+            msg += ". Only Hepsiburada and Trendyol products are available in Price Monitor. Use 'Import Excel' or 'URL Scraper' for other platforms."
+        raise HTTPException(status_code=404, detail=msg)
 
     urls_data = []
     for p in products:
