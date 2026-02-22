@@ -771,12 +771,62 @@ export interface StoreProductFilters {
   price_range: { min: number; max: number; avg: number };
 }
 
+export interface FilteredStats {
+  avg_price: number;
+  brand_count: number;
+  category_count?: number;
+}
+
 export interface StoreProductListResponse {
   total: number;
   page: number;
   page_size: number;
   total_pages: number;
   products: StoreProduct[];
+  filtered_stats?: FilteredStats;
+}
+
+export interface CategoryProductItem {
+  id: number;
+  session_id: string;
+  name: string;
+  url: string;
+  image_url: string;
+  brand: string;
+  price: number | null;
+  original_price: number | null;
+  discount_percentage: number | null;
+  rating: number | null;
+  review_count: number | null;
+  is_sponsored: boolean;
+  campaign_text: string;
+  seller_name: string;
+  page_number: number;
+  position: number;
+  detail_fetched: boolean;
+  detail_data: any;
+  created_at: string | null;
+}
+
+export interface CategoryProductListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  products: CategoryProductItem[];
+  filtered_stats: { avg_price: number; brand_count: number };
+  sessions: Array<{
+    id: string;
+    platform: string;
+    category_url: string;
+    category_name: string;
+    breadcrumbs: Array<{ name: string; url?: string }>;
+    total_products: number;
+    pages_scraped: number;
+    status: string;
+    created_at: string;
+    product_count: number;
+  }>;
 }
 
 export const getStoreProducts = async (params: {
@@ -930,6 +980,17 @@ export const getCategoryFetchStatus = async (sessionId: string) => {
 
 export const getCategoryProductDetail = async (productId: number) => {
   const response = await api.get(`/category-explorer/products/${productId}`);
+  return response.data;
+};
+
+export const getCategoryProductsByCategory = async (params: {
+  category?: string;
+  platform?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<CategoryProductListResponse> => {
+  const response = await api.get('/category-explorer/products-by-category', { params });
   return response.data;
 };
 

@@ -346,6 +346,59 @@ async def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     return _serialize_product(product)
 
 
+@router.get("/products-by-category")
+async def list_products_by_category(
+    category: Optional[str] = Query(None),
+    platform: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db)
+):
+    q = db.query(CategoryProduct).join(CategorySession, CategoryProduct.session_id == CategorySession.id)
+
+    if platform:
+        q = q.filter(CategorySession.platform == platform)
+    if category:
+        q = q.filter(CategorySession.category_name.ilike(f"%{category}%"))
+    if search:
+        q = q.filter(or_(
+            CategoryProduct.name.ilike(f"%{search}%"),
+            CategoryProduct.brand.ilike(f"%{search}%"),
+        ))
+
+    total = q.count()
+
+    stats_row = q.with_entities(
+        func.avg(CategoryProduct.price),
+        func.count(func.distinct(CategoryProduct.brand)),
+    ).first()
+
+    q = q.order_by(CategoryProduct.position.asc())
+    offset = (page - 1) * page_size
+    products = q.offset(offset).limit(page_size).all()
+
+    sessions_q = db.query(CategorySession)
+    if platform:
+        sessions_q = sessions_q.filter(CategorySession.platform == platform)
+    if category:
+        sessions_q = sessions_q.filter(CategorySession.category_name.ilike(f"%{category}%"))
+    related_sessions = sessions_q.order_by(CategorySession.created_at.desc()).limit(5).all()
+
+    return {
+        'total': total,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': (total + page_size - 1) // page_size if total > 0 else 0,
+        'products': [_serialize_product(p) for p in products],
+        'filtered_stats': {
+            'avg_price': float(stats_row[0]) if stats_row[0] else 0,
+            'brand_count': stats_row[1] or 0,
+        },
+        'sessions': [_serialize_session(s) for s in related_sessions],
+    }
+
+
 @router.get("/fetch-status/{session_id}")
 async def fetch_status(session_id: str, db: Session = Depends(get_db)):
     try:

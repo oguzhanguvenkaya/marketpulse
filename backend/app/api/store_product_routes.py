@@ -67,6 +67,18 @@ async def list_store_products(
 
     total = q.count()
 
+    stats_q = q.with_entities(
+        func.avg(StoreProduct.price),
+        func.count(func.distinct(StoreProduct.brand)),
+        func.count(func.distinct(StoreProduct.category)),
+    )
+    stats_row = stats_q.first()
+    filtered_stats = {
+        "avg_price": float(stats_row[0]) if stats_row[0] else 0,
+        "brand_count": stats_row[1] or 0,
+        "category_count": stats_row[2] or 0,
+    }
+
     sort_col = getattr(StoreProduct, sort_by, StoreProduct.created_at)
     if sort_dir == "asc":
         q = q.order_by(sort_col.asc())
@@ -82,6 +94,7 @@ async def list_store_products(
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size if total > 0 else 0,
         "products": [_serialize_product(p) for p in products],
+        "filtered_stats": filtered_stats,
     }
 
 
