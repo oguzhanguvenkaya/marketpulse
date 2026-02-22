@@ -1,0 +1,86 @@
+2026-02-22T19:06:39Z info: Deployment: c24c51cd-2aea-40e7-8eac-8aebf8e91edc
+2026-02-22T19:06:39Z info: Running Security Scan
+2026-02-22T19:07:10Z info: Security Scan Complete
+2026-02-22T19:07:12Z info: Preparing development database
+2026-02-22T19:07:17Z info: Copying development database to production database
+2026-02-22T19:08:30Z info: Successfully copied development database to production database
+2026-02-22T19:08:30Z info: Connecting to builder
+2026-02-22T19:08:31Z info: Builder connected
+2026-02-22T19:08:33Z info: Installing packages
+--> npm install
+
+
+up to date, audited 1 package in 290ms
+
+
+found 0 vulnerabilities
+
+2026-02-22T19:08:35Z info: Starting Build
+
+> pazaryeri-platform@1.0.0 build
+> cd frontend && npm install && npm run build
+
+
+
+added 2 packages, and audited 490 packages in 43s
+
+
+74 packages are looking for funding
+  run `npm fund` for details
+
+
+14 vulnerabilities (2 moderate, 12 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+
+vite v7.2.7 building client environment for production...
+
+transforming...
+
+✓ 122 modules transformed.
+
+[plugin vite:resolve] Module "buffer" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/typedarray-pool/pool.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+[plugin vite:resolve] Module "stream" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/probe-image-size/lib/common.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+[plugin vite:resolve] Module "assert" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/stream-parser/index.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+"buffer/" is imported by "buffer/?commonjs-external", but could not be resolved – treating it as an external dependency.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                                     0.54 kB │ gzip:     0.33 kB
+
+dist/assets/index-DP3gaSA9.css                     56.91 kB │ gzip:    10.81 kB
+dist/assets/vendor-plotly-vHLx566B.css             65.44 kB │ gzip:     9.25 kB
+dist/assets/TrendyolProducts-vwO7kaRs.js            0.55 kB │ gzip:     0.37 kB
+dist/assets/HepsiburadaProducts-C2FI8rnX.js         0.57 kB │ gzip:     0.39 kB
+dist/assets/WebProducts-C-oKT5AE.js                 0.66 kB │ gzip:     0.42 kB
+dist/assets/Products-BU2ejc7d.js                    5.86 kB │ gzip:     2.02 kB
+
+✓ built in 34.62s
+
+2026-02-22T19:10:01Z info: Pushing pid1 binary layer...
+2026-02-22T19:10:10Z info: Pushing Repl layer...
+2026-02-22T19:10:10Z info: Pushing hosting layer...
+2026-02-22T19:10:11Z info: Nix layers for this Repl are uncached.
+2026-02-22T19:10:11Z info: Pushing nix-0 layer...
+2026-02-22T19:10:13Z info: Created hosting layer
+2026-02-22T19:10:14Z info: Created pid1 binary layer
+2026-02-22T19:12:54Z info: Created Repl layer
+2026-02-22T19:12:54Z info: Pushing Repl (cache) layer...
+2026-02-22T19:12:57Z info: Created Repl (cache) layer
+Deployment timed out. Check the Logs tab for more details. - 2026-02-22T19:15:39.860Z
