@@ -40,6 +40,7 @@ class ScrapePageRequest(BaseModel):
     url: str
     session_id: Optional[str] = None
     page: int = 1
+    page_count: int = 1
 
 
 class FetchDetailRequest(BaseModel):
@@ -99,13 +100,8 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
         raise HTTPException(400, "Valid URL required")
 
     platform = scraper.detect_platform(req.url)
-    page_url = scraper.build_page_url(req.url, req.page)
-
-    html = await scraper.fetch_page(page_url)
-    if not html:
-        raise HTTPException(502, "Failed to fetch category page. The page may be protected or unavailable.")
-
-    parsed = scraper.parse_category_page(html, page_url)
+    pages_to_scrape = max(1, min(req.page_count, 20))
+    start_page = req.page
 
     session = None
     if req.session_id:
@@ -116,59 +112,92 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
         except (ValueError, Exception):
             pass
 
-    if not session:
-        session = CategorySession(
-            platform=platform,
-            category_url=req.url,
-            category_name=parsed.get('category_name', ''),
-            breadcrumbs=parsed.get('breadcrumbs', []),
-            total_products=parsed.get('total_products', 0),
-            pages_scraped=0,
-            status='active',
-        )
-        db.add(session)
-        db.flush()
-    else:
-        if parsed.get('category_name'):
-            session.category_name = parsed['category_name']
-        if parsed.get('breadcrumbs'):
-            session.breadcrumbs = parsed['breadcrumbs']
-        if parsed.get('total_products'):
-            session.total_products = parsed['total_products']
+    total_added = 0
+    total_found = 0
+    pages_scraped_list = []
+    has_next = False
 
     existing_urls = set()
-    if req.page > 1:
+    if session:
         existing = db.query(CategoryProduct.url).filter(
             CategoryProduct.session_id == session.id
         ).all()
         existing_urls = {r[0] for r in existing if r[0]}
 
-    added = 0
-    for idx, prod in enumerate(parsed.get('products', [])):
-        if prod.get('url') and prod['url'] in existing_urls:
-            continue
+    for page_num in range(start_page, start_page + pages_to_scrape):
+        page_url = scraper.build_page_url(req.url, page_num)
 
-        cp = CategoryProduct(
-            session_id=session.id,
-            name=prod.get('name', ''),
-            url=prod.get('url', ''),
-            image_url=prod.get('image_url', ''),
-            brand=prod.get('brand', ''),
-            price=_safe_numeric(prod.get('price')),
-            original_price=_safe_numeric(prod.get('original_price')),
-            discount_percentage=_safe_numeric(prod.get('discount_percentage')),
-            rating=_safe_numeric(prod.get('rating')),
-            review_count=prod.get('review_count'),
-            is_sponsored=prod.get('is_sponsored', False),
-            campaign_text=prod.get('campaign_text', ''),
-            seller_name=prod.get('seller_name', ''),
-            page_number=req.page,
-            position=(req.page - 1) * 50 + idx + 1,
-        )
-        db.add(cp)
-        added += 1
+        html = await scraper.fetch_page(page_url)
+        if not html:
+            if page_num == start_page:
+                raise HTTPException(502, "Failed to fetch category page. The page may be protected or unavailable.")
+            logger.warning(f"Failed to fetch page {page_num}, stopping multi-page scrape")
+            break
 
-    session.pages_scraped = max(session.pages_scraped or 0, req.page)
+        parsed = scraper.parse_category_page(html, page_url)
+
+        if not session:
+            session = CategorySession(
+                platform=platform,
+                category_url=req.url,
+                category_name=parsed.get('category_name', ''),
+                breadcrumbs=parsed.get('breadcrumbs', []),
+                total_products=parsed.get('total_products', 0),
+                pages_scraped=0,
+                status='active',
+            )
+            db.add(session)
+            db.flush()
+        else:
+            if parsed.get('category_name') and page_num == start_page:
+                session.category_name = parsed['category_name']
+            if parsed.get('breadcrumbs') and page_num == start_page:
+                session.breadcrumbs = parsed['breadcrumbs']
+            if parsed.get('total_products') and page_num == start_page:
+                session.total_products = parsed['total_products']
+
+        page_products = parsed.get('products', [])
+        total_found += len(page_products)
+        added = 0
+
+        for idx, prod in enumerate(page_products):
+            if prod.get('url') and prod['url'] in existing_urls:
+                continue
+
+            cp = CategoryProduct(
+                session_id=session.id,
+                name=prod.get('name', ''),
+                url=prod.get('url', ''),
+                image_url=prod.get('image_url', ''),
+                brand=prod.get('brand', ''),
+                price=_safe_numeric(prod.get('price')),
+                original_price=_safe_numeric(prod.get('original_price')),
+                discount_percentage=_safe_numeric(prod.get('discount_percentage')),
+                rating=_safe_numeric(prod.get('rating')),
+                review_count=prod.get('review_count'),
+                is_sponsored=prod.get('is_sponsored', False),
+                campaign_text=prod.get('campaign_text', ''),
+                seller_name=prod.get('seller_name', ''),
+                page_number=page_num,
+                position=(page_num - 1) * 50 + idx + 1,
+            )
+            db.add(cp)
+            existing_urls.add(prod.get('url', ''))
+            added += 1
+
+        total_added += added
+        pages_scraped_list.append(page_num)
+        session.pages_scraped = max(session.pages_scraped or 0, page_num)
+
+        has_next = parsed.get('has_next_page', False)
+        if not has_next and page_num < start_page + pages_to_scrape - 1:
+            logger.info(f"No more pages after page {page_num}, stopping")
+            break
+
+        if len(page_products) == 0:
+            logger.info(f"No products on page {page_num}, stopping")
+            break
+
     session.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(session)
@@ -179,13 +208,14 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
 
     return {
         'session': _serialize_session(session),
-        'page_scraped': req.page,
-        'products_found': len(parsed.get('products', [])),
-        'products_added': added,
-        'has_next_page': parsed.get('has_next_page', False),
+        'pages_scraped_list': pages_scraped_list,
+        'page_scraped': pages_scraped_list[-1] if pages_scraped_list else start_page,
+        'products_found': total_found,
+        'products_added': total_added,
+        'has_next_page': has_next,
         'total_in_session': len(all_products),
         'products': [_serialize_product(p) for p in all_products],
-        'breadcrumbs': parsed.get('breadcrumbs', []),
+        'breadcrumbs': parsed.get('breadcrumbs', []) if 'parsed' in locals() else [],
     }
 
 

@@ -932,12 +932,13 @@ export const importExcelProducts = async (file: File): Promise<{ created: number
   return response.data;
 };
 
-export const scrapeCategoryPage = async (url: string, page: number = 1, sessionId?: string) => {
+export const scrapeCategoryPage = async (url: string, page: number = 1, sessionId?: string, pageCount: number = 1) => {
   const response = await api.post('/category-explorer/scrape-page', {
     url,
     page,
     session_id: sessionId || null,
-  }, { timeout: 120000 });
+    page_count: pageCount,
+  }, { timeout: 300000 });
   return response.data;
 };
 

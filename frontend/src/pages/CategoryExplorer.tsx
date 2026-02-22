@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   getStoreProducts,
@@ -7,6 +7,8 @@ import {
   getCategoryProductsByCategory,
   scrapeCategoryPage,
   lookupSessionUrl,
+  fetchCategoryProductDetail,
+  getCategoryFetchStatus,
   type StoreProduct,
   type StoreProductFilters,
   type StoreProductListResponse,
@@ -43,9 +45,18 @@ export default function CategoryExplorer() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showScraper, setShowScraper] = useState(false);
   const [scrapeUrl, setScrapeUrl] = useState('');
+  const [scrapePageCount, setScrapePageCount] = useState(1);
   const [scraping, setScraping] = useState(false);
   const [scrapeMsg, setScrapeMsg] = useState('');
+  const [scrapeProgress, setScrapeProgress] = useState('');
+  const [scrapeSessionId, setScrapeSessionId] = useState<string | null>(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [selectedForDetail, setSelectedForDetail] = useState<Set<number>>(new Set());
+  const [detailFetching, setDetailFetching] = useState(false);
+  const [detailProgress, setDetailProgress] = useState('');
+  const detailPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchMyProducts = useCallback(async () => {
     setLoading(true);
@@ -124,12 +135,19 @@ export default function CategoryExplorer() {
     lookupSessionUrl(lastPart, platform || undefined).then(result => {
       if (result.category_url) {
         setScrapeUrl(result.category_url);
+        if (result.session_id) setScrapeSessionId(result.session_id);
         setShowScraper(true);
       } else {
         setScrapeUrl('');
       }
     }).catch(() => {});
   }, [selectedCategory, platform]);
+
+  useEffect(() => {
+    return () => {
+      if (detailPollRef.current) clearInterval(detailPollRef.current);
+    };
+  }, []);
 
   const handlePlatformChange = (p: Platform) => {
     setPlatform(p);
@@ -156,14 +174,79 @@ export default function CategoryExplorer() {
     if (!scrapeUrl) return;
     setScraping(true);
     setScrapeMsg('');
+    setScrapeProgress('');
     try {
-      const result = await scrapeCategoryPage(scrapeUrl, 1);
-      setScrapeMsg(`Scraped: ${result.products_found} products found from ${result.session?.category_name || 'category'}`);
+      setScrapeProgress(`Scraping ${scrapePageCount} page${scrapePageCount > 1 ? 's' : ''}...`);
+      const result = await scrapeCategoryPage(scrapeUrl, 1, scrapeSessionId || undefined, scrapePageCount);
+      const pagesScraped = result.pages_scraped_list?.length || 1;
+      setScrapeMsg(`Done: ${result.products_added} new products from ${pagesScraped} page${pagesScraped > 1 ? 's' : ''} (${result.products_found} found, ${result.total_in_session} total)`);
+      setScrapeProgress('');
+      if (result.session?.id) setScrapeSessionId(result.session.id);
       if (viewMode === 'category_page') fetchCatProducts();
     } catch (err: any) {
       setScrapeMsg(err?.response?.data?.detail || 'Scrape failed');
+      setScrapeProgress('');
     } finally {
       setScraping(false);
+    }
+  };
+
+  const toggleProductSelection = (id: number) => {
+    setSelectedForDetail(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllForDetail = () => {
+    const products = catData?.products || [];
+    const unfetched = products.filter(p => !p.detail_fetched);
+    if (selectedForDetail.size === unfetched.length && unfetched.length > 0) {
+      setSelectedForDetail(new Set());
+    } else {
+      setSelectedForDetail(new Set(unfetched.map(p => p.id)));
+    }
+  };
+
+  const handleFetchDetails = async () => {
+    if (selectedForDetail.size === 0) return;
+    setDetailFetching(true);
+    setDetailProgress(`Starting detail fetch for ${selectedForDetail.size} products...`);
+    try {
+      const ids = Array.from(selectedForDetail);
+      await fetchCategoryProductDetail(ids);
+      setDetailProgress(`Fetching details for ${ids.length} products in background...`);
+
+      const sessionId = scrapeSessionId || catData?.sessions?.[0]?.id;
+      if (sessionId) {
+        detailPollRef.current = setInterval(async () => {
+          try {
+            const status = await getCategoryFetchStatus(sessionId);
+            setDetailProgress(`Details: ${status.detail_fetched}/${status.total_products} fetched (${status.pending} remaining)`);
+            if (status.pending === 0) {
+              if (detailPollRef.current) clearInterval(detailPollRef.current);
+              setDetailFetching(false);
+              setDetailProgress('All details fetched!');
+              setSelectedForDetail(new Set());
+              fetchCatProducts();
+            }
+          } catch {
+            if (detailPollRef.current) clearInterval(detailPollRef.current);
+            setDetailFetching(false);
+          }
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          setDetailFetching(false);
+          setDetailProgress('Detail fetch started. Refresh to see results.');
+          setSelectedForDetail(new Set());
+        }, 2000);
+      }
+    } catch (err: any) {
+      setDetailProgress(err?.response?.data?.detail || 'Detail fetch failed');
+      setDetailFetching(false);
     }
   };
 
@@ -211,6 +294,13 @@ export default function CategoryExplorer() {
     }
     return { total: 0, avgPrice: 0, brandCount: 0, categoryCount: 0 };
   }, [viewMode, data, catData]);
+
+  const detailStats = useMemo(() => {
+    const products = catData?.products || [];
+    const fetched = products.filter(p => p.detail_fetched).length;
+    const unfetched = products.filter(p => !p.detail_fetched).length;
+    return { total: products.length, fetched, unfetched };
+  }, [catData]);
 
   const currentProducts = viewMode === 'my_products' ? data?.products || [] : [];
   const currentCatProducts = viewMode === 'category_page' ? catData?.products || [] : [];
@@ -303,64 +393,88 @@ export default function CategoryExplorer() {
     </div>
   );
 
-  const renderCatProductCard = (product: CategoryProductItem) => (
-    <div
-      key={product.id}
-      className="rounded-xl border border-white/10 overflow-hidden hover:border-white/20 transition-all cursor-pointer group relative"
-      style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
-      onClick={() => { setSelectedCatProduct(product); setSelectedProduct(null); }}
-    >
-      <div className="absolute top-2 right-2 flex items-center gap-1">
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 font-mono">
-          #{product.position}
-        </span>
-        {product.is_sponsored && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">
-            AD
+  const renderCatProductCard = (product: CategoryProductItem) => {
+    const isSelected = selectedForDetail.has(product.id);
+    return (
+      <div
+        key={product.id}
+        className={`rounded-xl border overflow-hidden transition-all cursor-pointer group relative ${
+          isSelected ? 'border-cyan-500/40 ring-1 ring-cyan-500/20' : 'border-white/10 hover:border-white/20'
+        }`}
+        style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
+      >
+        <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+          {showDetailPanel && !product.detail_fetched && (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleProductSelection(product.id); }}
+              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                isSelected ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-white/20 hover:border-cyan-500/50'
+              }`}
+            >
+              {isSelected && (
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+              )}
+            </button>
+          )}
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 font-mono">
+            #{product.position}
           </span>
-        )}
-      </div>
-      <div className="flex gap-3 p-3">
-        <div className="w-20 h-20 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {product.image_url ? (
-            <img src={product.image_url} alt="" className="max-h-full max-w-full object-contain" loading="lazy" />
-          ) : (
-            <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          {product.is_sponsored && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">
+              AD
+            </span>
+          )}
+          {product.detail_fetched && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-medium">
+              Detailed
+            </span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            {product.brand && <span className="text-[10px] text-cyan-400 font-medium uppercase truncate">{product.brand}</span>}
-          </div>
-          <h3 className="text-sm text-neutral-200 line-clamp-2 leading-snug mb-1.5">{product.name || 'Unnamed'}</h3>
-          <div className="flex items-end justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-white">{formatPrice(product.price)}</span>
-              {product.original_price && product.original_price > (product.price || 0) && (
-                <span className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</span>
-              )}
-            </div>
-            {product.rating && (
-              <div className="flex items-center gap-0.5">
-                <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                <span className="text-xs text-neutral-400">{product.rating}</span>
-                {product.review_count != null && <span className="text-[10px] text-neutral-600">({product.review_count})</span>}
-              </div>
+        <div
+          className="flex gap-3 p-3"
+          onClick={() => { setSelectedCatProduct(product); setSelectedProduct(null); }}
+        >
+          <div className="w-20 h-20 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {product.image_url ? (
+              <img src={product.image_url} alt="" className="max-h-full max-w-full object-contain" loading="lazy" />
+            ) : (
+              <svg className="w-8 h-8 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             )}
           </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              {product.brand && <span className="text-[10px] text-cyan-400 font-medium uppercase truncate">{product.brand}</span>}
+            </div>
+            <h3 className="text-sm text-neutral-200 line-clamp-2 leading-snug mb-1.5">{product.name || 'Unnamed'}</h3>
+            <div className="flex items-end justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-white">{formatPrice(product.price)}</span>
+                {product.original_price && product.original_price > (product.price || 0) && (
+                  <span className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</span>
+                )}
+              </div>
+              {product.rating && (
+                <div className="flex items-center gap-0.5">
+                  <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  <span className="text-xs text-neutral-400">{product.rating}</span>
+                  {product.review_count != null && <span className="text-[10px] text-neutral-600">({product.review_count})</span>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="px-3 pb-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-neutral-600">Page {product.page_number}</span>
+            {product.seller_name && <span className="text-[10px] text-neutral-600">| {product.seller_name}</span>}
+          </div>
+          {product.campaign_text && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 truncate max-w-[120px]">{product.campaign_text}</span>
+          )}
         </div>
       </div>
-      <div className="px-3 pb-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-neutral-600">Page {product.page_number}</span>
-          {product.seller_name && <span className="text-[10px] text-neutral-600">| {product.seller_name}</span>}
-        </div>
-        {product.campaign_text && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 truncate max-w-[120px]">{product.campaign_text}</span>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   const FilterSidebar = () => (
     <div className="space-y-4">
@@ -507,6 +621,19 @@ export default function CategoryExplorer() {
               className="lg:hidden px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
             </button>
+            {viewMode === 'category_page' && (
+              <button
+                onClick={() => { setShowDetailPanel(!showDetailPanel); setSelectedForDetail(new Set()); }}
+                className={`px-3 py-2 text-sm rounded-lg border transition-colors flex items-center gap-1.5 ${
+                  showDetailPanel ? 'border-purple-500/30 bg-purple-500/10 text-purple-400' : 'border-white/10 text-neutral-300 hover:bg-white/5'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Get Details
+              </button>
+            )}
             <button
               onClick={() => setShowScraper(!showScraper)}
               className={`px-3 py-2 text-sm rounded-lg border transition-colors flex items-center gap-1.5 ${
@@ -522,33 +649,158 @@ export default function CategoryExplorer() {
         </div>
 
         {showScraper && (
-          <div className="rounded-xl border border-white/10 p-4" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,212,255,0.02))' }}>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={scrapeUrl}
-                onChange={(e) => setScrapeUrl(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !scraping) handleScrape(); }}
-                placeholder="Paste category URL — e.g. https://www.hepsiburada.com/hizli-cilalar-c-20035738"
-                className="flex-1 bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50"
-              />
-              <button
-                onClick={handleScrape}
-                disabled={scraping || !scrapeUrl}
-                className="px-5 py-2.5 text-sm rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-                style={{ background: 'linear-gradient(135deg, #00d4ff, #0099cc)' }}
-              >
-                {scraping ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                )}
-                Scrape
-              </button>
+          <div className="rounded-xl border border-cyan-500/20 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,212,255,0.02))' }}>
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                <span className="text-sm font-medium text-cyan-300">Scrape Category Page</span>
+                <span className="text-[10px] text-neutral-500 ml-auto">Step 1: Collect product listings from marketplace</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={scrapeUrl}
+                  onChange={(e) => setScrapeUrl(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !scraping) handleScrape(); }}
+                  placeholder="Paste category URL — e.g. https://www.hepsiburada.com/hizli-cilalar-c-20035738"
+                  className="flex-1 bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-neutral-400 whitespace-nowrap">Pages to scrape:</label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 5, 10].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => setScrapePageCount(n)}
+                        className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                          scrapePageCount === n
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                            : 'bg-white/5 text-neutral-400 border border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={scrapePageCount}
+                      onChange={(e) => setScrapePageCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                      className="w-14 bg-black/30 border border-white/10 rounded-md px-2 py-1 text-xs text-neutral-200 text-center focus:outline-none focus:border-cyan-500/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:ml-auto">
+                  {scrapeUrl && (
+                    <span className="text-[10px] text-neutral-500">
+                      {scrapeUrl.includes('hepsiburada') ? 'HB' : scrapeUrl.includes('trendyol') ? 'TY' : 'URL'}
+                      {scrapePageCount > 1 && ` • ${scrapePageCount} pages: ${
+                        scrapeUrl.includes('trendyol') ? '?pi=1...' + scrapePageCount : '?sayfa=1...' + scrapePageCount
+                      }`}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleScrape}
+                    disabled={scraping || !scrapeUrl}
+                    className="px-5 py-2 text-sm rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+                    style={{ background: scraping ? '#334155' : 'linear-gradient(135deg, #00d4ff, #0099cc)' }}
+                  >
+                    {scraping ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    )}
+                    {scraping ? 'Scraping...' : 'Scrape Pages'}
+                  </button>
+                </div>
+              </div>
+
+              {scrapeProgress && (
+                <div className="flex items-center gap-2 text-xs text-cyan-400">
+                  <div className="w-3 h-3 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+                  {scrapeProgress}
+                </div>
+              )}
+              {scrapeMsg && (
+                <p className={`text-xs ${scrapeMsg.includes('fail') || scrapeMsg.includes('Failed') ? 'text-red-400' : 'text-emerald-400'}`}>{scrapeMsg}</p>
+              )}
             </div>
-            {scrapeMsg && (
-              <p className={`text-xs mt-2 ${scrapeMsg.includes('fail') || scrapeMsg.includes('Failed') ? 'text-red-400' : 'text-cyan-400'}`}>{scrapeMsg}</p>
-            )}
+          </div>
+        )}
+
+        {showDetailPanel && viewMode === 'category_page' && (
+          <div className="rounded-xl border border-purple-500/20 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.05), rgba(168,85,247,0.02))' }}>
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="text-sm font-medium text-purple-300">Get Product Details</span>
+                  <span className="text-[10px] text-neutral-500">Step 2: Fetch detailed data for selected products</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="text-neutral-400">
+                    <span className="text-white font-medium">{detailStats.total}</span> products
+                  </span>
+                  <span className="text-emerald-400">
+                    <span className="font-medium">{detailStats.fetched}</span> detailed
+                  </span>
+                  <span className="text-amber-400">
+                    <span className="font-medium">{detailStats.unfetched}</span> pending
+                  </span>
+                  <span className="text-cyan-400">
+                    <span className="font-medium">{selectedForDetail.size}</span> selected
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 sm:ml-auto">
+                  <button
+                    onClick={selectAllForDetail}
+                    className="px-3 py-1.5 text-xs rounded-lg border border-white/10 text-neutral-300 hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    {selectedForDetail.size === detailStats.unfetched && detailStats.unfetched > 0 ? 'Deselect All' : `Select All (${detailStats.unfetched})`}
+                  </button>
+                  <button
+                    onClick={handleFetchDetails}
+                    disabled={detailFetching || selectedForDetail.size === 0}
+                    className="px-4 py-1.5 text-xs rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+                    style={{ background: detailFetching ? '#334155' : 'linear-gradient(135deg, #a855f7, #7c3aed)' }}
+                  >
+                    {detailFetching ? (
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    )}
+                    {detailFetching ? 'Fetching...' : `Fetch Details (${selectedForDetail.size})`}
+                  </button>
+                </div>
+              </div>
+
+              {detailProgress && (
+                <div className={`flex items-center gap-2 text-xs ${detailProgress.includes('failed') ? 'text-red-400' : detailProgress.includes('All details') ? 'text-emerald-400' : 'text-purple-400'}`}>
+                  {detailFetching && <div className="w-3 h-3 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />}
+                  {!detailFetching && detailProgress.includes('All details') && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  )}
+                  {detailProgress}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -652,7 +904,7 @@ export default function CategoryExplorer() {
             {catData.sessions.map(s => (
               <button
                 key={s.id}
-                onClick={() => setScrapeUrl(s.category_url)}
+                onClick={() => { setScrapeUrl(s.category_url); setScrapeSessionId(s.id); setShowScraper(true); }}
                 className="text-xs px-2 py-1 rounded-md bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-1"
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${s.platform === 'hepsiburada' ? 'bg-orange-400' : 'bg-purple-400'}`} />
@@ -879,6 +1131,9 @@ function CatProductDetailPanel({ product, onClose, formatPrice }: {
           <div className="flex items-center gap-2">
             <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-white/10 text-neutral-300 font-mono">#{product.position}</span>
             <h3 className="text-base font-semibold text-white truncate">Category Product</h3>
+            {product.detail_fetched && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Detailed</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {product.url && (
