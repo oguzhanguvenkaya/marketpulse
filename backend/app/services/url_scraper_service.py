@@ -42,7 +42,7 @@ class UrlScraperService:
             domain = urlparse(url).netloc.lower().replace('www.', '')
             for td in _tr_domains:
                 if domain.endswith(td):
-                    return 'tr'
+                    return 'eu'
         except Exception:
             pass
         import random

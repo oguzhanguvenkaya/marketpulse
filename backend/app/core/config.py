@@ -114,7 +114,7 @@ class Settings(BaseSettings):
         if self.SCRAPER_API_KEY:
             return {
                 "server": "http://proxy-server.scraperapi.com:8001",
-                "username": "scraperapi.render=true.country_code=tr",
+                "username": "scraperapi.render=true.country_code=eu",
                 "password": self.SCRAPER_API_KEY
             }
         return None
@@ -124,7 +124,7 @@ class Settings(BaseSettings):
         if self.SCRAPER_API_KEY:
             return {
                 "server": "http://proxy-server.scraperapi.com:8001",
-                "username": "scraperapi.render=true.premium=true.country_code=tr",
+                "username": "scraperapi.render=true.premium=true.country_code=eu",
                 "password": self.SCRAPER_API_KEY
             }
         return None

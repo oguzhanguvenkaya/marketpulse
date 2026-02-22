@@ -22,17 +22,16 @@ MAX_RETRIES = 2
 SCRAPERAPI_BASE_URL = "http://api.scraperapi.com"
 
 _TR_DOMAINS = {'hepsiburada.com', 'trendyol.com', 'n11.com', 'gittigidiyor.com', 'ciceksepeti.com', 'amazon.com.tr'}
-_NON_TR_REGIONS = ['us', 'eu']
 
 def _get_geo_country(url: str) -> str:
     try:
         domain = urlparse(url).netloc.lower().replace('www.', '')
         for td in _TR_DOMAINS:
             if domain.endswith(td):
-                return 'tr'
+                return 'eu'
     except Exception:
         pass
-    return random.choice(_NON_TR_REGIONS)
+    return random.choice(['us', 'eu'])
 
 class ScrapingService:
     def __init__(self):
