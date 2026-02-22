@@ -11,7 +11,13 @@ async def require_mutating_api_key(request: Request) -> None:
     if request.method not in MUTATING_METHODS:
         return
 
-    expected_api_key = settings.require_internal_api_key()
+    expected_api_key = (settings.INTERNAL_API_KEY or "").strip()
+    if not expected_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Server misconfiguration: INTERNAL_API_KEY is not set",
+        )
+
     provided_api_key = request.headers.get("x-api-key")
 
     if not provided_api_key:

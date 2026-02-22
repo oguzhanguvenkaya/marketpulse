@@ -1,31 +1,55 @@
 import os
+import logging
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from redis import Redis
 from sqlalchemy import text
-from app.api.routes import router
-from app.api.url_scraper_routes import router as url_scraper_router
-from app.api.transcript_routes import router as transcript_router
-from app.api.json_editor_routes import router as json_editor_router
-from app.api.store_product_routes import router as store_product_router
-from app.api.category_explorer_routes import router as category_explorer_router
 from app.core.config import settings
-from app.db.database import engine, Base
 from app.core.logger import setup_uvicorn_log_filter
 
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger(__name__)
+
+_db_initialized = False
+
+
+def _init_db():
+    global _db_initialized
+    try:
+        from app.db.database import engine, Base
+        Base.metadata.create_all(bind=engine)
+        _db_initialized = True
+        logger.info("Database tables initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    api_key = (settings.INTERNAL_API_KEY or "").strip()
+    if not api_key:
+        logger.warning(
+            "INTERNAL_API_KEY is not set. Mutating API endpoints will reject requests. "
+            "Configure it in environment variables or backend/.env."
+        )
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, _init_db)
+
+    yield
+
 
 setup_uvicorn_log_filter()
-
-settings.require_internal_api_key()
 cors_allowed_origins = settings.cors_allowed_origins()
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",
     description="Marketplace Data Analysis Platform API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -39,6 +63,7 @@ app.add_middleware(
 
 def _database_reachable() -> bool:
     try:
+        from app.db.database import engine
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         return True
@@ -67,13 +92,27 @@ def _queue_reachable() -> bool:
 
 @app.get("/health")
 async def health():
+    return {"status": "healthy", "db_initialized": _db_initialized}
+
+
+@app.get("/health/deep")
+async def health_deep():
     return {
         "status": "healthy",
+        "db_initialized": _db_initialized,
         "scraper_api_configured": settings.has_scraper_api(),
         "price_monitor_executor": settings.price_monitor_executor(),
         "database_reachable": _database_reachable(),
         "queue_reachable": _queue_reachable(),
     }
+
+
+from app.api.routes import router
+from app.api.url_scraper_routes import router as url_scraper_router
+from app.api.transcript_routes import router as transcript_router
+from app.api.json_editor_routes import router as json_editor_router
+from app.api.store_product_routes import router as store_product_router
+from app.api.category_explorer_routes import router as category_explorer_router
 
 app.include_router(router, prefix="/api")
 app.include_router(url_scraper_router)
