@@ -99,14 +99,17 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `/api/category-explorer/*` → Category page scraping and competitive analysis
 - `/health` → System health check
 
-## Celery Tasks
+## Celery Tasks (Lazy Initialization)
 - `run_scraping_task`: Execute keyword search via Playwright and save products
 - `run_price_monitor_fetch_task`: Fetch prices for monitored products (Hepsiburada or Trendyol)
-- Broker/Backend: Redis (`REDIS_URL`)
+- Broker/Backend: Redis (`REDIS_URL`) - only initialized when first task is dispatched
+- Celery app created lazily via `get_celery_app()` to avoid blocking app startup
+- Production uses `PRICE_MONITOR_EXECUTOR=local` (no Redis needed for autoscale)
+- Development can use either `celery` or `local` executor
 
 ## External Dependencies
 - **Database:** PostgreSQL (Neon-backed on Replit)
-- **Queue:** Redis (Celery broker/backend)
+- **Queue:** Redis (Celery broker/backend) - optional, only needed when PRICE_MONITOR_EXECUTOR=celery
 - **AI Service:** OpenAI (GPT-4o-mini)
 - **Proxy Services:**
     - ScraperAPI (Primary, cost-effective)
@@ -135,6 +138,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Deployment fix: Lazy Celery/Redis initialization to prevent autoscale timeout. Database engine lazy via proxy classes. CORS auto-includes REPLIT_DOMAINS. Production uses PRICE_MONITOR_EXECUTOR=local. Deploy target changed from cloudrun to autoscale
 - 2026-02-22: Theme change: Switched from Palantir dark theme to Honey light theme. Updated CSS variables, Tailwind config, Layout, and all 14 pages. Colors: cream backgrounds (#fffbef), dark brown primary (#5b4824), honey gold accent (#f7ce86). Typography: Inter body, Lora headings, Space Grotesk monospace. Chart colors updated to Honey palette
 - 2026-02-22: Hybrid detail fetch: Listings API (sellers/prices/stock/buybox/campaigns as clean JSON) + HTML (brand/description/specs via utagData) in parallel. SKU extracted from product URLs (pm-HBCXXXXX pattern) during category scrape. Removed dead _extract_hb_product_data_from_scripts(). Deferred Listings API call when SKU discovered from HTML. Price hierarchy: Listings API buybox #1 > utagData > parsed
 - 2026-02-22: Enhanced detail fetch: utagData parsing for brand, seller_list, SKU, barcode, category_path, stock_status, shipping_type, specs, description. New DB columns on CategoryProduct. Price fix: CSS class-based extraction (originalPrice/currentPrice/discountRate) replacing regex that captured campaign text. Duplicate handling: URL-based dedup with UPDATE on re-scrape. Sponsored ad URL resolution via redirect param. Frontend detail panel shows all new fields

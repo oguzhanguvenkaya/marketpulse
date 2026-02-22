@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from uuid import UUID
 from urllib.parse import quote_plus
 from time import perf_counter
-from redis import Redis
 from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, MonitoredProduct, SellerSnapshot, PriceMonitorTask
 from app.services.scraping import ScrapingService, get_proxy_status
@@ -19,7 +18,6 @@ from app.services.trendyol_price_monitor_service import trendyol_price_monitor_s
 from app.core.config import settings
 from app.core.logger import api_logger as logger, log_endpoint_metric
 from app.core.security import require_mutating_api_key
-from app.tasks import run_price_monitor_fetch_task
 
 router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
 
@@ -229,6 +227,7 @@ def _require_scraper_api_or_503() -> str:
 def _is_queue_reachable() -> bool:
     client = None
     try:
+        from redis import Redis
         client = Redis.from_url(
             settings.REDIS_URL,
             socket_connect_timeout=1,
@@ -1551,7 +1550,8 @@ async def start_fetch_task(
         asyncio.create_task(run_fetch_task(str(task.id), platform, product_ids, fetch_type))
     else:
         try:
-            run_price_monitor_fetch_task.delay(str(task.id), platform, fetch_type, product_ids)
+            from app.tasks import send_price_monitor_task
+            send_price_monitor_task(str(task.id), platform, fetch_type, product_ids)
         except Exception as exc:
             task.status = "failed"
             task.error_message = f"Celery enqueue failed: {exc}"
