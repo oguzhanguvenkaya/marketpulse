@@ -11,13 +11,30 @@ from urllib.parse import quote_plus
 from time import perf_counter
 from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, MonitoredProduct, SellerSnapshot, PriceMonitorTask
-from app.services.scraping import ScrapingService, get_proxy_status
-from app.services.llm_service import LLMService
-from app.services.price_monitor_service import price_monitor_service
-from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
 from app.core.config import settings
 from app.core.logger import api_logger as logger, log_endpoint_metric
 from app.core.security import require_mutating_api_key
+
+
+def _get_scraping_service():
+    from app.services.scraping import ScrapingService
+    return ScrapingService()
+
+def _get_proxy_status():
+    from app.services.scraping import get_proxy_status
+    return get_proxy_status()
+
+def _get_llm_service():
+    from app.services.llm_service import LLMService
+    return LLMService()
+
+def _get_price_monitor_service():
+    from app.services.price_monitor_service import price_monitor_service
+    return price_monitor_service
+
+def _get_trendyol_price_monitor_service():
+    from app.services.trendyol_price_monitor_service import trendyol_price_monitor_service
+    return trendyol_price_monitor_service
 
 router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
 
@@ -288,7 +305,7 @@ async def run_scraping_background(task_id: str):
         task.status = "running"
         db.commit()
         
-        scraper = ScrapingService()
+        scraper = _get_scraping_service()
         browser_initialized = False
         try:
             if task.platform == "hepsiburada":
@@ -771,7 +788,7 @@ async def analyze_products(request: AnalysisRequest, db: Session = Depends(get_d
                 ]
             })
     
-    llm = LLMService()
+    llm = _get_llm_service()
     analysis = await llm.analyze_products(products_data, request.question)
     return {"analysis": analysis}
 
@@ -795,7 +812,7 @@ async def get_stats(db: Session = Depends(get_db)):
 
 @router.get("/scraping/status")
 async def get_scraping_status():
-    status = get_proxy_status()
+    status = _get_proxy_status()
     return status
 
 
@@ -1515,9 +1532,9 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
             return
         if task:
             if platform == "trendyol":
-                await trendyol_price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
+                await _get_trendyol_price_monitor_service().fetch_all_products(db, task, product_ids, platform, fetch_type)
             else:
-                await price_monitor_service.fetch_all_products(db, task, product_ids, platform, fetch_type)
+                await _get_price_monitor_service().fetch_all_products(db, task, product_ids, platform, fetch_type)
     finally:
         db.close()
 
@@ -1687,9 +1704,9 @@ async def fetch_single_product(
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
     
     if product.platform == "trendyol":
-        success = await trendyol_price_monitor_service.fetch_and_save_product(db, product)
+        success = await _get_trendyol_price_monitor_service().fetch_and_save_product(db, product)
     else:
-        success = await price_monitor_service.fetch_and_save_product(db, product)
+        success = await _get_price_monitor_service().fetch_and_save_product(db, product)
     
     if success:
         return {"success": True, "message": f"{product.sku} için satıcı verileri güncellendi", "platform": product.platform}

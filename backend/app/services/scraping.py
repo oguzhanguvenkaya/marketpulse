@@ -8,8 +8,16 @@ from urllib.parse import quote_plus, unquote, urlparse, parse_qs
 from datetime import date
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
-from playwright.async_api import async_playwright, Browser, Page
-from playwright_stealth import Stealth
+try:
+    from playwright.async_api import async_playwright, Browser, Page
+    from playwright_stealth import Stealth
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    async_playwright = None
+    Browser = None
+    Page = None
+    Stealth = None
+    PLAYWRIGHT_AVAILABLE = False
 from app.core.config import settings
 from app.core.logger import scraping_logger as logger
 from app.services.proxy_providers import proxy_manager, debug_logger, ProxyProvider
@@ -42,6 +50,8 @@ class ScrapingService:
         self.current_provider_name: str = "direct"
     
     async def init_browser(self, provider_name: Optional[str] = None, premium: bool = False):
+        if not PLAYWRIGHT_AVAILABLE:
+            raise RuntimeError("Playwright is not installed. Browser-based scraping is not available in this environment.")
         self.playwright = await async_playwright().start()
         
         if provider_name:

@@ -1,13 +1,11 @@
 import os
 import logging
-import asyncio
+import threading
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
-from app.core.config import settings
-from app.core.logger import setup_uvicorn_log_filter
 
 logger = logging.getLogger(__name__)
 
@@ -28,28 +26,32 @@ def _init_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from app.core.config import settings
     api_key = (settings.INTERNAL_API_KEY or "").strip()
     if not api_key:
         logger.warning(
-            "INTERNAL_API_KEY is not set. Mutating API endpoints will reject requests. "
-            "Configure it in environment variables or backend/.env."
+            "INTERNAL_API_KEY is not set. Mutating API endpoints will reject requests."
         )
 
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, _init_db)
+    try:
+        from app.core.logger import setup_uvicorn_log_filter
+        setup_uvicorn_log_filter()
+    except Exception:
+        pass
+
+    t = threading.Thread(target=_init_db, daemon=True)
+    t.start()
 
     yield
 
 
-setup_uvicorn_log_filter()
-
 def _get_cors_origins():
     try:
+        from app.core.config import settings
         return settings.cors_allowed_origins()
     except Exception:
         return ["*"]
 
-cors_allowed_origins = _get_cors_origins()
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",
@@ -60,42 +62,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_allowed_origins,
+    allow_origins=_get_cors_origins(),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
-
-
-def _database_reachable() -> bool:
-    try:
-        from sqlalchemy import text
-        from app.db.database import get_engine
-        with get_engine().connect() as connection:
-            connection.execute(text("SELECT 1"))
-        return True
-    except Exception:
-        return False
-
-
-def _queue_reachable() -> bool:
-    client = None
-    try:
-        from redis import Redis
-        client = Redis.from_url(
-            settings.REDIS_URL,
-            socket_connect_timeout=1,
-            socket_timeout=1,
-        )
-        return bool(client.ping())
-    except Exception:
-        return False
-    finally:
-        if client is not None:
-            try:
-                client.close()
-            except Exception:
-                pass
 
 
 @app.get("/health")
@@ -105,13 +76,40 @@ async def health():
 
 @app.get("/health/deep")
 async def health_deep():
+    from app.core.config import settings
+
+    db_reachable = False
+    try:
+        from sqlalchemy import text
+        from app.db.database import get_engine
+        with get_engine().connect() as conn:
+            conn.execute(text("SELECT 1"))
+        db_reachable = True
+    except Exception:
+        pass
+
+    q_reachable = False
+    client = None
+    try:
+        from redis import Redis
+        client = Redis.from_url(settings.REDIS_URL, socket_connect_timeout=1, socket_timeout=1)
+        q_reachable = bool(client.ping())
+    except Exception:
+        pass
+    finally:
+        if client:
+            try:
+                client.close()
+            except Exception:
+                pass
+
     return {
         "status": "healthy",
         "db_initialized": _db_initialized,
         "scraper_api_configured": settings.has_scraper_api(),
         "price_monitor_executor": settings.price_monitor_executor(),
-        "database_reachable": _database_reachable(),
-        "queue_reachable": _queue_reachable(),
+        "database_reachable": db_reachable,
+        "queue_reachable": q_reachable,
     }
 
 
