@@ -281,6 +281,16 @@ export default function CategoryExplorer() {
     }
   };
 
+  const selectAllProducts = () => {
+    const products = catData?.products || [];
+    if (products.length === 0) return;
+    if (selectedForDetail.size === products.length) {
+      setSelectedForDetail(new Set());
+    } else {
+      setSelectedForDetail(new Set(products.map(p => p.id)));
+    }
+  };
+
   const handleFetchDetails = async () => {
     if (selectedForDetail.size === 0) return;
     setDetailFetching(true);
@@ -505,18 +515,16 @@ export default function CategoryExplorer() {
         style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
       >
         <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-          {showDetailPanel && (
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleProductSelection(product.id); }}
-              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                isSelected ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-white/20 hover:border-cyan-500/50'
-              }`}
-            >
-              {isSelected && (
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              )}
-            </button>
-          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleProductSelection(product.id); }}
+            className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+              isSelected ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-white/20 hover:border-cyan-500/50'
+            }`}
+          >
+            {isSelected && (
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            )}
+          </button>
           <button
             onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
             className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:bg-red-500/20"
@@ -1111,6 +1119,50 @@ export default function CategoryExplorer() {
         ) : (
           currentCatProducts.length > 0 ? (
             <>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={selectAllProducts}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+                      selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
+                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400'
+                        : 'border-white/10 text-neutral-300 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                      selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
+                        ? 'bg-cyan-500 border-cyan-500'
+                        : selectedForDetail.size > 0
+                        ? 'bg-cyan-500/50 border-cyan-500/50'
+                        : 'border-white/30'
+                    }`}>
+                      {selectedForDetail.size > 0 && (
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3}
+                            d={selectedForDetail.size === (catData?.products?.length || 0) ? "M5 13l4 4L19 7" : "M20 12H4"} />
+                        </svg>
+                      )}
+                    </div>
+                    {selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
+                      ? 'Deselect All'
+                      : `Select All (${catData?.total || 0})`}
+                  </button>
+                  {selectedForDetail.size > 0 && (
+                    <span className="text-xs text-cyan-400">
+                      {selectedForDetail.size} selected
+                    </span>
+                  )}
+                </div>
+                {selectedForDetail.size > 0 && (
+                  <button
+                    onClick={handleBulkDelete}
+                    className="flex items-center gap-2 px-4 py-1.5 text-xs rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors font-medium"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Delete Selected ({selectedForDetail.size})
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {currentCatProducts.map(renderCatProductCard)}
               </div>
