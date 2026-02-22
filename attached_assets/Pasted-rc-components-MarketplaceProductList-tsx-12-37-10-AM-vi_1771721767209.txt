@@ -1,0 +1,42 @@
+rc/components/MarketplaceProductList.tsx
+12:37:10 AM [vite] (client) hmr update /src/index.css, /src/components/MarketplaceProductList.tsx
+12:37:19 AM [vite] (client) hmr update /src/index.css, /src/components/MarketplaceProductList.tsx (x2)
+12:37:33 AM [vite] (client) hmr update /src/index.css, /src/components/MarketplaceProductList.tsx (x3)
+12:37:47 AM [vite] (client) hmr update /src/index.css, /src/components/MarketplaceProductList.tsx (x4)
+12:37:57 AM [vite] http proxy error: /api/store-products?platform=hepsiburada&page=1&page_size=50&sort_by=created_at&sort_dir=desc
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products/filters?platform=hepsiburada
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/stats
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/tasks?limit=10
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products?platform=hepsiburada&page=1&page_size=50&sort_by=created_at&sort_dir=desc
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products/filters?platform=hepsiburada
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products?platform=hepsiburada&page=1&page_size=50&sort_by=created_at&sort_dir=desc
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products/filters?platform=hepsiburada
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:218:20)
+12:37:57 AM [vite] http proxy error: /api/store-products?platform=hepsiburada&page=1&page_size=50&sort_by=created_at&sort_dir=desc
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)
+12:37:57 AM [vite] http proxy error: /api/store-products/filters?platform=hepsiburada
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)
+12:37:58 AM [vite] http proxy error: /api/store-products/filters?platform=hepsiburada
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) (x2)
+12:37:58 AM [vite] http proxy error: /api/store-products?platform=hepsiburada&page=1&page_size=50&sort_by=created_at&sort_dir=desc
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)
+12:39:19 AM [vite] (client) hmr update /src/index.css, /src/components/MarketplaceProductList.tsx
