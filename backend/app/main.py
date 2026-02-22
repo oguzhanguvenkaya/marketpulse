@@ -6,8 +6,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
-from redis import Redis
-from sqlalchemy import text
 from app.core.config import settings
 from app.core.logger import setup_uvicorn_log_filter
 
@@ -19,8 +17,9 @@ _db_initialized = False
 def _init_db():
     global _db_initialized
     try:
-        from app.db.database import engine, Base
-        Base.metadata.create_all(bind=engine)
+        from app.db.database import get_engine, Base
+        eng = get_engine()
+        Base.metadata.create_all(bind=eng)
         _db_initialized = True
         logger.info("Database tables initialized successfully")
     except Exception as e:
@@ -43,7 +42,14 @@ async def lifespan(app: FastAPI):
 
 
 setup_uvicorn_log_filter()
-cors_allowed_origins = settings.cors_allowed_origins()
+
+def _get_cors_origins():
+    try:
+        return settings.cors_allowed_origins()
+    except Exception:
+        return ["*"]
+
+cors_allowed_origins = _get_cors_origins()
 
 app = FastAPI(
     title="Pazaryeri Veri Analiz API",
@@ -63,8 +69,9 @@ app.add_middleware(
 
 def _database_reachable() -> bool:
     try:
-        from app.db.database import engine
-        with engine.connect() as connection:
+        from sqlalchemy import text
+        from app.db.database import get_engine
+        with get_engine().connect() as connection:
             connection.execute(text("SELECT 1"))
         return True
     except Exception:
@@ -74,6 +81,7 @@ def _database_reachable() -> bool:
 def _queue_reachable() -> bool:
     client = None
     try:
+        from redis import Redis
         client = Redis.from_url(
             settings.REDIS_URL,
             socket_connect_timeout=1,

@@ -166,9 +166,20 @@ class Settings(BaseSettings):
         return "celery"
 
     def cors_allowed_origins(self) -> List[str]:
-        origins = [origin.strip() for origin in (self.CORS_ALLOWED_ORIGINS or "").split(",") if origin.strip()]
+        raw = (self.CORS_ALLOWED_ORIGINS or "").strip()
+        if raw == "*":
+            return ["*"]
+        origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+        replit_domains = os.getenv("REPLIT_DOMAINS", "")
+        if replit_domains:
+            for domain in replit_domains.split(","):
+                d = domain.strip()
+                if d:
+                    https_origin = f"https://{d}"
+                    if https_origin not in origins:
+                        origins.append(https_origin)
         if not origins:
-            raise ValueError("CORS_ALLOWED_ORIGINS must contain at least one allowed origin.")
+            return ["*"]
         return origins
     
     class Config:
