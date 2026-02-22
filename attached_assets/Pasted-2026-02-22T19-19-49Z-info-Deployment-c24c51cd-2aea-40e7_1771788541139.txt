@@ -1,0 +1,81 @@
+2026-02-22T19:19:49Z info: Deployment: c24c51cd-2aea-40e7-8eac-8aebf8e91edc
+2026-02-22T19:19:49Z info: Running Security Scan
+2026-02-22T19:19:59Z info: Security Scan Complete
+2026-02-22T19:19:59Z info: Connecting to builder
+2026-02-22T19:20:00Z info: Builder connected
+2026-02-22T19:20:02Z info: Installing packages
+--> npm install
+
+--> npm install
+
+
+up to date, audited 1 package in 298ms
+
+
+found 0 vulnerabilities
+
+2026-02-22T19:20:04Z info: Starting Build
+
+up to date, audited 1 package in 239ms
+
+
+found 0 vulnerabilities
+
+
+> pazaryeri-platform@1.0.0 build
+> cd frontend && npm install && npm run build
+
+
+
+74 packages are looking for funding
+  run `npm fund` for details
+
+
+14 vulnerabilities (2 moderate, 12 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+
+vite v7.2.7 building client environment for production...
+
+transforming...
+
+✓ 122 modules transformed.
+
+[plugin vite:resolve] Module "buffer" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/typedarray-pool/pool.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+[plugin vite:resolve] Module "stream" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/probe-image-size/lib/common.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+[plugin vite:resolve] Module "assert" has been externalized for browser compatibility, imported by "/home/runner/workspace/frontend/node_modules/stream-parser/index.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+
+"buffer/" is imported by "buffer/?commonjs-external", but could not be resolved – treating it as an external dependency.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                                     0.54 kB │ gzip:     0.33 kB
+
+✓ built in 34.92s
+
+2026-02-22T19:21:25Z info: Pushing pid1 binary layer...
+2026-02-22T19:21:38Z info: Pushing Repl layer...
+2026-02-22T19:21:38Z info: Pushing hosting layer...
+2026-02-22T19:21:39Z info: Nix layers for this Repl are uncached.
+2026-02-22T19:21:39Z info: Pushing nix-0 layer...
+2026-02-22T19:21:42Z info: Created hosting layer
+2026-02-22T19:21:58Z info: Created pid1 binary layer
+2026-02-22T19:24:30Z info: Created Repl layer
+2026-02-22T19:24:30Z info: Pushing Repl (cache) layer...
+2026-02-22T19:24:32Z info: Created Repl (cache) layer
+Deployment timed out. Check the Logs tab for more details. - 2026-02-22T19:28:49.859Z
