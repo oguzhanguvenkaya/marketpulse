@@ -240,6 +240,14 @@ export default function CategoryExplorer() {
       setScrapeMsg(`Done: ${result.products_added} new products from ${pagesScraped} page${pagesScraped > 1 ? 's' : ''} (${result.products_found} found, ${result.total_in_session} total)`);
       setScrapeProgress('');
       if (result.session?.id) setScrapeSessionId(result.session.id);
+      if (result.session?.filter_data) {
+        const fd = result.session.filter_data;
+        setCatFilterData(prev => ({
+          brands: fd.brands || prev?.brands || [],
+          sellers: fd.sellers || prev?.sellers || [],
+          price_range: prev?.price_range || { min: 0, max: 0 },
+        }));
+      }
       if (viewMode === 'category_page') {
         fetchCatProducts();
         fetchCatFilterData();

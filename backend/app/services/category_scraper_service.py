@@ -147,10 +147,81 @@ class CategoryScraperService:
             logger.debug(f"Error extracting HB product data from scripts: {e}")
         return product_map
 
+    @staticmethod
+    def _extract_hb_filter_data(soup, html: str) -> dict:
+        filter_data: dict = {'brands': [], 'sellers': [], 'price_ranges': []}
+        try:
+            filter_div = soup.find('div', class_=re.compile(r'VerticalFilter', re.I))
+            if not filter_div:
+                filter_div = soup.find('div', id=re.compile(r'VerticalFilter', re.I))
+
+            if filter_div:
+                brand_links = filter_div.find_all('a', title=True)
+                seen_brands = set()
+                for bl in brand_links:
+                    title = bl.get('title', '').strip()
+                    href = bl.get('href', '')
+                    if not title or not href:
+                        continue
+                    if re.search(r'-xc-\d+-b\d+$|/[^/]+/.*-c-\d+$', href):
+                        brand_name = re.sub(r'\s+(Hızlı Cila|hızlı cilalar).*$', '', title, flags=re.I).strip()
+                        cat_suffix = re.sub(r'^.*?-(\w+)-c-\d+$', r'\1', href)
+                        if brand_name and brand_name.lower() not in seen_brands:
+                            seen_brands.add(brand_name.lower())
+                            filter_data['brands'].append(brand_name)
+
+            from urllib.parse import unquote
+            for script in soup.find_all('script'):
+                txt = script.string or ''
+                if len(txt) < 100:
+                    continue
+                satici_idx = txt.find('"Sat\\u0131c\\u0131"')
+                if satici_idx < 0:
+                    satici_idx = txt.find('"Satıcı"')
+                if satici_idx < 0:
+                    continue
+                chunk = txt[satici_idx:satici_idx + 5000]
+                values = re.findall(r'"value":"([^"]+)"', chunk)
+                if values:
+                    for v in values:
+                        try:
+                            decoded = unquote(v.replace('€', '%'))
+                            decoded = decoded.strip()
+                            if decoded:
+                                filter_data['sellers'].append(decoded)
+                        except Exception:
+                            cleaned = v.replace('€20', ' ')
+                            cleaned = re.sub(r'€[0-9A-Fa-f]{2}', '', cleaned).strip()
+                            if cleaned:
+                                filter_data['sellers'].append(cleaned)
+                    break
+
+            for script in soup.find_all('script'):
+                txt = script.string or ''
+                if '"Fiyat Aral' in txt or 'Fiyat Aral\\u0131\\u011f\\u0131' in txt:
+                    price_matches = re.findall(r'(\d[\d.]*)\s*(?:-|TL)\s*(\d[\d.]*)\s*TL', txt)
+                    for low, high in price_matches:
+                        try:
+                            filter_data['price_ranges'].append({
+                                'min': float(low.replace('.', '')),
+                                'max': float(high.replace('.', ''))
+                            })
+                        except ValueError:
+                            pass
+                    break
+
+        except Exception as e:
+            logger.debug(f"Error extracting HB filter data: {e}")
+
+        logger.info(f"Extracted HB filter data: {len(filter_data['brands'])} brands, {len(filter_data['sellers'])} sellers")
+        return filter_data
+
     def parse_hepsiburada_category(self, html: str, url: str) -> dict:
         soup = BeautifulSoup(html, 'html.parser')
         product_data_map = self._extract_hb_product_data_from_scripts(html)
         logger.info(f"Extracted brand/seller data for {len(product_data_map)} products from HB scripts")
+
+        filter_data = self._extract_hb_filter_data(soup, html)
 
         result = {
             'platform': 'hepsiburada',
@@ -159,6 +230,7 @@ class CategoryScraperService:
             'total_products': 0,
             'products': [],
             'has_next_page': False,
+            'filter_data': filter_data,
         }
 
         bc_nav = soup.find('nav', {'aria-label': 'breadcrumb'}) or soup.find('div', class_=re.compile(r'breadcrumb', re.I))
@@ -388,6 +460,7 @@ class CategoryScraperService:
             'total_products': 0,
             'products': [],
             'has_next_page': False,
+            'filter_data': {'brands': [], 'sellers': [], 'price_ranges': []},
         }
 
         bc_el = soup.find('div', class_=re.compile(r'breadcrumb', re.I))
@@ -436,6 +509,30 @@ class CategoryScraperService:
             if m:
                 try:
                     state = json.loads(m.group(1))
+
+                    try:
+                        filters_data = state.get('filters', state.get('searchData', {}).get('result', {}).get('filters', []))
+                        if isinstance(filters_data, list):
+                            for f in filters_data:
+                                if not isinstance(f, dict):
+                                    continue
+                                f_type = (f.get('filterType', '') or f.get('type', '')).lower()
+                                f_name = (f.get('name', '') or f.get('title', '')).lower()
+                                values = f.get('values', [])
+                                if ('brand' in f_type or 'marka' in f_name) and isinstance(values, list):
+                                    for v in values:
+                                        name = v.get('text', '') or v.get('name', '') if isinstance(v, dict) else ''
+                                        if name:
+                                            result['filter_data']['brands'].append(name)
+                                elif ('seller' in f_type or 'satıcı' in f_name or 'satici' in f_name) and isinstance(values, list):
+                                    for v in values:
+                                        name = v.get('text', '') or v.get('name', '') if isinstance(v, dict) else ''
+                                        if name:
+                                            result['filter_data']['sellers'].append(name)
+                        logger.info(f"Extracted TY filter data: {len(result['filter_data']['brands'])} brands, {len(result['filter_data']['sellers'])} sellers")
+                    except Exception as e:
+                        logger.debug(f"Error extracting TY filter data: {e}")
+
                     products_data = state.get('products', state.get('searchData', {}).get('result', {}).get('products', []))
                     if isinstance(products_data, list):
                         for p in products_data:
@@ -574,4 +671,5 @@ class CategoryScraperService:
                 'total_products': 0,
                 'products': [],
                 'has_next_page': False,
+                'filter_data': {'brands': [], 'sellers': [], 'price_ranges': []},
             }

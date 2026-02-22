@@ -389,6 +389,7 @@ class CategorySession(Base):
     breadcrumbs = Column(JSON)
     total_products = Column(Integer, default=0)
     pages_scraped = Column(Integer, default=0)
+    filter_data = Column(JSON, nullable=True)
     status = Column(String(20), default="active")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -131,6 +131,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Marketplace sidebar filter extraction: HB VerticalFilter brand links (19 brands), Satıcı facet script data with €XX→%XX URL decode (18 sellers), price ranges from Fiyat Aralığı. TY filters from __SEARCH_APP_INITIAL_STATE__. filter_data JSON column on CategorySession. category-filters endpoint merges marketplace + product-derived filters. Frontend instantly populates filter dropdowns from session.filter_data after scrape
 - 2026-02-22: Category Page filters: brand/seller/price range/rating/sponsored filters for scraped category products. Brand extraction from HB product cards (h2 vs a[title] diff). New /category-filters endpoint. Stats bar shows brand_count, seller_count, last_scraped. Sort options separated per view mode
 - 2026-02-22: Category Explorer redesign: multi-page scraping (page_count 1-20, HB ?sayfa=N / TY ?pi=N), "Get Product Details" panel with checkbox selection + Select All, bulk detail fetch with polling progress, cyan/purple visual separation for scrape vs detail operations
 - 2026-02-22: Collapsible sidebar: desktop toggle to collapse/expand sidebar (icon-only vs full labels), state persisted in localStorage, all pages auto-adjust. Mobile drawer behavior unchanged

@@ -85,6 +85,7 @@ def _serialize_session(s: CategorySession, include_products: bool = False) -> di
         'breadcrumbs': s.breadcrumbs or [],
         'total_products': s.total_products,
         'pages_scraped': s.pages_scraped,
+        'filter_data': s.filter_data,
         'status': s.status,
         'created_at': s.created_at.isoformat() if s.created_at else None,
         'product_count': len(s.category_products) if s.category_products else 0,
@@ -143,6 +144,7 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
                 category_name=parsed.get('category_name', ''),
                 breadcrumbs=parsed.get('breadcrumbs', []),
                 total_products=parsed.get('total_products', 0),
+                filter_data=parsed.get('filter_data'),
                 pages_scraped=0,
                 status='active',
             )
@@ -155,6 +157,15 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
                 session.breadcrumbs = parsed['breadcrumbs']
             if parsed.get('total_products') and page_num == start_page:
                 session.total_products = parsed['total_products']
+            if parsed.get('filter_data') and page_num == start_page:
+                existing_fd = session.filter_data or {}
+                new_fd = parsed['filter_data']
+                merged = {
+                    'brands': list(dict.fromkeys((existing_fd.get('brands', []) or []) + (new_fd.get('brands', []) or []))),
+                    'sellers': list(dict.fromkeys((existing_fd.get('sellers', []) or []) + (new_fd.get('sellers', []) or []))),
+                    'price_ranges': new_fd.get('price_ranges', existing_fd.get('price_ranges', [])),
+                }
+                session.filter_data = merged
 
         page_products = parsed.get('products', [])
         total_found += len(page_products)
@@ -425,6 +436,15 @@ async def get_category_filters(
     platform: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
+    session_obj = None
+    if session_id:
+        try:
+            session_obj = db.query(CategorySession).filter(CategorySession.id == uuid_mod.UUID(session_id)).first()
+        except (ValueError, Exception):
+            pass
+
+    marketplace_fd = session_obj.filter_data if session_obj and session_obj.filter_data else None
+
     q = db.query(CategoryProduct).join(CategorySession, CategoryProduct.session_id == CategorySession.id)
     if platform:
         q = q.filter(CategorySession.platform == platform)
@@ -434,20 +454,36 @@ async def get_category_filters(
         leaf = category.split(' > ')[-1].strip() if ' > ' in category else category
         q = q.filter(CategorySession.category_name.ilike(f"%{leaf}%"))
 
-    brands = [r[0] for r in q.with_entities(CategoryProduct.brand).filter(CategoryProduct.brand.isnot(None), CategoryProduct.brand != '').distinct().order_by(CategoryProduct.brand).all()]
-    sellers = [r[0] for r in q.with_entities(CategoryProduct.seller_name).filter(CategoryProduct.seller_name.isnot(None), CategoryProduct.seller_name != '').distinct().order_by(CategoryProduct.seller_name).all()]
+    product_brands = [r[0] for r in q.with_entities(CategoryProduct.brand).filter(CategoryProduct.brand.isnot(None), CategoryProduct.brand != '').distinct().order_by(CategoryProduct.brand).all()]
+    product_sellers = [r[0] for r in q.with_entities(CategoryProduct.seller_name).filter(CategoryProduct.seller_name.isnot(None), CategoryProduct.seller_name != '').distinct().order_by(CategoryProduct.seller_name).all()]
+
+    if marketplace_fd:
+        mp_brands = marketplace_fd.get('brands', []) or []
+        mp_sellers = marketplace_fd.get('sellers', []) or []
+        all_brands = list(dict.fromkeys(mp_brands + product_brands))
+        all_sellers = list(dict.fromkeys(mp_sellers + product_sellers))
+    else:
+        all_brands = product_brands
+        all_sellers = product_sellers
 
     price_row = q.with_entities(
         func.min(CategoryProduct.price),
         func.max(CategoryProduct.price),
     ).first()
 
+    mp_price_ranges = marketplace_fd.get('price_ranges', []) if marketplace_fd else []
+
     return {
-        'brands': brands,
-        'sellers': sellers,
+        'brands': sorted(all_brands, key=str.lower),
+        'sellers': sorted(all_sellers, key=str.lower),
         'price_range': {
             'min': float(price_row[0]) if price_row and price_row[0] else 0,
             'max': float(price_row[1]) if price_row and price_row[1] else 0,
+        },
+        'marketplace_price_ranges': mp_price_ranges,
+        'marketplace_filter_count': {
+            'brands': len(marketplace_fd.get('brands', [])) if marketplace_fd else 0,
+            'sellers': len(marketplace_fd.get('sellers', [])) if marketplace_fd else 0,
         },
     }
 
