@@ -818,6 +818,23 @@ export const scrapeFromPriceMonitor = async (platform?: string): Promise<{ job_i
   return response.data;
 };
 
+export interface ScrapeJobStatus {
+  job_id: string;
+  status: string;
+  total: number;
+  completed: number;
+  failed: number;
+  pending: number;
+  skipped: number;
+  created_at: string | null;
+  completed_at: string | null;
+}
+
+export const getScrapeJobStatus = async (jobId: string): Promise<ScrapeJobStatus> => {
+  const response = await api.get(`/store-products/scrape-job-status/${jobId}`);
+  return response.data;
+};
+
 export const saveFromScrapeJob = async (jobId: string): Promise<{ saved: number; updated: number; total_results: number }> => {
   const response = await api.post(`/store-products/save-from-scrape-job/${jobId}`);
   return response.data;

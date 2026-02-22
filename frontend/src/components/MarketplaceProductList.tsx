@@ -3,9 +3,11 @@ import {
   getStoreProducts,
   getStoreProductFilters,
   scrapeFromPriceMonitor,
+  getScrapeJobStatus,
   type StoreProduct,
   type StoreProductFilters,
   type StoreProductListResponse,
+  type ScrapeJobStatus,
 } from '../services/api';
 
 interface Props {
@@ -21,6 +23,8 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
   const [loading, setLoading] = useState(true);
   const [scraping, setScraping] = useState(false);
   const [scrapeMessage, setScrapeMessage] = useState('');
+  const [scrapeJobId, setScrapeJobId] = useState<string | null>(null);
+  const [scrapeProgress, setScrapeProgress] = useState<ScrapeJobStatus | null>(null);
 
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
@@ -78,15 +82,46 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
     fetchFilters();
   }, [fetchProducts, fetchFilters]);
 
+  useEffect(() => {
+    if (!scrapeJobId) return;
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const status = await getScrapeJobStatus(scrapeJobId);
+        if (cancelled) return;
+        setScrapeProgress(status);
+        if (status.status === 'completed' || status.status === 'failed' || status.status === 'stopped') {
+          setScraping(false);
+          setScrapeMessage(
+            `Job ${status.status}: ${status.completed} scraped, ${status.failed} failed out of ${status.total} URLs`
+          );
+          fetchProducts();
+          fetchFilters();
+          return;
+        }
+      } catch {
+        if (cancelled) return;
+      }
+      if (!cancelled) {
+        timeoutId = setTimeout(poll, 3000);
+      }
+    };
+    timeoutId = setTimeout(poll, 2000);
+    return () => { cancelled = true; clearTimeout(timeoutId); };
+  }, [scrapeJobId, fetchProducts, fetchFilters]);
+
   const handleScrape = async () => {
     setScraping(true);
     setScrapeMessage('');
+    setScrapeProgress(null);
+    setScrapeJobId(null);
     try {
       const result = await scrapeFromPriceMonitor(platform === 'all' ? undefined : platform);
-      setScrapeMessage(`Scraping started! Job ID: ${result.job_id.slice(0, 8)}... (${result.total_urls} URLs)`);
+      setScrapeJobId(result.job_id);
+      setScrapeMessage(`Scraping started — ${result.total_urls} URLs queued`);
     } catch (err: any) {
       setScrapeMessage(err?.response?.data?.detail || 'Scraping failed');
-    } finally {
       setScraping(false);
     }
   };
@@ -182,9 +217,35 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
         </div>
       </div>
 
-      {scrapeMessage && (
-        <div className="px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-sm">
-          {scrapeMessage}
+      {(scrapeMessage || scrapeProgress) && (
+        <div className="rounded-lg bg-white/5 border border-white/10 overflow-hidden">
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <span className="text-sm text-neutral-300">{scrapeMessage}</span>
+            {scrapeProgress && scrapeProgress.status !== 'completed' && scrapeProgress.status !== 'failed' && scrapeProgress.status !== 'stopped' && (
+              <span className="text-xs text-neutral-500">
+                {scrapeProgress.completed + scrapeProgress.failed} / {scrapeProgress.total}
+              </span>
+            )}
+          </div>
+          {scrapeProgress && scrapeProgress.total > 0 && (
+            <div className="px-4 pb-3">
+              <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.round(((scrapeProgress.completed + scrapeProgress.failed) / scrapeProgress.total) * 100)}%`,
+                    background: `linear-gradient(90deg, ${platformColor}, ${platformColor}99)`,
+                  }}
+                />
+              </div>
+              <div className="flex gap-4 mt-1.5 text-xs">
+                <span className="text-green-400">{scrapeProgress.completed} OK</span>
+                {scrapeProgress.failed > 0 && <span className="text-red-400">{scrapeProgress.failed} failed</span>}
+                {scrapeProgress.pending > 0 && <span className="text-neutral-500">{scrapeProgress.pending} pending</span>}
+                {scrapeProgress.skipped > 0 && <span className="text-yellow-400">{scrapeProgress.skipped} skipped</span>}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

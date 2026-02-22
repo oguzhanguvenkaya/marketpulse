@@ -183,6 +183,8 @@ async def scrape_from_price_monitor(
     db.commit()
     db.refresh(job)
 
+    logger.info(f"[STORE-SCRAPE] Created job {str(job.id)[:8]} for platform={platform or 'all'}, {len(urls_data)} URLs from price monitor")
+
     for u in urls_data:
         result = ScrapeResult(
             scrape_job_id=job.id,
@@ -194,10 +196,14 @@ async def scrape_from_price_monitor(
         db.add(result)
     db.commit()
 
+    url_metadata = {r.url: next((u for u in urls_data if u['url'] == r.url), {}) for r in db.query(ScrapeResult).filter(ScrapeResult.scrape_job_id == job.id).all()}
+
+    logger.info(f"[STORE-SCRAPE] Job {str(job.id)[:8]} queued as background task, starting scrape...")
+
     background_tasks.add_task(
         run_scrape_and_save_job,
         str(job.id),
-        {r.url: next((u for u in urls_data if u['url'] == r.url), {}) for r in db.query(ScrapeResult).filter(ScrapeResult.scrape_job_id == job.id).all()}
+        url_metadata
     )
 
     return {
@@ -205,6 +211,42 @@ async def scrape_from_price_monitor(
         "status": "running",
         "total_urls": len(urls_data),
         "platform": platform or "all",
+    }
+
+
+@router.get("/scrape-job-status/{job_id}")
+async def get_scrape_job_status(job_id: str, db: Session = Depends(get_db)):
+    job = db.query(ScrapeJob).filter(ScrapeJob.id == uuid_mod.UUID(job_id)).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    completed = db.query(ScrapeResult).filter(
+        ScrapeResult.scrape_job_id == job.id,
+        ScrapeResult.status == "completed"
+    ).count()
+    failed = db.query(ScrapeResult).filter(
+        ScrapeResult.scrape_job_id == job.id,
+        ScrapeResult.status == "failed"
+    ).count()
+    pending = db.query(ScrapeResult).filter(
+        ScrapeResult.scrape_job_id == job.id,
+        ScrapeResult.status == "pending"
+    ).count()
+    skipped = db.query(ScrapeResult).filter(
+        ScrapeResult.scrape_job_id == job.id,
+        ScrapeResult.status == "skipped"
+    ).count()
+
+    return {
+        "job_id": str(job.id),
+        "status": job.status,
+        "total": job.total_urls or 0,
+        "completed": completed,
+        "failed": failed,
+        "pending": pending,
+        "skipped": skipped,
+        "created_at": job.created_at.isoformat() if job.created_at else None,
+        "completed_at": job.completed_at.isoformat() if job.completed_at else None,
     }
 
 
@@ -358,15 +400,28 @@ def _save_store_product_from_scrape(db: Session, scrape_result: ScrapeResult) ->
 
 
 async def run_scrape_and_save_job(job_id: str, url_metadata: dict):
-    from app.services.url_scraper_service import UrlScraperService
+    import time as _time
     from app.api.url_scraper_routes import run_scrape_job
 
-    await run_scrape_job(job_id)
+    jid = job_id[:8]
+    overall_start = _time.time()
+
+    logger.info(f"[STORE-SCRAPE] [{jid}] === STARTING SCRAPE JOB === URLs: {len(url_metadata)}")
+
+    try:
+        await run_scrape_job(job_id)
+    except Exception as e:
+        logger.error(f"[STORE-SCRAPE] [{jid}] Scrape job failed with exception: {e}", exc_info=True)
+        return
+
+    scrape_elapsed = round(_time.time() - overall_start, 1)
+    logger.info(f"[STORE-SCRAPE] [{jid}] Scrape phase completed in {scrape_elapsed}s, now saving to StoreProduct...")
 
     db = SessionLocal()
     try:
         job = db.query(ScrapeJob).filter(ScrapeJob.id == uuid_mod.UUID(job_id)).first()
         if not job:
+            logger.error(f"[STORE-SCRAPE] [{jid}] Job not found in DB after scraping")
             return
 
         results = db.query(ScrapeResult).filter(
@@ -374,10 +429,19 @@ async def run_scrape_and_save_job(job_id: str, url_metadata: dict):
             ScrapeResult.status == "completed"
         ).all()
 
-        saved = 0
-        for r in results:
+        total_results = len(results)
+        created = 0
+        updated = 0
+        skipped = 0
+        errors = 0
+
+        logger.info(f"[STORE-SCRAPE] [{jid}] Processing {total_results} completed results...")
+
+        for i, r in enumerate(results):
             if not r.scraped_data:
+                skipped += 1
                 continue
+
             meta = url_metadata.get(r.url, {})
             if meta.get('monitored_product_id'):
                 if not r.scraped_data.get('_monitored_product_id'):
@@ -385,13 +449,31 @@ async def run_scrape_and_save_job(job_id: str, url_metadata: dict):
             if meta.get('barcode') and not r.barcode:
                 r.barcode = meta['barcode']
 
-            result = _save_store_product_from_scrape(db, r)
-            if result in ('created', 'updated'):
-                saved += 1
+            try:
+                result = _save_store_product_from_scrape(db, r)
+                if result == 'created':
+                    created += 1
+                elif result == 'updated':
+                    updated += 1
+                else:
+                    skipped += 1
+            except Exception as e:
+                errors += 1
+                logger.error(f"[STORE-SCRAPE] [{jid}] Error saving product from {r.url[:60]}: {e}")
+                db.rollback()
 
-        logger.info(f"[STORE] Saved {saved} products from scrape job {job_id[:8]}")
+            if (i + 1) % 50 == 0:
+                logger.info(f"[STORE-SCRAPE] [{jid}] Save progress: {i+1}/{total_results} (new:{created} upd:{updated} skip:{skipped} err:{errors})")
+
+        total_elapsed = round(_time.time() - overall_start, 1)
+        logger.info(
+            f"[STORE-SCRAPE] [{jid}] === JOB COMPLETE === "
+            f"Total time: {total_elapsed}s | "
+            f"Scraped: {total_results}/{len(url_metadata)} | "
+            f"Saved: new={created} updated={updated} skipped={skipped} errors={errors}"
+        )
     except Exception as e:
-        logger.error(f"[STORE] Error saving products from job {job_id[:8]}: {e}")
+        logger.error(f"[STORE-SCRAPE] [{jid}] Error in save phase: {e}", exc_info=True)
         db.rollback()
     finally:
         db.close()
