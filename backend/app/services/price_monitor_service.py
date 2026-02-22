@@ -17,7 +17,7 @@ class PriceMonitorService:
     
     LISTINGS_API_URL = "https://www.hepsiburada.com/api/v1/product/listings/{sku}"
     CAMPAIGN_API_URL = "https://obiwan-gw.hepsiburada.com/api/v2/Campaign/pdp"
-    DEFAULT_MAX_CONCURRENT_REQUESTS = 17
+    DEFAULT_MAX_CONCURRENT_REQUESTS = 40
     
     def __init__(self):
         self._semaphore = None  # Lazy initialization

@@ -28,19 +28,34 @@ def clear_stop_signal(job_id: str):
 
 class UrlScraperService:
     SCRAPERAPI_BASE_URL = "https://api.scraperapi.com"
-    MAX_CONCURRENT = 15
+    MAX_CONCURRENT = 40
 
     def __init__(self):
         self.api_key = (settings.SCRAPER_API_KEY or "").strip()
         self._semaphore = None
+
+    @staticmethod
+    def _get_geo_country(url: str) -> str:
+        _tr_domains = {'hepsiburada.com', 'trendyol.com', 'n11.com', 'gittigidiyor.com', 'ciceksepeti.com', 'amazon.com.tr'}
+        try:
+            from urllib.parse import urlparse
+            domain = urlparse(url).netloc.lower().replace('www.', '')
+            for td in _tr_domains:
+                if domain.endswith(td):
+                    return 'tr'
+        except Exception:
+            pass
+        import random
+        return random.choice(['us', 'eu'])
 
     async def fetch_url(self, url: str) -> str | None:
         if not self.api_key:
             logger.error("ScraperAPI key not found")
             return None
 
+        geo_country = self._get_geo_country(url)
         encoded_url = quote_plus(url)
-        api_url = f"{self.SCRAPERAPI_BASE_URL}?api_key={self.api_key}&url={encoded_url}&render=false"
+        api_url = f"{self.SCRAPERAPI_BASE_URL}?api_key={self.api_key}&url={encoded_url}&render=false&country_code={geo_country}"
 
         start = time.time()
         try:

@@ -21,7 +21,7 @@ class TrendyolPriceMonitorService:
     Bu sayede render=true gerekmez, daha hızlı ve ucuz!
     """
     
-    DEFAULT_MAX_CONCURRENT_REQUESTS = 17  # Basic mode hızlı, yüksek concurrent limit
+    DEFAULT_MAX_CONCURRENT_REQUESTS = 40
     
     def __init__(self):
         self._semaphore = None

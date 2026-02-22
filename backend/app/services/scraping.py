@@ -21,6 +21,19 @@ MAX_RETRIES = 2
 
 SCRAPERAPI_BASE_URL = "http://api.scraperapi.com"
 
+_TR_DOMAINS = {'hepsiburada.com', 'trendyol.com', 'n11.com', 'gittigidiyor.com', 'ciceksepeti.com', 'amazon.com.tr'}
+_NON_TR_REGIONS = ['us', 'eu']
+
+def _get_geo_country(url: str) -> str:
+    try:
+        domain = urlparse(url).netloc.lower().replace('www.', '')
+        for td in _TR_DOMAINS:
+            if domain.endswith(td):
+                return 'tr'
+    except Exception:
+        pass
+    return random.choice(_NON_TR_REGIONS)
+
 class ScrapingService:
     def __init__(self):
         self.browser: Optional[Browser] = None
@@ -135,9 +148,10 @@ class ScrapingService:
         
         proxy_url = "http://proxy-server.scraperapi.com:8001"
         
+        geo_country = _get_geo_country(url)
         username_parts = [
             "scraperapi",
-            "country_code=tr",
+            f"country_code={geo_country}",
             "device_type=desktop",
             "max_cost=200",
             f"session_number={session_number}"
@@ -216,11 +230,12 @@ class ScrapingService:
         if not settings.SCRAPER_API_KEY:
             return None
         
-        # Fiyat takip servisiyle aynı format - country_code=tr geotargeting gerektiriyor, kaldırıldı
+        geo_country = _get_geo_country(url)
         encoded_url = quote_plus(url)
         params = {
             "api_key": settings.SCRAPER_API_KEY,
             "url": encoded_url,
+            "country_code": geo_country,
         }
         
         if render:
@@ -277,11 +292,13 @@ class ScrapingService:
         
         async_api_url = "https://async.scraperapi.com/jobs"
         
+        geo_country = _get_geo_country(url)
         payload = {
             "apiKey": settings.SCRAPER_API_KEY,
             "url": url,
             "render": render,
-            "premium": premium
+            "premium": premium,
+            "country_code": geo_country
         }
         
         logger.info(f"ScraperAPI Async Job oluşturuluyor: {url[:60]}...")

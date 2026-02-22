@@ -115,7 +115,7 @@ def _fetch_with_api(ytt_api: YouTubeTranscriptApi, video_id: str):
 
 
 class TranscriptService:
-    MAX_CONCURRENT = 10
+    MAX_CONCURRENT = 40
 
     def fetch_transcript(self, video_url: str, force_proxy: bool = False) -> dict:
         video_id = extract_video_id(video_url)
