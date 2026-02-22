@@ -863,6 +863,7 @@ export interface CategoryTreeNode {
   full_path: string;
   count: number;
   depth: number;
+  category_url?: string | null;
   children: CategoryTreeNode[];
 }
 

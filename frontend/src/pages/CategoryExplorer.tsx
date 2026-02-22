@@ -5,9 +5,7 @@ import {
   getStoreProductFilters,
   getStoreCategoryTree,
   getCategoryProductsByCategory,
-  getCategorySessions,
   scrapeCategoryPage,
-  lookupSessionUrl,
   fetchCategoryProductDetail,
   getCategoryFetchStatus,
   type StoreProduct,
@@ -58,7 +56,6 @@ export default function CategoryExplorer() {
   const [detailFetching, setDetailFetching] = useState(false);
   const [detailProgress, setDetailProgress] = useState('');
   const detailPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [allSessions, setAllSessions] = useState<any[]>([]);
 
   const fetchMyProducts = useCallback(async () => {
     setLoading(true);
@@ -123,14 +120,22 @@ export default function CategoryExplorer() {
   useEffect(() => { fetchFilters(); }, [fetchFilters]);
 
   useEffect(() => {
-    getCategorySessions(platform || undefined).then(result => {
-      setAllSessions(result?.sessions || []);
-    }).catch(() => {});
-  }, [platform]);
-
-  useEffect(() => {
     setPage(1);
   }, [platform, search, selectedCategory, selectedBrand, minPrice, maxPrice, minRating, sortBy, sortDir, viewMode]);
+
+  const categoryUrlMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    const walk = (nodes: CategoryTreeNode[]) => {
+      for (const node of nodes) {
+        if (node.category_url) {
+          map[node.full_path] = node.category_url;
+        }
+        if (node.children?.length) walk(node.children);
+      }
+    };
+    walk(categoryTree);
+    return map;
+  }, [categoryTree]);
 
   useEffect(() => {
     if (!selectedCategory) {
@@ -138,61 +143,26 @@ export default function CategoryExplorer() {
       return;
     }
 
-    const sessionsToSearch = allSessions.length > 0 ? allSessions : (catData?.sessions || []);
+    if (categoryUrlMap[selectedCategory]) {
+      setScrapeUrl(categoryUrlMap[selectedCategory]);
+      setScrapeSessionId('');
+      setShowScraper(true);
+      return;
+    }
 
-    if (sessionsToSearch.length > 0) {
-      const categoryParts = selectedCategory.split(/\s*[>/]\s*/).map(p => p.trim().toLowerCase()).filter(Boolean);
-      let bestMatch: any = null;
-      let bestScore = 0;
-
-      for (const session of sessionsToSearch) {
-        const sessionName = (session.category_name || '').toLowerCase();
-        const sessionUrl = (session.category_url || '').toLowerCase();
-        let score = 0;
-
-        for (const part of categoryParts) {
-          if (part.length < 3) continue;
-          if (sessionName.includes(part)) score += 2;
-          const slug = part.replace(/\s+/g, '-').replace(/[ıİ]/g, 'i').replace(/[öÖ]/g, 'o').replace(/[üÜ]/g, 'u').replace(/[şŞ]/g, 's').replace(/[çÇ]/g, 'c').replace(/[ğĞ]/g, 'g');
-          if (sessionUrl.includes(slug)) score += 2;
-        }
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = session;
-        }
-      }
-
-      if (bestMatch && bestScore > 0) {
-        setScrapeUrl(bestMatch.category_url);
-        setScrapeSessionId(bestMatch.id);
+    const parts = selectedCategory.split(' > ');
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const partial = parts.slice(0, i + 1).join(' > ');
+      if (categoryUrlMap[partial]) {
+        setScrapeUrl(categoryUrlMap[partial]);
+        setScrapeSessionId('');
         setShowScraper(true);
         return;
       }
     }
 
-    const allParts = selectedCategory.split(/\s*[>/]\s*/).map(p => p.trim()).filter(p => p.length >= 3);
-    const searchTerm = allParts.length > 0 ? allParts[allParts.length - 1] : selectedCategory.trim();
-
-    lookupSessionUrl(searchTerm, platform || undefined).then(result => {
-      if (result.category_url) {
-        setScrapeUrl(result.category_url);
-        if (result.session_id) setScrapeSessionId(result.session_id);
-        setShowScraper(true);
-      } else if (allParts.length > 1) {
-        lookupSessionUrl(selectedCategory, platform || undefined).then(r2 => {
-          if (r2.category_url) {
-            setScrapeUrl(r2.category_url);
-            if (r2.session_id) setScrapeSessionId(r2.session_id);
-            setShowScraper(true);
-          } else {
-            setScrapeUrl('');
-          }
-        }).catch(() => setScrapeUrl(''));
-      } else {
-        setScrapeUrl('');
-      }
-    }).catch(() => {});
-  }, [selectedCategory, platform, allSessions, catData?.sessions]);
+    setScrapeUrl('');
+  }, [selectedCategory, categoryUrlMap]);
 
   useEffect(() => {
     return () => {
@@ -233,7 +203,6 @@ export default function CategoryExplorer() {
       setScrapeMsg(`Done: ${result.products_added} new products from ${pagesScraped} page${pagesScraped > 1 ? 's' : ''} (${result.products_found} found, ${result.total_in_session} total)`);
       setScrapeProgress('');
       if (result.session?.id) setScrapeSessionId(result.session.id);
-      getCategorySessions(platform || undefined).then(r => setAllSessions(r?.sessions || [])).catch(() => {});
       if (viewMode === 'category_page') fetchCatProducts();
     } catch (err: any) {
       setScrapeMsg(err?.response?.data?.detail || 'Scrape failed');

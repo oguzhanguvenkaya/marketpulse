@@ -133,7 +133,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 ## Recent Changes
 - 2026-02-22: Category Explorer redesign: multi-page scraping (page_count 1-20, HB ?sayfa=N / TY ?pi=N), "Get Product Details" panel with checkbox selection + Select All, bulk detail fetch with polling progress, cyan/purple visual separation for scrape vs detail operations
 - 2026-02-22: Collapsible sidebar: desktop toggle to collapse/expand sidebar (icon-only vs full labels), state persisted in localStorage, all pages auto-adjust. Mobile drawer behavior unchanged
-- 2026-02-22: Category URL auto-fill: selecting a category in Category Explorer auto-populates scrape URL from matching CategorySession. New endpoint: /api/category-explorer/session-url-lookup
+- 2026-02-22: Category URL auto-fill v2: category-tree endpoint now extracts marketplace category URLs from store_products raw_scraped_data breadcrumb JSON-LD. Each sidebar category node carries its permanent URL (100% HB, 85% TY coverage). Selecting a category instantly populates scrape URL without any fuzzy matching or external lookup
 - 2026-02-22: Added Category Explorer for competitive analysis: scrape HB/Trendyol category pages, view product listings with breadcrumb navigation, filter by brand/price/sponsored, bulk fetch product details. DB models: CategorySession, CategoryProduct. Routes: /api/category-explorer/. Frontend: /category-explorer
 - 2026-02-22: Added Excel import for web products (POST /api/store-products/import-excel), improved price extraction with multi-source fallback, redesigned product detail as slide-in side panel
 - 2026-02-22: Increased all concurrent workers to 40 (URL scraper, transcript, price monitor HB+TY)

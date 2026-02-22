@@ -146,6 +146,94 @@ async def get_filter_options(
     }
 
 
+def _extract_category_url_map(db: Session, platform: Optional[str] = None) -> dict:
+    import json as _json
+    q = db.query(StoreProduct.category, StoreProduct.raw_scraped_data, StoreProduct.platform).filter(
+        StoreProduct.category.isnot(None),
+        StoreProduct.category != '',
+        StoreProduct.raw_scraped_data.isnot(None),
+    )
+    if platform:
+        q = q.filter(StoreProduct.platform == platform)
+    rows = q.all()
+
+    url_map: dict = {}
+
+    def _is_category_url(url: str) -> bool:
+        if not url:
+            return False
+        if url.rstrip('/') in ('https://www.hepsiburada.com', 'https://www.trendyol.com', 'https://www.trendyol.com/', 'https://www.hepsiburada.com/'):
+            return False
+        return True
+
+    def _extract_breadcrumb_entries(json_ld_list: list) -> list:
+        entries = []
+        for ld_item in json_ld_list:
+            if not isinstance(ld_item, dict):
+                continue
+            bc = ld_item.get('breadcrumb', {})
+            if not isinstance(bc, dict):
+                continue
+            items = bc.get('itemListElement', [])
+            if items:
+                return items
+        return entries
+
+    for category, raw_data, plat in rows:
+        cat_parts = [p.strip() for p in category.split('>') if p.strip()]
+        all_mapped = all(' > '.join(cat_parts[:i+1]) in url_map for i in range(len(cat_parts)))
+        if all_mapped:
+            continue
+
+        try:
+            data = raw_data if isinstance(raw_data, dict) else _json.loads(raw_data)
+            json_ld = data.get('json_ld', [])
+
+            bc_items = _extract_breadcrumb_entries(json_ld) if isinstance(json_ld, list) else []
+
+            bc_urls = []
+            for bc_item in bc_items:
+                item_field = bc_item.get('item', '')
+                if isinstance(item_field, dict):
+                    url = item_field.get('@id', '')
+                    name = item_field.get('name', '')
+                else:
+                    url = item_field
+                    name = bc_item.get('name', '')
+                if _is_category_url(url):
+                    bc_urls.append({'url': url, 'name': name})
+
+            if not bc_urls and isinstance(json_ld, list):
+                for ld_item in json_ld:
+                    if isinstance(ld_item, dict):
+                        related = ld_item.get('relatedLink', [])
+                        if isinstance(related, list):
+                            for rl in related:
+                                if isinstance(rl, str) and _is_category_url(rl):
+                                    bc_urls.append({'url': rl, 'name': ''})
+                            if bc_urls:
+                                break
+
+            if not bc_urls:
+                continue
+
+            for i, part in enumerate(cat_parts):
+                partial_path = ' > '.join(cat_parts[:i+1])
+                if partial_path in url_map:
+                    continue
+                if i < len(bc_urls):
+                    url_entry = bc_urls[i]
+                    if not url_entry.get('url', '').endswith('/'):
+                        url_map[partial_path] = url_entry['url']
+                    elif _is_category_url(url_entry['url']):
+                        url_map[partial_path] = url_entry['url']
+
+        except Exception:
+            continue
+
+    return url_map
+
+
 @router.get("/category-tree")
 async def get_category_tree(
     platform: Optional[str] = Query(None),
@@ -159,19 +247,24 @@ async def get_category_tree(
         q = q.filter(StoreProduct.platform == platform)
     raw = q.group_by(StoreProduct.category).all()
 
+    url_map = _extract_category_url_map(db, platform)
+
     tree: dict = {}
     for full_path, count in raw:
         parts = [p.strip() for p in full_path.split('>') if p.strip()]
         node = tree
         for part in parts:
             if part not in node:
-                node[part] = {'_count': 0, '_full_path': '', '_children': {}}
+                node[part] = {'_count': 0, '_full_path': '', '_children': {}, '_category_url': None}
             node[part]['_count'] += count
             node = node[part]['_children']
 
         current = tree
         for i, part in enumerate(parts):
-            current[part]['_full_path'] = ' > '.join(parts[:i+1])
+            fp = ' > '.join(parts[:i+1])
+            current[part]['_full_path'] = fp
+            if not current[part]['_category_url'] and fp in url_map:
+                current[part]['_category_url'] = url_map[fp]
             current = current[part]['_children']
 
     def build_list(node: dict, depth: int = 0) -> list:
@@ -183,6 +276,7 @@ async def get_category_tree(
                 'full_path': data['_full_path'],
                 'count': data['_count'],
                 'depth': depth,
+                'category_url': data.get('_category_url'),
                 'children': build_list(data['_children'], depth + 1) if data['_children'] else [],
             }
             result.append(item)
