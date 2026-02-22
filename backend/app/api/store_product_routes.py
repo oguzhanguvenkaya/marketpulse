@@ -1,9 +1,10 @@
 import uuid as uuid_mod
 import logging
+import re
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, HTTPException
+from fastapi import APIRouter, Depends, BackgroundTasks, Query, HTTPException, UploadFile, File
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_, cast, String
@@ -298,6 +299,238 @@ async def delete_all_store_products(
     return {"deleted": count}
 
 
+@router.post("/import-excel")
+async def import_excel(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    import openpyxl
+    from io import BytesIO
+
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in ('xlsx', 'xls'):
+        raise HTTPException(status_code=400, detail="Only .xlsx and .xls files are supported")
+
+    MAX_SIZE = 50 * 1024 * 1024
+    content = await file.read()
+    if len(content) > MAX_SIZE:
+        raise HTTPException(status_code=400, detail=f"File too large (max {MAX_SIZE // (1024*1024)}MB)")
+
+    try:
+        wb = openpyxl.load_workbook(BytesIO(content), read_only=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid Excel file: {str(e)}")
+
+    ws = wb.active or wb[wb.sheetnames[0]]
+
+    headers = [ws.cell(1, c).value for c in range(1, ws.max_column + 1)]
+    header_map = {h: i for i, h in enumerate(headers) if h}
+
+    required = ['Url']
+    missing = [h for h in required if h not in header_map]
+    if missing:
+        wb.close()
+        raise HTTPException(status_code=400, detail=f"Missing required columns: {', '.join(missing)}. Found: {', '.join(h for h in headers if h)}")
+
+    def cell(row, col_name):
+        idx = header_map.get(col_name)
+        if idx is None:
+            return None
+        val = ws.cell(row, idx + 1).value
+        return str(val).strip() if val is not None else None
+
+    def parse_price(val):
+        if not val:
+            return None
+        val = str(val).strip().replace(' ', '')
+        val = val.replace('.', '').replace(',', '.')
+        try:
+            p = float(val)
+            return p if p > 0 else None
+        except (ValueError, TypeError):
+            return None
+
+    created = 0
+    updated = 0
+    skipped = 0
+
+    for row_num in range(2, ws.max_row + 1):
+        url = cell(row_num, 'Url')
+        if not url:
+            skipped += 1
+            continue
+
+        sku = cell(row_num, 'StokKodu')
+        barcode = cell(row_num, 'Barkodu')
+        name = cell(row_num, 'Baslik')
+        brand = cell(row_num, 'Marka')
+        category = cell(row_num, 'Kategori')
+        price = parse_price(cell(row_num, 'Fiyat1'))
+        image = cell(row_num, 'Resim')
+        currency_raw = cell(row_num, 'Para_Birimi')
+        currency = 'TRY' if currency_raw in ('TL', 'TRY', None) else currency_raw
+
+        hb_sku = cell(row_num, 'Hepsiburada_SKU')
+        hb_price = parse_price(cell(row_num, 'HepsiBurada_Fiyat'))
+        n11_price = parse_price(cell(row_num, 'N11_Fiyat'))
+
+        cat_parts = category.replace('>', ' > ').split(' > ') if category else []
+        cat_parts = [c.strip() for c in cat_parts if c.strip()]
+        cat_breadcrumbs = [{'name': c, 'url': None, 'position': i + 1} for i, c in enumerate(cat_parts)] if cat_parts else None
+        cat_display = ' > '.join(cat_parts) if cat_parts else None
+
+        specs = {}
+        for i in range(1, 6):
+            key = cell(row_num, f'EkDetay_Tanim{i}')
+            val = cell(row_num, f'EkDetay{i}')
+            if key and val:
+                specs[key] = val
+
+        platform = _detect_platform(url)
+
+        existing = None
+        if sku:
+            existing = db.query(StoreProduct).filter(
+                StoreProduct.platform == platform,
+                StoreProduct.sku == sku
+            ).first()
+        if not existing:
+            existing = db.query(StoreProduct).filter(
+                StoreProduct.source_url == url
+            ).first()
+
+        data = {
+            'platform': platform,
+            'source_url': url,
+            'sku': sku,
+            'barcode': barcode,
+            'product_name': name,
+            'brand': brand,
+            'category': cat_display,
+            'category_breadcrumbs': cat_breadcrumbs,
+            'price': price,
+            'currency': currency,
+            'image_url': image,
+            'product_specs': specs if specs else None,
+            'additional_properties': {
+                'hepsiburada_sku': hb_sku,
+                'hepsiburada_price': hb_price,
+                'n11_price': n11_price,
+            } if any([hb_sku, hb_price, n11_price]) else None,
+            'updated_at': datetime.utcnow(),
+        }
+
+        if existing:
+            for key, val in data.items():
+                if val is not None:
+                    setattr(existing, key, val)
+            updated += 1
+        else:
+            product = StoreProduct(**data)
+            db.add(product)
+            created += 1
+
+        if (row_num - 1) % 100 == 0:
+            db.commit()
+
+    db.commit()
+    wb.close()
+
+    logger.info(f"[EXCEL-IMPORT] Imported {created} new, {updated} updated, {skipped} skipped from {file.filename}")
+
+    return {
+        "created": created,
+        "updated": updated,
+        "skipped": skipped,
+        "total_rows": ws.max_row - 1,
+        "filename": file.filename,
+    }
+
+
+def _parse_price_str(val) -> Optional[float]:
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        return float(val) if float(val) > 0 else None
+    s = str(val).strip()
+    if not s:
+        return None
+    s = re.sub(r'[^\d.,]', '', s)
+    if not s:
+        return None
+    if ',' in s and '.' in s:
+        if s.rindex(',') > s.rindex('.'):
+            s = s.replace('.', '').replace(',', '.')
+        else:
+            s = s.replace(',', '')
+    elif ',' in s:
+        parts = s.split(',')
+        if len(parts) == 2 and len(parts[1]) <= 2:
+            s = s.replace(',', '.')
+        else:
+            s = s.replace(',', '')
+    try:
+        p = float(s)
+        return p if p > 0 else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _extract_best_price(scraped: dict) -> Optional[float]:
+    price = _parse_price_str(scraped.get('price'))
+    if price:
+        return price
+
+    json_ld_list = scraped.get('json_ld', [])
+    for ld in json_ld_list:
+        items = []
+        if isinstance(ld, dict):
+            if '@graph' in ld:
+                items = ld['@graph'] if isinstance(ld['@graph'], list) else [ld['@graph']]
+            else:
+                items = [ld]
+        elif isinstance(ld, list):
+            items = ld
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            ld_type = item.get('@type', '')
+            is_product = ld_type == 'Product' or (isinstance(ld_type, list) and 'Product' in ld_type)
+            if not is_product:
+                continue
+            offers = item.get('offers', {})
+            offer_list = [offers] if isinstance(offers, dict) else offers if isinstance(offers, list) else []
+            for offer in offer_list:
+                if not isinstance(offer, dict):
+                    continue
+                for field in ('price', 'lowPrice', 'highPrice'):
+                    p = _parse_price_str(offer.get(field))
+                    if p:
+                        return p
+                sub_offers = offer.get('offers', [])
+                if isinstance(sub_offers, list):
+                    for sub in sub_offers:
+                        if isinstance(sub, dict):
+                            p = _parse_price_str(sub.get('price'))
+                            if p:
+                                return p
+
+    og = scraped.get('og_data', {})
+    if isinstance(og, dict):
+        p = _parse_price_str(og.get('price:amount'))
+        if p:
+            return p
+
+    for key in ('original_price', 'list_price', 'sale_price'):
+        p = _parse_price_str(scraped.get(key))
+        if p:
+            return p
+
+    return None
+
+
 def _detect_platform(url: str) -> str:
     if 'hepsiburada.com' in url:
         return 'hepsiburada'
@@ -343,11 +576,7 @@ def _save_store_product_from_scrape(db: Session, scrape_result: ScrapeResult) ->
             StoreProduct.source_url == source_url
         ).first()
 
-    price_val = scraped.get('price')
-    try:
-        price_val = float(price_val) if price_val else None
-    except (ValueError, TypeError):
-        price_val = None
+    price_val = _extract_best_price(scraped)
 
     rating_val = scraped.get('rating')
     try:

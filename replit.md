@@ -125,8 +125,9 @@ Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product da
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Added Excel import for web products (POST /api/store-products/import-excel), improved price extraction with multi-source fallback, redesigned product detail as slide-in side panel
 - 2026-02-22: Increased all concurrent workers to 40 (URL scraper, transcript, price monitor HB+TY)
-- 2026-02-22: Added geotargeting to all ScraperAPI methods: TR domains→country_code=tr, others→US/EU round-robin
+- 2026-02-22: Added geotargeting to all ScraperAPI methods: TR domains→country_code=eu, others→US/EU random
 - 2026-02-22: Added Marketplace Product Pages (Hepsiburada, Trendyol, Web) with StoreProduct model, advanced filtering, category breadcrumb extraction
 - 2026-02-22: Enhanced URL scraper: WebPage JSON-LD breadcrumb parsing, Trendyol SEO props parsing, reviews/shipping/return policy extraction
 - 2025-02-19: Cleaned up outdated planning/architecture documentation files

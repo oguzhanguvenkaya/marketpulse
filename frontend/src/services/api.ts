@@ -849,4 +849,14 @@ export const deleteAllStoreProducts = async (platform?: string): Promise<{ delet
   return response.data;
 };
 
+export const importExcelProducts = async (file: File): Promise<{ created: number; updated: number; skipped: number; total_rows: number; filename: string }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/store-products/import-excel', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000,
+  });
+  return response.data;
+};
+
 export default api;
