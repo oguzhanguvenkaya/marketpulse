@@ -90,7 +90,8 @@ export default function CategoryExplorer() {
         page_size: pageSize,
       };
       if (platform) params.platform = platform;
-      if (selectedCategory) params.category = selectedCategory;
+      if (scrapeSessionId) params.session_id = scrapeSessionId;
+      else if (selectedCategory) params.category = selectedCategory;
       if (search) params.search = search;
       const result = await getCategoryProductsByCategory(params);
       setCatData(result);
@@ -99,7 +100,7 @@ export default function CategoryExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [platform, page, pageSize, selectedCategory, search]);
+  }, [platform, page, pageSize, selectedCategory, search, scrapeSessionId]);
 
   const fetchFilters = useCallback(async () => {
     try {

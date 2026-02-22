@@ -154,11 +154,11 @@ class CategoryScraperService:
 
         product_cards = soup.find_all('li', attrs={'data-test-id': 'product-card-item'})
         if not product_cards:
-            product_cards = soup.find_all('div', class_=re.compile(r'productListContent', re.I))
-        if not product_cards:
-            product_cards = soup.select('ul.productListContent-zAP0Y5msy8OHn5z7T_K_ > li')
-        if not product_cards:
             product_cards = soup.select('ul[class*="productListContent"] > li')
+        if not product_cards:
+            product_cards = soup.find_all('li', class_=re.compile(r'productListContent', re.I))
+        if not product_cards:
+            product_cards = soup.find_all('article', class_=re.compile(r'productCard', re.I))
 
         for card in product_cards:
             product = self._parse_hb_product_card(card)
@@ -219,13 +219,14 @@ class CategoryScraperService:
                 href = f"https://www.hepsiburada.com{href}"
             product['url'] = href
 
-        title_el = card.find('h3') or card.find('span', attrs={'data-test-id': 'product-card-name'})
-        if not title_el:
-            title_el = card.find('a', {'title': True})
-            if title_el:
-                product['name'] = title_el.get('title', '').strip()
-        if title_el and not product['name']:
+        title_el = card.find('h3') or card.find('h2') or card.find('span', attrs={'data-test-id': 'product-card-name'})
+        if title_el:
             product['name'] = title_el.get_text(strip=True)
+
+        if not product['name']:
+            title_a = card.find('a', {'title': True})
+            if title_a:
+                product['name'] = title_a.get('title', '').strip()
 
         if not product['name'] and link:
             product['name'] = link.get('title', '').strip()

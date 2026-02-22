@@ -989,6 +989,7 @@ export const getCategoryProductsByCategory = async (params: {
   category?: string;
   platform?: string;
   search?: string;
+  session_id?: string;
   page?: number;
   page_size?: number;
 }): Promise<CategoryProductListResponse> => {

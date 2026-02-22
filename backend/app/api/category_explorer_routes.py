@@ -423,6 +423,7 @@ async def list_products_by_category(
     category: Optional[str] = Query(None),
     platform: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
+    session_id: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db)
@@ -431,8 +432,11 @@ async def list_products_by_category(
 
     if platform:
         q = q.filter(CategorySession.platform == platform)
-    if category:
-        q = q.filter(CategorySession.category_name.ilike(f"%{category}%"))
+    if session_id:
+        q = q.filter(CategoryProduct.session_id == session_id)
+    elif category:
+        leaf = category.split(' > ')[-1].strip() if ' > ' in category else category
+        q = q.filter(CategorySession.category_name.ilike(f"%{leaf}%"))
     if search:
         q = q.filter(or_(
             CategoryProduct.name.ilike(f"%{search}%"),
