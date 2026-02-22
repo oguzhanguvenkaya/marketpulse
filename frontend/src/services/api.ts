@@ -849,6 +849,16 @@ export const deleteAllStoreProducts = async (platform?: string): Promise<{ delet
   return response.data;
 };
 
+export const scrapeFromUrls = async (urls: string[]): Promise<{ job_id: string; status: string; total_urls: number }> => {
+  const response = await api.post('/store-products/scrape-from-urls', { urls });
+  return response.data;
+};
+
+export const backfillPrices = async (platform?: string): Promise<{ message: string; updated: number; total_without_price: number }> => {
+  const response = await api.post('/store-products/backfill-prices', null, { params: { platform } });
+  return response.data;
+};
+
 export const importExcelProducts = async (file: File): Promise<{ created: number; updated: number; skipped: number; total_rows: number; filename: string }> => {
   const formData = new FormData();
   formData.append('file', file);

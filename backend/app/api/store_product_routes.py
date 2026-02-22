@@ -11,7 +11,7 @@ from sqlalchemy import func, or_, cast, String
 from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import StoreProduct, MonitoredProduct, ScrapeJob, ScrapeResult
+from app.db.models import StoreProduct, MonitoredProduct, ScrapeJob, ScrapeResult, SellerSnapshot
 from app.core.security import require_mutating_api_key
 
 logger = logging.getLogger(__name__)
@@ -152,6 +152,53 @@ async def get_store_product(product_id: str, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return _serialize_product(product, include_raw=True)
+
+
+class UrlListRequest(BaseModel):
+    urls: List[str]
+
+
+@router.post("/scrape-from-urls")
+async def scrape_from_url_list(
+    request: UrlListRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    urls = [u.strip() for u in request.urls if u.strip()]
+    if not urls:
+        raise HTTPException(status_code=400, detail="No valid URLs provided")
+    if len(urls) > 5000:
+        raise HTTPException(status_code=400, detail="Maximum 5000 URLs allowed per request")
+
+    job = ScrapeJob(total_urls=len(urls), status="running")
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
+    url_metadata = {}
+    for url in urls:
+        result = ScrapeResult(
+            scrape_job_id=job.id,
+            url=url,
+            status="pending"
+        )
+        db.add(result)
+        url_metadata[url] = {'url': url, 'platform': _detect_platform(url)}
+    db.commit()
+
+    logger.info(f"[STORE-SCRAPE] Created URL list job {str(job.id)[:8]}, {len(urls)} URLs")
+
+    background_tasks.add_task(
+        run_scrape_and_save_job,
+        str(job.id),
+        url_metadata
+    )
+
+    return {
+        "job_id": str(job.id),
+        "status": "running",
+        "total_urls": len(urls),
+    }
 
 
 @router.post("/scrape-from-monitor")
@@ -300,6 +347,48 @@ async def delete_all_store_products(
     count = q.delete()
     db.commit()
     return {"deleted": count}
+
+
+@router.post("/backfill-prices")
+async def backfill_prices_from_monitor(
+    platform: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    from sqlalchemy import func, and_
+
+    q = db.query(StoreProduct).filter(StoreProduct.price.is_(None))
+    if platform:
+        q = q.filter(StoreProduct.platform == platform)
+    products_without_price = q.all()
+
+    if not products_without_price:
+        return {"message": "No products without prices found", "updated": 0}
+
+    updated = 0
+    for sp in products_without_price:
+        mp = db.query(MonitoredProduct).filter(
+            func.lower(MonitoredProduct.product_name) == func.lower(sp.product_name),
+            MonitoredProduct.platform == sp.platform
+        ).first()
+
+        if not mp:
+            continue
+
+        latest_snapshot = db.query(SellerSnapshot).filter(
+            SellerSnapshot.monitored_product_id == mp.id,
+            SellerSnapshot.price.isnot(None)
+        ).order_by(SellerSnapshot.fetched_at.desc()).first()
+
+        if latest_snapshot and latest_snapshot.price:
+            sp.price = float(latest_snapshot.price)
+            sp.currency = 'TRY'
+            if latest_snapshot.original_price:
+                sp.additional_properties = sp.additional_properties or {}
+                sp.additional_properties['original_price'] = float(latest_snapshot.original_price)
+            updated += 1
+
+    db.commit()
+    return {"message": f"Backfilled prices for {updated} products", "updated": updated, "total_without_price": len(products_without_price)}
 
 
 @router.post("/import-excel")

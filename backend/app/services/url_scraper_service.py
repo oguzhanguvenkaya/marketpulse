@@ -160,6 +160,69 @@ class UrlScraperService:
 
         return None
 
+    def _extract_trendyol_price(self, soup, data: dict):
+        for script in soup.find_all('script'):
+            script_text = script.string or ''
+            for marker in ('window.__PRODUCT_DETAIL_APP_INITIAL_STATE__', 'window["__PRODUCT_DETAIL_APP_INITIAL_STATE__"]'):
+                idx = script_text.find(marker)
+                if idx == -1:
+                    continue
+                eq_idx = script_text.find('=', idx + len(marker))
+                if eq_idx == -1:
+                    continue
+                rest = script_text[eq_idx + 1:].strip()
+                brace_start = rest.find('{')
+                if brace_start == -1:
+                    continue
+                depth = 0
+                json_end = -1
+                for ci, ch in enumerate(rest[brace_start:]):
+                    if ch == '{':
+                        depth += 1
+                    elif ch == '}':
+                        depth -= 1
+                        if depth == 0:
+                            json_end = brace_start + ci + 1
+                            break
+                if json_end == -1:
+                    continue
+                try:
+                    state = json.loads(rest[brace_start:json_end])
+                    product = state.get('product', {})
+                    price_info = product.get('price', {})
+                    selling = price_info.get('sellingPrice') or price_info.get('discountedPrice') or price_info.get('originalPrice')
+                    if selling:
+                        data['price'] = str(selling)
+                        data['currency'] = price_info.get('currency', 'TRY')
+                        orig = price_info.get('originalPrice')
+                        if orig and orig != selling:
+                            data['original_price'] = str(orig)
+                        logger.info(f"  Trendyol JS state: price={selling}")
+                        return
+                except (json.JSONDecodeError, TypeError, KeyError) as e:
+                    logger.warning(f"  Failed to parse Trendyol product state: {e}")
+
+        for script in soup.find_all('script', type='application/javascript'):
+            script_text = script.string or ''
+            price_match = re.search(r'"price"\s*:\s*(\d+[\d.,]*)', script_text)
+            if price_match:
+                data['price'] = price_match.group(1)
+                logger.info(f"  Trendyol regex price: {data['price']}")
+                return
+
+        price_el = soup.find('span', class_=re.compile(r'prc-dsc|prc-slg|product-price', re.I))
+        if not price_el:
+            price_el = soup.find('span', attrs={'data-testid': re.compile(r'price', re.I)})
+        if price_el:
+            price_text = price_el.get_text(strip=True)
+            cleaned = price_text.replace('TL', '').replace('₺', '').strip()
+            cleaned = cleaned.replace('.', '').replace(',', '.')
+            price_match = re.search(r'[\d.]+', cleaned)
+            if price_match:
+                data['price'] = price_match.group(0)
+                data['currency'] = 'TRY'
+                logger.info(f"  Trendyol HTML price element: {data['price']}")
+
     def _extract_price_from_html(self, soup) -> dict:
         price_data = {}
         price_selectors = [
@@ -457,6 +520,9 @@ class UrlScraperService:
         for key, val in microdata.items():
             if not data.get(key):
                 data[key] = val
+
+        if 'trendyol.com' in url and not data.get('price'):
+            self._extract_trendyol_price(soup, data)
 
         if not data.get('product_description'):
             data['product_description'] = self._extract_html_description(soup)

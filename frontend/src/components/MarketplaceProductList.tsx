@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   getStoreProducts,
   getStoreProductFilters,
   scrapeFromPriceMonitor,
   getScrapeJobStatus,
   importExcelProducts,
+  backfillPrices,
+  scrapeFromUrls,
   type StoreProduct,
   type StoreProductFilters,
   type StoreProductListResponse,
@@ -28,6 +31,8 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
   const [scrapeProgress, setScrapeProgress] = useState<ScrapeJobStatus | null>(null);
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
+  const [showUrlDialog, setShowUrlDialog] = useState(false);
+  const [urlText, setUrlText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState('');
@@ -148,6 +153,41 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
     }
   };
 
+  const handleUrlScrape = async () => {
+    const urls = urlText.split('\n').map(u => u.trim()).filter(u => u && (u.startsWith('http://') || u.startsWith('https://')));
+    if (urls.length === 0) {
+      setScrapeMessage('No valid URLs found. Each URL should start with http:// or https://');
+      return;
+    }
+    setScraping(true);
+    setScrapeMessage('');
+    setScrapeProgress(null);
+    setScrapeJobId(null);
+    setShowUrlDialog(false);
+    setUrlText('');
+    try {
+      const result = await scrapeFromUrls(urls);
+      setScrapeJobId(result.job_id);
+      setScrapeMessage(`Scraping started — ${result.total_urls} URLs queued`);
+    } catch (err: any) {
+      setScrapeMessage(err?.response?.data?.detail || 'URL scraping failed');
+      setScraping(false);
+    }
+  };
+
+  const handleBackfillPrices = async () => {
+    setScrapeMessage('Backfilling prices from Price Monitor...');
+    try {
+      const result = await backfillPrices(platform === 'all' ? undefined : platform);
+      setScrapeMessage(result.message);
+      if (result.updated > 0) {
+        fetchProducts();
+      }
+    } catch (err: any) {
+      setScrapeMessage(err?.response?.data?.detail || 'Backfill failed');
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
@@ -242,22 +282,44 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             )}
             Import Excel
           </button>
+          <button
+            onClick={() => setShowUrlDialog(true)}
+            disabled={scraping}
+            className="px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            Scrape URLs
+          </button>
           {platform !== 'web' && (
-            <button
-              onClick={handleScrape}
-              disabled={scraping}
-              className="px-3 py-2 text-sm rounded-lg text-white font-medium transition-all flex items-center gap-1.5 disabled:opacity-50"
-              style={{ background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)` }}
-            >
-              {scraping ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
+            <>
+              <button
+                onClick={handleBackfillPrices}
+                className="px-3 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors flex items-center gap-1.5"
+                title="Fill missing prices from Price Monitor data"
+              >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              )}
-              Scrape Products
-            </button>
+                Backfill Prices
+              </button>
+              <button
+                onClick={handleScrape}
+                disabled={scraping}
+                className="px-3 py-2 text-sm rounded-lg text-white font-medium transition-all flex items-center gap-1.5 disabled:opacity-50"
+                style={{ background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)` }}
+              >
+                {scraping ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                Scrape Products
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -564,17 +626,66 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
           <p className="text-neutral-400 text-sm">No products found</p>
           <p className="text-neutral-500 text-xs">
             {platform === 'web'
-              ? 'Click "Import Excel" to upload product data from an Excel file.'
-              : 'Click "Scrape Products" to fetch products from Price Monitor, or "Import Excel" to upload product data.'}
+              ? 'Click "Import Excel" to upload product data, or "Scrape URLs" to fetch from a list of URLs.'
+              : 'Click "Scrape Products" to fetch products from Price Monitor, "Import Excel", or "Scrape URLs".'}
           </p>
         </div>
       )}
 
-      {selectedProduct && (
+      {showUrlDialog && createPortal(
         <>
-          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setSelectedProduct(null)} />
+          <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={() => setShowUrlDialog(false)} />
           <div
-            className="fixed top-0 right-0 h-full w-full max-w-lg z-50 overflow-y-auto border-l border-white/10 shadow-2xl"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-[9999] rounded-xl border border-white/10 shadow-2xl p-6"
+            style={{ background: 'linear-gradient(180deg, #1a1c20 0%, #111214 100%)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Scrape URLs</h3>
+              <button onClick={() => setShowUrlDialog(false)} className="p-1.5 hover:bg-white/10 rounded-lg text-neutral-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-neutral-400 mb-3">Paste URLs below (one per line). Each URL will be scraped and saved as a product.</p>
+            <textarea
+              value={urlText}
+              onChange={(e) => setUrlText(e.target.value)}
+              placeholder={"https://www.hepsiburada.com/...\nhttps://www.trendyol.com/...\nhttps://example.com/product/..."}
+              className="w-full h-48 bg-black/30 border border-white/10 rounded-lg p-3 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50 resize-none font-mono"
+            />
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-xs text-neutral-500">
+                {urlText.split('\n').filter(u => u.trim() && (u.trim().startsWith('http://') || u.trim().startsWith('https://'))).length} valid URLs
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowUrlDialog(false)}
+                  className="px-4 py-2 text-sm rounded-lg border border-white/10 text-neutral-300 hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUrlScrape}
+                  disabled={!urlText.trim()}
+                  className="px-4 py-2 text-sm rounded-lg text-white font-medium disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #00d4ff, #00d4ffcc)' }}
+                >
+                  Start Scraping
+                </button>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {selectedProduct && createPortal(
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={() => setSelectedProduct(null)} />
+          <div
+            className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-white/10 shadow-2xl"
             style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => { if (e.key === 'Escape') setSelectedProduct(null); }}
@@ -756,7 +867,8 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <div className="h-6" />
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
