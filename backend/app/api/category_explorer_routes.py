@@ -1,6 +1,8 @@
 import uuid as uuid_mod
 import logging
 import asyncio
+import re
+import json
 from datetime import datetime
 from typing import Optional, List
 
@@ -8,6 +10,7 @@ from fastapi import APIRouter, Depends, BackgroundTasks, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from pydantic import BaseModel
+from bs4 import BeautifulSoup
 
 from app.db.database import get_db, SessionLocal
 from app.db.models import CategorySession, CategoryProduct
@@ -72,6 +75,15 @@ def _serialize_product(p: CategoryProduct) -> dict:
         'position': p.position,
         'detail_fetched': p.detail_fetched,
         'detail_data': p.detail_data,
+        'sku': p.sku,
+        'barcode': p.barcode,
+        'description': p.description,
+        'specs': p.specs,
+        'shipping_type': p.shipping_type,
+        'stock_status': p.stock_status,
+        'category_path': p.category_path,
+        'seller_list': p.seller_list,
+        'updated_at': p.updated_at.isoformat() if p.updated_at else None,
         'created_at': p.created_at.isoformat() if p.created_at else None,
     }
 
@@ -118,12 +130,17 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
     pages_scraped_list = []
     has_next = False
 
-    existing_urls = set()
+    existing_url_map: dict[str, CategoryProduct] = {}
     if session:
-        existing = db.query(CategoryProduct.url).filter(
+        existing = db.query(CategoryProduct).filter(
             CategoryProduct.session_id == session.id
         ).all()
-        existing_urls = {r[0] for r in existing if r[0]}
+        for ep in existing:
+            if ep.url:
+                clean_url = ep.url.split('?')[0] if ep.url else ''
+                existing_url_map[clean_url] = ep
+
+    total_updated = 0
 
     for page_num in range(start_page, start_page + pages_to_scrape):
         page_url = scraper.build_page_url(req.url, page_num)
@@ -172,29 +189,50 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
         added = 0
 
         for idx, prod in enumerate(page_products):
-            if prod.get('url') and prod['url'] in existing_urls:
-                continue
+            prod_url = prod.get('url', '')
+            clean_prod_url = prod_url.split('?')[0] if prod_url else ''
 
-            cp = CategoryProduct(
-                session_id=session.id,
-                name=prod.get('name', ''),
-                url=prod.get('url', ''),
-                image_url=prod.get('image_url', ''),
-                brand=prod.get('brand', ''),
-                price=_safe_numeric(prod.get('price')),
-                original_price=_safe_numeric(prod.get('original_price')),
-                discount_percentage=_safe_numeric(prod.get('discount_percentage')),
-                rating=_safe_numeric(prod.get('rating')),
-                review_count=prod.get('review_count'),
-                is_sponsored=prod.get('is_sponsored', False),
-                campaign_text=prod.get('campaign_text', ''),
-                seller_name=prod.get('seller_name', ''),
-                page_number=page_num,
-                position=(page_num - 1) * 50 + idx + 1,
-            )
-            db.add(cp)
-            existing_urls.add(prod.get('url', ''))
-            added += 1
+            existing_product = existing_url_map.get(clean_prod_url) if clean_prod_url else None
+
+            if existing_product:
+                if _safe_numeric(prod.get('price')) is not None:
+                    existing_product.price = _safe_numeric(prod.get('price'))
+                if _safe_numeric(prod.get('original_price')) is not None:
+                    existing_product.original_price = _safe_numeric(prod.get('original_price'))
+                if prod.get('discount_percentage') is not None:
+                    existing_product.discount_percentage = _safe_numeric(prod.get('discount_percentage'))
+                if prod.get('rating') is not None:
+                    existing_product.rating = _safe_numeric(prod.get('rating'))
+                if prod.get('review_count') is not None:
+                    existing_product.review_count = prod.get('review_count')
+                if prod.get('image_url'):
+                    existing_product.image_url = prod.get('image_url')
+                if prod.get('campaign_text'):
+                    existing_product.campaign_text = prod.get('campaign_text')
+                existing_product.is_sponsored = prod.get('is_sponsored', False)
+                existing_product.updated_at = datetime.utcnow()
+                total_updated += 1
+            else:
+                cp = CategoryProduct(
+                    session_id=session.id,
+                    name=prod.get('name', ''),
+                    url=prod_url,
+                    image_url=prod.get('image_url', ''),
+                    brand=prod.get('brand', ''),
+                    price=_safe_numeric(prod.get('price')),
+                    original_price=_safe_numeric(prod.get('original_price')),
+                    discount_percentage=_safe_numeric(prod.get('discount_percentage')),
+                    rating=_safe_numeric(prod.get('rating')),
+                    review_count=prod.get('review_count'),
+                    is_sponsored=prod.get('is_sponsored', False),
+                    campaign_text=prod.get('campaign_text', ''),
+                    seller_name=prod.get('seller_name', ''),
+                    page_number=page_num,
+                    position=(page_num - 1) * 50 + idx + 1,
+                )
+                db.add(cp)
+                existing_url_map[clean_prod_url] = cp
+                added += 1
 
         total_added += added
         pages_scraped_list.append(page_num)
@@ -223,6 +261,7 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
         'page_scraped': pages_scraped_list[-1] if pages_scraped_list else start_page,
         'products_found': total_found,
         'products_added': total_added,
+        'products_updated': total_updated,
         'has_next_page': has_next,
         'total_in_session': len(all_products),
         'products': [_serialize_product(p) for p in all_products],
@@ -281,6 +320,58 @@ async def delete_session(session_id: str, db: Session = Depends(get_db)):
     return {"message": "Session deleted"}
 
 
+def _parse_utag_data(html: str) -> dict:
+    utag = {}
+    try:
+        m = re.search(r'(?:const|var)\s+utagData\s*=\s*(\{.+?\});\s*\n', html, re.DOTALL)
+        if m:
+            utag = json.loads(m.group(1))
+    except (json.JSONDecodeError, Exception) as e:
+        logger.debug(f"utagData parse error: {e}")
+    return utag
+
+
+def _parse_hb_specs(html: str) -> dict:
+    specs = {}
+    try:
+        soup_partial = BeautifulSoup(html, 'html.parser')
+        specs_container = soup_partial.find('div', attrs={'data-test-id': 'KeyFeaturesTable'})
+        if not specs_container:
+            specs_container = soup_partial.find('div', id='techSpecs')
+        if specs_container:
+            rows = specs_container.find_all('div', class_=re.compile(r'jkj4C4|spec-row', re.I))
+            if not rows:
+                rows = specs_container.find_all('li')
+            for row in rows:
+                children = row.find_all('div', recursive=False)
+                if len(children) >= 2:
+                    key = children[0].get_text(strip=True)
+                    val = children[1].get_text(strip=True)
+                    if key:
+                        specs[key] = val
+                else:
+                    spans = row.find_all('span')
+                    if len(spans) >= 2:
+                        specs[spans[0].get_text(strip=True)] = spans[1].get_text(strip=True)
+    except Exception as e:
+        logger.debug(f"Specs parse error: {e}")
+    return specs
+
+
+def _parse_hb_description(html: str) -> str:
+    desc = ''
+    try:
+        soup_partial = BeautifulSoup(html, 'html.parser')
+        desc_el = soup_partial.find('div', class_=re.compile(r'ProductDescription|productDescriptionContent', re.I))
+        if desc_el:
+            for tag in desc_el.find_all(['script', 'style']):
+                tag.decompose()
+            desc = desc_el.get_text(separator='\n', strip=True)[:5000]
+    except Exception as e:
+        logger.debug(f"Description parse error: {e}")
+    return desc
+
+
 async def _fetch_single_detail(product_id: int):
     db = SessionLocal()
     try:
@@ -288,38 +379,156 @@ async def _fetch_single_detail(product_id: int):
         if not product or not product.url:
             return
 
-        html = await url_scraper.fetch_url(product.url)
+        fetch_url = product.url
+        if 'adservice' in fetch_url:
+            redirect_match = re.search(r'redirect=([^&]+)', fetch_url)
+            if redirect_match:
+                from urllib.parse import unquote as _unquote
+                fetch_url = _unquote(redirect_match.group(1)).split('?')[0]
+
+        html = await url_scraper.fetch_url(fetch_url)
         if not html:
-            logger.warning(f"Failed to fetch detail for product {product_id}: {product.url[:80]}")
+            logger.warning(f"Failed to fetch detail for product {product_id}: {fetch_url[:80]}")
             return
 
-        parsed = url_scraper.parse_html(html, product.url)
-        if parsed:
-            detail_data = {
-                'title': parsed.get('title'),
-                'description': parsed.get('description'),
-                'price': parsed.get('price'),
-                'currency': parsed.get('currency'),
-                'brand': parsed.get('brand'),
-                'sku': parsed.get('sku'),
-                'barcode': parsed.get('barcode'),
-                'availability': parsed.get('availability'),
-                'rating': parsed.get('rating'),
-                'rating_count': parsed.get('rating_count'),
-                'review_count': parsed.get('review_count'),
-                'reviews': parsed.get('reviews'),
-                'seller_name': parsed.get('seller_name'),
-                'category': parsed.get('category'),
-                'category_breadcrumbs': parsed.get('category_breadcrumbs'),
-                'images': parsed.get('images'),
-                'product_specs': parsed.get('product_specs'),
-                'shipping_info': parsed.get('shipping_info'),
-                'return_policy': parsed.get('return_policy'),
-            }
-            product.detail_fetched = True
-            product.detail_data = detail_data
-            db.commit()
-            logger.info(f"Detail fetched for product {product_id}: {product.name[:50] if product.name else 'N/A'}")
+        utag = _parse_utag_data(html)
+        specs = _parse_hb_specs(html)
+        description = _parse_hb_description(html)
+
+        parsed = url_scraper.parse_html(html, fetch_url)
+
+        brand = utag.get('product_brand', '') or (utag.get('product_brands', [''])[0] if utag.get('product_brands') else '')
+        if not brand and parsed:
+            brand = parsed.get('brand', '')
+
+        merchant_names = utag.get('merchant_names', [])
+        seller_name = merchant_names[0] if merchant_names else ''
+        if not seller_name:
+            seller_name = utag.get('order_store', '')
+        if not seller_name and parsed:
+            seller_name = parsed.get('seller_name', '')
+
+        product_skus = utag.get('product_skus', [])
+        sku = product_skus[0] if product_skus else ''
+        if not sku and parsed:
+            sku = parsed.get('sku', '')
+
+        barcodes = utag.get('product_barcodes', [])
+        barcode = barcodes[0] if barcodes else utag.get('product_barcode', '')
+        if not barcode and parsed:
+            barcode = parsed.get('barcode', '')
+
+        category_path = utag.get('category_name_hierarchy', '')
+        if not category_path and parsed:
+            cats = parsed.get('category_breadcrumbs', [])
+            if isinstance(cats, list):
+                names = [c.get('name', '') if isinstance(c, dict) else str(c) for c in cats]
+                category_path = ' > '.join(n for n in names if n)
+
+        stock_status = utag.get('product_status', '')
+        if not stock_status and parsed:
+            stock_status = parsed.get('availability', '')
+
+        shipping_types = utag.get('shipping_type', [])
+        shipping_type = shipping_types[0] if isinstance(shipping_types, list) and shipping_types else str(shipping_types) if shipping_types else ''
+
+        review_rate = utag.get('review_rate', '')
+        rating_val = None
+        if review_rate:
+            try:
+                rating_val = float(str(review_rate).replace(',', '.'))
+            except (ValueError, TypeError):
+                pass
+        review_count_val = None
+        rc = utag.get('review_count', '')
+        if rc:
+            try:
+                review_count_val = int(str(rc).replace('.', ''))
+            except (ValueError, TypeError):
+                pass
+
+        prices = utag.get('product_prices', [])
+        utag_price = None
+        if prices:
+            try:
+                utag_price = float(str(prices[0]).replace(',', ''))
+            except (ValueError, TypeError):
+                pass
+
+        seller_list_data = []
+        if merchant_names:
+            merchant_ids = utag.get('merchant_ids', [])
+            listing_ids = utag.get('listing_ids', [])
+            for i, mn in enumerate(merchant_names):
+                entry = {'name': mn}
+                if i < len(merchant_ids):
+                    entry['id'] = merchant_ids[i]
+                if i < len(listing_ids):
+                    entry['listing_id'] = listing_ids[i]
+                seller_list_data.append(entry)
+
+        if not specs and parsed:
+            specs = parsed.get('product_specs', {}) or {}
+
+        detail_data = {
+            'title': utag.get('product_name_array', '') or (parsed.get('title') if parsed else ''),
+            'description': description or (parsed.get('description', '') if parsed else ''),
+            'price': utag_price or (parsed.get('price') if parsed else None),
+            'currency': utag.get('order_currency', 'TRY'),
+            'brand': brand,
+            'sku': sku,
+            'barcode': barcode,
+            'availability': stock_status,
+            'rating': rating_val or (parsed.get('rating') if parsed else None),
+            'review_count': review_count_val or (parsed.get('review_count') if parsed else None),
+            'seller_name': seller_name,
+            'seller_list': seller_list_data,
+            'category': category_path,
+            'category_breadcrumbs': parsed.get('category_breadcrumbs') if parsed else [],
+            'images': parsed.get('images') if parsed else [],
+            'product_specs': specs,
+            'shipping_type': shipping_type,
+            'shipping_info': parsed.get('shipping_info') if parsed else None,
+            'return_policy': parsed.get('return_policy') if parsed else None,
+            'canonical_url': utag.get('canonical_url', ''),
+            'product_ids': utag.get('product_ids', []),
+        }
+
+        product.detail_fetched = True
+        product.detail_data = detail_data
+        if brand:
+            product.brand = brand
+        if seller_name:
+            product.seller_name = seller_name
+        if sku:
+            product.sku = sku
+        if barcode:
+            product.barcode = barcode
+        if description:
+            product.description = description[:5000]
+        if specs:
+            product.specs = specs
+        if shipping_type:
+            product.shipping_type = shipping_type
+        if stock_status:
+            product.stock_status = stock_status
+        if category_path:
+            product.category_path = category_path
+        if seller_list_data:
+            product.seller_list = seller_list_data
+        if rating_val:
+            product.rating = rating_val
+        if review_count_val:
+            product.review_count = review_count_val
+        if utag_price and not product.price:
+            product.price = utag_price
+
+        if fetch_url != product.url:
+            product.url = fetch_url
+
+        product.updated_at = datetime.utcnow()
+        db.commit()
+        logger.info(f"Detail fetched for product {product_id}: brand={brand}, seller={seller_name}, sku={sku}")
     except Exception as e:
         logger.error(f"Error fetching detail for product {product_id}: {e}")
     finally:

@@ -805,6 +805,15 @@ export interface CategoryProductItem {
   position: number;
   detail_fetched: boolean;
   detail_data: any;
+  sku: string | null;
+  barcode: string | null;
+  description: string | null;
+  specs: Record<string, any> | null;
+  shipping_type: string | null;
+  stock_status: string | null;
+  category_path: string | null;
+  seller_list: Array<{ name: string; id?: string; listing_id?: string }> | null;
+  updated_at: string | null;
   created_at: string | null;
 }
 

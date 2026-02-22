@@ -360,76 +360,86 @@ class CategoryScraperService:
         if img:
             product['image_url'] = img.get('src') or img.get('data-src') or img.get('loading') or ''
 
-        price_spans = card.find_all(string=re.compile(r'^\d[\d.,]*\s*TL$'))
-        prices = []
-        for ps in price_spans:
-            m = re.search(r'([\d.,]+)', ps)
-            if m:
-                price_val = m.group(1).replace('.', '').replace(',', '.')
-                try:
-                    prices.append(float(price_val))
-                except ValueError:
-                    pass
+        price_area = card.find('div', class_=re.compile(r'price-module_priceAreaRoot|priceAreaRoot', re.I))
+        if not price_area:
+            price_area = card.find('div', attrs={'data-test-id': re.compile(r'add-to-cart-button', re.I)})
 
-        if not prices:
+        current_price = None
+        orig_price = None
+        discount_pct = None
+
+        if price_area:
+            orig_el = price_area.find('span', class_=re.compile(r'price-module_originalPrice|originalPrice', re.I))
+            if orig_el:
+                m = re.search(r'([\d.]+(?:,\d+)?)', orig_el.get_text())
+                if m:
+                    orig_price = float(m.group(1).replace('.', '').replace(',', '.'))
+
+            disc_el = price_area.find('span', class_=re.compile(r'price-module_discountRate|discountRate', re.I))
+            if disc_el:
+                m = re.search(r'(\d+)', disc_el.get_text())
+                if m:
+                    discount_pct = float(m.group(1))
+
+            price_text = price_area.get_text()
+            price_candidates = re.findall(r'(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?)\s*TL', price_text)
+            parsed_prices = []
+            for pc in price_candidates:
+                val = float(pc.replace('.', '').replace(',', '.'))
+                parsed_prices.append(val)
+
+            if parsed_prices:
+                if orig_price and orig_price in parsed_prices:
+                    remaining = [p for p in parsed_prices if p != orig_price]
+                    current_price = min(remaining) if remaining else orig_price
+                else:
+                    current_price = min(parsed_prices)
+                    if len(parsed_prices) > 1:
+                        orig_price = max(parsed_prices)
+
+        if not current_price:
             price_el = card.find(attrs={'data-test-id': re.compile(r'price', re.I)})
             if price_el:
-                m = re.search(r'([\d.,]+)', price_el.get_text())
+                m = re.search(r'([\d.]+(?:,\d+)?)', price_el.get_text())
                 if m:
-                    price_val = m.group(1).replace('.', '').replace(',', '.')
-                    try:
-                        prices.append(float(price_val))
-                    except ValueError:
-                        pass
+                    current_price = float(m.group(1).replace('.', '').replace(',', '.'))
 
-        if not prices:
-            all_text = card.get_text()
-            price_matches = re.findall(r'(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?)\s*TL', all_text)
-            for pm in price_matches:
-                price_val = pm.replace('.', '').replace(',', '.')
-                try:
-                    prices.append(float(price_val))
-                except ValueError:
-                    pass
+        if not current_price:
+            standalone = card.find_all(string=re.compile(r'^\s*\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?\s*TL\s*$'))
+            safe_prices = []
+            for ps in standalone:
+                parent = ps.parent
+                if parent:
+                    parent_class = ' '.join(parent.get('class', []))
+                    parent_text = parent.get_text(strip=True) if parent.parent else ''
+                    if re.search(r'kampanya|indirim|kupon|üzeri|fiyatına|peşin', parent_text, re.I):
+                        continue
+                m = re.search(r'([\d.]+(?:,\d+)?)', ps)
+                if m:
+                    safe_prices.append(float(m.group(1).replace('.', '').replace(',', '.')))
+            if safe_prices:
+                current_price = min(safe_prices)
+                if len(safe_prices) > 1:
+                    orig_price = max(safe_prices)
 
-        if prices:
-            product['price'] = min(prices)
-            if len(prices) > 1:
-                product['original_price'] = max(prices)
-                if product['original_price'] > product['price']:
+        if current_price:
+            product['price'] = current_price
+            if orig_price and orig_price > current_price:
+                product['original_price'] = orig_price
+                if discount_pct:
+                    product['discount_percentage'] = discount_pct
+                else:
                     product['discount_percentage'] = round(
-                        (1 - product['price'] / product['original_price']) * 100, 1
+                        (1 - current_price / orig_price) * 100, 1
                     )
 
-        product_id = ''
-        if product['url']:
-            pid_match = re.search(r'-pm-([A-Za-z0-9]+)', product['url'])
-            if pid_match:
-                product_id = pid_match.group(1)
-
-        if product_data_map and product_id and product_id in product_data_map:
-            script_data = product_data_map[product_id]
-            if script_data.get('brand'):
-                product['brand'] = script_data['brand']
-            if script_data.get('seller'):
-                product['seller_name'] = script_data['seller']
-
-        if not product['brand']:
-            title_el_text = ''
-            if title_el:
-                title_el_text = title_el.get_text(strip=True)
-            title_a = card.find('a', {'title': True})
-            a_title_text = title_a.get('title', '').strip() if title_a else ''
-            if title_el_text and a_title_text and title_el_text != a_title_text:
-                if title_el_text.lower().endswith(a_title_text.lower()):
-                    brand_candidate = title_el_text[:len(title_el_text) - len(a_title_text)].strip()
-                    if brand_candidate and len(brand_candidate) < 40:
-                        product['brand'] = brand_candidate
-
-        if not product['seller_name']:
-            seller_el = card.find('span', class_=re.compile(r'seller|merchant|storeName', re.I))
-            if seller_el:
-                product['seller_name'] = seller_el.get_text(strip=True)
+        if product['url'] and 'adservice' in product['url']:
+            redirect_match = re.search(r'redirect=([^&]+)', product['url'])
+            if redirect_match:
+                from urllib.parse import unquote
+                real_url = unquote(redirect_match.group(1))
+                if real_url.startswith('http'):
+                    product['url'] = real_url.split('?')[0]
 
         rating_el = card.find(string=re.compile(r'\d[.,]\d'))
         if rating_el:

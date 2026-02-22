@@ -537,9 +537,10 @@ export default function CategoryExplorer() {
           </div>
         </div>
         <div className="px-3 pb-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-[10px] text-neutral-600">Page {product.page_number}</span>
-            {product.seller_name && <span className="text-[10px] text-neutral-600">| {product.seller_name}</span>}
+            {product.seller_name && <span className="text-[10px] text-neutral-600 truncate">| {product.seller_name}</span>}
+            {product.sku && <span className="text-[10px] text-neutral-600 font-mono truncate">SKU: {product.sku}</span>}
           </div>
           {product.campaign_text && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 truncate max-w-[120px]">{product.campaign_text}</span>
@@ -1325,6 +1326,30 @@ function CatProductDetailPanel({ product, onClose, formatPrice }: {
                 <span className="text-white">{product.seller_name}</span>
               </div>
             )}
+            {product.sku && (
+              <div className="flex justify-between py-1.5 border-b border-white/5">
+                <span className="text-neutral-500">SKU</span>
+                <span className="text-white font-mono text-xs">{product.sku}</span>
+              </div>
+            )}
+            {product.barcode && (
+              <div className="flex justify-between py-1.5 border-b border-white/5">
+                <span className="text-neutral-500">Barcode</span>
+                <span className="text-white font-mono text-xs">{product.barcode}</span>
+              </div>
+            )}
+            {product.stock_status && (
+              <div className="flex justify-between py-1.5 border-b border-white/5">
+                <span className="text-neutral-500">Stock</span>
+                <span className={product.stock_status === 'inStock' ? 'text-emerald-400' : 'text-orange-400'}>{product.stock_status}</span>
+              </div>
+            )}
+            {product.shipping_type && (
+              <div className="flex justify-between py-1.5 border-b border-white/5">
+                <span className="text-neutral-500">Shipping</span>
+                <span className="text-white">{product.shipping_type}</span>
+              </div>
+            )}
             {product.campaign_text && (
               <div className="flex justify-between py-1.5 border-b border-white/5">
                 <span className="text-neutral-500">Campaign</span>
@@ -1338,16 +1363,54 @@ function CatProductDetailPanel({ product, onClose, formatPrice }: {
               </div>
             )}
           </div>
-          {detail && Object.keys(detail).length > 0 && (
+          {product.category_path && (
             <div>
-              <div className="text-xs text-neutral-500 mb-2 font-medium">Fetched Details</div>
-              {detail.description && (
+              <div className="text-xs text-neutral-500 mb-1 font-medium">Category Path</div>
+              <p className="text-xs text-neutral-300">{product.category_path}</p>
+            </div>
+          )}
+          {product.seller_list && product.seller_list.length > 0 && (
+            <div>
+              <div className="text-xs text-neutral-500 mb-2 font-medium">All Sellers ({product.seller_list.length})</div>
+              <div className="space-y-1">
+                {product.seller_list.map((s: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-white/5">
+                    <span className="text-white">{s.name}</span>
+                    {s.id && <span className="text-neutral-500 font-mono text-[10px]">ID: {s.id}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {product.description && (
+            <div>
+              <div className="text-xs text-neutral-500 mb-1 font-medium">Description</div>
+              <p className="text-xs text-neutral-300 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-line">{product.description}</p>
+            </div>
+          )}
+          {product.specs && Object.keys(product.specs).length > 0 && (
+            <div>
+              <div className="text-xs text-neutral-500 mb-2 font-medium">Specifications</div>
+              <div className="space-y-1">
+                {Object.entries(product.specs).map(([k, v]) => (
+                  <div key={k} className="flex justify-between text-xs py-1 px-2 rounded bg-white/5">
+                    <span className="text-neutral-400">{k}</span>
+                    <span className="text-white text-right max-w-[60%]">{String(v)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {detail && Object.keys(detail).length > 0 && !product.specs && (
+            <div>
+              <div className="text-xs text-neutral-500 mb-2 font-medium">Additional Details</div>
+              {detail.description && !product.description && (
                 <div className="mb-2">
                   <div className="text-xs text-neutral-500 mb-1">Description</div>
                   <p className="text-xs text-neutral-300 leading-relaxed max-h-32 overflow-y-auto">{detail.description}</p>
                 </div>
               )}
-              {detail.category && (
+              {detail.category && !product.category_path && (
                 <div className="mb-2">
                   <div className="text-xs text-neutral-500 mb-1">Category</div>
                   <p className="text-xs text-neutral-300">{detail.category}</p>
