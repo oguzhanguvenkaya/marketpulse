@@ -245,7 +245,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             {platformIcon}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">{platformLabel} Products</h1>
+            <h1 className="text-xl font-bold text-[#0f1419]">{platformLabel} Products</h1>
             <p className="text-xs text-[#9e8b66]">
               {data ? `${data.total} products found` : 'Loading...'}
             </p>
@@ -254,7 +254,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-3 py-2 text-sm rounded-lg border border-white/10 text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 text-sm rounded-lg border border-[#e5e0d2] text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -271,7 +271,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
-            className="px-3 py-2 text-sm rounded-lg border border-white/10 text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="px-3 py-2 text-sm rounded-lg border border-[#e5e0d2] text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5 disabled:opacity-50"
           >
             {importing ? (
               <div className="w-4 h-4 border-2 border-neutral-400/30 border-t-neutral-400 rounded-full animate-spin" />
@@ -285,7 +285,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
           <button
             onClick={() => setShowUrlDialog(true)}
             disabled={scraping}
-            className="px-3 py-2 text-sm rounded-lg border border-white/10 text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="px-3 py-2 text-sm rounded-lg border border-[#e5e0d2] text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5 disabled:opacity-50"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -296,7 +296,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             <>
               <button
                 onClick={handleBackfillPrices}
-                className="px-3 py-2 text-sm rounded-lg border border-white/10 text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5"
+                className="px-3 py-2 text-sm rounded-lg border border-[#e5e0d2] text-[#5f471d] hover:bg-[#5b4824]/5 transition-colors flex items-center gap-1.5"
                 title="Fill missing prices from Price Monitor data"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,7 +307,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <button
                 onClick={handleScrape}
                 disabled={scraping}
-                className="px-3 py-2 text-sm rounded-lg text-white font-medium transition-all flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-2 text-sm rounded-lg text-[#0f1419] font-medium transition-all flex items-center gap-1.5 disabled:opacity-50"
                 style={{ background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)` }}
               >
                 {scraping ? (
@@ -325,7 +325,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
       </div>
 
       {importMessage && (
-        <div className="px-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-white/10 text-sm text-[#5f471d] flex items-center justify-between">
+        <div className="px-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-sm text-[#5f471d] flex items-center justify-between">
           <span>{importMessage}</span>
           <button onClick={() => setImportMessage('')} className="text-neutral-500 hover:text-[#5f471d] ml-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -334,7 +334,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
       )}
 
       {(scrapeMessage || scrapeProgress) && (
-        <div className="rounded-lg bg-[#5b4824]/5 border border-white/10 overflow-hidden">
+        <div className="rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] overflow-hidden">
           <div className="px-4 py-2.5 flex items-center justify-between">
             <span className="text-sm text-[#5f471d]">{scrapeMessage}</span>
             {scrapeProgress && scrapeProgress.status !== 'completed' && scrapeProgress.status !== 'failed' && scrapeProgress.status !== 'stopped' && (
@@ -375,23 +375,23 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, brand, or SKU..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-cyan-500/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] placeholder-neutral-500 text-sm focus:outline-none focus:border-cyan-500/50"
           />
         </div>
-        <button type="submit" className="px-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm hover:bg-[#5b4824]/8 transition-colors">
+        <button type="submit" className="px-4 py-2.5 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm hover:bg-[#5b4824]/8 transition-colors">
           Search
         </button>
       </form>
 
       {showFilters && (
-        <div className="rounded-xl border border-white/10 p-4 space-y-3" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))' }}>
+        <div className="rounded-xl border border-[#e5e0d2] p-4 space-y-3" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))' }}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="text-xs text-[#9e8b66] mb-1 block">Brand</label>
               <select
                 value={selectedBrand}
                 onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               >
                 <option value="">All Brands</option>
                 {filters?.brands.map((b) => (
@@ -404,7 +404,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <select
                 value={selectedCategory}
                 onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               >
                 <option value="">All Categories</option>
                 {filters?.categories.map((c) => (
@@ -419,7 +419,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={minPrice}
                 onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
                 placeholder={filters?.price_range ? `Min: ${Math.floor(filters.price_range.min)}` : 'Min'}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               />
             </div>
             <div>
@@ -429,7 +429,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={maxPrice}
                 onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
                 placeholder={filters?.price_range ? `Max: ${Math.ceil(filters.price_range.max)}` : 'Max'}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               />
             </div>
             <div>
@@ -437,7 +437,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <select
                 value={minRating}
                 onChange={(e) => { setMinRating(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               >
                 <option value="">All Ratings</option>
                 <option value="4">4+ Stars</option>
@@ -452,7 +452,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={skuFilter}
                 onChange={(e) => { setSkuFilter(e.target.value); setPage(1); }}
                 placeholder="Exact SKU"
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               />
             </div>
             <div>
@@ -462,7 +462,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={barcodeFilter}
                 onChange={(e) => { setBarcodeFilter(e.target.value); setPage(1); }}
                 placeholder="Exact Barcode"
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               />
             </div>
             <div>
@@ -475,7 +475,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                   setSortDir(sd);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-[#5b4824]/5 border border-[#e5e0d2] text-[#0f1419] text-sm focus:outline-none focus:border-cyan-500/50"
               >
                 <option value="created_at:desc">Newest First</option>
                 <option value="created_at:asc">Oldest First</option>
@@ -488,7 +488,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             </div>
           </div>
           <div className="flex justify-end">
-            <button onClick={clearFilters} className="px-3 py-1.5 text-xs rounded-lg text-[#9e8b66] hover:text-white hover:bg-[#5b4824]/5 transition-colors">
+            <button onClick={clearFilters} className="px-3 py-1.5 text-xs rounded-lg text-[#9e8b66] hover:text-[#0f1419] hover:bg-[#5b4824]/5 transition-colors">
               Clear All Filters
             </button>
           </div>
@@ -509,14 +509,14 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 className={`group rounded-xl border overflow-hidden cursor-pointer transition-all duration-200 ${
                   selectedProduct?.id === product.id
                     ? 'border-white/30 ring-1'
-                    : 'border-white/[0.06] hover:border-white/20'
+                    : 'border-[#e5e0d2] hover:border-white/20'
                 }`}
                 style={{
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
                   ...(selectedProduct?.id === product.id ? { ringColor: platformColor, borderColor: `${platformColor}66` } : {})
                 }}
               >
-                <div className="aspect-square relative overflow-hidden bg-black/20">
+                <div className="aspect-square relative overflow-hidden bg-[#f7eede]">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -558,7 +558,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                     <p className="text-[10px] text-neutral-500 truncate">{product.category}</p>
                   )}
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-base font-bold text-white">
+                    <span className="text-base font-bold text-[#0f1419]">
                       {formatPrice(product.price, product.currency)}
                     </span>
                     {product.rating && renderStars(product.rating)}
@@ -583,7 +583,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page <= 1}
-                  className="px-3 py-1.5 rounded-lg text-sm border border-white/10 text-[#9e8b66] hover:bg-[#5b4824]/5 disabled:opacity-30 transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-sm border border-[#e5e0d2] text-[#9e8b66] hover:bg-[#5b4824]/5 disabled:opacity-30 transition-colors"
                 >
                   Prev
                 </button>
@@ -597,8 +597,8 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                       onClick={() => setPage(p)}
                       className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                         p === page
-                          ? 'border-cyan-500/50 text-white bg-cyan-500/10'
-                          : 'border-white/10 text-[#9e8b66] hover:bg-[#5b4824]/5'
+                          ? 'border-cyan-500/50 text-[#0f1419] bg-cyan-500/10'
+                          : 'border-[#e5e0d2] text-[#9e8b66] hover:bg-[#5b4824]/5'
                       }`}
                     >
                       {p}
@@ -608,7 +608,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 <button
                   onClick={() => setPage(Math.min(data.total_pages, page + 1))}
                   disabled={page >= data.total_pages}
-                  className="px-3 py-1.5 rounded-lg text-sm border border-white/10 text-[#9e8b66] hover:bg-[#5b4824]/5 disabled:opacity-30 transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-sm border border-[#e5e0d2] text-[#9e8b66] hover:bg-[#5b4824]/5 disabled:opacity-30 transition-colors"
                 >
                   Next
                 </button>
@@ -636,12 +636,12 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
         <>
           <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={() => setShowUrlDialog(false)} />
           <div
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-[9999] rounded-xl border border-white/10 shadow-2xl p-6"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl z-[9999] rounded-xl border border-[#e5e0d2] shadow-2xl p-6"
             style={{ background: 'linear-gradient(180deg, #1a1c20 0%, #111214 100%)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Scrape URLs</h3>
+              <h3 className="text-lg font-semibold text-[#0f1419]">Scrape URLs</h3>
               <button onClick={() => setShowUrlDialog(false)} className="p-1.5 hover:bg-[#5b4824]/8 rounded-lg text-[#9e8b66]">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -653,7 +653,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               value={urlText}
               onChange={(e) => setUrlText(e.target.value)}
               placeholder={"https://www.hepsiburada.com/...\nhttps://www.trendyol.com/...\nhttps://example.com/product/..."}
-              className="w-full h-48 bg-black/30 border border-white/10 rounded-lg p-3 text-sm text-[#3d3427] placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50 resize-none font-mono"
+              className="w-full h-48 bg-[#f7eede] border border-[#e5e0d2] rounded-lg p-3 text-sm text-[#3d3427] placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50 resize-none font-mono"
             />
             <div className="flex items-center justify-between mt-4">
               <span className="text-xs text-neutral-500">
@@ -662,14 +662,14 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowUrlDialog(false)}
-                  className="px-4 py-2 text-sm rounded-lg border border-white/10 text-[#5f471d] hover:bg-[#5b4824]/5"
+                  className="px-4 py-2 text-sm rounded-lg border border-[#e5e0d2] text-[#5f471d] hover:bg-[#5b4824]/5"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUrlScrape}
                   disabled={!urlText.trim()}
-                  className="px-4 py-2 text-sm rounded-lg text-white font-medium disabled:opacity-50"
+                  className="px-4 py-2 text-sm rounded-lg text-[#0f1419] font-medium disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #00d4ff, #00d4ffcc)' }}
                 >
                   Start Scraping
@@ -685,21 +685,21 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
         <>
           <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={() => setSelectedProduct(null)} />
           <div
-            className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-white/10 shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-lg z-[9999] overflow-y-auto border-l border-[#e5e0d2] shadow-2xl"
             style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => { if (e.key === 'Escape') setSelectedProduct(null); }}
             tabIndex={-1}
             ref={(el) => el?.focus()}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-white/[0.06]" style={{ background: 'rgba(14, 15, 17, 0.95)', backdropFilter: 'blur(12px)' }}>
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-[#e5e0d2]" style={{ background: 'rgba(14, 15, 17, 0.95)', backdropFilter: 'blur(12px)' }}>
               <div className="flex items-center gap-2 min-w-0">
                 {selectedProduct.platform && (
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0" style={{ background: `${platformColor}22`, color: platformColor }}>
                     {selectedProduct.platform}
                   </span>
                 )}
-                <h2 className="text-sm font-semibold text-white truncate">{selectedProduct.product_name || 'Product Details'}</h2>
+                <h2 className="text-sm font-semibold text-[#0f1419] truncate">{selectedProduct.product_name || 'Product Details'}</h2>
               </div>
               <button onClick={() => setSelectedProduct(null)} className="p-1.5 hover:bg-[#5b4824]/8 rounded-lg transition-colors text-[#9e8b66] flex-shrink-0 ml-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -710,14 +710,14 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
 
             <div className="p-5 space-y-5">
               {selectedProduct.image_url && (
-                <div className="rounded-xl overflow-hidden bg-black/30 border border-white/5">
+                <div className="rounded-xl overflow-hidden bg-[#f7eede] border border-[#e5e0d2]">
                   <img src={selectedProduct.image_url} alt="" className="w-full object-contain max-h-64" />
                 </div>
               )}
               {selectedProduct.images && selectedProduct.images.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {selectedProduct.images.slice(0, 6).map((img, i) => (
-                    <img key={i} src={img} alt="" className="w-14 h-14 object-contain rounded-lg border border-white/10 bg-black/20 flex-shrink-0" />
+                    <img key={i} src={img} alt="" className="w-14 h-14 object-contain rounded-lg border border-[#e5e0d2] bg-[#f7eede] flex-shrink-0" />
                   ))}
                 </div>
               )}
@@ -728,17 +728,17 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                     {selectedProduct.brand}
                   </p>
                 )}
-                <h3 className="text-base font-bold text-white leading-snug">{selectedProduct.product_name}</h3>
+                <h3 className="text-base font-bold text-[#0f1419] leading-snug">{selectedProduct.product_name}</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg p-3 bg-white/[0.03] border border-white/[0.06]">
+                <div className="rounded-lg p-3 bg-[#f7eede] border border-[#e5e0d2]">
                   <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Price</p>
-                  <p className="text-xl font-bold mt-0.5" style={{ color: selectedProduct.price ? '#fff' : '#666' }}>
+                  <p className="text-xl font-bold mt-0.5" style={{ color: selectedProduct.price ? '#5b4824' : '#9e8b66' }}>
                     {formatPrice(selectedProduct.price, selectedProduct.currency)}
                   </p>
                 </div>
-                <div className="rounded-lg p-3 bg-white/[0.03] border border-white/[0.06]">
+                <div className="rounded-lg p-3 bg-[#f7eede] border border-[#e5e0d2]">
                   <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Rating</p>
                   <div className="mt-1">
                     {selectedProduct.rating ? renderStars(selectedProduct.rating) : <span className="text-neutral-500 text-sm">N/A</span>}
@@ -751,25 +751,25 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
 
               <div className="space-y-1.5">
                 {selectedProduct.sku && (
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between items-center py-1.5 border-b border-[#e5e0d2]">
                     <span className="text-xs text-neutral-500">SKU</span>
                     <span className="text-xs text-[#3d3427] font-mono">{selectedProduct.sku}</span>
                   </div>
                 )}
                 {selectedProduct.barcode && (
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between items-center py-1.5 border-b border-[#e5e0d2]">
                     <span className="text-xs text-neutral-500">Barcode</span>
                     <span className="text-xs text-[#3d3427] font-mono">{selectedProduct.barcode}</span>
                   </div>
                 )}
                 {selectedProduct.seller_name && (
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between items-center py-1.5 border-b border-[#e5e0d2]">
                     <span className="text-xs text-neutral-500">Seller</span>
                     <span className="text-xs text-[#3d3427]">{selectedProduct.seller_name}</span>
                   </div>
                 )}
                 {selectedProduct.availability && (
-                  <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <div className="flex justify-between items-center py-1.5 border-b border-[#e5e0d2]">
                     <span className="text-xs text-neutral-500">Status</span>
                     {availabilityBadge(selectedProduct.availability)}
                   </div>
@@ -784,7 +784,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                       <span key={i} className="flex items-center gap-1">
                         {i > 0 && <span className="text-neutral-600">&rsaquo;</span>}
                         {bc.url ? (
-                          <a href={bc.url} target="_blank" rel="noopener noreferrer" className="text-cyan-400/80 hover:text-cyan-300 transition-colors">
+                          <a href={bc.url} target="_blank" rel="noopener noreferrer" className="text-[#5b4824] hover:text-[#3d3427] transition-colors">
                             {bc.name}
                           </a>
                         ) : (
@@ -814,7 +814,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 href={selectedProduct.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 w-full px-4 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:brightness-110"
+                className="flex items-center justify-center gap-1.5 w-full px-4 py-2.5 rounded-lg text-sm font-medium text-[#0f1419] transition-all hover:brightness-110"
                 style={{ background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)` }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -842,7 +842,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                   <p className="text-xs font-semibold text-[#5f471d] uppercase tracking-wider mb-2">Reviews ({selectedProduct.reviews.length})</p>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {selectedProduct.reviews.map((rev, i) => (
-                      <div key={i} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                      <div key={i} className="p-3 rounded-lg bg-white/[0.02] border border-[#e5e0d2]">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs text-[#9e8b66]">{rev.author || 'Anonymous'}</span>
                           <div className="flex items-center gap-2">
