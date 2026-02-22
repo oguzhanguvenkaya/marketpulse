@@ -1,13 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+const SIDEBAR_KEY = 'mp_sidebar_collapsed';
+
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem(SIDEBAR_KEY) === '1'; } catch { return false; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0'); } catch {}
+  }, [collapsed]);
 
   const navItems = useMemo(() => [
     { path: '/', label: 'Dashboard', icon: (
@@ -78,35 +87,40 @@ export default function Layout({ children }: LayoutProps) {
     return activeItem?.label || 'Workspace';
   }, [location.pathname, navItems]);
 
+  const sidebarWidth = collapsed ? 'w-[72px]' : 'w-72';
+  const mainMargin = collapsed ? 'md:ml-[72px]' : 'md:ml-72';
+
   return (
     <div className="min-h-screen app-shell text-neutral-200 flex">
-      {sidebarOpen && (
+      {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/65 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
       <aside
-        className={`w-72 sidebar-surface flex flex-col fixed h-full z-50 transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`${sidebarWidth} sidebar-surface flex flex-col fixed h-full z-50 transition-all duration-300 ease-in-out ${
+          mobileOpen ? 'translate-x-0 !w-72' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className="p-6 border-b border-white/10">
+        <div className={`border-b border-white/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-3 min-w-0">
+              <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
-              <div>
-                <span className="text-xl font-bold text-white tracking-tight">MarketPulse</span>
-                <span className="text-xs text-neutral-400 block">Intelligence Console</span>
-              </div>
+              {!collapsed && (
+                <div className="min-w-0">
+                  <span className="text-xl font-bold text-white tracking-tight">MarketPulse</span>
+                  <span className="text-xs text-neutral-400 block">Intelligence Console</span>
+                </div>
+              )}
             </Link>
             <button
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => setMobileOpen(false)}
               className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,25 +130,30 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-1.5">
+        <nav className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
+          <div className="space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    isActive ? 'nav-item-active text-white' : 'text-neutral-300'
-                  }`}
+                  onClick={() => setMobileOpen(false)}
+                  title={collapsed ? item.label : undefined}
+                  className={`nav-item flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-4 py-3'
+                  } ${isActive ? 'nav-item-active text-white' : 'text-neutral-300'}`}
                 >
-                  <span className={isActive ? 'text-accent-secondary' : 'text-neutral-400'}>
+                  <span className={`flex-shrink-0 ${isActive ? 'text-accent-secondary' : 'text-neutral-400'}`}>
                     {item.icon}
                   </span>
-                  {item.label}
-                  {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-secondary shadow-glow-cyan" />
+                  {!collapsed && (
+                    <>
+                      <span className="truncate">{item.label}</span>
+                      {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-secondary shadow-glow-cyan flex-shrink-0" />
+                      )}
+                    </>
                   )}
                 </Link>
               );
@@ -142,21 +161,40 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
 
-        <div className="p-4 border-t border-white/10">
-          <div className="px-4 py-3 rounded-xl bg-dark-700/45 border border-white/10">
-            <div className="flex items-center gap-2 text-xs text-neutral-300">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              Realtime services active
+        <div className={`border-t border-white/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-neutral-400 hover:text-white hover:bg-white/10 ${
+              collapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'
+            }`}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+            {!collapsed && <span className="text-sm">Collapse</span>}
+          </button>
+          {!collapsed && (
+            <div className="px-4 py-3 mt-2 rounded-xl bg-dark-700/45 border border-white/10">
+              <div className="flex items-center gap-2 text-xs text-neutral-300">
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                Realtime services active
+              </div>
             </div>
-          </div>
+          )}
+          {collapsed && (
+            <div className="flex justify-center mt-2">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" title="Realtime services active" />
+            </div>
+          )}
         </div>
       </aside>
 
-      <main className="flex-1 ml-0 md:ml-72 min-w-0">
+      <main className={`flex-1 ml-0 ${mainMargin} min-w-0 transition-all duration-300 ease-in-out`}>
         <header className="h-16 topbar-surface flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => setMobileOpen(!mobileOpen)}
               className="p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

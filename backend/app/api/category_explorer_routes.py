@@ -346,6 +346,24 @@ async def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     return _serialize_product(product)
 
 
+@router.get("/session-url-lookup")
+async def session_url_lookup(
+    category: Optional[str] = Query(None),
+    platform: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    if not category:
+        return {'category_url': None}
+
+    q = db.query(CategorySession).filter(CategorySession.category_name.ilike(f"%{category}%"))
+    if platform:
+        q = q.filter(CategorySession.platform == platform)
+    session = q.order_by(CategorySession.created_at.desc()).first()
+    if session:
+        return {'category_url': session.category_url, 'session_id': str(session.id), 'category_name': session.category_name}
+    return {'category_url': None}
+
+
 @router.get("/products-by-category")
 async def list_products_by_category(
     category: Optional[str] = Query(None),

@@ -6,6 +6,7 @@ import {
   getStoreCategoryTree,
   getCategoryProductsByCategory,
   scrapeCategoryPage,
+  lookupSessionUrl,
   type StoreProduct,
   type StoreProductFilters,
   type StoreProductListResponse,
@@ -113,13 +114,22 @@ export default function CategoryExplorer() {
   }, [platform, search, selectedCategory, selectedBrand, minPrice, maxPrice, minRating, sortBy, sortDir, viewMode]);
 
   useEffect(() => {
-    if (selectedCategory && catData?.sessions?.length) {
-      const session = catData.sessions[0];
-      if (session?.category_url) {
-        setScrapeUrl(session.category_url);
-      }
+    if (!selectedCategory) {
+      setScrapeUrl('');
+      return;
     }
-  }, [selectedCategory, catData]);
+    const lastPart = selectedCategory.includes(' > ')
+      ? selectedCategory.split(' > ').pop()!.trim()
+      : selectedCategory.trim();
+    lookupSessionUrl(lastPart, platform || undefined).then(result => {
+      if (result.category_url) {
+        setScrapeUrl(result.category_url);
+        setShowScraper(true);
+      } else {
+        setScrapeUrl('');
+      }
+    }).catch(() => {});
+  }, [selectedCategory, platform]);
 
   const handlePlatformChange = (p: Platform) => {
     setPlatform(p);

@@ -994,4 +994,11 @@ export const getCategoryProductsByCategory = async (params: {
   return response.data;
 };
 
+export const lookupSessionUrl = async (category: string, platform?: string): Promise<{category_url: string | null; session_id?: string; category_name?: string}> => {
+  const params: Record<string, string> = { category };
+  if (platform) params.platform = platform;
+  const response = await api.get('/category-explorer/session-url-lookup', { params });
+  return response.data;
+};
+
 export default api;
