@@ -97,8 +97,61 @@ class CategoryScraperService:
         new_query = urlencode(qs, doseq=True)
         return urlunparse(parsed._replace(query=new_query))
 
+    @staticmethod
+    def _extract_hb_product_data_from_scripts(html: str) -> dict:
+        product_map: dict[str, dict] = {}
+        try:
+            for m in re.finditer(r'"products":\[', html):
+                start = m.start() + len('"products":')
+                depth = 0
+                end_idx = start
+                for i, c in enumerate(html[start:start + 500000]):
+                    if c == '[':
+                        depth += 1
+                    elif c == ']':
+                        depth -= 1
+                        if depth == 0:
+                            end_idx = start + i + 1
+                            break
+                arr_json = html[start:end_idx]
+                if len(arr_json) < 20:
+                    continue
+                try:
+                    products = json.loads(arr_json)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(products, list):
+                    continue
+                for p in products:
+                    if not isinstance(p, dict):
+                        continue
+                    pid = p.get('productId', '')
+                    if not pid:
+                        continue
+                    brand = p.get('brand', '')
+                    seller = ''
+                    variants = p.get('variantList', [])
+                    if variants and isinstance(variants, list):
+                        for v in variants:
+                            if not isinstance(v, dict):
+                                continue
+                            listing = v.get('listing', {})
+                            if isinstance(listing, dict) and listing.get('merchantName'):
+                                seller = listing['merchantName']
+                                break
+                    if pid not in product_map or brand:
+                        product_map[pid] = {'brand': brand, 'seller': seller}
+                if product_map:
+                    break
+        except Exception as e:
+            logger.debug(f"Error extracting HB product data from scripts: {e}")
+        return product_map
+
     def parse_hepsiburada_category(self, html: str, url: str) -> dict:
         soup = BeautifulSoup(html, 'html.parser')
+        product_data_map = self._extract_hb_product_data_from_scripts(html)
+        logger.info(f"Extracted brand/seller data for {len(product_data_map)} products from HB scripts")
+
         result = {
             'platform': 'hepsiburada',
             'breadcrumbs': [],
@@ -161,7 +214,7 @@ class CategoryScraperService:
             product_cards = soup.find_all('article', class_=re.compile(r'productCard', re.I))
 
         for card in product_cards:
-            product = self._parse_hb_product_card(card)
+            product = self._parse_hb_product_card(card, product_data_map)
             if product and product.get('name'):
                 result['products'].append(product)
 
@@ -187,7 +240,7 @@ class CategoryScraperService:
 
         return result
 
-    def _parse_hb_product_card(self, card) -> dict:
+    def _parse_hb_product_card(self, card, product_data_map: dict = None) -> dict:
         product = {
             'name': '',
             'url': '',
@@ -276,20 +329,35 @@ class CategoryScraperService:
                         (1 - product['price'] / product['original_price']) * 100, 1
                     )
 
-        title_el_text = ''
-        if title_el:
-            title_el_text = title_el.get_text(strip=True)
-        title_a = card.find('a', {'title': True})
-        a_title_text = title_a.get('title', '').strip() if title_a else ''
-        if title_el_text and a_title_text and title_el_text != a_title_text:
-            if title_el_text.lower().endswith(a_title_text.lower()):
-                brand_candidate = title_el_text[:len(title_el_text) - len(a_title_text)].strip()
-                if brand_candidate and len(brand_candidate) < 40:
-                    product['brand'] = brand_candidate
+        product_id = ''
+        if product['url']:
+            pid_match = re.search(r'-pm-([A-Za-z0-9]+)', product['url'])
+            if pid_match:
+                product_id = pid_match.group(1)
 
-        seller_el = card.find('span', class_=re.compile(r'seller|merchant|storeName', re.I))
-        if seller_el:
-            product['seller_name'] = seller_el.get_text(strip=True)
+        if product_data_map and product_id and product_id in product_data_map:
+            script_data = product_data_map[product_id]
+            if script_data.get('brand'):
+                product['brand'] = script_data['brand']
+            if script_data.get('seller'):
+                product['seller_name'] = script_data['seller']
+
+        if not product['brand']:
+            title_el_text = ''
+            if title_el:
+                title_el_text = title_el.get_text(strip=True)
+            title_a = card.find('a', {'title': True})
+            a_title_text = title_a.get('title', '').strip() if title_a else ''
+            if title_el_text and a_title_text and title_el_text != a_title_text:
+                if title_el_text.lower().endswith(a_title_text.lower()):
+                    brand_candidate = title_el_text[:len(title_el_text) - len(a_title_text)].strip()
+                    if brand_candidate and len(brand_candidate) < 40:
+                        product['brand'] = brand_candidate
+
+        if not product['seller_name']:
+            seller_el = card.find('span', class_=re.compile(r'seller|merchant|storeName', re.I))
+            if seller_el:
+                product['seller_name'] = seller_el.get_text(strip=True)
 
         rating_el = card.find(string=re.compile(r'\d[.,]\d'))
         if rating_el:

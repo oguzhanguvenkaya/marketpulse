@@ -982,28 +982,24 @@ export default function CategoryExplorer() {
           </div>
         </div>
 
-        {viewMode === 'category_page' && (catFilterData?.brands?.length || catFilterData?.sellers?.length || 0) > 0 && (
+        {viewMode === 'category_page' && (
           <div className="flex flex-wrap items-end gap-2">
-            {catFilterData?.brands && catFilterData.brands.length > 0 && (
-              <div className="flex-1 min-w-[140px]">
-                <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Brand</label>
-                <select value={catBrand} onChange={e => setCatBrand(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
-                  <option value="">All Brands</option>
-                  {catFilterData.brands.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            )}
-            {catFilterData?.sellers && catFilterData.sellers.length > 0 && (
-              <div className="flex-1 min-w-[140px]">
-                <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Seller</label>
-                <select value={catSeller} onChange={e => setCatSeller(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
-                  <option value="">All Sellers</option>
-                  {catFilterData.sellers.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            )}
+            <div className="flex-1 min-w-[140px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Brand</label>
+              <select value={catBrand} onChange={e => setCatBrand(e.target.value)}
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                <option value="">All Brands</option>
+                {(catFilterData?.brands || []).map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[140px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Seller</label>
+              <select value={catSeller} onChange={e => setCatSeller(e.target.value)}
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                <option value="">All Sellers</option>
+                {(catFilterData?.sellers || []).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
             <div className="min-w-[100px]">
               <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Price</label>
               <input type="number" value={catMinPrice} onChange={e => setCatMinPrice(e.target.value)} placeholder="Min"
