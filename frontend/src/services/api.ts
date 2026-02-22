@@ -732,4 +732,104 @@ export const stopTranscriptJob = async (jobId: string): Promise<{ success: boole
   return response.data;
 };
 
+export interface StoreProduct {
+  id: string;
+  platform: string;
+  source_url: string;
+  sku: string | null;
+  barcode: string | null;
+  product_name: string | null;
+  brand: string | null;
+  category: string | null;
+  category_breadcrumbs: Array<{ name: string; url: string; position: number }> | null;
+  price: number | null;
+  currency: string | null;
+  availability: string | null;
+  rating: number | null;
+  rating_count: number | null;
+  review_count: number | null;
+  reviews: Array<{ author: string; date: string; text: string; rating: number }> | null;
+  image_url: string | null;
+  images: string[] | null;
+  description: string | null;
+  seller_name: string | null;
+  shipping_info: { cost: string; currency: string } | null;
+  return_policy: { days: number; free_return: boolean } | null;
+  product_specs: Record<string, string> | null;
+  additional_properties: Record<string, string> | null;
+  related_products: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+  raw_scraped_data?: any;
+  og_data?: any;
+}
+
+export interface StoreProductFilters {
+  brands: Array<{ name: string; count: number }>;
+  categories: Array<{ name: string; count: number }>;
+  platforms: Array<{ name: string; count: number }>;
+  price_range: { min: number; max: number; avg: number };
+}
+
+export interface StoreProductListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  products: StoreProduct[];
+}
+
+export const getStoreProducts = async (params: {
+  platform?: string;
+  brand?: string;
+  category?: string;
+  search?: string;
+  min_price?: number;
+  max_price?: number;
+  min_rating?: number;
+  sku?: string;
+  barcode?: string;
+  sort_by?: string;
+  sort_dir?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<StoreProductListResponse> => {
+  const response = await api.get('/store-products', { params });
+  return response.data;
+};
+
+export const getStoreProductFilters = async (platform?: string): Promise<StoreProductFilters> => {
+  const response = await api.get('/store-products/filters', { params: { platform } });
+  return response.data;
+};
+
+export const getStoreProductStats = async (): Promise<{ total_products: number; by_platform: Record<string, number> }> => {
+  const response = await api.get('/store-products/stats');
+  return response.data;
+};
+
+export const getStoreProduct = async (productId: string): Promise<StoreProduct> => {
+  const response = await api.get(`/store-products/${productId}`);
+  return response.data;
+};
+
+export const scrapeFromPriceMonitor = async (platform?: string): Promise<{ job_id: string; status: string; total_urls: number }> => {
+  const response = await api.post('/store-products/scrape-from-monitor', null, { params: { platform } });
+  return response.data;
+};
+
+export const saveFromScrapeJob = async (jobId: string): Promise<{ saved: number; updated: number; total_results: number }> => {
+  const response = await api.post(`/store-products/save-from-scrape-job/${jobId}`);
+  return response.data;
+};
+
+export const deleteStoreProduct = async (productId: string): Promise<void> => {
+  await api.delete(`/store-products/${productId}`);
+};
+
+export const deleteAllStoreProducts = async (platform?: string): Promise<{ deleted: number }> => {
+  const response = await api.delete('/store-products', { params: { platform } });
+  return response.data;
+};
+
 export default api;

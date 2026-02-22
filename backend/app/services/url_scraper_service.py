@@ -255,6 +255,32 @@ class UrlScraperService:
                         continue
                     ld_type = item.get('@type', '')
                     is_product = ld_type == 'Product' or (isinstance(ld_type, list) and 'Product' in ld_type)
+                    is_webpage = ld_type == 'WebPage' or (isinstance(ld_type, list) and 'WebPage' in ld_type)
+
+                    if is_webpage:
+                        breadcrumb = item.get('breadcrumb')
+                        if breadcrumb and isinstance(breadcrumb, dict):
+                            bc_items = breadcrumb.get('itemListElement', [])
+                            if bc_items and not data.get('category_breadcrumbs'):
+                                crumbs = []
+                                for bc in bc_items:
+                                    bc_item = bc.get('item', {})
+                                    name = bc_item.get('name') if isinstance(bc_item, dict) else None
+                                    url = bc_item.get('@id') if isinstance(bc_item, dict) else bc_item
+                                    if not name:
+                                        name = bc.get('name')
+                                    if name:
+                                        crumbs.append({'name': name, 'url': url, 'position': bc.get('position')})
+                                if crumbs:
+                                    data['category_breadcrumbs'] = crumbs
+                                    if not data.get('product_category'):
+                                        cat_names = [c['name'] for c in crumbs if c['name'] not in ('Anasayfa', 'Trendyol', 'Hepsiburada')]
+                                        data['product_category'] = ' > '.join(cat_names) if cat_names else None
+
+                        related = item.get('relatedLink') or item.get('isRelatedTo')
+                        if related and isinstance(related, list) and not data.get('related_links'):
+                            data['related_links'] = related
+
                     if is_product:
                         if not data.get('product_name'):
                             data['product_name'] = item.get('name')
@@ -279,6 +305,19 @@ class UrlScraperService:
                         if not data.get('product_category'):
                             data['product_category'] = item.get('category')
 
+                        pattern = item.get('pattern')
+                        if pattern and not data.get('product_pattern'):
+                            data['product_pattern'] = pattern
+
+                        additional_props = item.get('additionalProperty', [])
+                        if additional_props and isinstance(additional_props, list):
+                            props = {}
+                            for prop in additional_props:
+                                if isinstance(prop, dict) and prop.get('name'):
+                                    props[prop['name']] = prop.get('unitText') or prop.get('value')
+                            if props and not data.get('additional_properties'):
+                                data['additional_properties'] = props
+
                         offers = item.get('offers', {})
                         offer_list = [offers] if isinstance(offers, dict) else offers if isinstance(offers, list) else []
                         if offer_list:
@@ -291,14 +330,113 @@ class UrlScraperService:
                                 seller = offer['seller']
                                 data['seller_name'] = seller.get('name') if isinstance(seller, dict) else seller
 
+                            shipping = offer.get('shippingDetails')
+                            if shipping and isinstance(shipping, dict) and not data.get('shipping_info'):
+                                rate = shipping.get('shippingRate', {})
+                                data['shipping_info'] = {
+                                    'cost': rate.get('value') if isinstance(rate, dict) else None,
+                                    'currency': rate.get('currency') if isinstance(rate, dict) else None,
+                                }
+
+                            return_policy = offer.get('hasMerchantReturnPolicy')
+                            if return_policy and isinstance(return_policy, dict) and not data.get('return_policy'):
+                                data['return_policy'] = {
+                                    'days': return_policy.get('merchantReturnDays'),
+                                    'free_return': return_policy.get('returnFees') == 'https://schema.org/FreeReturn',
+                                }
+
                         agg = item.get('aggregateRating')
                         if agg and isinstance(agg, dict):
                             data['rating'] = agg.get('ratingValue')
                             data['review_count'] = agg.get('reviewCount')
+                            if not data.get('rating_count'):
+                                data['rating_count'] = agg.get('ratingCount')
+
+                        reviews = item.get('review')
+                        if reviews and isinstance(reviews, list) and not data.get('reviews'):
+                            parsed_reviews = []
+                            for rev in reviews[:20]:
+                                if isinstance(rev, dict):
+                                    author = rev.get('author', {})
+                                    rating_obj = rev.get('reviewRating', {})
+                                    parsed_reviews.append({
+                                        'author': author.get('name') if isinstance(author, dict) else author,
+                                        'date': rev.get('datePublished'),
+                                        'text': rev.get('reviewBody'),
+                                        'rating': rating_obj.get('ratingValue') if isinstance(rating_obj, dict) else None,
+                                    })
+                            if parsed_reviews:
+                                data['reviews'] = parsed_reviews
+
+                        related_products = item.get('isRelatedTo')
+                        if related_products and isinstance(related_products, list) and not data.get('related_products'):
+                            data['related_products'] = related_products[:10]
             except (json.JSONDecodeError, TypeError):
                 continue
         if json_ld_data:
             data['json_ld'] = json_ld_data
+
+        if not data.get('category_breadcrumbs'):
+            for script in soup.find_all('script'):
+                script_text = script.string or ''
+                marker = 'window["__product-detail-seo__PROPS"]'
+                idx = script_text.find(marker)
+                if idx == -1:
+                    continue
+                eq_idx = script_text.find('=', idx + len(marker))
+                if eq_idx == -1:
+                    continue
+                rest = script_text[eq_idx + 1:].strip()
+                brace_start = rest.find('{')
+                if brace_start == -1:
+                    continue
+                depth = 0
+                json_end = -1
+                for ci, ch in enumerate(rest[brace_start:]):
+                    if ch == '{':
+                        depth += 1
+                    elif ch == '}':
+                        depth -= 1
+                        if depth == 0:
+                            json_end = brace_start + ci + 1
+                            break
+                if json_end == -1:
+                    continue
+                try:
+                    seo_data = json.loads(rest[brace_start:json_end])
+                    bc_list = seo_data.get('breadcrumbs', [])
+                    if bc_list:
+                        crumbs = []
+                        for i, bc in enumerate(bc_list):
+                            name = bc.get('name')
+                            path = bc.get('path', '')
+                            if name:
+                                crumbs.append({'name': name, 'url': f"https://www.trendyol.com{path}" if path else None, 'position': i + 1})
+                        if crumbs:
+                            data['category_breadcrumbs'] = crumbs
+                            if not data.get('product_category'):
+                                cat_names = [c['name'] for c in crumbs]
+                                data['product_category'] = ' > '.join(cat_names) if cat_names else None
+                            logger.info(f"  Extracted {len(crumbs)} breadcrumbs from Trendyol SEO props")
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(f"  Failed to parse Trendyol SEO props: {e}")
+                break
+
+            if not data.get('category_breadcrumbs'):
+                bc_el = soup.find('ul', class_='breadcrumb-list') or soup.find('ol', class_=re.compile(r'breadcrumb', re.I))
+                if bc_el:
+                    crumbs = []
+                    for i, li in enumerate(bc_el.find_all('li')):
+                        a_tag = li.find('a')
+                        if a_tag:
+                            name = a_tag.get_text(strip=True)
+                            href = a_tag.get('href', '')
+                            if name and name not in ('Anasayfa', 'Trendyol', 'Hepsiburada'):
+                                crumbs.append({'name': name, 'url': href, 'position': i + 1})
+                    if crumbs:
+                        data['category_breadcrumbs'] = crumbs
+                        if not data.get('product_category'):
+                            data['product_category'] = ' > '.join(c['name'] for c in crumbs)
 
         microdata = self._extract_microdata(soup)
         for key, val in microdata.items():

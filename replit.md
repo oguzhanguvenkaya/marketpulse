@@ -68,11 +68,15 @@ Extracts transcripts using `youtube-transcript-api`. Supports single URL, bulk J
 ### JSON Product Editor
 Full-stack tool for editing product catalog JSON files with PostgreSQL persistence. Fully dynamic rendering: all product keys auto-detected and rendered based on value type. Supports any JSON structure. DB model: `JsonFile`. Routes: `/api/json-editor/`. Frontend: `/json-editor`.
 
-## Database Models (13 tables)
+### Marketplace Product Pages
+Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product data with advanced filtering. Uses `StoreProduct` table populated from URL scraper results. Supports filtering by category, brand, price range, rating, SKU, barcode. Product detail modal shows breadcrumb categories, reviews, specs, shipping info. "Scrape Products" button triggers bulk scraping from active price monitor products. Routes: `/api/store-products/`. Frontend: `/hepsiburada`, `/trendyol`, `/web-products`.
+
+## Database Models (15 tables)
 - `Product`, `ProductSnapshot`, `ProductSeller`, `ProductReview`
 - `SearchTask`, `SponsoredBrandAd`, `SearchSponsoredProduct`
 - `MonitoredProduct`, `SellerSnapshot`, `PriceMonitorTask`
 - `ScrapeJob`, `ScrapeResult`
+- `StoreProduct`
 - `TranscriptJob`, `TranscriptResult`
 - `JsonFile`
 
@@ -121,5 +125,7 @@ Full-stack tool for editing product catalog JSON files with PostgreSQL persisten
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Added Marketplace Product Pages (Hepsiburada, Trendyol, Web) with StoreProduct model, advanced filtering, category breadcrumb extraction
+- 2026-02-22: Enhanced URL scraper: WebPage JSON-LD breadcrumb parsing, Trendyol SEO props parsing, reviews/shipping/return policy extraction
 - 2025-02-19: Cleaned up outdated planning/architecture documentation files
 - 2025-02-19: Created comprehensive project documentation (README.md, ARCHITECTURE.md, backend/README.md, frontend/README.md)

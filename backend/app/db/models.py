@@ -333,3 +333,47 @@ class TranscriptResult(Base):
     
     class Config:
         from_attributes = True
+
+
+class StoreProduct(Base):
+    __tablename__ = "store_products"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    platform = Column(String(30), nullable=False, index=True)
+    source_url = Column(Text, nullable=False)
+    sku = Column(String(100), index=True)
+    barcode = Column(String(50), index=True)
+    product_name = Column(Text)
+    brand = Column(String(255), index=True)
+    category = Column(Text)
+    category_breadcrumbs = Column(JSON)
+    price = Column(Numeric(10, 2))
+    currency = Column(String(10))
+    availability = Column(String(100))
+    rating = Column(Float)
+    rating_count = Column(Integer)
+    review_count = Column(Integer)
+    reviews = Column(JSON)
+    image_url = Column(Text)
+    images = Column(JSON)
+    description = Column(Text)
+    seller_name = Column(String(255))
+    shipping_info = Column(JSON)
+    return_policy = Column(JSON)
+    product_specs = Column(JSON)
+    additional_properties = Column(JSON)
+    related_products = Column(JSON)
+    og_data = Column(JSON)
+    scrape_result_id = Column(Integer, index=True)
+    monitored_product_id = Column(UUID(as_uuid=True), index=True)
+    raw_scraped_data = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        Index('ix_store_products_platform_brand', 'platform', 'brand'),
+        Index('ix_store_products_platform_sku', 'platform', 'sku'),
+    )
+
+    class Config:
+        from_attributes = True
