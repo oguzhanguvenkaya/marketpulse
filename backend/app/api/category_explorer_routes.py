@@ -20,6 +20,9 @@ from app.services.url_scraper_service import UrlScraperService
 
 logger = logging.getLogger(__name__)
 
+_active_fetches: dict[str, dict] = {}
+_detail_semaphore = asyncio.Semaphore(40)
+
 router = APIRouter(
     prefix="/api/category-explorer",
     tags=["Category Explorer"],
@@ -372,7 +375,13 @@ def _parse_hb_description(html: str) -> str:
     return desc
 
 
-async def _fetch_single_detail(product_id: int):
+async def _fetch_single_detail(product_id: int, semaphore: asyncio.Semaphore | None = None):
+    sem = semaphore or _detail_semaphore
+    async with sem:
+        await _fetch_single_detail_inner(product_id)
+
+
+async def _fetch_single_detail_inner(product_id: int):
     db = SessionLocal()
     try:
         product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
@@ -535,29 +544,56 @@ async def _fetch_single_detail(product_id: int):
         db.close()
 
 
+async def _run_parallel_fetch(session_id: str, product_ids: list[int]):
+    fetch_key = session_id
+    _active_fetches[fetch_key] = {
+        'product_ids': set(product_ids),
+        'total': len(product_ids),
+        'completed': 0,
+        'failed': 0,
+    }
+    try:
+        tasks = [_fetch_single_detail(pid) for pid in product_ids]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for r in results:
+            if isinstance(r, Exception):
+                _active_fetches[fetch_key]['failed'] += 1
+                logger.error(f"Detail fetch error: {r}")
+            else:
+                _active_fetches[fetch_key]['completed'] += 1
+    except Exception as e:
+        logger.error(f"Parallel fetch error: {e}")
+    finally:
+        _active_fetches.pop(fetch_key, None)
+
+
 @router.post("/fetch-detail")
-async def fetch_product_details(req: FetchDetailRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def fetch_product_details(req: FetchDetailRequest, db: Session = Depends(get_db)):
     if not req.product_ids:
         raise HTTPException(400, "product_ids required")
 
     products = db.query(CategoryProduct).filter(
-        CategoryProduct.id.in_(req.product_ids)
+        CategoryProduct.id.in_(req.product_ids),
+        CategoryProduct.detail_fetched == False,
     ).all()
 
     if not products:
-        raise HTTPException(404, "No products found")
+        raise HTTPException(404, "No unfetched products found")
 
-    for product in products:
-        background_tasks.add_task(_fetch_single_detail, product.id)
+    product_ids = [p.id for p in products]
+    session_id = str(products[0].session_id)
+
+    asyncio.create_task(_run_parallel_fetch(session_id, product_ids))
 
     return {
-        'message': f'Fetching details for {len(products)} products in background',
-        'product_ids': [p.id for p in products],
+        'message': f'Fetching details for {len(products)} products in parallel (40 concurrent)',
+        'product_ids': product_ids,
+        'total': len(product_ids),
     }
 
 
 @router.post("/bulk-fetch")
-async def bulk_fetch_details(req: BulkFetchRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def bulk_fetch_details(req: BulkFetchRequest, db: Session = Depends(get_db)):
     try:
         session = db.query(CategorySession).filter(
             CategorySession.id == uuid_mod.UUID(req.session_id)
@@ -579,11 +615,12 @@ async def bulk_fetch_details(req: BulkFetchRequest, background_tasks: Background
     if not products:
         return {'message': 'No products to fetch', 'count': 0}
 
-    for product in products:
-        background_tasks.add_task(_fetch_single_detail, product.id)
+    product_ids = [p.id for p in products]
+
+    asyncio.create_task(_run_parallel_fetch(str(session.id), product_ids))
 
     return {
-        'message': f'Bulk fetching details for {len(products)} products in background',
+        'message': f'Bulk fetching details for {len(products)} products in parallel (40 concurrent)',
         'count': len(products),
     }
 
@@ -594,6 +631,31 @@ async def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(404, "Product not found")
     return _serialize_product(product)
+
+
+@router.delete("/products/{product_id}")
+async def delete_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+    db.delete(product)
+    db.commit()
+    return {'message': 'Product deleted', 'id': product_id}
+
+
+class BulkDeleteRequest(BaseModel):
+    product_ids: List[int]
+
+
+@router.post("/delete-products")
+async def delete_products_bulk(req: BulkDeleteRequest, db: Session = Depends(get_db)):
+    if not req.product_ids:
+        raise HTTPException(400, "product_ids required")
+    deleted = db.query(CategoryProduct).filter(
+        CategoryProduct.id.in_(req.product_ids)
+    ).delete(synchronize_session='fetch')
+    db.commit()
+    return {'message': f'{deleted} products deleted', 'deleted': deleted}
 
 
 @router.get("/session-url-lookup")
@@ -803,6 +865,23 @@ async def fetch_status(session_id: str, db: Session = Depends(get_db)):
     if not session:
         raise HTTPException(404, "Session not found")
 
+    active = _active_fetches.get(session_id)
+
+    if active:
+        submitted_ids = active['product_ids']
+        submitted_total = active['total']
+        fetched_of_submitted = db.query(func.count(CategoryProduct.id)).filter(
+            CategoryProduct.id.in_(submitted_ids),
+            CategoryProduct.detail_fetched == True,
+        ).scalar()
+        return {
+            'session_id': session_id,
+            'total_products': submitted_total,
+            'detail_fetched': fetched_of_submitted,
+            'pending': submitted_total - fetched_of_submitted,
+            'is_running': True,
+        }
+
     total = db.query(func.count(CategoryProduct.id)).filter(
         CategoryProduct.session_id == session.id
     ).scalar()
@@ -817,4 +896,5 @@ async def fetch_status(session_id: str, db: Session = Depends(get_db)):
         'total_products': total,
         'detail_fetched': fetched,
         'pending': total - fetched,
+        'is_running': False,
     }

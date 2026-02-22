@@ -1029,6 +1029,18 @@ export const getCategoryPageFilters = async (params: {
   return response.data;
 };
 
+export const deleteCategoryProduct = async (productId: number) => {
+  const response = await api.delete(`/category-explorer/products/${productId}`);
+  return response.data;
+};
+
+export const deleteCategoryProductsBulk = async (productIds: number[]) => {
+  const response = await api.post('/category-explorer/delete-products', {
+    product_ids: productIds,
+  });
+  return response.data;
+};
+
 export const lookupSessionUrl = async (category: string, platform?: string): Promise<{category_url: string | null; session_id?: string; category_name?: string}> => {
   const params: Record<string, string> = { category };
   if (platform) params.platform = platform;

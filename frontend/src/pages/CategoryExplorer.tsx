@@ -9,6 +9,8 @@ import {
   scrapeCategoryPage,
   fetchCategoryProductDetail,
   getCategoryFetchStatus,
+  deleteCategoryProduct,
+  deleteCategoryProductsBulk,
   type StoreProduct,
   type StoreProductFilters,
   type StoreProductListResponse,
@@ -300,6 +302,7 @@ export default function CategoryExplorer() {
               setDetailProgress('All details fetched!');
               setSelectedForDetail(new Set());
               fetchCatProducts();
+              fetchCatFilterData();
             }
           } catch {
             if (detailPollRef.current) clearInterval(detailPollRef.current);
@@ -316,6 +319,31 @@ export default function CategoryExplorer() {
     } catch (err: any) {
       setDetailProgress(err?.response?.data?.detail || 'Detail fetch failed');
       setDetailFetching(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: number) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await deleteCategoryProduct(productId);
+      fetchCatProducts();
+      fetchCatFilterData();
+      if (selectedCatProduct?.id === productId) setSelectedCatProduct(null);
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Delete failed');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedForDetail.size === 0) return;
+    if (!confirm(`Delete ${selectedForDetail.size} selected products?`)) return;
+    try {
+      await deleteCategoryProductsBulk(Array.from(selectedForDetail));
+      setSelectedForDetail(new Set());
+      fetchCatProducts();
+      fetchCatFilterData();
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || 'Bulk delete failed');
     }
   };
 
@@ -477,7 +505,7 @@ export default function CategoryExplorer() {
         style={{ background: 'linear-gradient(180deg, #141619 0%, #0e0f11 100%)' }}
       >
         <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-          {showDetailPanel && !product.detail_fetched && (
+          {showDetailPanel && (
             <button
               onClick={(e) => { e.stopPropagation(); toggleProductSelection(product.id); }}
               className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
@@ -489,6 +517,13 @@ export default function CategoryExplorer() {
               )}
             </button>
           )}
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }}
+            className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:bg-red-500/20"
+            title="Delete product"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 font-mono">
             #{product.position}
           </span>
@@ -849,6 +884,15 @@ export default function CategoryExplorer() {
                     </svg>
                     {selectedForDetail.size === detailStats.unfetched && detailStats.unfetched > 0 ? 'Deselect All' : `Select All (${detailStats.unfetched})`}
                   </button>
+                  {selectedForDetail.size > 0 && (
+                    <button
+                      onClick={handleBulkDelete}
+                      className="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      Delete ({selectedForDetail.size})
+                    </button>
+                  )}
                   <button
                     onClick={handleFetchDetails}
                     disabled={detailFetching || selectedForDetail.size === 0}
@@ -1084,7 +1128,7 @@ export default function CategoryExplorer() {
       )}
 
       {selectedCatProduct && createPortal(
-        <CatProductDetailPanel product={selectedCatProduct} onClose={() => setSelectedCatProduct(null)} formatPrice={formatPrice} />,
+        <CatProductDetailPanel product={selectedCatProduct} onClose={() => setSelectedCatProduct(null)} onDelete={handleDeleteProduct} formatPrice={formatPrice} />,
         document.body
       )}
 
@@ -1250,9 +1294,10 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
 }
 
 
-function CatProductDetailPanel({ product, onClose, formatPrice }: {
+function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
   product: CategoryProductItem;
   onClose: () => void;
+  onDelete: (id: number) => void;
   formatPrice: (p: number | null | undefined) => string;
 }) {
   const detail = product.detail_data || {};
@@ -1275,6 +1320,9 @@ function CatProductDetailPanel({ product, onClose, formatPrice }: {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
             )}
+            <button onClick={() => onDelete(product.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-400" title="Delete product">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
             <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
