@@ -803,6 +803,19 @@ export const getStoreProductFilters = async (platform?: string): Promise<StorePr
   return response.data;
 };
 
+export const getStoreCategoryTree = async (platform?: string): Promise<{ tree: CategoryTreeNode[] }> => {
+  const response = await api.get('/store-products/category-tree', { params: { platform } });
+  return response.data;
+};
+
+export interface CategoryTreeNode {
+  name: string;
+  full_path: string;
+  count: number;
+  depth: number;
+  children: CategoryTreeNode[];
+}
+
 export const getStoreProductStats = async (): Promise<{ total_products: number; by_platform: Record<string, number> }> => {
   const response = await api.get('/store-products/stats');
   return response.data;

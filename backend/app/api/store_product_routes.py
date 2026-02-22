@@ -133,6 +133,51 @@ async def get_filter_options(
     }
 
 
+@router.get("/category-tree")
+async def get_category_tree(
+    platform: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    q = db.query(StoreProduct.category, func.count(StoreProduct.id).label('cnt')).filter(
+        StoreProduct.category.isnot(None),
+        StoreProduct.category != '',
+    )
+    if platform:
+        q = q.filter(StoreProduct.platform == platform)
+    raw = q.group_by(StoreProduct.category).all()
+
+    tree: dict = {}
+    for full_path, count in raw:
+        parts = [p.strip() for p in full_path.split('>') if p.strip()]
+        node = tree
+        for part in parts:
+            if part not in node:
+                node[part] = {'_count': 0, '_full_path': '', '_children': {}}
+            node[part]['_count'] += count
+            node = node[part]['_children']
+
+        current = tree
+        for i, part in enumerate(parts):
+            current[part]['_full_path'] = ' > '.join(parts[:i+1])
+            current = current[part]['_children']
+
+    def build_list(node: dict, depth: int = 0) -> list:
+        result = []
+        sorted_items = sorted(node.items(), key=lambda x: x[1]['_count'], reverse=True)
+        for name, data in sorted_items:
+            item = {
+                'name': name,
+                'full_path': data['_full_path'],
+                'count': data['_count'],
+                'depth': depth,
+                'children': build_list(data['_children'], depth + 1) if data['_children'] else [],
+            }
+            result.append(item)
+        return result
+
+    return {'tree': build_list(tree)}
+
+
 @router.get("/stats")
 async def get_store_stats(db: Session = Depends(get_db)):
     total = db.query(func.count(StoreProduct.id)).scalar()
