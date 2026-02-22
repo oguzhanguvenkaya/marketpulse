@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   getStoreProducts,
   getStoreProductFilters,
@@ -23,53 +24,101 @@ import {
 type Platform = '' | 'hepsiburada' | 'trendyol' | 'web';
 type ViewMode = 'my_products' | 'category_page';
 
+const SS_KEY = 'catExplorer';
+function ssGet(key: string): string { try { return sessionStorage.getItem(`${SS_KEY}_${key}`) || ''; } catch { return ''; } }
+function ssSet(key: string, val: string) { try { sessionStorage.setItem(`${SS_KEY}_${key}`, val); } catch {} }
+function ssGetJson<T>(key: string, fallback: T): T { try { const v = sessionStorage.getItem(`${SS_KEY}_${key}`); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function ssSetJson(key: string, val: unknown) { try { sessionStorage.setItem(`${SS_KEY}_${key}`, JSON.stringify(val)); } catch {} }
+
 export default function CategoryExplorer() {
-  const [platform, setPlatform] = useState<Platform>('');
-  const [viewMode, setViewMode] = useState<ViewMode>('my_products');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initParam = (key: string, def: string) => searchParams.get(key) || def;
+
+  const [platform, setPlatform] = useState<Platform>((initParam('platform', '') as Platform));
+  const [viewMode, setViewMode] = useState<ViewMode>((initParam('view', 'my_products') as ViewMode));
   const [data, setData] = useState<StoreProductListResponse | null>(null);
   const [catData, setCatData] = useState<CategoryProductListResponse | null>(null);
   const [filters, setFilters] = useState<StoreProductFilters | null>(null);
   const [categoryTree, setCategoryTree] = useState<CategoryTreeNode[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [minRating, setMinRating] = useState('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortDir, setSortDir] = useState('desc');
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState(initParam('search', ''));
+  const [selectedCategory, setSelectedCategory] = useState(initParam('category', ''));
+  const [selectedBrand, setSelectedBrand] = useState(initParam('brand', ''));
+  const [minPrice, setMinPrice] = useState(initParam('minPrice', ''));
+  const [maxPrice, setMaxPrice] = useState(initParam('maxPrice', ''));
+  const [minRating, setMinRating] = useState(initParam('minRating', ''));
+  const [sortBy, setSortBy] = useState(initParam('sortBy', 'created_at'));
+  const [sortDir, setSortDir] = useState(initParam('sortDir', 'desc'));
+  const [page, setPage] = useState(parseInt(initParam('page', '1'), 10) || 1);
   const [pageSize] = useState(50);
 
   const [selectedProduct, setSelectedProduct] = useState<StoreProduct | null>(null);
   const [selectedCatProduct, setSelectedCatProduct] = useState<CategoryProductItem | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [showScraper, setShowScraper] = useState(false);
-  const [scrapeUrl, setScrapeUrl] = useState('');
-  const [scrapePageCount, setScrapePageCount] = useState(1);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
+    return new Set(ssGetJson<string[]>('expandedCategories', []));
+  });
+  const [showScraper, setShowScraper] = useState(() => ssGet('showScraper') === 'true');
+  const [scrapeUrl, setScrapeUrl] = useState(() => ssGet('scrapeUrl'));
+  const [scrapePageCount, setScrapePageCount] = useState(() => parseInt(ssGet('scrapePageCount') || '1', 10) || 1);
   const [scraping, setScraping] = useState(false);
   const [scrapeMsg, setScrapeMsg] = useState('');
   const [scrapeProgress, setScrapeProgress] = useState('');
-  const [scrapeSessionId, setScrapeSessionId] = useState<string | null>(null);
+  const [scrapeSessionId, setScrapeSessionId] = useState<string | null>(() => ssGet('scrapeSessionId') || null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [catFilterData, setCatFilterData] = useState<CategoryFilterData | null>(null);
-  const [catBrand, setCatBrand] = useState('');
-  const [catSeller, setCatSeller] = useState('');
-  const [catMinPrice, setCatMinPrice] = useState('');
-  const [catMaxPrice, setCatMaxPrice] = useState('');
-  const [catMinRating, setCatMinRating] = useState('');
-  const [catSponsored, setCatSponsored] = useState<'' | 'true' | 'false'>('');
-  const [catSortBy, setCatSortBy] = useState('position');
-  const [catSortDir, setCatSortDir] = useState('asc');
+  const [catBrand, setCatBrand] = useState(initParam('catBrand', ''));
+  const [catSeller, setCatSeller] = useState(initParam('catSeller', ''));
+  const [catMinPrice, setCatMinPrice] = useState(initParam('catMinPrice', ''));
+  const [catMaxPrice, setCatMaxPrice] = useState(initParam('catMaxPrice', ''));
+  const [catMinRating, setCatMinRating] = useState(initParam('catMinRating', ''));
+  const [catSponsored, setCatSponsored] = useState<'' | 'true' | 'false'>((initParam('catSponsored', '') as '' | 'true' | 'false'));
+  const [catSortBy, setCatSortBy] = useState(initParam('catSortBy', 'position'));
+  const [catSortDir, setCatSortDir] = useState(initParam('catSortDir', 'asc'));
 
-  const [showDetailPanel, setShowDetailPanel] = useState(false);
-  const [selectedForDetail, setSelectedForDetail] = useState<Set<number>>(new Set());
+  const [showDetailPanel, setShowDetailPanel] = useState(() => ssGet('showDetailPanel') === 'true');
+  const [selectedForDetail, setSelectedForDetail] = useState<Set<number>>(() => {
+    return new Set(ssGetJson<number[]>('selectedForDetail', []));
+  });
   const [detailFetching, setDetailFetching] = useState(false);
   const [detailProgress, setDetailProgress] = useState('');
   const detailPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (platform) params.platform = platform;
+    if (viewMode !== 'my_products') params.view = viewMode;
+    if (search) params.search = search;
+    if (selectedCategory) params.category = selectedCategory;
+    if (selectedBrand) params.brand = selectedBrand;
+    if (minPrice) params.minPrice = minPrice;
+    if (maxPrice) params.maxPrice = maxPrice;
+    if (minRating) params.minRating = minRating;
+    if (sortBy !== 'created_at') params.sortBy = sortBy;
+    if (sortDir !== 'desc') params.sortDir = sortDir;
+    if (page > 1) params.page = String(page);
+    if (catBrand) params.catBrand = catBrand;
+    if (catSeller) params.catSeller = catSeller;
+    if (catMinPrice) params.catMinPrice = catMinPrice;
+    if (catMaxPrice) params.catMaxPrice = catMaxPrice;
+    if (catMinRating) params.catMinRating = catMinRating;
+    if (catSponsored) params.catSponsored = catSponsored;
+    if (catSortBy !== 'position') params.catSortBy = catSortBy;
+    if (catSortDir !== 'asc') params.catSortDir = catSortDir;
+    setSearchParams(params, { replace: true });
+  }, [platform, viewMode, search, selectedCategory, selectedBrand, minPrice, maxPrice, minRating, sortBy, sortDir, page, catBrand, catSeller, catMinPrice, catMaxPrice, catMinRating, catSponsored, catSortBy, catSortDir]);
+
+  useEffect(() => {
+    ssSet('showScraper', showScraper ? 'true' : 'false');
+  }, [showScraper]);
+  useEffect(() => { ssSet('scrapeUrl', scrapeUrl); }, [scrapeUrl]);
+  useEffect(() => { ssSet('scrapePageCount', String(scrapePageCount)); }, [scrapePageCount]);
+  useEffect(() => { ssSet('scrapeSessionId', scrapeSessionId || ''); }, [scrapeSessionId]);
+  useEffect(() => { ssSet('showDetailPanel', showDetailPanel ? 'true' : 'false'); }, [showDetailPanel]);
+  useEffect(() => { ssSetJson('selectedForDetail', Array.from(selectedForDetail)); }, [selectedForDetail]);
+  useEffect(() => { ssSetJson('expandedCategories', Array.from(expandedCategories)); }, [expandedCategories]);
 
   const fetchMyProducts = useCallback(async () => {
     setLoading(true);

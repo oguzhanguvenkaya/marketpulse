@@ -22,7 +22,7 @@ from app.services.price_monitor_service import PriceMonitorService
 logger = logging.getLogger(__name__)
 
 _active_fetches: dict[str, dict] = {}
-_detail_semaphore = asyncio.Semaphore(40)
+_detail_semaphore = asyncio.Semaphore(10)
 
 router = APIRouter(
     prefix="/api/category-explorer",
@@ -672,7 +672,7 @@ async def fetch_product_details(req: FetchDetailRequest, db: Session = Depends(g
     asyncio.create_task(_run_parallel_fetch(session_id, product_ids))
 
     return {
-        'message': f'Fetching details for {len(products)} products in parallel (40 concurrent)',
+        'message': f'Fetching details for {len(products)} products in parallel (10 concurrent)',
         'product_ids': product_ids,
         'total': len(product_ids),
     }
@@ -706,7 +706,7 @@ async def bulk_fetch_details(req: BulkFetchRequest, db: Session = Depends(get_db
     asyncio.create_task(_run_parallel_fetch(str(session.id), product_ids))
 
     return {
-        'message': f'Bulk fetching details for {len(products)} products in parallel (40 concurrent)',
+        'message': f'Bulk fetching details for {len(products)} products in parallel (10 concurrent)',
         'count': len(products),
     }
 
