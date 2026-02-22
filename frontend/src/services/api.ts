@@ -808,14 +808,20 @@ export interface CategoryProductItem {
   created_at: string | null;
 }
 
+export interface CategoryFilterData {
+  brands: string[];
+  sellers: string[];
+  price_range: { min: number; max: number };
+}
+
 export interface CategoryProductListResponse {
   total: number;
   page: number;
   page_size: number;
   total_pages: number;
   products: CategoryProductItem[];
-  filtered_stats: { avg_price: number; brand_count: number };
-  sessions: Array<{
+  filtered_stats: { avg_price: number; brand_count: number; seller_count?: number; last_scraped?: string | null };
+  sessions?: Array<{
     id: string;
     platform: string;
     category_url: string;
@@ -990,10 +996,27 @@ export const getCategoryProductsByCategory = async (params: {
   platform?: string;
   search?: string;
   session_id?: string;
+  brand?: string;
+  seller?: string;
+  min_price?: number;
+  max_price?: number;
+  min_rating?: number;
+  is_sponsored?: boolean;
+  sort_by?: string;
+  sort_dir?: string;
   page?: number;
   page_size?: number;
 }): Promise<CategoryProductListResponse> => {
   const response = await api.get('/category-explorer/products-by-category', { params });
+  return response.data;
+};
+
+export const getCategoryPageFilters = async (params: {
+  session_id?: string;
+  category?: string;
+  platform?: string;
+}): Promise<CategoryFilterData> => {
+  const response = await api.get('/category-explorer/category-filters', { params });
   return response.data;
 };
 

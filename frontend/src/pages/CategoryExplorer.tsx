@@ -5,6 +5,7 @@ import {
   getStoreProductFilters,
   getStoreCategoryTree,
   getCategoryProductsByCategory,
+  getCategoryPageFilters,
   scrapeCategoryPage,
   fetchCategoryProductDetail,
   getCategoryFetchStatus,
@@ -14,6 +15,7 @@ import {
   type CategoryTreeNode,
   type CategoryProductItem,
   type CategoryProductListResponse,
+  type CategoryFilterData,
 } from '../services/api';
 
 type Platform = '' | 'hepsiburada' | 'trendyol' | 'web';
@@ -50,6 +52,16 @@ export default function CategoryExplorer() {
   const [scrapeProgress, setScrapeProgress] = useState('');
   const [scrapeSessionId, setScrapeSessionId] = useState<string | null>(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const [catFilterData, setCatFilterData] = useState<CategoryFilterData | null>(null);
+  const [catBrand, setCatBrand] = useState('');
+  const [catSeller, setCatSeller] = useState('');
+  const [catMinPrice, setCatMinPrice] = useState('');
+  const [catMaxPrice, setCatMaxPrice] = useState('');
+  const [catMinRating, setCatMinRating] = useState('');
+  const [catSponsored, setCatSponsored] = useState<'' | 'true' | 'false'>('');
+  const [catSortBy, setCatSortBy] = useState('position');
+  const [catSortDir, setCatSortDir] = useState('asc');
 
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [selectedForDetail, setSelectedForDetail] = useState<Set<number>>(new Set());
@@ -88,11 +100,20 @@ export default function CategoryExplorer() {
       const params: any = {
         page,
         page_size: pageSize,
+        sort_by: catSortBy,
+        sort_dir: catSortDir,
       };
       if (platform) params.platform = platform;
       if (scrapeSessionId) params.session_id = scrapeSessionId;
       else if (selectedCategory) params.category = selectedCategory;
       if (search) params.search = search;
+      if (catBrand) params.brand = catBrand;
+      if (catSeller) params.seller = catSeller;
+      if (catMinPrice) params.min_price = parseFloat(catMinPrice);
+      if (catMaxPrice) params.max_price = parseFloat(catMaxPrice);
+      if (catMinRating) params.min_rating = parseFloat(catMinRating);
+      if (catSponsored === 'true') params.is_sponsored = true;
+      else if (catSponsored === 'false') params.is_sponsored = false;
       const result = await getCategoryProductsByCategory(params);
       setCatData(result);
     } catch (err) {
@@ -100,7 +121,7 @@ export default function CategoryExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [platform, page, pageSize, selectedCategory, search, scrapeSessionId]);
+  }, [platform, page, pageSize, selectedCategory, search, scrapeSessionId, catBrand, catSeller, catMinPrice, catMaxPrice, catMinRating, catSponsored, catSortBy, catSortDir]);
 
   const fetchFilters = useCallback(async () => {
     try {
@@ -113,6 +134,17 @@ export default function CategoryExplorer() {
     } catch {}
   }, [platform]);
 
+  const fetchCatFilterData = useCallback(async () => {
+    try {
+      const params: any = {};
+      if (platform) params.platform = platform;
+      if (scrapeSessionId) params.session_id = scrapeSessionId;
+      else if (selectedCategory) params.category = selectedCategory;
+      const result = await getCategoryPageFilters(params);
+      setCatFilterData(result);
+    } catch {}
+  }, [platform, scrapeSessionId, selectedCategory]);
+
   useEffect(() => {
     if (viewMode === 'my_products') fetchMyProducts();
     else fetchCatProducts();
@@ -121,8 +153,12 @@ export default function CategoryExplorer() {
   useEffect(() => { fetchFilters(); }, [fetchFilters]);
 
   useEffect(() => {
+    if (viewMode === 'category_page') fetchCatFilterData();
+  }, [viewMode, fetchCatFilterData]);
+
+  useEffect(() => {
     setPage(1);
-  }, [platform, search, selectedCategory, selectedBrand, minPrice, maxPrice, minRating, sortBy, sortDir, viewMode]);
+  }, [platform, search, selectedCategory, selectedBrand, minPrice, maxPrice, minRating, sortBy, sortDir, viewMode, catBrand, catSeller, catMinPrice, catMaxPrice, catMinRating, catSponsored, catSortBy, catSortDir]);
 
   const categoryUrlMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -204,7 +240,10 @@ export default function CategoryExplorer() {
       setScrapeMsg(`Done: ${result.products_added} new products from ${pagesScraped} page${pagesScraped > 1 ? 's' : ''} (${result.products_found} found, ${result.total_in_session} total)`);
       setScrapeProgress('');
       if (result.session?.id) setScrapeSessionId(result.session.id);
-      if (viewMode === 'category_page') fetchCatProducts();
+      if (viewMode === 'category_page') {
+        fetchCatProducts();
+        fetchCatFilterData();
+      }
     } catch (err: any) {
       setScrapeMsg(err?.response?.data?.detail || 'Scrape failed');
       setScrapeProgress('');
@@ -304,6 +343,8 @@ export default function CategoryExplorer() {
         avgPrice: data.filtered_stats?.avg_price || 0,
         brandCount: data.filtered_stats?.brand_count || 0,
         categoryCount: data.filtered_stats?.category_count || 0,
+        sellerCount: 0,
+        lastScraped: null as string | null,
       };
     }
     if (viewMode === 'category_page' && catData) {
@@ -311,10 +352,12 @@ export default function CategoryExplorer() {
         total: catData.total,
         avgPrice: catData.filtered_stats?.avg_price || 0,
         brandCount: catData.filtered_stats?.brand_count || 0,
-        categoryCount: catData.sessions?.length || 0,
+        categoryCount: 0,
+        sellerCount: catData.filtered_stats?.seller_count || 0,
+        lastScraped: catData.filtered_stats?.last_scraped || null,
       };
     }
-    return { total: 0, avgPrice: 0, brandCount: 0, categoryCount: 0 };
+    return { total: 0, avgPrice: 0, brandCount: 0, categoryCount: 0, sellerCount: 0, lastScraped: null as string | null };
   }, [viewMode, data, catData]);
 
   const detailStats = useMemo(() => {
@@ -880,7 +923,7 @@ export default function CategoryExplorer() {
               className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
-          {viewMode === 'my_products' && (
+          {viewMode === 'my_products' ? (
             <select
               value={`${sortBy}:${sortDir}`}
               onChange={(e) => { const [s, d] = e.target.value.split(':'); setSortBy(s); setSortDir(d); }}
@@ -893,11 +936,19 @@ export default function CategoryExplorer() {
               <option value="rating:desc">Highest Rated</option>
               <option value="product_name:asc">Name A-Z</option>
             </select>
-          )}
-          {viewMode === 'category_page' && (
-            <div className="text-xs text-neutral-500 px-2 py-2">
-              Sorted by marketplace position
-            </div>
+          ) : (
+            <select
+              value={`${catSortBy}:${catSortDir}`}
+              onChange={(e) => { const [s, d] = e.target.value.split(':'); setCatSortBy(s); setCatSortDir(d); }}
+              className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50"
+            >
+              <option value="position:asc">Marketplace Position</option>
+              <option value="created_at:desc">Newest First</option>
+              <option value="price:asc">Price: Low to High</option>
+              <option value="price:desc">Price: High to Low</option>
+              <option value="rating:desc">Highest Rated</option>
+              <option value="name:asc">Name A-Z</option>
+            </select>
           )}
         </div>
 
@@ -915,25 +966,81 @@ export default function CategoryExplorer() {
             <div className="text-xs text-neutral-500">Brands</div>
           </div>
           <div className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <div className="text-lg font-bold text-emerald-400">{dynamicStats.categoryCount}</div>
-            <div className="text-xs text-neutral-500">{viewMode === 'category_page' ? 'Sessions' : 'Categories'}</div>
+            {viewMode === 'category_page' ? (
+              <>
+                <div className="text-sm font-bold text-emerald-400">
+                  {dynamicStats.lastScraped ? new Date(dynamicStats.lastScraped).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                </div>
+                <div className="text-xs text-neutral-500">Last Scraped</div>
+              </>
+            ) : (
+              <>
+                <div className="text-lg font-bold text-emerald-400">{dynamicStats.categoryCount}</div>
+                <div className="text-xs text-neutral-500">Categories</div>
+              </>
+            )}
           </div>
         </div>
 
-        {viewMode === 'category_page' && catData?.sessions && catData.sessions.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-neutral-500">Scraped sessions:</span>
-            {catData.sessions.map(s => (
+        {viewMode === 'category_page' && (catFilterData?.brands?.length || catFilterData?.sellers?.length || 0) > 0 && (
+          <div className="flex flex-wrap items-end gap-2">
+            {catFilterData?.brands && catFilterData.brands.length > 0 && (
+              <div className="flex-1 min-w-[140px]">
+                <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Brand</label>
+                <select value={catBrand} onChange={e => setCatBrand(e.target.value)}
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                  <option value="">All Brands</option>
+                  {catFilterData.brands.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </div>
+            )}
+            {catFilterData?.sellers && catFilterData.sellers.length > 0 && (
+              <div className="flex-1 min-w-[140px]">
+                <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Seller</label>
+                <select value={catSeller} onChange={e => setCatSeller(e.target.value)}
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                  <option value="">All Sellers</option>
+                  {catFilterData.sellers.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            )}
+            <div className="min-w-[100px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Price</label>
+              <input type="number" value={catMinPrice} onChange={e => setCatMinPrice(e.target.value)} placeholder="Min"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+            </div>
+            <div className="min-w-[100px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Max Price</label>
+              <input type="number" value={catMaxPrice} onChange={e => setCatMaxPrice(e.target.value)} placeholder="Max"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50" />
+            </div>
+            <div className="min-w-[80px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Rating</label>
+              <select value={catMinRating} onChange={e => setCatMinRating(e.target.value)}
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                <option value="">Any</option>
+                <option value="4">4+</option>
+                <option value="3">3+</option>
+                <option value="2">2+</option>
+              </select>
+            </div>
+            <div className="min-w-[100px]">
+              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Sponsored</label>
+              <select value={catSponsored} onChange={e => setCatSponsored(e.target.value as '' | 'true' | 'false')}
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-2 text-sm text-neutral-200 focus:outline-none focus:border-cyan-500/50">
+                <option value="">All</option>
+                <option value="true">Sponsored Only</option>
+                <option value="false">Non-Sponsored</option>
+              </select>
+            </div>
+            {(catBrand || catSeller || catMinPrice || catMaxPrice || catMinRating || catSponsored) && (
               <button
-                key={s.id}
-                onClick={() => { setScrapeUrl(s.category_url); setScrapeSessionId(s.id); setShowScraper(true); }}
-                className="text-xs px-2 py-1 rounded-md bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-1"
+                onClick={() => { setCatBrand(''); setCatSeller(''); setCatMinPrice(''); setCatMaxPrice(''); setCatMinRating(''); setCatSponsored(''); }}
+                className="text-xs text-neutral-400 hover:text-red-400 px-2 py-2 transition-colors whitespace-nowrap"
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${s.platform === 'hepsiburada' ? 'bg-orange-400' : 'bg-purple-400'}`} />
-                {s.category_name || 'Unknown'} ({s.product_count})
-                <span className="text-neutral-600">p{s.pages_scraped}</span>
+                Clear Filters
               </button>
-            ))}
+            )}
           </div>
         )}
 

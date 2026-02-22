@@ -131,6 +131,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Category Page filters: brand/seller/price range/rating/sponsored filters for scraped category products. Brand extraction from HB product cards (h2 vs a[title] diff). New /category-filters endpoint. Stats bar shows brand_count, seller_count, last_scraped. Sort options separated per view mode
 - 2026-02-22: Category Explorer redesign: multi-page scraping (page_count 1-20, HB ?sayfa=N / TY ?pi=N), "Get Product Details" panel with checkbox selection + Select All, bulk detail fetch with polling progress, cyan/purple visual separation for scrape vs detail operations
 - 2026-02-22: Collapsible sidebar: desktop toggle to collapse/expand sidebar (icon-only vs full labels), state persisted in localStorage, all pages auto-adjust. Mobile drawer behavior unchanged
 - 2026-02-22: Category URL auto-fill v2: category-tree endpoint now extracts marketplace category URLs from store_products raw_scraped_data breadcrumb JSON-LD. Each sidebar category node carries its permanent URL (100% HB, 85% TY coverage). Selecting a category instantly populates scrape URL without any fuzzy matching or external lookup

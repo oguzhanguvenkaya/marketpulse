@@ -418,12 +418,54 @@ async def session_url_lookup(
     return {'category_url': None}
 
 
+@router.get("/category-filters")
+async def get_category_filters(
+    session_id: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    platform: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    q = db.query(CategoryProduct).join(CategorySession, CategoryProduct.session_id == CategorySession.id)
+    if platform:
+        q = q.filter(CategorySession.platform == platform)
+    if session_id:
+        q = q.filter(CategoryProduct.session_id == session_id)
+    elif category:
+        leaf = category.split(' > ')[-1].strip() if ' > ' in category else category
+        q = q.filter(CategorySession.category_name.ilike(f"%{leaf}%"))
+
+    brands = [r[0] for r in q.with_entities(CategoryProduct.brand).filter(CategoryProduct.brand.isnot(None), CategoryProduct.brand != '').distinct().order_by(CategoryProduct.brand).all()]
+    sellers = [r[0] for r in q.with_entities(CategoryProduct.seller_name).filter(CategoryProduct.seller_name.isnot(None), CategoryProduct.seller_name != '').distinct().order_by(CategoryProduct.seller_name).all()]
+
+    price_row = q.with_entities(
+        func.min(CategoryProduct.price),
+        func.max(CategoryProduct.price),
+    ).first()
+
+    return {
+        'brands': brands,
+        'sellers': sellers,
+        'price_range': {
+            'min': float(price_row[0]) if price_row and price_row[0] else 0,
+            'max': float(price_row[1]) if price_row and price_row[1] else 0,
+        },
+    }
+
+
 @router.get("/products-by-category")
 async def list_products_by_category(
     category: Optional[str] = Query(None),
     platform: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     session_id: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None),
+    seller: Optional[str] = Query(None),
+    min_price: Optional[float] = Query(None),
+    max_price: Optional[float] = Query(None),
+    min_rating: Optional[float] = Query(None),
+    is_sponsored: Optional[bool] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query('asc'),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db)
@@ -441,22 +483,52 @@ async def list_products_by_category(
         q = q.filter(or_(
             CategoryProduct.name.ilike(f"%{search}%"),
             CategoryProduct.brand.ilike(f"%{search}%"),
+            CategoryProduct.seller_name.ilike(f"%{search}%"),
         ))
+    if brand:
+        q = q.filter(CategoryProduct.brand == brand)
+    if seller:
+        q = q.filter(CategoryProduct.seller_name == seller)
+    if min_price is not None:
+        q = q.filter(CategoryProduct.price >= min_price)
+    if max_price is not None:
+        q = q.filter(CategoryProduct.price <= max_price)
+    if min_rating is not None:
+        q = q.filter(CategoryProduct.rating >= min_rating)
+    if is_sponsored is not None:
+        q = q.filter(CategoryProduct.is_sponsored == is_sponsored)
 
     total = q.count()
 
     stats_row = q.with_entities(
         func.avg(CategoryProduct.price),
-        func.count(func.distinct(CategoryProduct.brand)),
+        func.count(func.distinct(func.nullif(CategoryProduct.brand, ''))),
+        func.count(func.distinct(func.nullif(CategoryProduct.seller_name, ''))),
     ).first()
 
-    q = q.order_by(CategoryProduct.position.asc())
+    last_scraped_row = q.with_entities(func.max(CategoryProduct.created_at)).first()
+
+    sort_col_map = {
+        'price': CategoryProduct.price,
+        'name': CategoryProduct.name,
+        'rating': CategoryProduct.rating,
+        'position': CategoryProduct.position,
+        'created_at': CategoryProduct.created_at,
+    }
+    sort_column = sort_col_map.get(sort_by, CategoryProduct.position)
+    if sort_dir == 'desc':
+        q = q.order_by(sort_column.desc().nullslast())
+    else:
+        q = q.order_by(sort_column.asc().nullsfirst())
+
     offset = (page - 1) * page_size
     products = q.offset(offset).limit(page_size).all()
 
     sessions_q = db.query(CategorySession)
     if platform:
         sessions_q = sessions_q.filter(CategorySession.platform == platform)
+    if session_id:
+        sessions_q = sessions_q.filter(CategorySession.id == session_id)
     related_sessions = sessions_q.order_by(CategorySession.created_at.desc()).limit(20).all()
 
     return {
@@ -468,6 +540,8 @@ async def list_products_by_category(
         'filtered_stats': {
             'avg_price': float(stats_row[0]) if stats_row[0] else 0,
             'brand_count': stats_row[1] or 0,
+            'seller_count': stats_row[2] or 0,
+            'last_scraped': last_scraped_row[0].isoformat() if last_scraped_row and last_scraped_row[0] else None,
         },
         'sessions': [_serialize_session(s) for s in related_sessions],
     }

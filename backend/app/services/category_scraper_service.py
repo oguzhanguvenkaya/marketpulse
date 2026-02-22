@@ -276,6 +276,21 @@ class CategoryScraperService:
                         (1 - product['price'] / product['original_price']) * 100, 1
                     )
 
+        title_el_text = ''
+        if title_el:
+            title_el_text = title_el.get_text(strip=True)
+        title_a = card.find('a', {'title': True})
+        a_title_text = title_a.get('title', '').strip() if title_a else ''
+        if title_el_text and a_title_text and title_el_text != a_title_text:
+            if title_el_text.lower().endswith(a_title_text.lower()):
+                brand_candidate = title_el_text[:len(title_el_text) - len(a_title_text)].strip()
+                if brand_candidate and len(brand_candidate) < 40:
+                    product['brand'] = brand_candidate
+
+        seller_el = card.find('span', class_=re.compile(r'seller|merchant|storeName', re.I))
+        if seller_el:
+            product['seller_name'] = seller_el.get_text(strip=True)
+
         rating_el = card.find(string=re.compile(r'\d[.,]\d'))
         if rating_el:
             parent = rating_el.parent
