@@ -78,8 +78,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     PRICE_MONITOR_EXECUTOR: str = os.getenv("PRICE_MONITOR_EXECUTOR", "celery")
     PRICE_MONITOR_MAX_CONCURRENT_REQUESTS: int = _env_int("PRICE_MONITOR_MAX_CONCURRENT_REQUESTS", 40)
-    DB_POOL_SIZE: int = _env_int("DB_POOL_SIZE", 5)
-    DB_MAX_OVERFLOW: int = _env_int("DB_MAX_OVERFLOW", 10)
+    DB_POOL_SIZE: int = _env_int("DB_POOL_SIZE", 10)
+    DB_MAX_OVERFLOW: int = _env_int("DB_MAX_OVERFLOW", 20)
     DB_POOL_TIMEOUT_SECONDS: int = _env_int("DB_POOL_TIMEOUT_SECONDS", 30)
     DB_POOL_RECYCLE_SECONDS: int = _env_int("DB_POOL_RECYCLE_SECONDS", 180)
     

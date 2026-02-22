@@ -382,126 +382,143 @@ async def _fetch_single_detail(product_id: int, semaphore: asyncio.Semaphore | N
 
 
 async def _fetch_single_detail_inner(product_id: int):
+    # Phase 1: Read product URL from DB, then immediately close the session
     db = SessionLocal()
     try:
         product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
         if not product or not product.url:
             return
+        fetch_url = str(product.url)
+        original_price = float(product.price) if product.price else None
+    finally:
+        db.close()
 
-        fetch_url = product.url
-        if 'adservice' in fetch_url:
-            redirect_match = re.search(r'redirect=([^&]+)', fetch_url)
-            if redirect_match:
-                from urllib.parse import unquote as _unquote
-                fetch_url = _unquote(redirect_match.group(1)).split('?')[0]
+    # Resolve ad redirect URLs
+    if 'adservice' in fetch_url:
+        redirect_match = re.search(r'redirect=([^&]+)', fetch_url)
+        if redirect_match:
+            from urllib.parse import unquote as _unquote
+            fetch_url = _unquote(redirect_match.group(1)).split('?')[0]
 
+    # Phase 2: HTTP fetch (no DB connection held)
+    try:
         html = await url_scraper.fetch_url(fetch_url)
         if not html:
             logger.warning(f"Failed to fetch detail for product {product_id}: {fetch_url[:80]}")
             return
+    except Exception as e:
+        logger.error(f"HTTP error fetching detail for product {product_id}: {e}")
+        return
 
-        utag = _parse_utag_data(html)
-        specs = _parse_hb_specs(html)
-        description = _parse_hb_description(html)
+    # Parse all data from HTML (still no DB connection)
+    utag = _parse_utag_data(html)
+    specs = _parse_hb_specs(html)
+    description = _parse_hb_description(html)
+    parsed = url_scraper.parse_html(html, fetch_url)
 
-        parsed = url_scraper.parse_html(html, fetch_url)
+    brand = utag.get('product_brand', '') or (utag.get('product_brands', [''])[0] if utag.get('product_brands') else '')
+    if not brand and parsed:
+        brand = parsed.get('brand', '')
 
-        brand = utag.get('product_brand', '') or (utag.get('product_brands', [''])[0] if utag.get('product_brands') else '')
-        if not brand and parsed:
-            brand = parsed.get('brand', '')
+    merchant_names = utag.get('merchant_names', [])
+    seller_name = merchant_names[0] if merchant_names else ''
+    if not seller_name:
+        seller_name = utag.get('order_store', '')
+    if not seller_name and parsed:
+        seller_name = parsed.get('seller_name', '')
 
-        merchant_names = utag.get('merchant_names', [])
-        seller_name = merchant_names[0] if merchant_names else ''
-        if not seller_name:
-            seller_name = utag.get('order_store', '')
-        if not seller_name and parsed:
-            seller_name = parsed.get('seller_name', '')
+    product_skus = utag.get('product_skus', [])
+    sku = product_skus[0] if product_skus else ''
+    if not sku and parsed:
+        sku = parsed.get('sku', '')
 
-        product_skus = utag.get('product_skus', [])
-        sku = product_skus[0] if product_skus else ''
-        if not sku and parsed:
-            sku = parsed.get('sku', '')
+    barcodes = utag.get('product_barcodes', [])
+    barcode = barcodes[0] if barcodes else utag.get('product_barcode', '')
+    if not barcode and parsed:
+        barcode = parsed.get('barcode', '')
 
-        barcodes = utag.get('product_barcodes', [])
-        barcode = barcodes[0] if barcodes else utag.get('product_barcode', '')
-        if not barcode and parsed:
-            barcode = parsed.get('barcode', '')
+    category_path = utag.get('category_name_hierarchy', '')
+    if not category_path and parsed:
+        cats = parsed.get('category_breadcrumbs', [])
+        if isinstance(cats, list):
+            names = [c.get('name', '') if isinstance(c, dict) else str(c) for c in cats]
+            category_path = ' > '.join(n for n in names if n)
 
-        category_path = utag.get('category_name_hierarchy', '')
-        if not category_path and parsed:
-            cats = parsed.get('category_breadcrumbs', [])
-            if isinstance(cats, list):
-                names = [c.get('name', '') if isinstance(c, dict) else str(c) for c in cats]
-                category_path = ' > '.join(n for n in names if n)
+    stock_status = utag.get('product_status', '')
+    if not stock_status and parsed:
+        stock_status = parsed.get('availability', '')
 
-        stock_status = utag.get('product_status', '')
-        if not stock_status and parsed:
-            stock_status = parsed.get('availability', '')
+    shipping_types = utag.get('shipping_type', [])
+    shipping_type = shipping_types[0] if isinstance(shipping_types, list) and shipping_types else str(shipping_types) if shipping_types else ''
 
-        shipping_types = utag.get('shipping_type', [])
-        shipping_type = shipping_types[0] if isinstance(shipping_types, list) and shipping_types else str(shipping_types) if shipping_types else ''
+    review_rate = utag.get('review_rate', '')
+    rating_val = None
+    if review_rate:
+        try:
+            rating_val = float(str(review_rate).replace(',', '.'))
+        except (ValueError, TypeError):
+            pass
+    review_count_val = None
+    rc = utag.get('review_count', '')
+    if rc:
+        try:
+            review_count_val = int(str(rc).replace('.', ''))
+        except (ValueError, TypeError):
+            pass
 
-        review_rate = utag.get('review_rate', '')
-        rating_val = None
-        if review_rate:
-            try:
-                rating_val = float(str(review_rate).replace(',', '.'))
-            except (ValueError, TypeError):
-                pass
-        review_count_val = None
-        rc = utag.get('review_count', '')
-        if rc:
-            try:
-                review_count_val = int(str(rc).replace('.', ''))
-            except (ValueError, TypeError):
-                pass
+    prices = utag.get('product_prices', [])
+    utag_price = None
+    if prices:
+        try:
+            utag_price = float(str(prices[0]).replace(',', ''))
+        except (ValueError, TypeError):
+            pass
 
-        prices = utag.get('product_prices', [])
-        utag_price = None
-        if prices:
-            try:
-                utag_price = float(str(prices[0]).replace(',', ''))
-            except (ValueError, TypeError):
-                pass
+    seller_list_data = []
+    if merchant_names:
+        merchant_ids = utag.get('merchant_ids', [])
+        listing_ids = utag.get('listing_ids', [])
+        for i, mn in enumerate(merchant_names):
+            entry = {'name': mn}
+            if i < len(merchant_ids):
+                entry['id'] = merchant_ids[i]
+            if i < len(listing_ids):
+                entry['listing_id'] = listing_ids[i]
+            seller_list_data.append(entry)
 
-        seller_list_data = []
-        if merchant_names:
-            merchant_ids = utag.get('merchant_ids', [])
-            listing_ids = utag.get('listing_ids', [])
-            for i, mn in enumerate(merchant_names):
-                entry = {'name': mn}
-                if i < len(merchant_ids):
-                    entry['id'] = merchant_ids[i]
-                if i < len(listing_ids):
-                    entry['listing_id'] = listing_ids[i]
-                seller_list_data.append(entry)
+    if not specs and parsed:
+        specs = parsed.get('product_specs', {}) or {}
 
-        if not specs and parsed:
-            specs = parsed.get('product_specs', {}) or {}
+    detail_data = {
+        'title': utag.get('product_name_array', '') or (parsed.get('title') if parsed else ''),
+        'description': description or (parsed.get('description', '') if parsed else ''),
+        'price': utag_price or (parsed.get('price') if parsed else None),
+        'currency': utag.get('order_currency', 'TRY'),
+        'brand': brand,
+        'sku': sku,
+        'barcode': barcode,
+        'availability': stock_status,
+        'rating': rating_val or (parsed.get('rating') if parsed else None),
+        'review_count': review_count_val or (parsed.get('review_count') if parsed else None),
+        'seller_name': seller_name,
+        'seller_list': seller_list_data,
+        'category': category_path,
+        'category_breadcrumbs': parsed.get('category_breadcrumbs') if parsed else [],
+        'images': parsed.get('images') if parsed else [],
+        'product_specs': specs,
+        'shipping_type': shipping_type,
+        'shipping_info': parsed.get('shipping_info') if parsed else None,
+        'return_policy': parsed.get('return_policy') if parsed else None,
+        'canonical_url': utag.get('canonical_url', ''),
+        'product_ids': utag.get('product_ids', []),
+    }
 
-        detail_data = {
-            'title': utag.get('product_name_array', '') or (parsed.get('title') if parsed else ''),
-            'description': description or (parsed.get('description', '') if parsed else ''),
-            'price': utag_price or (parsed.get('price') if parsed else None),
-            'currency': utag.get('order_currency', 'TRY'),
-            'brand': brand,
-            'sku': sku,
-            'barcode': barcode,
-            'availability': stock_status,
-            'rating': rating_val or (parsed.get('rating') if parsed else None),
-            'review_count': review_count_val or (parsed.get('review_count') if parsed else None),
-            'seller_name': seller_name,
-            'seller_list': seller_list_data,
-            'category': category_path,
-            'category_breadcrumbs': parsed.get('category_breadcrumbs') if parsed else [],
-            'images': parsed.get('images') if parsed else [],
-            'product_specs': specs,
-            'shipping_type': shipping_type,
-            'shipping_info': parsed.get('shipping_info') if parsed else None,
-            'return_policy': parsed.get('return_policy') if parsed else None,
-            'canonical_url': utag.get('canonical_url', ''),
-            'product_ids': utag.get('product_ids', []),
-        }
+    # Phase 3: Save results to DB with a fresh short-lived session
+    db = SessionLocal()
+    try:
+        product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
+        if not product:
+            return
 
         product.detail_fetched = True
         product.detail_data = detail_data
@@ -529,17 +546,17 @@ async def _fetch_single_detail_inner(product_id: int):
             product.rating = rating_val
         if review_count_val:
             product.review_count = review_count_val
-        if utag_price and not product.price:
+        if utag_price and not original_price:
             product.price = utag_price
 
-        if fetch_url != product.url:
+        if fetch_url != str(product.url):
             product.url = fetch_url
 
         product.updated_at = datetime.utcnow()
         db.commit()
         logger.info(f"Detail fetched for product {product_id}: brand={brand}, seller={seller_name}, sku={sku}")
     except Exception as e:
-        logger.error(f"Error fetching detail for product {product_id}: {e}")
+        logger.error(f"Error saving detail for product {product_id}: {e}")
     finally:
         db.close()
 
