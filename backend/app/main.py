@@ -10,6 +10,7 @@ from app.api.url_scraper_routes import router as url_scraper_router
 from app.api.transcript_routes import router as transcript_router
 from app.api.json_editor_routes import router as json_editor_router
 from app.api.store_product_routes import router as store_product_router
+from app.api.category_explorer_routes import router as category_explorer_router
 from app.core.config import settings
 from app.db.database import engine, Base
 from app.core.logger import setup_uvicorn_log_filter
@@ -79,6 +80,7 @@ app.include_router(url_scraper_router)
 app.include_router(transcript_router)
 app.include_router(json_editor_router)
 app.include_router(store_product_router)
+app.include_router(category_explorer_router)
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 if os.path.exists(frontend_dist):

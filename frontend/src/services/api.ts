@@ -869,4 +869,55 @@ export const importExcelProducts = async (file: File): Promise<{ created: number
   return response.data;
 };
 
+export const scrapeCategoryPage = async (url: string, page: number = 1, sessionId?: string) => {
+  const response = await api.post('/category-explorer/scrape-page', {
+    url,
+    page,
+    session_id: sessionId || null,
+  }, { timeout: 120000 });
+  return response.data;
+};
+
+export const getCategorySessions = async (platform?: string) => {
+  const params: Record<string, string> = {};
+  if (platform) params.platform = platform;
+  const response = await api.get('/category-explorer/sessions', { params });
+  return response.data;
+};
+
+export const getCategorySession = async (sessionId: string) => {
+  const response = await api.get(`/category-explorer/sessions/${sessionId}`);
+  return response.data;
+};
+
+export const deleteCategorySession = async (sessionId: string) => {
+  const response = await api.delete(`/category-explorer/sessions/${sessionId}`);
+  return response.data;
+};
+
+export const fetchCategoryProductDetail = async (productIds: number[]) => {
+  const response = await api.post('/category-explorer/fetch-detail', {
+    product_ids: productIds,
+  });
+  return response.data;
+};
+
+export const bulkFetchCategoryDetails = async (sessionId: string, productIds?: number[]) => {
+  const response = await api.post('/category-explorer/bulk-fetch', {
+    session_id: sessionId,
+    product_ids: productIds || null,
+  });
+  return response.data;
+};
+
+export const getCategoryFetchStatus = async (sessionId: string) => {
+  const response = await api.get(`/category-explorer/fetch-status/${sessionId}`);
+  return response.data;
+};
+
+export const getCategoryProductDetail = async (productId: number) => {
+  const response = await api.get(`/category-explorer/products/${productId}`);
+  return response.data;
+};
+
 export default api;

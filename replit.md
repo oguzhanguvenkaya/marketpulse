@@ -34,8 +34,9 @@ backend/app/
 ### Frontend Structure
 ```
 frontend/src/
-├── pages/         → 10 lazy-loaded pages (Dashboard, Products, ProductDetail, Ads, PriceMonitor,
-│                    Sellers, SellerDetail, UrlScraper, VideoTranscripts, JsonEditor)
+├── pages/         → 14 lazy-loaded pages (Dashboard, Products, ProductDetail, Ads, PriceMonitor,
+│                    Sellers, SellerDetail, HepsiburadaProducts, TrendyolProducts, WebProducts,
+│                    CategoryExplorer, UrlScraper, VideoTranscripts, JsonEditor)
 ├── components/    → Layout.tsx (sidebar, header, mobile menu)
 ├── services/      → api.ts (Axios client, 700+ lines), queryCache.ts (TTL-based cache)
 ├── App.tsx        → Router setup
@@ -71,13 +72,17 @@ Full-stack tool for editing product catalog JSON files with PostgreSQL persisten
 ### Marketplace Product Pages
 Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product data with advanced filtering. Uses `StoreProduct` table populated from URL scraper results. Supports filtering by category, brand, price range, rating, SKU, barcode. Product detail modal shows breadcrumb categories, reviews, specs, shipping info. "Scrape Products" button triggers bulk scraping from active price monitor products. Routes: `/api/store-products/`. Frontend: `/hepsiburada`, `/trendyol`, `/web-products`.
 
-## Database Models (15 tables)
+### Category Explorer
+Competitive analysis tool to scrape and browse marketplace category pages. Paste a Hepsiburada or Trendyol category URL to view all product listings, breadcrumb navigation, filter by brand/price/sponsored status, and fetch detailed product data for each item. Two-step scraping: category page listing data first, then individual product detail on demand. Supports pagination via platform-specific parameters (sayfa for HB, pi for Trendyol). DB models: `CategorySession`, `CategoryProduct`. Routes: `/api/category-explorer/`. Frontend: `/category-explorer`.
+
+## Database Models (17 tables)
 - `Product`, `ProductSnapshot`, `ProductSeller`, `ProductReview`
 - `SearchTask`, `SponsoredBrandAd`, `SearchSponsoredProduct`
 - `MonitoredProduct`, `SellerSnapshot`, `PriceMonitorTask`
 - `ScrapeJob`, `ScrapeResult`
 - `StoreProduct`
 - `TranscriptJob`, `TranscriptResult`
+- `CategorySession`, `CategoryProduct`
 - `JsonFile`
 
 ## Key API Route Groups
@@ -87,6 +92,7 @@ Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product da
 - `/api/url-scraper/*` → URL scraping jobs
 - `/api/transcripts/*` → YouTube transcript jobs
 - `/api/json-editor/*` → JSON file management
+- `/api/category-explorer/*` → Category page scraping and competitive analysis
 - `/health` → System health check
 
 ## Celery Tasks
@@ -125,6 +131,7 @@ Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product da
 - `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
 
 ## Recent Changes
+- 2026-02-22: Added Category Explorer for competitive analysis: scrape HB/Trendyol category pages, view product listings with breadcrumb navigation, filter by brand/price/sponsored, bulk fetch product details. DB models: CategorySession, CategoryProduct. Routes: /api/category-explorer/. Frontend: /category-explorer
 - 2026-02-22: Added Excel import for web products (POST /api/store-products/import-excel), improved price extraction with multi-source fallback, redesigned product detail as slide-in side panel
 - 2026-02-22: Increased all concurrent workers to 40 (URL scraper, transcript, price monitor HB+TY)
 - 2026-02-22: Added geotargeting to all ScraperAPI methods: TR domains→country_code=eu, others→US/EU random

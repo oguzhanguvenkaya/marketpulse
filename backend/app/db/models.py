@@ -377,3 +377,56 @@ class StoreProduct(Base):
 
     class Config:
         from_attributes = True
+
+
+class CategorySession(Base):
+    __tablename__ = "category_sessions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    platform = Column(String(30), nullable=False, index=True)
+    category_url = Column(Text, nullable=False)
+    category_name = Column(Text)
+    breadcrumbs = Column(JSON)
+    total_products = Column(Integer, default=0)
+    pages_scraped = Column(Integer, default=0)
+    status = Column(String(20), default="active")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    category_products = relationship("CategoryProduct", back_populates="session", cascade="all, delete-orphan")
+
+    class Config:
+        from_attributes = True
+
+
+class CategoryProduct(Base):
+    __tablename__ = "category_products"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("category_sessions.id"), nullable=False, index=True)
+    name = Column(Text)
+    url = Column(Text)
+    image_url = Column(Text)
+    brand = Column(String(255))
+    price = Column(Numeric(10, 2))
+    original_price = Column(Numeric(10, 2))
+    discount_percentage = Column(Float)
+    rating = Column(Float)
+    review_count = Column(Integer)
+    is_sponsored = Column(Boolean, default=False)
+    campaign_text = Column(Text)
+    seller_name = Column(String(255))
+    page_number = Column(Integer, default=1)
+    position = Column(Integer)
+    detail_fetched = Column(Boolean, default=False)
+    detail_data = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship("CategorySession", back_populates="category_products")
+
+    __table_args__ = (
+        Index('ix_category_products_session_page', 'session_id', 'page_number'),
+    )
+
+    class Config:
+        from_attributes = True
