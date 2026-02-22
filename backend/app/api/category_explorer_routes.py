@@ -17,6 +17,7 @@ from app.db.models import CategorySession, CategoryProduct
 from app.core.security import require_mutating_api_key
 from app.services.category_scraper_service import CategoryScraperService
 from app.services.url_scraper_service import UrlScraperService
+from app.services.price_monitor_service import PriceMonitorService
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +222,7 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
                     name=prod.get('name', ''),
                     url=prod_url,
                     image_url=prod.get('image_url', ''),
-                    brand=prod.get('brand', ''),
+                    sku=prod.get('sku', ''),
                     price=_safe_numeric(prod.get('price')),
                     original_price=_safe_numeric(prod.get('original_price')),
                     discount_percentage=_safe_numeric(prod.get('discount_percentage')),
@@ -229,7 +230,6 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
                     review_count=prod.get('review_count'),
                     is_sponsored=prod.get('is_sponsored', False),
                     campaign_text=prod.get('campaign_text', ''),
-                    seller_name=prod.get('seller_name', ''),
                     page_number=page_num,
                     position=(page_num - 1) * 50 + idx + 1,
                 )
@@ -400,117 +400,164 @@ async def _fetch_single_detail(product_id: int, semaphore: asyncio.Semaphore | N
 
 
 async def _fetch_single_detail_inner(product_id: int):
-    # Phase 1: Read product URL from DB, then immediately close the session
     db = SessionLocal()
     try:
         product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
         if not product or not product.url:
             return
         fetch_url = str(product.url)
+        existing_sku = product.sku or ''
+        platform = 'hepsiburada'
+        session = db.query(CategorySession).filter(CategorySession.id == product.session_id).first()
+        if session:
+            platform = session.platform or 'hepsiburada'
     finally:
         db.close()
 
-    # Resolve ad redirect URLs
     if 'adservice' in fetch_url:
         redirect_match = re.search(r'redirect=([^&]+)', fetch_url)
         if redirect_match:
             from urllib.parse import unquote as _unquote
             fetch_url = _unquote(redirect_match.group(1)).split('?')[0]
 
-    # Phase 2: HTTP fetch (no DB connection held)
-    try:
-        html = await url_scraper.fetch_url(fetch_url)
-        if not html:
-            logger.warning(f"Failed to fetch detail for product {product_id}: {fetch_url[:80]}")
-            return
-    except Exception as e:
-        logger.error(f"HTTP error fetching detail for product {product_id}: {e}")
+    sku = existing_sku or CategoryScraperService._extract_sku_from_url(fetch_url)
+
+    async def _do_html_fetch():
+        try:
+            return await url_scraper.fetch_url(fetch_url)
+        except Exception as e:
+            logger.error(f"HTML fetch error for product {product_id}: {e}")
+            return None
+
+    async def _do_listings_fetch(product_sku: str):
+        if not product_sku or platform != 'hepsiburada':
+            return None
+        try:
+            pm = PriceMonitorService()
+            result = await pm.fetch_listings(product_sku)
+            if result.get('success') and result.get('data'):
+                return pm.parse_listings(result['data'])
+            return None
+        except Exception as e:
+            logger.error(f"Listings API error for {product_sku}: {e}")
+            return None
+
+    html_result, listings_sellers = await asyncio.gather(
+        _do_html_fetch(),
+        _do_listings_fetch(sku)
+    )
+
+    brand = ''
+    seller_name = ''
+    barcode = ''
+    category_path = ''
+    stock_status = ''
+    shipping_type = ''
+    rating_val = None
+    review_count_val = None
+    utag_price = None
+    description = ''
+    specs = {}
+    seller_list_data = []
+    parsed = None
+
+    if html_result:
+        utag = _parse_utag_data(html_result)
+        specs = _parse_hb_specs(html_result)
+        description = _parse_hb_description(html_result)
+        parsed = url_scraper.parse_html(html_result, fetch_url)
+
+        brand = utag.get('product_brand', '') or (utag.get('product_brands', [''])[0] if utag.get('product_brands') else '')
+        if not brand and parsed:
+            brand = parsed.get('brand', '')
+
+        if not sku:
+            product_skus = utag.get('product_skus', [])
+            sku = product_skus[0] if product_skus else ''
+            if not sku and parsed:
+                sku = parsed.get('sku', '')
+
+        barcodes = utag.get('product_barcodes', [])
+        barcode = barcodes[0] if barcodes else utag.get('product_barcode', '')
+        if not barcode and parsed:
+            barcode = parsed.get('barcode', '')
+
+        category_path = utag.get('category_name_hierarchy', '')
+        if not category_path and parsed:
+            cats = parsed.get('category_breadcrumbs', [])
+            if isinstance(cats, list):
+                names = [c.get('name', '') if isinstance(c, dict) else str(c) for c in cats]
+                category_path = ' > '.join(n for n in names if n)
+
+        stock_status = utag.get('product_status', '')
+        if not stock_status and parsed:
+            stock_status = parsed.get('availability', '')
+
+        shipping_types = utag.get('shipping_type', [])
+        shipping_type = shipping_types[0] if isinstance(shipping_types, list) and shipping_types else str(shipping_types) if shipping_types else ''
+
+        review_rate = utag.get('review_rate', '')
+        if review_rate:
+            try:
+                rating_val = float(str(review_rate).replace(',', '.'))
+            except (ValueError, TypeError):
+                pass
+        rc = utag.get('review_count', '')
+        if rc:
+            try:
+                review_count_val = int(str(rc).replace('.', ''))
+            except (ValueError, TypeError):
+                pass
+
+        prices = utag.get('product_prices', [])
+        if prices:
+            try:
+                utag_price = float(str(prices[0]).replace(',', ''))
+            except (ValueError, TypeError):
+                pass
+
+        if not specs and parsed:
+            specs = parsed.get('product_specs', {}) or {}
+    elif not listings_sellers:
+        logger.warning(f"Both HTML and Listings API failed for product {product_id}")
         return
 
-    # Parse all data from HTML (still no DB connection)
-    utag = _parse_utag_data(html)
-    specs = _parse_hb_specs(html)
-    description = _parse_hb_description(html)
-    parsed = url_scraper.parse_html(html, fetch_url)
-
-    brand = utag.get('product_brand', '') or (utag.get('product_brands', [''])[0] if utag.get('product_brands') else '')
-    if not brand and parsed:
-        brand = parsed.get('brand', '')
-
-    merchant_names = utag.get('merchant_names', [])
-    seller_name = merchant_names[0] if merchant_names else ''
-    if not seller_name:
-        seller_name = utag.get('order_store', '')
-    if not seller_name and parsed:
-        seller_name = parsed.get('seller_name', '')
-
-    product_skus = utag.get('product_skus', [])
-    sku = product_skus[0] if product_skus else ''
-    if not sku and parsed:
-        sku = parsed.get('sku', '')
-
-    barcodes = utag.get('product_barcodes', [])
-    barcode = barcodes[0] if barcodes else utag.get('product_barcode', '')
-    if not barcode and parsed:
-        barcode = parsed.get('barcode', '')
-
-    category_path = utag.get('category_name_hierarchy', '')
-    if not category_path and parsed:
-        cats = parsed.get('category_breadcrumbs', [])
-        if isinstance(cats, list):
-            names = [c.get('name', '') if isinstance(c, dict) else str(c) for c in cats]
-            category_path = ' > '.join(n for n in names if n)
-
-    stock_status = utag.get('product_status', '')
-    if not stock_status and parsed:
-        stock_status = parsed.get('availability', '')
-
-    shipping_types = utag.get('shipping_type', [])
-    shipping_type = shipping_types[0] if isinstance(shipping_types, list) and shipping_types else str(shipping_types) if shipping_types else ''
-
-    review_rate = utag.get('review_rate', '')
-    rating_val = None
-    if review_rate:
+    if not listings_sellers and sku and platform == 'hepsiburada':
+        logger.info(f"SKU {sku} discovered from HTML for product {product_id}, fetching Listings API")
         try:
-            rating_val = float(str(review_rate).replace(',', '.'))
-        except (ValueError, TypeError):
-            pass
-    review_count_val = None
-    rc = utag.get('review_count', '')
-    if rc:
-        try:
-            review_count_val = int(str(rc).replace('.', ''))
-        except (ValueError, TypeError):
-            pass
+            pm = PriceMonitorService()
+            result = await pm.fetch_listings(sku)
+            if result.get('success') and result.get('data'):
+                listings_sellers = pm.parse_listings(result['data'])
+        except Exception as e:
+            logger.error(f"Deferred Listings API error for {sku}: {e}")
 
-    prices = utag.get('product_prices', [])
-    utag_price = None
-    if prices:
-        try:
-            utag_price = float(str(prices[0]).replace(',', ''))
-        except (ValueError, TypeError):
-            pass
-
-    seller_list_data = []
-    if merchant_names:
-        merchant_ids = utag.get('merchant_ids', [])
-        listing_ids = utag.get('listing_ids', [])
-        for i, mn in enumerate(merchant_names):
-            entry = {'name': mn}
-            if i < len(merchant_ids):
-                entry['id'] = merchant_ids[i]
-            if i < len(listing_ids):
-                entry['listing_id'] = listing_ids[i]
-            seller_list_data.append(entry)
-
-    if not specs and parsed:
-        specs = parsed.get('product_specs', {}) or {}
+    if listings_sellers:
+        seller_list_data = listings_sellers
+        buybox = next((s for s in listings_sellers if s.get('buybox_order') == 1), None)
+        if not buybox and listings_sellers:
+            buybox = listings_sellers[0]
+        if buybox:
+            if not seller_name:
+                seller_name = buybox.get('merchant_name', '')
+            listings_price = buybox.get('price')
+            if listings_price:
+                utag_price = listings_price
+    else:
+        if html_result:
+            utag = _parse_utag_data(html_result)
+            merchant_names = utag.get('merchant_names', [])
+            seller_name = merchant_names[0] if merchant_names else ''
+            if not seller_name:
+                seller_name = utag.get('order_store', '')
+            if not seller_name and parsed:
+                seller_name = parsed.get('seller_name', '')
 
     detail_data = {
-        'title': utag.get('product_name_array', '') or (parsed.get('title') if parsed else ''),
+        'title': '',
         'description': description or (parsed.get('description', '') if parsed else ''),
         'price': utag_price or (parsed.get('price') if parsed else None),
-        'currency': utag.get('order_currency', 'TRY'),
+        'currency': 'TRY',
         'brand': brand,
         'sku': sku,
         'barcode': barcode,
@@ -519,6 +566,7 @@ async def _fetch_single_detail_inner(product_id: int):
         'review_count': review_count_val or (parsed.get('review_count') if parsed else None),
         'seller_name': seller_name,
         'seller_list': seller_list_data,
+        'seller_count': len(seller_list_data),
         'category': category_path,
         'category_breadcrumbs': parsed.get('category_breadcrumbs') if parsed else [],
         'images': parsed.get('images') if parsed else [],
@@ -526,11 +574,14 @@ async def _fetch_single_detail_inner(product_id: int):
         'shipping_type': shipping_type,
         'shipping_info': parsed.get('shipping_info') if parsed else None,
         'return_policy': parsed.get('return_policy') if parsed else None,
-        'canonical_url': utag.get('canonical_url', ''),
-        'product_ids': utag.get('product_ids', []),
     }
 
-    # Phase 3: Save results to DB with a fresh short-lived session
+    if html_result:
+        utag = _parse_utag_data(html_result)
+        detail_data['title'] = utag.get('product_name_array', '') or (parsed.get('title') if parsed else '')
+        detail_data['canonical_url'] = utag.get('canonical_url', '')
+        detail_data['product_ids'] = utag.get('product_ids', [])
+
     db = SessionLocal()
     try:
         product = db.query(CategoryProduct).filter(CategoryProduct.id == product_id).first()
@@ -563,7 +614,7 @@ async def _fetch_single_detail_inner(product_id: int):
             product.rating = rating_val
         if review_count_val:
             product.review_count = review_count_val
-        if utag_price:
+        if utag_price and utag_price > 0:
             product.price = utag_price
 
         if fetch_url != str(product.url):
@@ -571,7 +622,8 @@ async def _fetch_single_detail_inner(product_id: int):
 
         product.updated_at = datetime.utcnow()
         db.commit()
-        logger.info(f"Detail fetched for product {product_id}: brand={brand}, seller={seller_name}, sku={sku}")
+        sellers_count = len(seller_list_data)
+        logger.info(f"Detail fetched for product {product_id}: brand={brand}, sku={sku}, sellers={sellers_count}")
     except Exception as e:
         logger.error(f"Error saving detail for product {product_id}: {e}")
     finally:

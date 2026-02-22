@@ -98,54 +98,14 @@ class CategoryScraperService:
         return urlunparse(parsed._replace(query=new_query))
 
     @staticmethod
-    def _extract_hb_product_data_from_scripts(html: str) -> dict:
-        product_map: dict[str, dict] = {}
-        try:
-            for m in re.finditer(r'"products":\[', html):
-                start = m.start() + len('"products":')
-                depth = 0
-                end_idx = start
-                for i, c in enumerate(html[start:start + 500000]):
-                    if c == '[':
-                        depth += 1
-                    elif c == ']':
-                        depth -= 1
-                        if depth == 0:
-                            end_idx = start + i + 1
-                            break
-                arr_json = html[start:end_idx]
-                if len(arr_json) < 20:
-                    continue
-                try:
-                    products = json.loads(arr_json)
-                except json.JSONDecodeError:
-                    continue
-                if not isinstance(products, list):
-                    continue
-                for p in products:
-                    if not isinstance(p, dict):
-                        continue
-                    pid = p.get('productId', '')
-                    if not pid:
-                        continue
-                    brand = p.get('brand', '')
-                    seller = ''
-                    variants = p.get('variantList', [])
-                    if variants and isinstance(variants, list):
-                        for v in variants:
-                            if not isinstance(v, dict):
-                                continue
-                            listing = v.get('listing', {})
-                            if isinstance(listing, dict) and listing.get('merchantName'):
-                                seller = listing['merchantName']
-                                break
-                    if pid not in product_map or brand:
-                        product_map[pid] = {'brand': brand, 'seller': seller}
-                if product_map:
-                    break
-        except Exception as e:
-            logger.debug(f"Error extracting HB product data from scripts: {e}")
-        return product_map
+    def _extract_sku_from_url(url: str) -> str:
+        m = re.search(r'-pm-([A-Za-z0-9]+)(?:\?|$|/)', url)
+        if m:
+            return m.group(1)
+        m2 = re.search(r'/([A-Z]{2,4}\d{8,}[A-Z0-9]*)(?:\?|$|/)', url)
+        if m2:
+            return m2.group(1)
+        return ''
 
     @staticmethod
     def _extract_hb_filter_data(soup, html: str) -> dict:
@@ -218,8 +178,6 @@ class CategoryScraperService:
 
     def parse_hepsiburada_category(self, html: str, url: str) -> dict:
         soup = BeautifulSoup(html, 'html.parser')
-        product_data_map = self._extract_hb_product_data_from_scripts(html)
-        logger.info(f"Extracted brand/seller data for {len(product_data_map)} products from HB scripts")
 
         filter_data = self._extract_hb_filter_data(soup, html)
 
@@ -286,7 +244,7 @@ class CategoryScraperService:
             product_cards = soup.find_all('article', class_=re.compile(r'productCard', re.I))
 
         for card in product_cards:
-            product = self._parse_hb_product_card(card, product_data_map)
+            product = self._parse_hb_product_card(card)
             if product and product.get('name'):
                 result['products'].append(product)
 
@@ -312,7 +270,7 @@ class CategoryScraperService:
 
         return result
 
-    def _parse_hb_product_card(self, card, product_data_map: dict = None) -> dict:
+    def _parse_hb_product_card(self, card) -> dict:
         product = {
             'name': '',
             'url': '',
@@ -322,10 +280,9 @@ class CategoryScraperService:
             'discount_percentage': None,
             'rating': None,
             'review_count': None,
-            'brand': '',
+            'sku': '',
             'is_sponsored': False,
             'campaign_text': '',
-            'seller_name': '',
         }
 
         is_sponsored = card.find(string=re.compile(r'Reklam', re.I))
@@ -343,6 +300,7 @@ class CategoryScraperService:
             if href and not href.startswith('http'):
                 href = f"https://www.hepsiburada.com{href}"
             product['url'] = href
+            product['sku'] = self._extract_sku_from_url(href)
 
         title_el = card.find('h3') or card.find('h2') or card.find('span', attrs={'data-test-id': 'product-card-name'})
         if title_el:
