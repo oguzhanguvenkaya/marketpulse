@@ -348,7 +348,11 @@ async def run_scrape_job(job_id: str):
             job.failed_urls = failed
             job.completed_at = datetime.utcnow()
             db.commit()
-        except:
-            pass
+        except Exception as e:
+            logger.critical(f"[JOB {job_id[:8]}] Failed to mark job as failed: {e}", exc_info=True)
+            try:
+                db.rollback()
+            except Exception:
+                pass
     finally:
         db.close()
