@@ -54,6 +54,11 @@ def _resolve_scraper_api_key() -> str:
     for key_name in _SCRAPER_KEY_NAMES:
         value = _normalize_secret(os.getenv(key_name, ""))
         if value:
+            if key_name != "SCRAPER_API_KEY":
+                logger.warning(
+                    "DEPRECATION: '%s' is deprecated, use 'SCRAPER_API_KEY' instead.",
+                    key_name,
+                )
             return value
 
     for env_file in (_ENV_FILE, _BACKEND_ENV_FILE):
@@ -96,7 +101,7 @@ class Settings(BaseSettings):
     
     PROXY_PROVIDER: str = os.getenv("PROXY_PROVIDER", "auto")
     
-    DEBUG_SAVE_HTML: bool = os.getenv("DEBUG_SAVE_HTML", "true").lower() == "true"
+    DEBUG_SAVE_HTML: bool = os.getenv("DEBUG_SAVE_HTML", "false").lower() == "true"
     DEBUG_HTML_PATH: str = os.getenv("DEBUG_HTML_PATH", "/tmp/scraping_debug")
     
     @property

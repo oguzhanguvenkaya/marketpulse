@@ -43,7 +43,8 @@ def extract_video_id(url: str) -> str | None:
 
 
 def _build_scraperapi_proxy_url():
-    api_key = os.getenv("SCRAPPER_API", "")
+    from app.core.config import settings
+    api_key = settings.SCRAPER_API_KEY
     if not api_key:
         return None
     return f"http://scraperapi:{api_key}@proxy-server.scraperapi.com:8001"
