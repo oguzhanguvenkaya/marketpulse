@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Layout from './components/Layout'
 import ApiKeyModal from './components/ApiKeyModal'
+import PageSkeleton from './components/Skeleton'
 import './App.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -19,19 +20,11 @@ const VideoTranscripts = lazy(() => import('./pages/VideoTranscripts'))
 const JsonEditor = lazy(() => import('./pages/JsonEditor'))
 const CategoryExplorer = lazy(() => import('./pages/CategoryExplorer'))
 
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  )
-}
-
 function App() {
   return (
     <Router>
       <Layout>
-        <Suspense fallback={<PageLoader />}>
+        <Suspense fallback={<PageSkeleton />}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
