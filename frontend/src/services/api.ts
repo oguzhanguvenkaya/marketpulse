@@ -223,6 +223,23 @@ export const getStats = async (): Promise<Stats> => {
   });
 };
 
+export interface StatTrends {
+  products: number[];
+  snapshots: number[];
+  tasks: number[];
+  completed: number[];
+}
+
+export const getStatTrends = async (): Promise<StatTrends | null> => {
+  try {
+    const response = await api.get('/stats/trends');
+    return response.data;
+  } catch {
+    // Backend endpoint may not exist yet — graceful fallback
+    return null;
+  }
+};
+
 export interface SponsoredProduct {
   order_index: number;
   product_url: string;
