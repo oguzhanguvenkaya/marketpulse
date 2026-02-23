@@ -60,11 +60,15 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'glow': 'glow 2.2s ease-in-out infinite alternate',
+        'shimmer': 'shimmer 1.5s infinite',
       },
       keyframes: {
         glow: {
           '0%': { boxShadow: '0 0 4px rgba(247, 206, 134, 0.2)' },
           '100%': { boxShadow: '0 0 16px rgba(247, 206, 134, 0.35)' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
         },
       },
       borderRadius: {
