@@ -5,10 +5,46 @@ const api = axios.create({
   baseURL: '/api',
 });
 
-const internalApiKey = import.meta.env.VITE_INTERNAL_API_KEY;
-if (internalApiKey) {
-  api.defaults.headers.common['X-API-Key'] = internalApiKey;
-}
+// Request interceptor: attach API key from sessionStorage
+api.interceptors.request.use((config) => {
+  const apiKey = sessionStorage.getItem('mp_api_key');
+  if (apiKey) {
+    config.headers['X-API-Key'] = apiKey;
+  }
+  return config;
+});
+
+// Response interceptor: trigger API key prompt on auth failure
+let isPromptingApiKey = false;
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      !isPromptingApiKey &&
+      [401, 403].includes(error.response?.status)
+    ) {
+      isPromptingApiKey = true;
+      window.dispatchEvent(new CustomEvent('mp:api-key-required'));
+
+      return new Promise((resolve, reject) => {
+        const handler = (e: Event) => {
+          window.removeEventListener('mp:api-key-set', handler);
+          isPromptingApiKey = false;
+          const key = (e as CustomEvent).detail;
+          if (key) {
+            error.config.headers['X-API-Key'] = key;
+            resolve(api.request(error.config));
+          } else {
+            reject(error);
+          }
+        };
+        window.addEventListener('mp:api-key-set', handler);
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 const CACHE_PREFIX = {
   tasks: 'tasks',
