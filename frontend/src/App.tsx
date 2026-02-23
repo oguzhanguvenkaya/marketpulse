@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Layout from './components/Layout'
+import ApiKeyModal from './components/ApiKeyModal'
 import './App.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -49,6 +50,7 @@ function App() {
           </Routes>
         </Suspense>
       </Layout>
+      <ApiKeyModal />
     </Router>
   )
 }
