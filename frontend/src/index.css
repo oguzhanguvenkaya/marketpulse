@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Scale: dark-900 (lightest bg) → dark-300 (darkest text) */
   --color-dark-900: #fffbef;
   --color-dark-800: #f7eede;
   --color-dark-700: #fefbf0;
@@ -11,13 +12,30 @@
   --color-dark-400: #9e9585;
   --color-dark-300: #7a7060;
 
+  /* Accent */
   --color-accent-primary: #5b4824;
   --color-accent-secondary: #f7ce86;
   --color-accent-tertiary: #e6ecd3;
 
+  /* Status */
   --color-danger: #cb5150;
   --color-warning: #d97706;
   --color-success: #16a34a;
+
+  /* Semantic text */
+  --color-text-primary: #0f1419;
+  --color-text-secondary: #3d3427;
+  --color-text-muted: #9e8b66;
+  --color-text-body: #5f471d;
+
+  /* Semantic surfaces */
+  --color-surface-input: #fffbef;
+  --color-surface-card: #fefbf0;
+  --color-surface-subtle: #f7eede;
+
+  /* Semantic borders */
+  --color-border-default: #e5e0d2;
+  --color-border-input: #e8dfcf;
 }
 
 :root {
@@ -44,6 +62,21 @@
   --color-danger: #ef7170;
   --color-warning: #fbbf24;
   --color-success: #4ade80;
+
+  /* Semantic text */
+  --color-text-primary: #F0FDF4;
+  --color-text-secondary: #A7C4B8;
+  --color-text-muted: #6B8F80;
+  --color-text-body: #A7C4B8;
+
+  /* Semantic surfaces */
+  --color-surface-input: #0F1A17;
+  --color-surface-card: #162420;
+  --color-surface-subtle: #162420;
+
+  /* Semantic borders */
+  --color-border-default: #2A4039;
+  --color-border-input: #2A4039;
 
   --surface-base: rgba(15, 26, 23, 0.96);
   --surface-raised: rgba(28, 46, 40, 0.98);

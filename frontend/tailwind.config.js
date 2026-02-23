@@ -7,45 +7,8 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        dark: {
-          900: '#fffbef',
-          800: '#f7eede',
-          700: '#fefbf0',
-          600: '#e5e0d2',
-          500: '#d4cfc1',
-          400: '#9e9585',
-          300: '#7a7060',
-        },
-        accent: {
-          primary: '#5b4824',
-          secondary: '#f7ce86',
-          tertiary: '#e6ecd3',
-          glow: 'rgba(247, 206, 134, 0.24)',
-        },
-        success: {
-          DEFAULT: '#22c55e',
-          dark: '#16a34a',
-          glow: 'rgba(34, 197, 94, 0.15)',
-        },
-        warning: {
-          DEFAULT: '#f59e0b',
-          dark: '#d97706',
-          glow: 'rgba(245, 158, 11, 0.15)',
-        },
-        danger: {
-          DEFAULT: '#cb5150',
-          dark: '#b91c1c',
-          glow: 'rgba(203, 81, 80, 0.15)',
-        },
-        neutral: {
-          100: '#fffbef',
-          200: '#5f471d',
-          300: '#7a6b4e',
-          400: '#9e8b66',
-          500: '#b5a382',
-        },
-      },
+      /* Colors are defined in @theme block in index.css (Tailwind v4 source of truth) */
+      /* Only non-color tokens remain here */
       boxShadow: {
         'glow-cyan': '0 0 16px rgba(247, 206, 134, 0.25)',
         'glow-green': '0 0 16px rgba(34, 197, 94, 0.2)',
