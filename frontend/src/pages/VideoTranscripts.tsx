@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import {
   fetchTranscript,
   fetchBulkTranscripts,
@@ -10,6 +11,7 @@ import {
   stopTranscriptJob,
 } from '../services/api';
 import type { TranscriptJobInfo, TranscriptJobDetail, TranscriptResultItem } from '../services/api';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type InputMode = 'single' | 'bulk';
 type BulkMode = 'csv' | 'json';
@@ -33,6 +35,7 @@ export default function VideoTranscripts() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [expandedTranscript, setExpandedTranscript] = useState<number | null>(null);
+  const [deleteJobId, setDeleteJobId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -173,8 +176,14 @@ export default function VideoTranscripts() {
     }
   };
 
-  const handleDelete = async (jobId: string) => {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+  const handleDeleteRequest = (jobId: string) => {
+    setDeleteJobId(jobId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteJobId) return;
+    const jobId = deleteJobId;
+    setDeleteJobId(null);
     try {
       await deleteTranscriptJob(jobId);
       if (expandedJobId === jobId) {
@@ -182,8 +191,10 @@ export default function VideoTranscripts() {
         setJobDetail(null);
       }
       loadJobs();
+      toast.success('Gorev silindi');
     } catch (e) {
       console.error('Error deleting job:', e);
+      toast.error('Silme islemi basarisiz');
     }
   };
 
@@ -594,7 +605,7 @@ export default function VideoTranscripts() {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(job.id)}
+                          onClick={() => handleDeleteRequest(job.id)}
                           className="text-[#9e8b66] dark:text-[#6B8F80] hover:text-red-400 transition-all"
                           title="Delete job"
                         >
@@ -633,6 +644,17 @@ export default function VideoTranscripts() {
           ) : null}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteJobId !== null}
+        title="Gorevi Sil"
+        message="Bu gorevi silmek istediginizden emin misiniz?"
+        confirmLabel="Sil"
+        cancelLabel="Iptal"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteJobId(null)}
+      />
     </div>
   );
 }

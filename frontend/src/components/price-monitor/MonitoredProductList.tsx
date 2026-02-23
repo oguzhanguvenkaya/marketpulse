@@ -21,7 +21,7 @@ export default function MonitoredProductList({
   selectedProduct,
   handleProductClick,
   handleFetchSingle,
-  handleDelete,
+  handleDeleteRequest,
   getProductUrl,
   formatDate,
   currentOffset,
@@ -201,7 +201,7 @@ export default function MonitoredProductList({
                     Refresh
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteRequest(product.id); }}
                     className="text-danger hover:text-danger/80 text-xs px-2 py-1 rounded hover:bg-danger/10 transition-colors cursor-pointer"
                   >
                     Delete

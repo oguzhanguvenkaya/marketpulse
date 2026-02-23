@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import {
   getMonitoredProducts,
   getMonitoredProductDetail,
@@ -55,6 +56,7 @@ export function usePriceMonitor() {
   const [currentFetchType, setCurrentFetchType] = useState<FetchType>('active');
   const [showDeleteModal, setShowDeleteModal] = useState<'all' | 'inactive' | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const [activeTotalCount, setActiveTotalCount] = useState(0);
   const [inactiveTotalCount, setInactiveTotalCount] = useState(0);
@@ -237,13 +239,13 @@ export function usePriceMonitor() {
       const parsed = JSON.parse(importJson);
       const productList: BulkProductInput[] = Array.isArray(parsed) ? parsed : [parsed];
       const result = await addMonitoredProducts(productList, platform);
-      alert(`${result.added} products added, ${result.updated} updated (${result.platform}).`);
+      toast.success(`${result.added} products added, ${result.updated} updated (${result.platform}).`);
       setShowImportModal(false);
       setImportJson('');
       void loadProducts();
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Unknown error';
-      alert('JSON parse error: ' + message);
+      toast.error('JSON parse error: ' + message);
     } finally {
       setImportLoading(false);
     }
@@ -259,7 +261,7 @@ export function usePriceMonitor() {
       setFetchStatus('started');
     } catch (e) {
       console.error('Error starting fetch:', e);
-      alert('Could not start price fetch');
+      toast.error('Could not start price fetch');
     }
   };
 
@@ -270,7 +272,7 @@ export function usePriceMonitor() {
       setFetchStatus('stopping');
     } catch (e) {
       console.error('Error stopping fetch:', e);
-      alert('Could not stop fetch');
+      toast.error('Could not stop fetch');
     }
   };
 
@@ -283,23 +285,35 @@ export function usePriceMonitor() {
       void Promise.all([loadProducts(), loadLastInactive()]);
     } catch (e) {
       console.error('Error fetching single product:', e);
-      alert('Could not fetch price');
+      toast.error('Could not fetch price');
     }
   };
 
-  const handleDelete = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDeleteRequest = useCallback((productId: string) => {
+    setDeleteTarget(productId);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     try {
-      await deleteMonitoredProduct(productId);
-      if (selectedProduct?.id === productId) {
+      await deleteMonitoredProduct(id);
+      if (selectedProduct?.id === id) {
         setSelectedProduct(null);
         setSellers([]);
       }
       void loadProducts();
+      toast.success('Urun silindi');
     } catch (e) {
       console.error('Error deleting product:', e);
+      toast.error('Delete failed');
     }
-  };
+  }, [deleteTarget, loadProducts, selectedProduct?.id]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
 
   const handleExport = async (filter: 'all' | 'active' | 'inactive' = 'all') => {
     try {
@@ -308,7 +322,7 @@ export function usePriceMonitor() {
       await exportPriceMonitorData(platform, filter);
     } catch (e) {
       console.error('Error exporting data:', e);
-      alert('Export failed');
+      toast.error('Export failed');
     } finally {
       setExportLoading(false);
     }
@@ -324,14 +338,14 @@ export function usePriceMonitor() {
       } else {
         result = await deleteInactiveMonitoredProducts(platform);
       }
-      alert(result.message);
+      toast.success(result.message);
       setShowDeleteModal(null);
       setSelectedProduct(null);
       setSellers([]);
       void Promise.all([loadProducts(), loadLastInactive()]);
     } catch (e) {
       console.error('Error deleting products:', e);
-      alert('Delete failed');
+      toast.error('Delete failed');
     } finally {
       setDeleteLoading(false);
     }
@@ -445,7 +459,10 @@ export function usePriceMonitor() {
     handleFetchAll,
     handleStopFetch,
     handleFetchSingle,
-    handleDelete,
+    deleteTarget,
+    handleDeleteRequest,
+    handleDeleteConfirm,
+    handleDeleteCancel,
     handleExport,
     handleBulkDelete,
     loadProducts,

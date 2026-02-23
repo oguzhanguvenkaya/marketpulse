@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import {
   scrapeUrl,
   scrapeBulkUrls,
@@ -10,6 +11,7 @@ import {
   stopScrapeJob,
 } from '../services/api';
 import type { ScrapeJobInfo, ScrapeJobDetail, ScrapeResultItem } from '../services/api';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type InputMode = 'single' | 'bulk';
 type BulkMode = 'csv' | 'json';
@@ -32,6 +34,7 @@ export default function UrlScraper() {
   const [jobDetail, setJobDetail] = useState<ScrapeJobDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [deleteJobId, setDeleteJobId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -171,8 +174,14 @@ export default function UrlScraper() {
     }
   };
 
-  const handleDelete = async (jobId: string) => {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+  const handleDeleteRequest = (jobId: string) => {
+    setDeleteJobId(jobId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteJobId) return;
+    const jobId = deleteJobId;
+    setDeleteJobId(null);
     try {
       await deleteScrapeJob(jobId);
       if (expandedJobId === jobId) {
@@ -180,8 +189,10 @@ export default function UrlScraper() {
         setJobDetail(null);
       }
       loadJobs();
+      toast.success('Gorev silindi');
     } catch (e) {
       console.error('Error deleting job:', e);
+      toast.error('Silme islemi basarisiz');
     }
   };
 
@@ -616,7 +627,7 @@ export default function UrlScraper() {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(job.id)}
+                          onClick={() => handleDeleteRequest(job.id)}
                           className="px-2.5 py-1 rounded-md text-xs font-medium bg-[#f7eede] dark:bg-[#162420] text-red-400 hover:bg-red-500/20 transition-all"
                           title="Delete job"
                         >
@@ -704,6 +715,17 @@ export default function UrlScraper() {
           ) : null}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteJobId !== null}
+        title="Gorevi Sil"
+        message="Bu gorevi silmek istediginizden emin misiniz?"
+        confirmLabel="Sil"
+        cancelLabel="Iptal"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteJobId(null)}
+      />
     </div>
   );
 }

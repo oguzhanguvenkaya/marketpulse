@@ -315,7 +315,7 @@ export default function ProductDetailModals(ce: UseCategoryExplorerReturn) {
     setSelectedCatProduct,
     setShowMobileFilters,
     selectCategory,
-    handleDeleteProduct,
+    handleDeleteProductRequest,
     formatPrice,
   } = ce;
 
@@ -335,7 +335,7 @@ export default function ProductDetailModals(ce: UseCategoryExplorerReturn) {
         <CatProductDetailPanel
           product={selectedCatProduct}
           onClose={() => setSelectedCatProduct(null)}
-          onDelete={handleDeleteProduct}
+          onDelete={handleDeleteProductRequest}
           formatPrice={formatPrice}
         />,
         document.body

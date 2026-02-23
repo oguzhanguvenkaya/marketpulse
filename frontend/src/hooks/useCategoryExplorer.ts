@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   getStoreProducts,
   getStoreProductFilters,
@@ -84,6 +85,12 @@ export function useCategoryExplorer() {
   const [detailFetching, setDetailFetching] = useState(false);
   const [detailProgress, setDetailProgress] = useState('');
   const detailPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'delete-single' | 'delete-bulk';
+    productId?: number;
+    message: string;
+  } | null>(null);
 
   // Sync state to URL params
   useEffect(() => {
@@ -389,29 +396,52 @@ export function useCategoryExplorer() {
     }
   };
 
-  const handleDeleteProduct = async (productId: number) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    try {
-      await deleteCategoryProduct(productId);
-      fetchCatProducts();
-      fetchCatFilterData();
-      if (selectedCatProduct?.id === productId) setSelectedCatProduct(null);
-    } catch (err: any) {
-      alert(err?.response?.data?.detail || 'Delete failed');
+  const handleDeleteProductRequest = (productId: number) => {
+    setConfirmAction({
+      type: 'delete-single',
+      productId,
+      message: 'Bu urunu silmek istediginizden emin misiniz?',
+    });
+  };
+
+  const handleBulkDeleteRequest = () => {
+    if (selectedForDetail.size === 0) return;
+    setConfirmAction({
+      type: 'delete-bulk',
+      message: `${selectedForDetail.size} secili urunu silmek istediginizden emin misiniz?`,
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+    const action = confirmAction;
+    setConfirmAction(null);
+
+    if (action.type === 'delete-single' && action.productId !== undefined) {
+      try {
+        await deleteCategoryProduct(action.productId);
+        fetchCatProducts();
+        fetchCatFilterData();
+        if (selectedCatProduct?.id === action.productId) setSelectedCatProduct(null);
+        toast.success('Urun silindi');
+      } catch (err: any) {
+        toast.error(err?.response?.data?.detail || 'Delete failed');
+      }
+    } else if (action.type === 'delete-bulk') {
+      try {
+        await deleteCategoryProductsBulk(Array.from(selectedForDetail));
+        setSelectedForDetail(new Set());
+        fetchCatProducts();
+        fetchCatFilterData();
+        toast.success('Urunler silindi');
+      } catch (err: any) {
+        toast.error(err?.response?.data?.detail || 'Bulk delete failed');
+      }
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedForDetail.size === 0) return;
-    if (!confirm(`Delete ${selectedForDetail.size} selected products?`)) return;
-    try {
-      await deleteCategoryProductsBulk(Array.from(selectedForDetail));
-      setSelectedForDetail(new Set());
-      fetchCatProducts();
-      fetchCatFilterData();
-    } catch (err: any) {
-      alert(err?.response?.data?.detail || 'Bulk delete failed');
-    }
+  const handleCancelAction = () => {
+    setConfirmAction(null);
   };
 
   const formatPrice = (price: number | null | undefined) => {
@@ -559,8 +589,11 @@ export function useCategoryExplorer() {
     selectAllForDetail,
     selectAllProducts,
     handleFetchDetails,
-    handleDeleteProduct,
-    handleBulkDelete,
+    confirmAction,
+    handleDeleteProductRequest,
+    handleBulkDeleteRequest,
+    handleConfirmAction,
+    handleCancelAction,
     formatPrice,
 
     // Memos / derived

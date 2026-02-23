@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
+import { Toaster } from 'sonner'
 import Layout from './components/Layout'
+import ErrorBoundary from './components/ErrorBoundary'
 import ApiKeyModal from './components/ApiKeyModal'
 import PageSkeleton from './components/Skeleton'
 import './App.css'
@@ -24,26 +26,38 @@ function App() {
   return (
     <Router>
       <Layout>
-        <Suspense fallback={<PageSkeleton />}>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/ads" element={<Ads />} />
-            <Route path="/price-monitor" element={<PriceMonitor />} />
-            <Route path="/sellers" element={<Sellers />} />
-            <Route path="/sellers/:merchantId" element={<SellerDetail />} />
-            <Route path="/hepsiburada" element={<HepsiburadaProducts />} />
-            <Route path="/trendyol" element={<TrendyolProducts />} />
-            <Route path="/web-products" element={<WebProducts />} />
-            <Route path="/url-scraper" element={<UrlScraper />} />
-            <Route path="/video-transcripts" element={<VideoTranscripts />} />
-            <Route path="/json-editor" element={<JsonEditor />} />
-            <Route path="/category-explorer" element={<CategoryExplorer />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<PageSkeleton />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/ads" element={<Ads />} />
+              <Route path="/price-monitor" element={<PriceMonitor />} />
+              <Route path="/sellers" element={<Sellers />} />
+              <Route path="/sellers/:merchantId" element={<SellerDetail />} />
+              <Route path="/hepsiburada" element={<HepsiburadaProducts />} />
+              <Route path="/trendyol" element={<TrendyolProducts />} />
+              <Route path="/web-products" element={<WebProducts />} />
+              <Route path="/url-scraper" element={<UrlScraper />} />
+              <Route path="/video-transcripts" element={<VideoTranscripts />} />
+              <Route path="/json-editor" element={<JsonEditor />} />
+              <Route path="/category-explorer" element={<CategoryExplorer />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </Layout>
       <ApiKeyModal />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: 'bg-[var(--surface-raised)] text-[var(--color-dark-300)] border border-[var(--surface-border)] shadow-lg',
+          style: {
+            fontFamily: 'Inter, sans-serif',
+          },
+        }}
+        richColors
+      />
     </Router>
   )
 }

@@ -5,6 +5,7 @@ import MonitoredProductList from '../components/price-monitor/MonitoredProductLi
 import SellerDetailPanel from '../components/price-monitor/SellerDetailPanel';
 import ImportModal from '../components/price-monitor/ImportModal';
 import DeleteModal from '../components/price-monitor/DeleteModal';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function PriceMonitor() {
   const pm = usePriceMonitor();
@@ -22,6 +23,17 @@ export default function PriceMonitor() {
 
       {pm.showImportModal && <ImportModal {...pm} />}
       {pm.showDeleteModal && <DeleteModal {...pm} />}
+
+      <ConfirmDialog
+        open={pm.deleteTarget !== null}
+        title="Urunu Sil"
+        message="Bu urunu silmek istediginizden emin misiniz?"
+        confirmLabel="Sil"
+        cancelLabel="Iptal"
+        variant="danger"
+        onConfirm={pm.handleDeleteConfirm}
+        onCancel={pm.handleDeleteCancel}
+      />
     </div>
   );
 }

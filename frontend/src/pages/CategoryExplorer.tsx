@@ -4,6 +4,7 @@ import ProductCards from '../components/category-explorer/ProductCards';
 import ScraperPanel from '../components/category-explorer/ScraperPanel';
 import DetailFetchPanel from '../components/category-explorer/DetailFetchPanel';
 import ProductDetailModals from '../components/category-explorer/ProductDetailModal';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function CategoryExplorer() {
   const ce = useCategoryExplorer();
@@ -255,6 +256,17 @@ export default function CategoryExplorer() {
       </main>
 
       <ProductDetailModals {...ce} />
+
+      <ConfirmDialog
+        open={ce.confirmAction !== null}
+        title="Silme Onayi"
+        message={ce.confirmAction?.message ?? ''}
+        confirmLabel="Sil"
+        cancelLabel="Iptal"
+        variant="danger"
+        onConfirm={ce.handleConfirmAction}
+        onCancel={ce.handleCancelAction}
+      />
     </div>
   );
 }
