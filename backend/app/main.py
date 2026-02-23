@@ -1,6 +1,7 @@
 import os
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -135,9 +136,10 @@ if os.path.exists(frontend_dist):
     async def serve_spa(full_path: str):
         if full_path.startswith("api/"):
             return JSONResponse(status_code=404, content={"detail": "Not found"})
-        file_path = os.path.join(frontend_dist, full_path)
-        if full_path and os.path.isfile(file_path):
-            return FileResponse(file_path)
+        frontend_root = Path(frontend_dist).resolve()
+        requested = (frontend_root / full_path).resolve()
+        if full_path and requested.is_file() and str(requested).startswith(str(frontend_root)):
+            return FileResponse(str(requested))
         index_path = os.path.join(frontend_dist, "index.html")
         if os.path.isfile(index_path):
             return FileResponse(index_path, headers={"Cache-Control": "no-cache"})
