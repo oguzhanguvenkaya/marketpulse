@@ -34,7 +34,7 @@ export default function DeleteModal({
           <button
             onClick={handleBulkDelete}
             disabled={deleteLoading}
-            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-text-primary font-medium transition-colors disabled:opacity-50"
+            className="btn-danger"
           >
             {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
           </button>

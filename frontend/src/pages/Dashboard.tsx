@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { createSearchTask, getSearchTask, getTasks, getStats, getStatTrends } from '../services/api';
 import type { SearchTask, Stats, StatTrends } from '../services/api';
 import Sparkline, { TrendIndicator } from '../components/Sparkline';
@@ -42,6 +43,7 @@ export default function Dashboard() {
       setTrends(trendsData);
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Failed to load dashboard data', { id: 'dashboard-load-error' });
     }
   };
 
@@ -56,6 +58,7 @@ export default function Dashboard() {
       setKeyword('');
     } catch (error) {
       console.error('Error creating task:', error);
+      toast.error('Failed to create search task', { id: 'dashboard-search-error' });
     } finally {
       setLoading(false);
     }

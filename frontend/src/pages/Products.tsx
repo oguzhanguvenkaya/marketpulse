@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { getProducts } from '../services/api';
 import type { Product } from '../services/api';
@@ -21,6 +22,7 @@ export default function Products() {
       setProducts(data);
     } catch (error) {
       console.error('Error loading products:', error);
+      toast.error('Failed to load products', { id: 'products-load-error' });
     } finally {
       setLoading(false);
     }

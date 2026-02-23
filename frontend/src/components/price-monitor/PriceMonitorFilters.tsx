@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { UsePriceMonitorReturn } from '../../hooks/usePriceMonitor';
 
 export default function PriceMonitorFilters({
@@ -22,6 +23,31 @@ export default function PriceMonitorFilters({
   handleExport,
   setShowDeleteModal,
 }: UsePriceMonitorReturn) {
+  const fetchMenuRef = useRef<HTMLDivElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showFetchMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (fetchMenuRef.current && !fetchMenuRef.current.contains(e.target as Node)) {
+        setShowFetchMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showFetchMenu, setShowFetchMenu]);
+
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExportMenu, setShowExportMenu]);
+
   return (
     <>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -47,7 +73,7 @@ export default function PriceMonitorFilters({
               </button>
             </>
           ) : (
-            <div className="relative">
+            <div className="relative" ref={fetchMenuRef}>
               <button
                 onClick={(e) => { e.stopPropagation(); setShowFetchMenu(!showFetchMenu); }}
                 disabled={activeTotalCount === 0 && inactiveTotalCount === 0 && lastInactiveCount === 0}
@@ -91,7 +117,7 @@ export default function PriceMonitorFilters({
               )}
             </div>
           )}
-          <div className="relative">
+          <div className="relative" ref={exportMenuRef}>
             <button
               onClick={(e) => { e.stopPropagation(); setShowExportMenu(!showExportMenu); }}
               disabled={exportLoading || totalProducts === 0}

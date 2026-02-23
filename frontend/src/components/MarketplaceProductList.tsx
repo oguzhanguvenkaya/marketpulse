@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import { createPortal } from 'react-dom';
 import {
   getStoreProducts,
@@ -72,6 +73,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
       setData(result);
     } catch (err) {
       console.error('Failed to fetch products:', err);
+      toast.error('Failed to load products', { id: 'marketplace-products-error' });
     } finally {
       setLoading(false);
     }
@@ -83,6 +85,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
       setFilters(f);
     } catch (err) {
       console.error('Failed to fetch filters:', err);
+      toast.error('Failed to load filters', { id: 'marketplace-filters-error' });
     }
   }, [platform]);
 
@@ -375,7 +378,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, brand, or SKU..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary placeholder-neutral-500 text-sm focus:outline-none focus:border-cyan-500/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary placeholder-neutral-500 text-sm focus:outline-none focus:border-accent-primary/50"
           />
         </div>
         <button type="submit" className="px-4 py-2.5 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm hover:bg-accent-primary/[0.08] transition-colors">
@@ -391,7 +394,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <select
                 value={selectedBrand}
                 onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               >
                 <option value="">All Brands</option>
                 {filters?.brands.map((b) => (
@@ -404,7 +407,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <select
                 value={selectedCategory}
                 onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               >
                 <option value="">All Categories</option>
                 {filters?.categories.map((c) => (
@@ -419,7 +422,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={minPrice}
                 onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
                 placeholder={filters?.price_range ? `Min: ${Math.floor(filters.price_range.min)}` : 'Min'}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               />
             </div>
             <div>
@@ -429,7 +432,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={maxPrice}
                 onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
                 placeholder={filters?.price_range ? `Max: ${Math.ceil(filters.price_range.max)}` : 'Max'}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               />
             </div>
             <div>
@@ -437,7 +440,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               <select
                 value={minRating}
                 onChange={(e) => { setMinRating(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               >
                 <option value="">All Ratings</option>
                 <option value="4">4+ Stars</option>
@@ -452,7 +455,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={skuFilter}
                 onChange={(e) => { setSkuFilter(e.target.value); setPage(1); }}
                 placeholder="Exact SKU"
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               />
             </div>
             <div>
@@ -462,7 +465,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                 value={barcodeFilter}
                 onChange={(e) => { setBarcodeFilter(e.target.value); setPage(1); }}
                 placeholder="Exact Barcode"
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               />
             </div>
             <div>
@@ -475,7 +478,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                   setSortDir(sd);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full px-3 py-2 rounded-lg bg-accent-primary/5 border border-border-default text-text-primary text-sm focus:outline-none focus:border-accent-primary/50"
               >
                 <option value="created_at:desc">Newest First</option>
                 <option value="created_at:asc">Oldest First</option>
@@ -596,7 +599,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
                       onClick={() => setPage(p)}
                       className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                         p === page
-                          ? 'border-cyan-500/50 text-text-primary bg-cyan-500/10'
+                          ? 'border-accent-primary/50 text-text-primary bg-accent-primary/10'
                           : 'border-border-default text-text-muted hover:bg-accent-primary/5'
                       }`}
                     >
@@ -651,7 +654,7 @@ export default function MarketplaceProductList({ platform, platformLabel, platfo
               value={urlText}
               onChange={(e) => setUrlText(e.target.value)}
               placeholder={"https://www.hepsiburada.com/...\nhttps://www.trendyol.com/...\nhttps://example.com/product/..."}
-              className="w-full h-48 bg-surface-subtle border border-border-default rounded-lg p-3 text-sm text-text-secondary placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500/50 resize-none font-mono"
+              className="w-full h-48 bg-surface-subtle border border-border-default rounded-lg p-3 text-sm text-text-secondary placeholder:text-neutral-600 focus:outline-none focus:border-accent-primary/50 resize-none font-mono"
             />
             <div className="flex items-center justify-between mt-4">
               <span className="text-xs text-neutral-500 dark:text-text-muted">

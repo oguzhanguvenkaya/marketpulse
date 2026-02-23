@@ -264,7 +264,7 @@ export default function ProductCards(ce: UseCategoryExplorerReturn) {
                 selectedForDetail.size === (catData?.products?.length || 0) && selectedForDetail.size > 0
                   ? 'bg-accent-primary border-accent-primary'
                   : selectedForDetail.size > 0
-                  ? 'bg-cyan-500/50 border-accent-primary/30'
+                  ? 'bg-accent-primary/50 border-accent-primary/30'
                   : 'border-accent-primary/20'
               }`}>
                 {selectedForDetail.size > 0 && (

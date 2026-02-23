@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { getSellerProducts, exportSellerProducts } from '../services/api';
 import type { SellerProduct } from '../services/api';
@@ -20,6 +21,18 @@ export default function SellerDetail() {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceAlertCount, setPriceAlertCount] = useState(0);
   const [campaignAlertCount, setCampaignAlertCount] = useState(0);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExportMenu]);
 
   useEffect(() => {
     if (merchantId) {
@@ -39,6 +52,7 @@ export default function SellerDetail() {
       setCampaignAlertCount(data.campaign_alert_count);
     } catch (error) {
       console.error('Error fetching seller products:', error);
+      toast.error('Failed to load seller details', { id: 'seller-detail-error' });
     } finally {
       setLoading(false);
     }
@@ -54,6 +68,7 @@ export default function SellerDetail() {
       await exportSellerProducts(merchantId, platform, priceOnly, campaignOnly);
     } catch (error) {
       console.error('Error exporting:', error);
+      toast.error('Failed to export seller products', { id: 'seller-detail-export-error' });
     } finally {
       setExporting(false);
     }
@@ -135,7 +150,7 @@ export default function SellerDetail() {
             )}
           </button>
 
-          <div className="relative">
+          <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
               disabled={exporting || filteredProducts.length === 0}

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSellers } from '../services/api';
 import type { SellerInfo } from '../services/api';
@@ -16,6 +17,18 @@ export default function Sellers() {
   const [bulkExporting, setBulkExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState({ current: 0, total: 0, sellerName: '' });
   const [showBulkExportMenu, setShowBulkExportMenu] = useState(false);
+  const bulkExportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showBulkExportMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (bulkExportRef.current && !bulkExportRef.current.contains(e.target as Node)) {
+        setShowBulkExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showBulkExportMenu]);
 
   useEffect(() => {
     setSearchParams({ platform });
@@ -33,6 +46,7 @@ export default function Sellers() {
       setSellers(data.sellers);
     } catch (error) {
       console.error('Error fetching sellers:', error);
+      toast.error('Failed to load sellers', { id: 'sellers-load-error' });
     } finally {
       setLoading(false);
     }
@@ -99,6 +113,7 @@ export default function Sellers() {
         }
       } catch (error) {
         console.error(`Error exporting ${seller.merchant_name}:`, error);
+        toast.error('Failed to export seller data', { id: 'sellers-export-error' });
       }
 
       if (i < targetSellers.length - 1) {
@@ -118,7 +133,7 @@ export default function Sellers() {
           <p className="text-sm md:text-base text-text-muted mt-1">View all sellers and their alert products</p>
         </div>
         {sellersWithAlerts.length > 0 && (
-          <div className="relative">
+          <div className="relative" ref={bulkExportRef}>
             <button
               onClick={() => setShowBulkExportMenu(!showBulkExportMenu)}
               disabled={bulkExporting}
