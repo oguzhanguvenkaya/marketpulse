@@ -103,7 +103,6 @@ Marketplace Data Analysis Platform for Turkish e-commerce marketplaces. Scrapes 
 | `BRIGHT_DATA_ZONE_NAME` | - | Bright Data zone |
 | `BRIGHT_DATA_ZONE_PASSWORD` | - | Bright Data zone password |
 | `VITE_QUERY_CACHE_TTL_MS` | `45000` | Frontend query cache TTL |
-| `VITE_INTERNAL_API_KEY` | - | API key injected into frontend |
 
 ## Running Locally
 

@@ -138,7 +138,7 @@ if os.path.exists(frontend_dist):
             return JSONResponse(status_code=404, content={"detail": "Not found"})
         frontend_root = Path(frontend_dist).resolve()
         requested = (frontend_root / full_path).resolve()
-        if full_path and requested.is_file() and str(requested).startswith(str(frontend_root)):
+        if full_path and requested.is_file() and frontend_root in requested.parents:
             return FileResponse(str(requested))
         index_path = os.path.join(frontend_dist, "index.html")
         if os.path.isfile(index_path):

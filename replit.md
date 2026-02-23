@@ -135,7 +135,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - `CORS_ALLOWED_ORIGINS` - Comma-separated origins
 - `DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`, `DB_POOL_TIMEOUT_SECONDS=30`, `DB_POOL_RECYCLE_SECONDS=180`
 - `BRIGHT_DATA_ACCOUNT_ID`, `BRIGHT_DATA_ZONE_NAME`, `BRIGHT_DATA_ZONE_PASSWORD`
-- `VITE_QUERY_CACHE_TTL_MS=45000`, `VITE_INTERNAL_API_KEY`
+- `VITE_QUERY_CACHE_TTL_MS=45000`
 
 ## Recent Changes
 - 2026-02-22: Deployment fix: Lazy Celery/Redis initialization to prevent autoscale timeout. Database engine lazy via proxy classes. CORS auto-includes REPLIT_DOMAINS. Production uses PRICE_MONITOR_EXECUTOR=local. Deploy target changed from cloudrun to autoscale

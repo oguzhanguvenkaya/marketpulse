@@ -16,14 +16,20 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor: trigger API key prompt on auth failure
 let isPromptingApiKey = false;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pendingAuthQueue: Array<{ resolve: (v: any) => void; reject: (e: any) => void; config: any }> = [];
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (
-      !isPromptingApiKey &&
-      [401, 403].includes(error.response?.status)
-    ) {
+    if ([401, 403].includes(error.response?.status)) {
+      if (isPromptingApiKey) {
+        // Queue concurrent 401s to retry after key is entered
+        return new Promise((resolve, reject) => {
+          pendingAuthQueue.push({ resolve, reject, config: error.config });
+        });
+      }
+
       isPromptingApiKey = true;
       window.dispatchEvent(new CustomEvent('mp:api-key-required'));
 
@@ -34,8 +40,18 @@ api.interceptors.response.use(
           const key = (e as CustomEvent).detail;
           if (key) {
             error.config.headers['X-API-Key'] = key;
+            // Drain queued requests
+            const queued = [...pendingAuthQueue];
+            pendingAuthQueue = [];
+            queued.forEach((q) => {
+              q.config.headers['X-API-Key'] = key;
+              q.resolve(api.request(q.config));
+            });
             resolve(api.request(error.config));
           } else {
+            const queued = [...pendingAuthQueue];
+            pendingAuthQueue = [];
+            queued.forEach((q) => q.reject(error));
             reject(error);
           }
         };
