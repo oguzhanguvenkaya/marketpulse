@@ -1,6 +1,5 @@
 import os
 import logging
-import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,8 +38,7 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
 
-    t = threading.Thread(target=_init_db, daemon=True)
-    t.start()
+    _init_db()
 
     yield
 
