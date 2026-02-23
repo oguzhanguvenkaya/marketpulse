@@ -363,7 +363,11 @@ async def run_transcript_job(job_id: str):
             job.failed_videos = failed
             job.completed_at = datetime.utcnow()
             db.commit()
-        except:
-            pass
+        except Exception as e:
+            logger.critical(f"[TRANSCRIPT {job_id[:8]}] Failed to mark job as failed: {e}", exc_info=True)
+            try:
+                db.rollback()
+            except Exception:
+                pass
     finally:
         db.close()
