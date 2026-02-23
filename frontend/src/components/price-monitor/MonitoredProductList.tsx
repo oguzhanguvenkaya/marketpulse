@@ -103,17 +103,17 @@ export default function MonitoredProductList({
       {loading ? (
         <div className="text-center py-12">
           <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mx-auto" />
-          <p className="text-neutral-500 mt-3">Loading products...</p>
+          <p className="text-neutral-500 dark:text-[#6B8F80] mt-3">Loading products...</p>
         </div>
       ) : (showInactive ? inactiveProducts : activeProducts).length === 0 ? (
         <div className="text-center py-12">
           <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-neutral-500 dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
           <p className="text-[#9e8b66] dark:text-[#6B8F80]">{showInactive ? 'No inactive products' : 'No monitored products yet'}</p>
-          <p className="text-sm text-neutral-500 mt-1">{showInactive ? '' : 'Click "Add SKU" to start monitoring'}</p>
+          <p className="text-sm text-neutral-500 dark:text-[#6B8F80] mt-1">{showInactive ? '' : 'Click "Add SKU" to start monitoring'}</p>
         </div>
       ) : (
         <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
@@ -158,7 +158,7 @@ export default function MonitoredProductList({
                       className={`font-medium text-sm truncate block ${
                         showInactive
                           ? 'text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#5f471d] dark:hover:text-[#A7C4B8]'
-                          : 'text-accent-primary hover:text-accent-primary/80'
+                          : 'text-[#5b4824] dark:text-[#F0FDF4] hover:text-accent-primary dark:hover:text-[#86EFAC]'
                       }`}
                     >
                       {product.product_name}
@@ -172,18 +172,18 @@ export default function MonitoredProductList({
                       className={`font-medium text-sm ${
                         showInactive
                           ? 'text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#5f471d] dark:hover:text-[#A7C4B8]'
-                          : 'text-accent-primary hover:text-accent-primary/80'
+                          : 'text-[#5b4824] dark:text-[#F0FDF4] hover:text-accent-primary dark:hover:text-[#86EFAC]'
                       }`}
                     >
                       {product.sku}
                     </a>
                   )}
                   {product.product_name && (
-                    <div className="text-xs text-neutral-500 mt-1">
+                    <div className="text-xs text-neutral-500 dark:text-[#6B8F80] mt-1">
                       {product.barcode ? `Barcode: ${product.barcode}` : `SKU: ${product.sku}`}
                     </div>
                   )}
-                  <div className="text-xs text-neutral-500 mt-1 flex items-center gap-2">
+                  <div className="text-xs text-neutral-500 dark:text-[#6B8F80] mt-1 flex items-center gap-2">
                     <span>{product.seller_count} sellers</span>
                     {product.last_fetched_at && (
                       <>
@@ -216,7 +216,7 @@ export default function MonitoredProductList({
       {/* Pagination */}
       {totalProducts > PAGE_SIZE && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8">
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-neutral-500 dark:text-[#6B8F80]">
             {currentOffset + 1}–{Math.min(currentOffset + PAGE_SIZE, totalProducts)} of {totalProducts}
           </span>
           <div className="flex gap-2">

@@ -51,11 +51,11 @@ export default function Sellers() {
 
   const getCardBackground = (seller: SellerInfo) => {
     if (seller.price_alert_count > 0 && seller.campaign_alert_count > 0) {
-      return 'bg-gradient-to-br from-red-50 to-orange-50 border border-red-300/40';
+      return 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border border-red-300/40 dark:border-red-400/20';
     } else if (seller.price_alert_count > 0) {
-      return 'bg-red-50 border border-red-300/40';
+      return 'bg-red-50 dark:bg-red-950/30 border border-red-300/40 dark:border-red-400/20';
     } else if (seller.campaign_alert_count > 0) {
-      return 'bg-orange-50 border border-orange-300/40';
+      return 'bg-orange-50 dark:bg-orange-950/30 border border-orange-300/40 dark:border-orange-400/20';
     }
     return 'bg-[#f7eede] dark:bg-[#162420]';
   };
@@ -150,7 +150,7 @@ export default function Sellers() {
                 >
                   <span className="w-2 h-2 bg-danger rounded-full"></span>
                   <span>Export Price Alerts</span>
-                  <span className="ml-auto text-xs text-neutral-500">
+                  <span className="ml-auto text-xs text-neutral-500 dark:text-[#6B8F80]">
                     ({filteredSellers.filter(s => s.price_alert_count > 0).length} sellers)
                   </span>
                 </button>
@@ -161,7 +161,7 @@ export default function Sellers() {
                 >
                   <span className="w-2 h-2 bg-warning rounded-full"></span>
                   <span>Export Campaign Alerts</span>
-                  <span className="ml-auto text-xs text-neutral-500">
+                  <span className="ml-auto text-xs text-neutral-500 dark:text-[#6B8F80]">
                     ({filteredSellers.filter(s => s.campaign_alert_count > 0).length} sellers)
                   </span>
                 </button>
@@ -268,13 +268,13 @@ export default function Sellers() {
                     <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Products</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500 dark:text-[#6B8F80]'}`}>
                       {seller.price_alert_count}
                     </div>
                     <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Price</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500 dark:text-[#6B8F80]'}`}>
                       {seller.campaign_alert_count}
                     </div>
                     <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Campaign</div>

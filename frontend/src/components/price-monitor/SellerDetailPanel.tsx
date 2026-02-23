@@ -42,7 +42,7 @@ export default function SellerDetailPanel({
       {!selectedProduct ? (
         <div className="text-center py-12">
           <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-neutral-500 dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
             </svg>
           </div>
@@ -51,17 +51,17 @@ export default function SellerDetailPanel({
       ) : sellersLoading ? (
         <div className="text-center py-12">
           <div className="w-8 h-8 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mx-auto" />
-          <p className="text-neutral-500 mt-3">Loading sellers...</p>
+          <p className="text-neutral-500 dark:text-[#6B8F80] mt-3">Loading sellers...</p>
         </div>
       ) : sellers.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-neutral-500 dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
           </div>
           <p className="text-[#9e8b66] dark:text-[#6B8F80]">No seller data yet</p>
-          <p className="text-sm text-neutral-500 mt-1">Click "Refresh" to fetch prices</p>
+          <p className="text-sm text-neutral-500 dark:text-[#6B8F80] mt-1">Click "Refresh" to fetch prices</p>
         </div>
       ) : (
         <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
