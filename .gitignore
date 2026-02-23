@@ -45,5 +45,6 @@ backend/.env
 
 # Large asset directories
 attached_assets/
+hepsiburada_active_products.json
 awesome-llm-apps-main/
 superpowers-main/
