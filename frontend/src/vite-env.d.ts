@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_INTERNAL_API_KEY?: string;
   readonly VITE_QUERY_CACHE_TTL_MS?: string;
   readonly VITE_DISABLE_STRICT_MODE?: string;
 }

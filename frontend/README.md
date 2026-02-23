@@ -70,7 +70,7 @@ Palantir-style dark theme:
 
 `services/api.ts` provides typed functions for all backend endpoints. Uses:
 - Axios with `/api` base URL
-- `X-API-Key` header from `VITE_INTERNAL_API_KEY`
+- `X-API-Key` header from sessionStorage (set via ApiKeyModal at runtime)
 - Client-side query cache (`queryCache.ts`) with configurable TTL
 
 ## Running
