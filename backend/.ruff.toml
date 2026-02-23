@@ -1,0 +1,15 @@
+[lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501",   # line too long — many long lines in codebase
+    "E402",   # module level import not at top — lazy import pattern
+    "E701",   # multiple statements on one line
+    "E712",   # comparison to True/False — SQLAlchemy filter pattern
+    "F401",   # unused import — lazy imports and re-exports
+    "F841",   # unused variable — intentional in some patterns
+    "W291",   # trailing whitespace
+    "W292",   # no newline at end of file
+    "W293",   # whitespace before ':'
+]
+
+exclude = ["alembic/", "scripts/"]

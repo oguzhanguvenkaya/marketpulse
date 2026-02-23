@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid as uuid_mod
 import logging
 import asyncio
