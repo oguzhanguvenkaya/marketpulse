@@ -31,6 +31,19 @@ export default function Layout({ children }: LayoutProps) {
     try { localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0'); } catch {}
   }, [collapsed]);
 
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('mp_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch { return 'light'; }
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    try { localStorage.setItem('mp_theme', theme); } catch {}
+  }, [theme]);
+
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(NAV_GROUPS_KEY);
@@ -185,9 +198,9 @@ export default function Layout({ children }: LayoutProps) {
         title={collapsed ? item.label : undefined}
         className={`nav-item flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${
           collapsed ? 'justify-center px-0 py-3' : `gap-3 px-4 ${indented ? 'py-2.5 ml-2' : 'py-3'}`
-        } ${isActive ? 'nav-item-active text-[#3a2d14]' : 'text-[#7a6b4e]'}`}
+        } ${isActive ? 'nav-item-active text-[#3a2d14] dark:text-[#f5f0e8]' : 'text-[#7a6b4e] dark:text-[#8a7d65]'}`}
       >
-        <span className={`flex-shrink-0 ${isActive ? 'text-[#5b4824]' : 'text-[#9e8b66]'}`}>
+        <span className={`flex-shrink-0 ${isActive ? 'text-[#5b4824] dark:text-[#f7ce86]' : 'text-[#9e8b66] dark:text-[#8a7d65]'}`}>
           {item.icon}
         </span>
         {!collapsed && (
@@ -203,7 +216,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen app-shell text-[#5f471d] flex">
+    <div className="min-h-screen app-shell text-[#5f471d] dark:text-[#c4b89a] flex">
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -216,7 +229,7 @@ export default function Layout({ children }: LayoutProps) {
           mobileOpen ? 'translate-x-0 !w-72' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className={`border-b border-[#5b4824]/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
+        <div className={`border-b border-[#5b4824]/10 dark:border-[#f7ce86]/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center flex-shrink-0">
@@ -226,14 +239,14 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <span className="text-xl font-bold text-[#3a2d14] tracking-tight">MarketPulse</span>
-                  <span className="text-xs text-[#9e8b66] block">Intelligence Console</span>
+                  <span className="text-xl font-bold text-[#3a2d14] dark:text-[#f5f0e8] tracking-tight">MarketPulse</span>
+                  <span className="text-xs text-[#9e8b66] dark:text-[#8a7d65] block">Intelligence Console</span>
                 </div>
               )}
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
-              className="p-2 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 rounded-lg transition-colors md:hidden"
+              className="p-2 text-[#9e8b66] dark:text-[#8a7d65] hover:text-[#5b4824] dark:hover:text-[#f7ce86] hover:bg-[#5b4824]/10 dark:hover:bg-[#f7ce86]/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -257,15 +270,15 @@ export default function Layout({ children }: LayoutProps) {
                     <button
                       onClick={() => toggleGroup(group.label)}
                       className={`w-full flex items-center justify-between px-4 py-2 mt-3 mb-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.12em] transition-all duration-200 ${
-                        hasActiveChild ? 'text-[#5b4824]' : 'text-[#b5a382]'
-                      } hover:text-[#5b4824] hover:bg-[#5b4824]/5`}
+                        hasActiveChild ? 'text-[#5b4824] dark:text-[#f7ce86]' : 'text-[#b5a382] dark:text-[#8a7d65]'
+                      } hover:text-[#5b4824] dark:hover:text-[#f7ce86] hover:bg-[#5b4824]/5 dark:hover:bg-[#f7ce86]/5`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[#9e8b66]">{group.icon}</span>
+                        <span className="text-[#9e8b66] dark:text-[#8a7d65]">{group.icon}</span>
                         <span>{group.label}</span>
                       </div>
                       <svg
-                        className={`w-3.5 h-3.5 text-[#9e8b66] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-3.5 h-3.5 text-[#9e8b66] dark:text-[#8a7d65] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -278,7 +291,7 @@ export default function Layout({ children }: LayoutProps) {
                       className="flex justify-center py-2 mt-3 mb-1"
                       title={group.label}
                     >
-                      <span className="text-[#9e8b66]">{group.icon}</span>
+                      <span className="text-[#9e8b66] dark:text-[#8a7d65]">{group.icon}</span>
                     </div>
                   )}
                   {(isExpanded || collapsed) && (
@@ -292,10 +305,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
 
-        <div className={`border-t border-[#5b4824]/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
+        <div className={`border-t border-[#5b4824]/10 dark:border-[#f7ce86]/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
           <button
             onClick={() => setCollapsed(c => !c)}
-            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 ${
+            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-[#9e8b66] dark:text-[#8a7d65] hover:text-[#5b4824] dark:hover:text-[#f7ce86] hover:bg-[#5b4824]/10 dark:hover:bg-[#f7ce86]/10 ${
               collapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'
             }`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -306,8 +319,8 @@ export default function Layout({ children }: LayoutProps) {
             {!collapsed && <span className="text-sm">Collapse</span>}
           </button>
           {!collapsed && (
-            <div className="px-4 py-3 mt-2 rounded-xl bg-[#f7eede] border border-[#5b4824]/10">
-              <div className="flex items-center gap-2 text-xs text-[#7a6b4e]">
+            <div className="px-4 py-3 mt-2 rounded-xl bg-[#f7eede] dark:bg-[#2d2820] border border-[#5b4824]/10 dark:border-[#f7ce86]/10">
+              <div className="flex items-center gap-2 text-xs text-[#7a6b4e] dark:text-[#8a7d65]">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Realtime services active
               </div>
@@ -326,21 +339,36 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 -ml-1 text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 rounded-lg transition-colors md:hidden"
+              className="p-2 -ml-1 text-[#9e8b66] dark:text-[#8a7d65] hover:text-[#5b4824] dark:hover:text-[#f7ce86] hover:bg-[#5b4824]/10 dark:hover:bg-[#f7ce86]/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-[#b5a382]">Workspace</p>
-              <h1 className="text-base md:text-lg font-bold text-[#3a2d14]">{activeLabel}</h1>
+              <p className="text-xs uppercase tracking-[0.15em] text-[#b5a382] dark:text-[#8a7d65]">Workspace</p>
+              <h1 className="text-base md:text-lg font-bold text-[#3a2d14] dark:text-[#f5f0e8]">{activeLabel}</h1>
             </div>
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+              className="p-2 rounded-lg text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 dark:text-[#8a7d65] dark:hover:text-[#f7ce86] dark:hover:bg-[#f7ce86]/10 transition-colors"
+              title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+            >
+              {theme === 'light' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              )}
+            </button>
             <div className="badge badge-info">Live analytics</div>
-            <div className="text-sm text-[#9e8b66]">
+            <div className="text-sm text-[#9e8b66] dark:text-[#8a7d65]">
               {new Date().toLocaleDateString('en-US', {
                 weekday: 'short',
                 year: 'numeric',
