@@ -529,7 +529,7 @@ async def backfill_prices_from_monitor(
         latest_snapshot = db.query(SellerSnapshot).filter(
             SellerSnapshot.monitored_product_id == mp.id,
             SellerSnapshot.price.isnot(None)
-        ).order_by(SellerSnapshot.fetched_at.desc()).first()
+        ).order_by(SellerSnapshot.snapshot_date.desc()).first()
 
         if latest_snapshot and latest_snapshot.price:
             sp.price = float(latest_snapshot.price)
