@@ -565,7 +565,8 @@ async def import_excel(
     try:
         wb = openpyxl.load_workbook(BytesIO(content), read_only=True)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid Excel file: {str(e)}")
+        logger.error(f"Excel import failed: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=400, detail="Gecersiz Excel dosyasi. Lutfen dosya formatini kontrol edin.")
 
     ws = wb.active or wb[wb.sheetnames[0]]
 

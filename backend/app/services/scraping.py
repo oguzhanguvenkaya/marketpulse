@@ -578,13 +578,15 @@ class ScrapingService:
                 try:
                     discounted = float(prices[1].replace('.', '').replace(',', '.'))
                     basket_prices[url] = discounted
-                except:
+                except Exception as e:
+                    logger.debug(f"Basket campaign price float conversion failed: {e}")
                     pass
             elif len(prices) == 1:
                 try:
                     discounted = float(prices[0].replace('.', '').replace(',', '.'))
                     basket_prices[url] = discounted
-                except:
+                except Exception as e:
+                    logger.debug(f"Basket campaign single price float conversion failed: {e}")
                     pass
         
         if basket_prices:
@@ -972,7 +974,8 @@ class ScrapingService:
             
             try:
                 await page.wait_for_selector('[data-test-id="price-current-price"], [class*="price"], .product-price', timeout=10000)
-            except:
+            except Exception as e:
+                logger.warning(f"Playwright price selector wait failed: {e}")
                 pass
             
             await self._random_delay(2000, 3000)
@@ -1121,7 +1124,8 @@ class ScrapingService:
                     elif isinstance(data, dict):
                         if data.get('@type') == 'Product':
                             return data
-                except:
+                except Exception as e:
+                    logger.debug(f"JSON-LD parse failed: {e}")
                     continue
         except Exception as e:
             logger.debug(f"Error extracting JSON-LD: {e}")
@@ -1144,9 +1148,10 @@ class ScrapingService:
                 value_str = value_str.replace(',', '.')
             value_str = re.sub(r'[^\d.]', '', value_str)
             return float(value_str) if value_str else None
-        except:
+        except Exception as e:
+            logger.debug(f"Price float conversion failed: {e}")
             return None
-    
+
     def _parse_int(self, value) -> Optional[int]:
         if value is None:
             return None
@@ -1158,7 +1163,8 @@ class ScrapingService:
             value_str = str(value).strip()
             value_str = re.sub(r'[^\d]', '', value_str)
             return int(value_str) if value_str else None
-        except:
+        except Exception as e:
+            logger.debug(f"Int conversion failed: {e}")
             return None
     
     def _parse_utag_data(self, utag: Dict) -> Dict[str, Any]:
@@ -1198,13 +1204,15 @@ class ScrapingService:
             try:
                 rating_str = str(utag['review_rate']).replace(',', '.')
                 data['rating'] = float(rating_str)
-            except:
+            except Exception as e:
+                logger.debug(f"Rating float conversion failed: {e}")
                 pass
         
         if 'review_count' in utag:
             try:
                 data['reviews_count'] = int(str(utag['review_count']).replace('.', ''))
-            except:
+            except Exception as e:
+                logger.debug(f"Review count int conversion failed: {e}")
                 pass
         
         if 'product_prices' in utag and utag['product_prices']:
@@ -1276,9 +1284,10 @@ class ScrapingService:
                 price_str = re.sub(r'[^\d,.]', '', price_text).replace('.', '').replace(',', '.')
                 if price_str:
                     data['price'] = float(price_str)
-            except:
+            except Exception as e:
+                logger.debug(f"Current price extraction failed: {e}")
                 pass
-        
+
         discounted_price = None
         
         sepete_ozel_selectors = [
@@ -1305,7 +1314,8 @@ class ScrapingService:
                         discounted_price = float(price_str)
                         logger.debug(f"Found sepete özel price via {selector}: {discounted_price}")
                         break
-                    except:
+                    except Exception as e:
+                        logger.debug(f"Sepete ozel price float conversion failed: {e}")
                         pass
         
         if not discounted_price:
@@ -1326,7 +1336,8 @@ class ScrapingService:
                         discounted_price = float(price_str)
                         logger.debug(f"Found sepete özel price: {discounted_price}")
                         break
-                    except:
+                    except Exception as e:
+                        logger.debug(f"Sepete ozel regex price conversion failed: {e}")
                         pass
         
         if not discounted_price:
@@ -1343,7 +1354,8 @@ class ScrapingService:
                                 discounted_price = float(price_str)
                                 logger.debug(f"Found sepete özel price via parent: {discounted_price}")
                                 break
-                            except:
+                            except Exception as e:
+                                logger.debug(f"Sepete ozel parent price conversion failed: {e}")
                                 pass
                         parent = parent.find_parent()
                         if not parent:
@@ -1397,7 +1409,8 @@ class ScrapingService:
                 if match:
                     try:
                         data['seller_rating'] = float(match.group(1).replace(',', '.'))
-                    except:
+                    except Exception as e:
+                        logger.debug(f"Seller rating float conversion failed: {e}")
                         pass
         
         return data
@@ -1488,14 +1501,16 @@ class ScrapingService:
                         if match:
                             try:
                                 seller_data['price'] = float(match.group().replace('.', '').replace(',', '.'))
-                            except:
+                            except Exception as e:
+                                logger.debug(f"Other seller price conversion failed: {e}")
                                 pass
                     
                     rating_match = re.search(r'(\d+[,\.]\d+)', parent.get_text())
                     if rating_match:
                         try:
                             seller_data['seller_rating'] = float(rating_match.group(1).replace(',', '.'))
-                        except:
+                        except Exception as e:
+                            logger.debug(f"Other seller rating conversion failed: {e}")
                             pass
                 
                 if len(sellers) < 10:
@@ -1554,7 +1569,8 @@ class ScrapingService:
                     
                     if review.get('review_text'):
                         reviews.append(review)
-                except:
+                except Exception as e:
+                    logger.debug(f"Review parse failed: {e}")
                     continue
         
         return reviews[:20]
@@ -1622,7 +1638,8 @@ class ScrapingService:
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 3)")
             await self._random_delay(500, 1000)
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
-        except:
+        except Exception as e:
+            logger.warning(f"Playwright human simulation failed: {e}")
             pass
     
     async def _random_delay(self, min_ms: int, max_ms: int):

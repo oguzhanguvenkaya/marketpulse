@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from app.db.database import get_db, SessionLocal
 from app.db.models import ScrapeJob, ScrapeResult
 from app.core.security import require_mutating_api_key
+from app.core.url_validator import validate_url_safe
 
 router = APIRouter(
     prefix="/api/url-scraper",
@@ -33,6 +34,10 @@ class BulkUrlRequest(BaseModel):
 
 @router.post("/scrape")
 async def scrape_single_url(req: SingleUrlRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    is_safe, error_msg = validate_url_safe(req.url)
+    if not is_safe:
+        raise HTTPException(status_code=400, detail=error_msg)
+
     job = ScrapeJob(total_urls=1, status="running")
     db.add(job)
     db.commit()
@@ -55,6 +60,11 @@ async def scrape_single_url(req: SingleUrlRequest, background_tasks: BackgroundT
 
 @router.post("/scrape-bulk")
 async def scrape_bulk_urls(req: BulkUrlRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    for u in req.urls:
+        is_safe, error_msg = validate_url_safe(u.url)
+        if not is_safe:
+            raise HTTPException(status_code=400, detail=f"URL guvenli degil ({u.url}): {error_msg}")
+
     job = ScrapeJob(total_urls=len(req.urls), status="running")
     db.add(job)
     db.commit()
@@ -156,6 +166,14 @@ async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: Back
 
     if not urls_to_scrape:
         raise HTTPException(status_code=400, detail="No valid URLs found in CSV")
+
+    unsafe_urls = []
+    for u in urls_to_scrape:
+        is_safe, error_msg = validate_url_safe(u['url'])
+        if not is_safe:
+            unsafe_urls.append(f"{u['url']}: {error_msg}")
+    if unsafe_urls:
+        raise HTTPException(status_code=400, detail=f"Guvenli olmayan URL'ler tespit edildi: {'; '.join(unsafe_urls)}")
 
     job = ScrapeJob(total_urls=len(urls_to_scrape), status="running")
     db.add(job)

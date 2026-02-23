@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from app.db.database import get_db, SessionLocal
 from app.db.models import TranscriptJob, TranscriptResult
 from app.core.security import require_mutating_api_key
+from app.core.url_validator import validate_url_safe
 
 router = APIRouter(
     prefix="/api/transcripts",
@@ -33,6 +34,10 @@ class BulkVideoRequest(BaseModel):
 
 @router.post("/fetch")
 async def fetch_single_transcript(req: SingleVideoRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    is_safe, error_msg = validate_url_safe(req.video_url)
+    if not is_safe:
+        raise HTTPException(status_code=400, detail=error_msg)
+
     job = TranscriptJob(total_videos=1, status="running")
     db.add(job)
     db.commit()
@@ -55,6 +60,11 @@ async def fetch_single_transcript(req: SingleVideoRequest, background_tasks: Bac
 
 @router.post("/fetch-bulk")
 async def fetch_bulk_transcripts(req: BulkVideoRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    for v in req.videos:
+        is_safe, error_msg = validate_url_safe(v.video_url)
+        if not is_safe:
+            raise HTTPException(status_code=400, detail=f"URL guvenli degil ({v.video_url}): {error_msg}")
+
     job = TranscriptJob(total_videos=len(req.videos), status="running")
     db.add(job)
     db.commit()
@@ -153,6 +163,14 @@ async def fetch_csv_transcripts(file: UploadFile = File(...), background_tasks: 
 
     if not videos_to_fetch:
         raise HTTPException(status_code=400, detail="No valid YouTube video URLs found in CSV")
+
+    unsafe_urls = []
+    for v in videos_to_fetch:
+        is_safe, error_msg = validate_url_safe(v['video_url'])
+        if not is_safe:
+            unsafe_urls.append(f"{v['video_url']}: {error_msg}")
+    if unsafe_urls:
+        raise HTTPException(status_code=400, detail=f"Guvenli olmayan URL'ler tespit edildi: {'; '.join(unsafe_urls)}")
 
     seen = set()
     unique_videos = []

@@ -2,7 +2,7 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -15,13 +15,17 @@ _db_initialized = False
 def _init_db():
     global _db_initialized
     try:
-        from app.db.database import get_engine, Base
+        from app.db.database import get_engine
+        from sqlalchemy import text
         eng = get_engine()
-        Base.metadata.create_all(bind=eng)
+        # Verify DB connectivity (schema managed by Alembic)
+        with eng.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            conn.commit()
         _db_initialized = True
-        logger.info("Database tables initialized successfully")
+        logger.info("Database connection verified successfully")
     except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
+        logger.error(f"Database connection check failed: {e}")
 
 
 @asynccontextmanager
@@ -47,9 +51,24 @@ async def lifespan(app: FastAPI):
 def _get_cors_origins():
     try:
         from app.core.config import settings
-        return settings.cors_allowed_origins()
-    except Exception:
-        return ["*"]
+        origins = settings.cors_allowed_origins()
+        if not origins:
+            logger.warning("CORS: Empty origin list — cross-origin requests will be blocked")
+        return origins
+    except Exception as e:
+        logger.error(f"CORS configuration failed: {e}")
+        # Last defense: read REPLIT_DOMAINS directly
+        replit_domains = os.getenv("REPLIT_DOMAINS", "")
+        if replit_domains:
+            fallback = []
+            for domain in replit_domains.split(","):
+                d = domain.strip()
+                if d:
+                    fallback.append(f"https://{d}")
+            if fallback:
+                logger.warning(f"CORS: Using REPLIT_DOMAINS fallback: {fallback}")
+                return fallback
+        return []
 
 
 app = FastAPI(
@@ -58,6 +77,13 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception on {request.method} {request.url.path}: {type(exc).__name__}: {exc}", exc_info=True)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
 
 app.add_middleware(
     CORSMiddleware,

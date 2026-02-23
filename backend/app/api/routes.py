@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc, or_, text
 from sqlalchemy.exc import OperationalError
 from typing import List, Optional, Dict, Any, Callable
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import UUID
 from urllib.parse import quote_plus
 from time import perf_counter
@@ -39,8 +39,8 @@ def _get_trendyol_price_monitor_service():
 router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
 
 class SearchRequest(BaseModel):
-    keyword: str
-    platform: str = "hepsiburada"
+    keyword: str = Field(..., min_length=1, max_length=200)
+    platform: str = Field(default="hepsiburada", pattern=r"^(hepsiburada|trendyol)$")
 
 class AnalysisRequest(BaseModel):
     product_ids: List[str]
@@ -980,7 +980,8 @@ async def add_monitored_products(
                 added += 1
         except Exception as e:
             logger.warning(f"Import error for SKU {item.sku}: {e}")
-            errors.append({"sku": item.sku or item.productUrl, "error": str(e)})
+            logger.error(f"Bulk import item failed (sku={item.sku or item.productUrl}): {type(e).__name__}: {e}")
+            errors.append({"sku": item.sku or item.productUrl, "error": "Urun eklenirken hata olustu"})
     
     db.commit()
     

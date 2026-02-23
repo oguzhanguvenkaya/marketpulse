@@ -1,7 +1,10 @@
+import logging
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
 from typing import Optional, List
+
+logger = logging.getLogger(__name__)
 
 _ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 _BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
@@ -179,7 +182,7 @@ class Settings(BaseSettings):
                     if https_origin not in origins:
                         origins.append(https_origin)
         if not origins:
-            return ["*"]
+            logger.warning("CORS: No origins configured and no REPLIT_DOMAINS found")
         return origins
     
     class Config:

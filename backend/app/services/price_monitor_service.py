@@ -536,8 +536,8 @@ class PriceMonitorService:
             logger.info(f"Fetched {len(sellers)} sellers for SKU {sku}")
             
         except Exception as e:
-            result['error'] = str(e)
-            logger.error(f"Error fetching product {sku}: {e}")
+            logger.error(f"Price monitor check failed for {sku}: {type(e).__name__}: {e}")
+            result['error'] = "Fiyat kontrolu sirasinda hata olustu"
         
         return result
     

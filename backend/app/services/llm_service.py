@@ -1,7 +1,10 @@
 import os
+import logging
 from openai import OpenAI
 from typing import List, Dict, Any, Optional
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 class LLMService:
     def __init__(self):
@@ -44,7 +47,8 @@ class LLMService:
             )
             return response.choices[0].message.content
         except Exception as e:
-            return f"Analiz sırasında hata oluştu: {str(e)}"
+            logger.error(f"LLM analysis failed: {type(e).__name__}: {e}")
+            return "Analiz sirasinda beklenmeyen bir hata olustu. Lutfen tekrar deneyin."
     
     def _format_products_for_analysis(self, products_data: List[Dict[str, Any]]) -> str:
         formatted = []
