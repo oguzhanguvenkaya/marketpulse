@@ -10,7 +10,7 @@ export default {
       /* Colors are defined in @theme block in index.css (Tailwind v4 source of truth) */
       /* Only non-color tokens remain here */
       boxShadow: {
-        'glow-cyan': '0 0 16px rgba(247, 206, 134, 0.25)',
+        'glow-gold': '0 0 16px rgba(247, 206, 134, 0.25)',
         'glow-green': '0 0 16px rgba(34, 197, 94, 0.2)',
         'glow-orange': '0 0 16px rgba(245, 158, 11, 0.2)',
         'glow-red': '0 0 16px rgba(203, 81, 80, 0.2)',
@@ -32,6 +32,7 @@ export default {
           '100%': { boxShadow: '0 0 16px rgba(247, 206, 134, 0.35)' },
         },
         shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
         },
       },

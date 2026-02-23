@@ -207,7 +207,7 @@ export default function Layout({ children }: LayoutProps) {
           <>
             <span className="truncate">{item.label}</span>
             {isActive && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#f7ce86] dark:bg-[#4ADE80] shadow-glow-cyan flex-shrink-0" />
+              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#f7ce86] dark:bg-[#4ADE80] shadow-glow-gold flex-shrink-0" />
             )}
           </>
         )}

@@ -27,11 +27,15 @@
   --color-text-secondary: #3d3427;
   --color-text-muted: #9e8b66;
   --color-text-body: #5f471d;
+  --color-text-faded: #b5a382;
+  --color-accent-on-primary: #ffffff;
 
   /* Semantic surfaces */
   --color-surface-input: #fffbef;
   --color-surface-card: #fefbf0;
   --color-surface-subtle: #f7eede;
+  --color-surface-hover: #f0e8d8;
+  --color-surface-hover-active: #e8dfcf;
 
   /* Semantic borders */
   --color-border-default: #e5e0d2;
@@ -68,11 +72,15 @@
   --color-text-secondary: #A7C4B8;
   --color-text-muted: #6B8F80;
   --color-text-body: #A7C4B8;
+  --color-text-faded: #6B8F80;
+  --color-accent-on-primary: #022c22;
 
   /* Semantic surfaces */
   --color-surface-input: #0F1A17;
   --color-surface-card: #162420;
   --color-surface-subtle: #162420;
+  --color-surface-hover: #1C2E28;
+  --color-surface-hover-active: #243832;
 
   /* Semantic borders */
   --color-border-default: #2A4039;
@@ -92,8 +100,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #fffbef;
-  color: #5f471d;
+  background: var(--color-dark-900);
+  color: var(--color-text-body);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
