@@ -22,7 +22,7 @@ export default function DetailFetchPanel({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <span className="text-sm font-medium text-purple-300">Get Product Details</span>
-            <span className="text-[10px] text-neutral-500">Step 2: Fetch detailed data for selected products</span>
+            <span className="text-[10px] text-neutral-500 dark:text-text-muted">Step 2: Fetch detailed data for selected products</span>
           </div>
         </div>
 

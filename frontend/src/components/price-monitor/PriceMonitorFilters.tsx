@@ -84,7 +84,7 @@ export default function PriceMonitorFilters({
                     disabled={inactiveTotalCount === 0}
                     className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors border-t border-accent-primary/8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="font-medium text-red-400">All Inactive</div>
+                    <div className="font-medium text-red-600 dark:text-red-400">All Inactive</div>
                     <div className="text-xs text-text-muted">{inactiveTotalCount} products</div>
                   </button>
                 </div>
@@ -126,7 +126,7 @@ export default function PriceMonitorFilters({
           <button
             onClick={() => setShowDeleteModal('all')}
             disabled={totalProducts === 0}
-            className="btn-secondary text-red-400 border-red-400/30 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary text-red-600 dark:text-red-400 border-red-400/30 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete All
           </button>

@@ -229,10 +229,10 @@ export default function UrlScraper() {
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      pending: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+      pending: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30',
       running: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-      completed: 'bg-green-500/20 text-green-400 border border-green-500/30',
-      failed: 'bg-red-500/20 text-red-400 border border-red-500/30',
+      completed: 'bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30',
+      failed: 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30',
       stopped: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
     };
     return (
@@ -300,7 +300,7 @@ export default function UrlScraper() {
         {price && (
           <div className="text-sm flex items-center gap-3">
             <span><span className="text-text-muted">Price:</span> <span className="text-accent-primary font-bold">{price} {currency}</span></span>
-            {originalPrice && <span><span className="text-text-muted">Was:</span> <span className="text-neutral-500 line-through">{originalPrice}</span></span>}
+            {originalPrice && <span><span className="text-text-muted">Was:</span> <span className="text-neutral-500 dark:text-text-muted line-through">{originalPrice}</span></span>}
           </div>
         )}
         {(productDescription || metaDescription) && (
@@ -315,7 +315,7 @@ export default function UrlScraper() {
             <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 bg-dark-800/50 rounded px-3 py-2 border border-border-default/30">
               {Object.entries(productSpecs).slice(0, 10).map(([k, v]) => (
                 <div key={k} className="text-xs">
-                  <span className="text-neutral-500">{k}:</span> <span className="text-text-body">{String(v)}</span>
+                  <span className="text-neutral-500 dark:text-text-muted">{k}:</span> <span className="text-text-body">{String(v)}</span>
                 </div>
               ))}
             </div>
@@ -345,18 +345,18 @@ export default function UrlScraper() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm flex items-start sm:items-center justify-between gap-2">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm flex items-start sm:items-center justify-between gap-2">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+          <button onClick={() => setError(null)} className="text-red-600 dark:text-red-400 hover:text-red-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm flex items-start sm:items-center justify-between gap-2">
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 text-green-600 dark:text-green-400 text-sm flex items-start sm:items-center justify-between gap-2">
           <span>{success}</span>
-          <button onClick={() => setSuccess(null)} className="text-green-400 hover:text-green-300">
+          <button onClick={() => setSuccess(null)} className="text-green-600 dark:text-green-400 hover:text-green-300">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -395,7 +395,7 @@ export default function UrlScraper() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.example.com/product/..."
-                className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-text-faded"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -406,7 +406,7 @@ export default function UrlScraper() {
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                   placeholder="Product name"
-                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-text-faded"
                 />
               </div>
               <div>
@@ -416,7 +416,7 @@ export default function UrlScraper() {
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                   placeholder="Barcode / EAN"
-                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-text-faded"
                 />
               </div>
             </div>
@@ -482,7 +482,7 @@ export default function UrlScraper() {
                 >
                   {csvFile ? (
                     <div className="space-y-2">
-                      <svg className="w-8 h-8 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p className="text-text-primary font-medium">{csvFile.name}</p>
@@ -494,7 +494,7 @@ export default function UrlScraper() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
                       <p className="text-text-body">Drop CSV file here or click to browse</p>
-                      <p className="text-neutral-500 text-xs">Supports comma (,) semicolon (;) or tab delimiters. Columns: url (+ url_1, url_2...), product_name (optional), barcode (optional)</p>
+                      <p className="text-neutral-500 dark:text-text-muted text-xs">Supports comma (,) semicolon (;) or tab delimiters. Columns: url (+ url_1, url_2...), product_name (optional), barcode (optional)</p>
                     </div>
                   )}
                   <input
@@ -514,7 +514,7 @@ export default function UrlScraper() {
                   onChange={(e) => setJsonInput(e.target.value)}
                   placeholder={'[\n  { "url": "https://example.com/product1", "product_name": "Product 1", "barcode": "123456" },\n  { "url": "https://example.com/product2" }\n]'}
                   rows={6}
-                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-3 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500 font-mono text-sm"
+                  className="w-full bg-dark-800 border border-accent-primary/12 text-text-primary rounded-lg px-4 py-3 focus:border-accent-primary focus:outline-none placeholder:text-text-faded font-mono text-sm"
                 />
               </div>
             )}
@@ -566,7 +566,7 @@ export default function UrlScraper() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9" />
             </svg>
             <p className="text-text-muted">No scrape jobs yet</p>
-            <p className="text-neutral-500 text-sm mt-1">Start by scraping a URL above</p>
+            <p className="text-neutral-500 dark:text-text-muted text-sm mt-1">Start by scraping a URL above</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -587,10 +587,10 @@ export default function UrlScraper() {
                     <td className="py-3 pr-4">{getStatusBadge(job.status)}</td>
                     <td className="py-3 pr-4 text-text-primary text-sm">{job.total_urls}</td>
                     <td className="py-3 pr-4 text-sm">
-                      <span className="text-green-400">{job.completed_urls}</span>
+                      <span className="text-green-600 dark:text-green-400">{job.completed_urls}</span>
                     </td>
                     <td className="py-3 pr-4 text-sm">
-                      <span className={job.failed_urls > 0 ? 'text-red-400' : 'text-neutral-500'}>{job.failed_urls}</span>
+                      <span className={job.failed_urls > 0 ? 'text-red-600 dark:text-red-400' : 'text-neutral-500 dark:text-text-muted'}>{job.failed_urls}</span>
                     </td>
                     <td className="py-3 pr-4 text-text-muted text-sm">{formatDate(job.created_at)}</td>
                     <td className="py-3 text-right">
@@ -598,7 +598,7 @@ export default function UrlScraper() {
                         {job.status === 'running' && (
                           <button
                             onClick={() => handleStop(job.id)}
-                            className="px-2.5 py-1 rounded-md text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 transition-all flex items-center gap-1"
+                            className="px-2.5 py-1 rounded-md text-xs font-medium bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/30 border border-red-500/30 transition-all flex items-center gap-1"
                             title="Stop scraping"
                           >
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -628,7 +628,7 @@ export default function UrlScraper() {
                         </button>
                         <button
                           onClick={() => handleDeleteRequest(job.id)}
-                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-dark-800 text-red-400 hover:bg-red-500/20 transition-all"
+                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-dark-800 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all"
                           title="Delete job"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -697,10 +697,10 @@ export default function UrlScraper() {
                         {result.url}
                       </a>
                       {result.barcode && (
-                        <span className="text-xs text-neutral-500 mt-0.5 block">Barcode: {result.barcode}</span>
+                        <span className="text-xs text-neutral-500 dark:text-text-muted mt-0.5 block">Barcode: {result.barcode}</span>
                       )}
                       {result.error_message && (
-                        <p className="text-xs text-red-400 mt-1">{result.error_message}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-1">{result.error_message}</p>
                       )}
                       {renderScrapedData(result)}
                     </div>

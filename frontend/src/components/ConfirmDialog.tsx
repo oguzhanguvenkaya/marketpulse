@@ -49,12 +49,15 @@ export default function ConfirmDialog({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
     >
       <div
         className="bg-[var(--surface-raised)] border border-[var(--surface-border)] rounded-xl shadow-2xl p-6 w-full max-w-sm mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-serif font-bold text-[var(--color-dark-300)] mb-2">
+        <h3 id="confirm-dialog-title" className="text-lg font-serif font-bold text-[var(--color-dark-300)] mb-2">
           {title}
         </h3>
         <p className="text-sm text-[var(--color-dark-400)] mb-6">{message}</p>

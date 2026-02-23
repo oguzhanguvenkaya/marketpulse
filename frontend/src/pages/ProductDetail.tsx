@@ -68,7 +68,7 @@ export default function ProductDetail() {
     return (
       <div className="card-dark p-12 text-center">
         <div className="w-12 h-12 rounded-full bg-surface-hover flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-neutral-500 dark:text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -120,7 +120,7 @@ export default function ProductDetail() {
 
   return (
     <div className="space-y-5 md:space-y-6 animate-fade-in">
-      <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-neutral-500">
+      <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-neutral-500 dark:text-text-muted">
         <Link to="/products" className="hover:text-accent-primary transition-colors">Products</Link>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -165,29 +165,29 @@ export default function ProductDetail() {
               <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#22c55e' } as React.CSSProperties}>
                 {hasDiscount ? (
                   <>
-                    <div className="text-sm line-through text-neutral-500">{formatPrice(product.latest_price)}</div>
+                    <div className="text-sm line-through text-neutral-500 dark:text-text-muted">{formatPrice(product.latest_price)}</div>
                     <div className="text-xl font-bold text-success">{formatPrice(product.discounted_price)}</div>
                   </>
                 ) : (
                   <div className="text-xl font-bold text-success">{formatPrice(product.latest_price)}</div>
                 )}
-                <div className="text-xs text-neutral-500">Current Price</div>
+                <div className="text-xs text-dark-400 dark:text-text-muted">Current Price</div>
               </div>
               <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#f59e0b' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-warning">
                   {product.latest_rating ? product.latest_rating.toFixed(1) : '-'}
                 </div>
-                <div className="text-xs text-neutral-500">Rating</div>
+                <div className="text-xs text-dark-400 dark:text-text-muted">Rating</div>
               </div>
               <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#1e9df1' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-accent-primary">{product.reviews_count || 0}</div>
-                <div className="text-xs text-neutral-500">Reviews</div>
+                <div className="text-xs text-dark-400 dark:text-text-muted">Reviews</div>
               </div>
               <div className="stat-card py-3 px-3 md:px-4" style={{ '--stat-color': '#f7b928' } as React.CSSProperties}>
                 <div className="text-xl font-bold text-purple-400">
                   {product.stock_count ? (product.stock_count < 50 ? `<${product.stock_count}` : product.stock_count) : (product.in_stock ? 'Yes' : 'No')}
                 </div>
-                <div className="text-xs text-neutral-500">Stock</div>
+                <div className="text-xs text-dark-400 dark:text-text-muted">Stock</div>
               </div>
             </div>
 
@@ -268,7 +268,7 @@ export default function ProductDetail() {
               {product.description ? (
                 <p className="text-text-body whitespace-pre-wrap leading-relaxed">{product.description}</p>
               ) : (
-                <p className="text-neutral-500">No product description available.</p>
+                <p className="text-neutral-500 dark:text-text-muted">No product description available.</p>
               )}
             </div>
           )}
@@ -309,7 +309,7 @@ export default function ProductDetail() {
                   </table>
                 </div>
               ) : (
-                <p className="text-neutral-500">No other sellers found.</p>
+                <p className="text-neutral-500 dark:text-text-muted">No other sellers found.</p>
               )}
             </div>
           )}
@@ -331,20 +331,20 @@ export default function ProductDetail() {
                           )}
                         </div>
                         {review.review_date && (
-                          <span className="text-xs text-neutral-500">{review.review_date}</span>
+                          <span className="text-xs text-neutral-500 dark:text-text-muted">{review.review_date}</span>
                         )}
                       </div>
                       {review.review_text && (
                         <p className="text-text-muted text-sm">{review.review_text}</p>
                       )}
                       {review.seller_name && (
-                        <p className="text-xs text-neutral-500 mt-2">Seller: {review.seller_name}</p>
+                        <p className="text-xs text-neutral-500 dark:text-text-muted mt-2">Seller: {review.seller_name}</p>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-neutral-500">No reviews found.</p>
+                <p className="text-neutral-500 dark:text-text-muted">No reviews found.</p>
               )}
             </div>
           )}

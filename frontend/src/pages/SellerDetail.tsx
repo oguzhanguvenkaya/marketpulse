@@ -212,12 +212,12 @@ export default function SellerDetail() {
                   </th>
                 </tr>
                 <tr>
-                  <th className="text-right border-l border-border-default text-xs font-normal text-neutral-500">Threshold</th>
-                  <th className="text-right text-xs font-normal text-neutral-500">Seller Price</th>
-                  <th className="text-center text-xs font-normal text-neutral-500">Status</th>
-                  <th className="text-right border-l border-border-default text-xs font-normal text-neutral-500">Threshold</th>
-                  <th className="text-right text-xs font-normal text-neutral-500">Campaign</th>
-                  <th className="text-center text-xs font-normal text-neutral-500">Status</th>
+                  <th className="text-right border-l border-border-default text-xs font-normal text-neutral-500 dark:text-text-muted">Threshold</th>
+                  <th className="text-right text-xs font-normal text-neutral-500 dark:text-text-muted">Seller Price</th>
+                  <th className="text-center text-xs font-normal text-neutral-500 dark:text-text-muted">Status</th>
+                  <th className="text-right border-l border-border-default text-xs font-normal text-neutral-500 dark:text-text-muted">Threshold</th>
+                  <th className="text-right text-xs font-normal text-neutral-500 dark:text-text-muted">Campaign</th>
+                  <th className="text-center text-xs font-normal text-neutral-500 dark:text-text-muted">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,7 +257,7 @@ export default function SellerDetail() {
                     </td>
                     <td>
                       <div className="text-text-body text-sm">{product.sku || '-'}</div>
-                      <div className="text-neutral-500 text-xs">{product.barcode || '-'}</div>
+                      <div className="text-neutral-500 dark:text-text-muted text-xs">{product.barcode || '-'}</div>
                     </td>
                     <td className="text-text-body">{product.brand || '-'}</td>
                     
@@ -281,10 +281,10 @@ export default function SellerDetail() {
                       ) : product.threshold_price ? (
                         <span className="badge badge-success text-xs">OK</span>
                       ) : (
-                        <span className="text-neutral-500 text-xs">-</span>
+                        <span className="text-neutral-500 dark:text-text-muted text-xs">-</span>
                       )}
                     </td>
-                    
+
                     {/* Campaign Alert columns */}
                     <td className="text-right text-text-muted border-l border-border-default">
                       {formatPrice(product.alert_campaign_price)}
@@ -302,7 +302,7 @@ export default function SellerDetail() {
                           )}
                         </>
                       ) : (
-                        <span className="text-neutral-500">-</span>
+                        <span className="text-neutral-500 dark:text-text-muted">-</span>
                       )}
                     </td>
                     <td className="text-center">
@@ -311,7 +311,7 @@ export default function SellerDetail() {
                       ) : product.alert_campaign_price && product.campaign_price ? (
                         <span className="badge badge-success text-xs">OK</span>
                       ) : (
-                        <span className="text-neutral-500 text-xs">-</span>
+                        <span className="text-neutral-500 dark:text-text-muted text-xs">-</span>
                       )}
                     </td>
                   </tr>

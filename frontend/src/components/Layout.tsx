@@ -228,6 +228,8 @@ export default function Layout({ children }: LayoutProps) {
         className={`${sidebarWidth} sidebar-surface flex flex-col fixed h-full z-50 transition-all duration-300 ease-in-out ${
           mobileOpen ? 'translate-x-0 !w-72' : '-translate-x-full'
         } md:translate-x-0`}
+        {...(mobileOpen ? { 'aria-modal': true as const, role: 'dialog' as const } : {})}
+        onKeyDown={(e) => { if (e.key === 'Escape') setMobileOpen(false); }}
       >
         <div className={`border-b border-accent-primary/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
           <div className="flex items-center justify-between">
@@ -246,6 +248,7 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
+              aria-label="Close navigation"
               className="p-2 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,6 +315,7 @@ export default function Layout({ children }: LayoutProps) {
               collapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'
             }`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <svg className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -339,6 +343,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Open navigation menu"
               className="p-2 -ml-1 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,6 +361,7 @@ export default function Layout({ children }: LayoutProps) {
               onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
               className="p-2 rounded-lg text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 transition-colors"
               title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               {theme === 'light' ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

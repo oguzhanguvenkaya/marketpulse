@@ -43,7 +43,7 @@ export default function CategoryExplorer() {
       <main className="flex-1 min-w-0 space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Competitive Analysis</div>
+            <div className="text-xs text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1">Competitive Analysis</div>
             <h1 className="text-2xl font-bold text-text-primary">Category Explorer</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export default function CategoryExplorer() {
 
         {breadcrumbParts.length > 0 && (
           <div className="flex items-center gap-1.5 text-sm flex-wrap">
-            <button onClick={() => setSelectedCategory('')} className="text-neutral-500 hover:text-accent-primary transition-colors">All</button>
+            <button onClick={() => setSelectedCategory('')} className="text-neutral-500 dark:text-text-muted hover:text-accent-primary transition-colors">All</button>
             {breadcrumbParts.map((bc, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 <svg className="w-3 h-3 text-text-faded" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -126,7 +126,7 @@ export default function CategoryExplorer() {
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full sm:w-auto">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 dark:text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -167,15 +167,15 @@ export default function CategoryExplorer() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center">
           <div className="rounded-lg border border-accent-primary/8 p-3 bg-accent-primary/[0.03]">
             <div className="text-lg font-bold text-text-primary">{dynamicStats.total.toLocaleString()}</div>
-            <div className="text-xs text-neutral-500">Products</div>
+            <div className="text-xs text-neutral-500 dark:text-text-muted">Products</div>
           </div>
           <div className="rounded-lg border border-accent-primary/8 p-3 bg-accent-primary/[0.03]">
             <div className="text-lg font-bold text-accent-primary">{formatPrice(dynamicStats.avgPrice)}</div>
-            <div className="text-xs text-neutral-500">Avg Price</div>
+            <div className="text-xs text-neutral-500 dark:text-text-muted">Avg Price</div>
           </div>
           <div className="rounded-lg border border-accent-primary/8 p-3 bg-accent-primary/[0.03]">
             <div className="text-lg font-bold text-text-muted">{dynamicStats.brandCount}</div>
-            <div className="text-xs text-neutral-500">Brands</div>
+            <div className="text-xs text-neutral-500 dark:text-text-muted">Brands</div>
           </div>
           <div className="rounded-lg border border-accent-primary/8 p-3 bg-accent-primary/[0.03]">
             {viewMode === 'category_page' ? (
@@ -183,12 +183,12 @@ export default function CategoryExplorer() {
                 <div className="text-sm font-bold text-emerald-600">
                   {dynamicStats.lastScraped ? new Date(dynamicStats.lastScraped).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                 </div>
-                <div className="text-xs text-neutral-500">Last Scraped</div>
+                <div className="text-xs text-neutral-500 dark:text-text-muted">Last Scraped</div>
               </>
             ) : (
               <>
                 <div className="text-lg font-bold text-emerald-600">{dynamicStats.categoryCount}</div>
-                <div className="text-xs text-neutral-500">Categories</div>
+                <div className="text-xs text-neutral-500 dark:text-text-muted">Categories</div>
               </>
             )}
           </div>
@@ -197,7 +197,7 @@ export default function CategoryExplorer() {
         {viewMode === 'category_page' && (
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex-1 min-w-[140px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Brand</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Brand</label>
               <select value={catBrand} onChange={e => setCatBrand(e.target.value)}
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30">
                 <option value="">All Brands</option>
@@ -205,7 +205,7 @@ export default function CategoryExplorer() {
               </select>
             </div>
             <div className="flex-1 min-w-[140px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Seller</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Seller</label>
               <select value={catSeller} onChange={e => setCatSeller(e.target.value)}
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30">
                 <option value="">All Sellers</option>
@@ -213,17 +213,17 @@ export default function CategoryExplorer() {
               </select>
             </div>
             <div className="min-w-[100px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Price</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Min Price</label>
               <input type="number" value={catMinPrice} onChange={e => setCatMinPrice(e.target.value)} placeholder="Min"
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30" />
             </div>
             <div className="min-w-[100px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Max Price</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Max Price</label>
               <input type="number" value={catMaxPrice} onChange={e => setCatMaxPrice(e.target.value)} placeholder="Max"
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30" />
             </div>
             <div className="min-w-[80px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Min Rating</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Min Rating</label>
               <select value={catMinRating} onChange={e => setCatMinRating(e.target.value)}
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30">
                 <option value="">Any</option>
@@ -233,7 +233,7 @@ export default function CategoryExplorer() {
               </select>
             </div>
             <div className="min-w-[100px]">
-              <label className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1 block">Sponsored</label>
+              <label className="text-[10px] text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-1 block">Sponsored</label>
               <select value={catSponsored} onChange={e => setCatSponsored(e.target.value as '' | 'true' | 'false')}
                 className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30">
                 <option value="">All</option>

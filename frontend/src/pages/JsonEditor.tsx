@@ -436,7 +436,7 @@ export default function JsonEditor() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => deleteAtPath(path)}
-            className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 border border-red-500/30"
+            className="px-2 py-1 bg-red-500/20 text-red-600 dark:text-red-400 rounded text-xs hover:bg-red-500/30 border border-red-500/30"
           >
             Confirm
           </button>
@@ -528,14 +528,14 @@ export default function JsonEditor() {
           {items.map((item, i) => (
             <div key={i} className="bg-dark-700 rounded-lg p-4 border border-accent-primary/8 space-y-3">
               <div className="flex items-start justify-between gap-2">
-                <span className="text-xs text-neutral-500">Q{i + 1}</span>
+                <span className="text-xs text-neutral-500 dark:text-text-muted">Q{i + 1}</span>
                 <button
                   onClick={() => {
                     const arr = [...items];
                     arr.splice(i, 1);
                     updateAtPath(fullPath, arr);
                   }}
-                  className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                  className="p-1 text-red-600 dark:text-red-400 hover:text-red-300 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -606,14 +606,14 @@ export default function JsonEditor() {
           {items.map((item, i) => (
             <div key={i} className="bg-dark-700 rounded-lg p-4 border border-accent-primary/8 space-y-3">
               <div className="flex items-start justify-between gap-2">
-                <span className="text-xs text-neutral-500">#{i + 1}</span>
+                <span className="text-xs text-neutral-500 dark:text-text-muted">#{i + 1}</span>
                 <button
                   onClick={() => {
                     const arr = [...items];
                     arr.splice(i, 1);
                     updateAtPath(fullPath, arr);
                   }}
-                  className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                  className="p-1 text-red-600 dark:text-red-400 hover:text-red-300 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -791,7 +791,7 @@ export default function JsonEditor() {
               </svg>
             </span>
             <span className="text-base md:text-lg font-semibold text-text-primary">Basic Info</span>
-            <span className="text-xs text-neutral-500">({primitiveKeys.length})</span>
+            <span className="text-xs text-neutral-500 dark:text-text-muted">({primitiveKeys.length})</span>
           </div>
           <svg className={`w-5 h-5 text-text-muted transition-transform duration-200 ${collapsedSections['_basic'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -803,7 +803,7 @@ export default function JsonEditor() {
               {skuKey && (
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-text-muted">{skuKey}</label>
-                  <input className={inputClass + " !text-neutral-500 cursor-not-allowed"} value={String(currentProduct[skuKey] || '')} readOnly />
+                  <input className={inputClass + " !text-neutral-500 dark:!text-text-muted cursor-not-allowed"} value={String(currentProduct[skuKey] || '')} readOnly />
                 </div>
               )}
               {priceKey && (
@@ -820,7 +820,7 @@ export default function JsonEditor() {
                         updateAtPath([priceKey], isNaN(val) ? 0 : Math.round(val * 100));
                       }}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">TL</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-text-muted text-sm">TL</span>
                   </div>
                 </div>
               )}
@@ -844,7 +844,7 @@ export default function JsonEditor() {
                   className="w-20 h-20 object-cover rounded-lg border border-accent-primary/12"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
-                <span className="text-xs text-neutral-500 break-all">{String(currentProduct[imageKey])}</span>
+                <span className="text-xs text-neutral-500 dark:text-text-muted break-all">{String(currentProduct[imageKey])}</span>
               </div>
             )}
             {otherKeys.length > 0 && (
@@ -876,7 +876,7 @@ export default function JsonEditor() {
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-accent-primary shrink-0">{icon}</span>
               <span className="text-base md:text-lg font-semibold text-text-primary truncate">{displayName}</span>
-              <span className="text-xs text-neutral-500 shrink-0">({(value as unknown[]).length})</span>
+              <span className="text-xs text-neutral-500 dark:text-text-muted shrink-0">({(value as unknown[]).length})</span>
             </div>
             <svg className={`w-5 h-5 text-text-muted transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -898,7 +898,7 @@ export default function JsonEditor() {
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-accent-primary shrink-0">{icon}</span>
               <span className="text-base md:text-lg font-semibold text-text-primary truncate">{displayName}</span>
-              <span className="text-xs text-neutral-500 shrink-0">({value.length})</span>
+              <span className="text-xs text-neutral-500 dark:text-text-muted shrink-0">({value.length})</span>
             </div>
             <svg className={`w-5 h-5 text-text-muted transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -920,7 +920,7 @@ export default function JsonEditor() {
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-accent-primary shrink-0">{icon}</span>
             <span className="text-base md:text-lg font-semibold text-text-primary truncate">{displayName}</span>
-            <span className="text-xs text-neutral-500 shrink-0">({entries.length})</span>
+            <span className="text-xs text-neutral-500 dark:text-text-muted shrink-0">({entries.length})</span>
           </div>
           <svg className={`w-5 h-5 text-text-muted transition-transform duration-200 shrink-0 ${isCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1001,7 +1001,7 @@ export default function JsonEditor() {
               </svg>
             </span>
             <span className="text-base md:text-lg font-semibold text-text-primary">Metadata</span>
-            <span className="text-xs text-neutral-500">({metaEntries.length})</span>
+            <span className="text-xs text-neutral-500 dark:text-text-muted">({metaEntries.length})</span>
           </div>
           <svg className={`w-5 h-5 text-text-muted transition-transform duration-200 ${collapsedSections['_metadata'] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1014,7 +1014,7 @@ export default function JsonEditor() {
                 return (
                   <div key={key} className="flex flex-col gap-1">
                     <label className="text-xs text-text-muted">total_products (auto)</label>
-                    <input className={inputClass + " !text-neutral-500 cursor-not-allowed"} value={String(currentCategory.products.length)} readOnly />
+                    <input className={inputClass + " !text-neutral-500 dark:!text-text-muted cursor-not-allowed"} value={String(currentCategory.products.length)} readOnly />
                   </div>
                 );
               }
@@ -1050,7 +1050,7 @@ export default function JsonEditor() {
                               subs.splice(i, 1);
                               updateMetadata('sub_types', subs);
                             }}
-                            className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                            className="p-1 text-red-600 dark:text-red-400 hover:text-red-300 transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1078,7 +1078,7 @@ export default function JsonEditor() {
                     <div className="bg-dark-700 rounded-lg p-3 space-y-2">
                       {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
                         <div key={k} className="flex flex-col gap-1">
-                          <label className="text-xs text-neutral-500">{k}</label>
+                          <label className="text-xs text-neutral-500 dark:text-text-muted">{k}</label>
                           <input
                             className={inputClass}
                             value={String(v || '')}
@@ -1224,18 +1224,18 @@ export default function JsonEditor() {
           }`}
         >
           <input ref={fileInputRef} type="file" multiple accept=".json" className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
-          <svg className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 text-neutral-500 dark:text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           <p className="text-base md:text-lg font-medium text-text-primary mb-1">Drop JSON files here or click to browse</p>
-          <p className="text-xs md:text-sm text-neutral-500">Accepts multiple .json product catalog files</p>
+          <p className="text-xs md:text-sm text-neutral-500 dark:text-text-muted">Accepts multiple .json product catalog files</p>
         </div>
 
         {loadErrors.length > 0 && (
           <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-            <p className="text-sm font-medium text-red-400 mb-1">Some files could not be loaded:</p>
+            <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">Some files could not be loaded:</p>
             {loadErrors.map((err, i) => (
-              <p key={i} className="text-xs text-red-400/80">{err}</p>
+              <p key={i} className="text-xs text-red-600/80 dark:text-red-400/80">{err}</p>
             ))}
           </div>
         )}
@@ -1243,7 +1243,7 @@ export default function JsonEditor() {
         {loadingFiles && (
           <div className="mt-6 text-center py-8">
             <div className="w-6 h-6 border-2 border-accent-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            <p className="text-sm text-neutral-500">Loading files...</p>
+            <p className="text-sm text-neutral-500 dark:text-text-muted">Loading files...</p>
           </div>
         )}
 
@@ -1253,7 +1253,7 @@ export default function JsonEditor() {
               <h2 className="text-sm font-semibold text-text-body uppercase tracking-wider">Saved Files ({dbFiles.length})</h2>
               <button
                 onClick={clearAllFiles}
-                className="w-full sm:w-auto px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-xs"
+                className="w-full sm:w-auto px-3 py-1.5 bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-500/20 border border-red-500/20 text-xs"
               >
                 Clear All
               </button>
@@ -1279,14 +1279,14 @@ export default function JsonEditor() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-text-primary truncate">{f.filename}</span>
                         {hasUnsaved && (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 shrink-0">
                             <span className="w-1 h-1 rounded-full bg-yellow-400 animate-pulse" />
                             Modified
                           </span>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-0.5">
-                        <span className="text-xs text-neutral-500">{f.product_count} product{f.product_count !== 1 ? 's' : ''}</span>
+                        <span className="text-xs text-neutral-500 dark:text-text-muted">{f.product_count} product{f.product_count !== 1 ? 's' : ''}</span>
                         {f.group_name && <span className="text-xs text-text-faded">| {f.group_name}</span>}
                       </div>
                     </button>
@@ -1307,7 +1307,7 @@ export default function JsonEditor() {
         )}
 
         {saveToast && (
-          <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg flex items-center gap-2">
+          <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -1333,14 +1333,14 @@ export default function JsonEditor() {
           </button>
           <h1 className="text-base md:text-xl font-bold text-text-primary truncate">{currentCategory?._fileName || 'JSON Editor'}</h1>
           {hasChanges && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
               <span className="hidden sm:inline">Unsaved</span>
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={saveToDb} className="w-full sm:w-auto px-3 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-xs md:text-sm font-medium flex items-center justify-center gap-1.5">
+          <button onClick={saveToDb} className="w-full sm:w-auto px-3 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-500/20 border border-emerald-500/20 text-xs md:text-sm font-medium flex items-center justify-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -1360,12 +1360,12 @@ export default function JsonEditor() {
 
       {loadErrors.length > 0 && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-2">
-          <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
           <div>
             {loadErrors.map((err, i) => (
-              <p key={i} className="text-xs text-red-400">{err}</p>
+              <p key={i} className="text-xs text-red-600 dark:text-red-400">{err}</p>
             ))}
           </div>
         </div>
@@ -1405,7 +1405,7 @@ export default function JsonEditor() {
             </select>
           </div>
           <div className="relative w-full">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -1419,7 +1419,7 @@ export default function JsonEditor() {
         {searchQuery && (
           <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
             {filteredProducts.length === 0 ? (
-              <p className="text-sm text-neutral-500 py-2">No products found</p>
+              <p className="text-sm text-neutral-500 dark:text-text-muted py-2">No products found</p>
             ) : (
               filteredProducts.map(({ product, originalIndex }) => (
                 <button
@@ -1446,7 +1446,7 @@ export default function JsonEditor() {
       )}
 
       {saveToast && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg animate-fade-in flex items-center gap-2">
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 px-4 py-3 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-sm font-medium shadow-lg animate-fade-in flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>

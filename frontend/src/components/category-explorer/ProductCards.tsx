@@ -13,9 +13,10 @@ function StoreProductCard({
   setSelectedCatProduct: (p: CategoryProductItem | null) => void;
 }) {
   return (
-    <div
+    <button
+      type="button"
       key={product.id}
-      className="rounded-xl border border-accent-primary/12 overflow-hidden hover:border-accent-primary/15 transition-all cursor-pointer group bg-gradient-to-b from-surface-card to-dark-900"
+      className="rounded-xl border border-accent-primary/12 overflow-hidden hover:border-accent-primary/15 transition-all cursor-pointer group bg-gradient-to-b from-surface-card to-dark-900 text-left w-full"
       onClick={() => { setSelectedProduct(product); setSelectedCatProduct(null); }}
     >
       <div className="flex gap-3 p-3">
@@ -55,7 +56,7 @@ function StoreProductCard({
           <p className="text-[10px] text-text-faded truncate">{product.category}</p>
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -116,8 +117,9 @@ function CatProductCard({
           </span>
         )}
       </div>
-      <div
-        className="flex gap-3 p-3"
+      <button
+        type="button"
+        className="flex gap-3 p-3 text-left w-full"
         onClick={() => { setSelectedCatProduct(product); setSelectedProduct(null); }}
       >
         <div className="w-20 h-20 rounded-lg bg-accent-primary/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -136,7 +138,7 @@ function CatProductCard({
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-text-primary">{formatPrice(product.price)}</span>
               {product.original_price && product.original_price > (product.price || 0) && (
-                <span className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</span>
+                <span className="text-xs text-neutral-500 dark:text-text-muted line-through">{formatPrice(product.original_price)}</span>
               )}
             </div>
             {product.rating && (
@@ -148,7 +150,7 @@ function CatProductCard({
             )}
           </div>
         </div>
-      </div>
+      </button>
       <div className="px-3 pb-2.5 flex items-center justify-between">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-[10px] text-text-faded">Page {product.page_number}</span>
@@ -325,7 +327,7 @@ function EmptyState({ viewMode, hasFilters }: { viewMode: string; hasFilters: bo
       <h3 className="text-lg font-medium text-text-body mb-2">
         {viewMode === 'category_page' ? 'No Scraped Products' : 'No Products Found'}
       </h3>
-      <p className="text-sm text-neutral-500 max-w-md">
+      <p className="text-sm text-neutral-500 dark:text-text-muted max-w-md">
         {viewMode === 'category_page'
           ? hasFilters
             ? 'No scraped products match this category. Use "Scrape New" to scrape a category page first.'

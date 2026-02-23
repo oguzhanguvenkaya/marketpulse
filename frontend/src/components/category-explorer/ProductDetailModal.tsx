@@ -46,7 +46,7 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
           </div>
           {product.category && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1">Category</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Category</div>
               <div className="flex items-center gap-1 flex-wrap">
                 {product.category.split(' > ').map((part, i, arr) => (
                   <span key={i} className="flex items-center gap-1">
@@ -59,45 +59,45 @@ function ProductDetailPanel({ product, onClose, formatPrice, selectCategory }: {
           )}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-accent-primary/5 p-3">
-              <div className="text-xs text-neutral-500 mb-1">Price</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Price</div>
               <div className="text-lg font-bold text-text-primary">{formatPrice(product.price)}</div>
             </div>
             <div className="rounded-lg bg-accent-primary/5 p-3">
-              <div className="text-xs text-neutral-500 mb-1">Rating</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Rating</div>
               <div className="text-lg font-bold text-text-primary flex items-center gap-1">
                 {product.rating || '-'}
                 {product.rating && <svg className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>}
               </div>
-              <div className="text-xs text-neutral-500">{product.review_count ?? 0} reviews</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted">{product.review_count ?? 0} reviews</div>
             </div>
           </div>
           <div className="space-y-2 text-sm">
-            {product.sku && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">SKU</span><span className="text-text-primary font-mono text-xs">{product.sku}</span></div>}
-            {product.barcode && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">Barcode</span><span className="text-text-primary font-mono text-xs">{product.barcode}</span></div>}
-            {product.seller_name && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">Seller</span><span className="text-text-primary">{product.seller_name}</span></div>}
-            {product.availability && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">Availability</span><span className={product.availability.toLowerCase().includes('instock') || product.availability.toLowerCase().includes('in stock') ? 'text-emerald-600' : 'text-red-600'}>{product.availability}</span></div>}
-            {product.shipping_info && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">Shipping</span><span className="text-text-primary">{product.shipping_info.cost} {product.shipping_info.currency}</span></div>}
-            {product.return_policy && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500">Return Policy</span><span className="text-text-primary">{product.return_policy.days} days {product.return_policy.free_return ? '(Free)' : ''}</span></div>}
+            {product.sku && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">SKU</span><span className="text-text-primary font-mono text-xs">{product.sku}</span></div>}
+            {product.barcode && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">Barcode</span><span className="text-text-primary font-mono text-xs">{product.barcode}</span></div>}
+            {product.seller_name && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">Seller</span><span className="text-text-primary">{product.seller_name}</span></div>}
+            {product.availability && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">Availability</span><span className={product.availability.toLowerCase().includes('instock') || product.availability.toLowerCase().includes('in stock') ? 'text-emerald-600' : 'text-red-600'}>{product.availability}</span></div>}
+            {product.shipping_info && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">Shipping</span><span className="text-text-primary">{product.shipping_info.cost} {product.shipping_info.currency}</span></div>}
+            {product.return_policy && <div className="flex justify-between py-1.5 border-b border-accent-primary/8"><span className="text-neutral-500 dark:text-text-muted">Return Policy</span><span className="text-text-primary">{product.return_policy.days} days {product.return_policy.free_return ? '(Free)' : ''}</span></div>}
           </div>
           {product.description && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1">Description</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Description</div>
               <p className="text-xs text-text-body leading-relaxed max-h-32 overflow-y-auto">{product.description}</p>
             </div>
           )}
           {product.product_specs && Object.keys(product.product_specs).length > 0 && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1">Specifications</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Specifications</div>
               <div className="space-y-1">
                 {Object.entries(product.product_specs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-text-body">{v}</span></div>
+                  <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500 dark:text-text-muted">{k}</span><span className="text-text-body">{v}</span></div>
                 ))}
               </div>
             </div>
           )}
           {product.reviews && product.reviews.length > 0 && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1">Reviews ({product.reviews.length})</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Reviews ({product.reviews.length})</div>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {product.reviews.slice(0, 5).map((r, i) => (
                   <div key={i} className="rounded-lg bg-accent-primary/5 p-2 text-xs">
@@ -164,90 +164,90 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-lg bg-accent-primary/5 p-3 text-center">
-              <div className="text-xs text-neutral-500 mb-1">Price</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Price</div>
               <div className="text-base font-bold text-text-primary">{formatPrice(product.price)}</div>
               {product.original_price && product.original_price > (product.price || 0) && (
-                <div className="text-xs text-neutral-500 line-through">{formatPrice(product.original_price)}</div>
+                <div className="text-xs text-neutral-500 dark:text-text-muted line-through">{formatPrice(product.original_price)}</div>
               )}
             </div>
             <div className="rounded-lg bg-accent-primary/5 p-3 text-center">
-              <div className="text-xs text-neutral-500 mb-1">Position</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Position</div>
               <div className="text-base font-bold text-text-primary">#{product.position}</div>
-              <div className="text-xs text-neutral-500">Page {product.page_number}</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted">Page {product.page_number}</div>
             </div>
             <div className="rounded-lg bg-accent-primary/5 p-3 text-center">
-              <div className="text-xs text-neutral-500 mb-1">Rating</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Rating</div>
               <div className="text-base font-bold text-text-primary flex items-center justify-center gap-1">
                 {product.rating || '-'}
                 {product.rating && <svg className="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>}
               </div>
-              <div className="text-xs text-neutral-500">{product.review_count ?? 0}</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted">{product.review_count ?? 0}</div>
             </div>
           </div>
           <div className="space-y-2 text-sm">
             {product.is_sponsored && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Type</span>
+                <span className="text-neutral-500 dark:text-text-muted">Type</span>
                 <span className="text-amber-400 font-medium">Sponsored Ad</span>
               </div>
             )}
             {product.seller_name && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Seller</span>
+                <span className="text-neutral-500 dark:text-text-muted">Seller</span>
                 <span className="text-text-primary">{product.seller_name}</span>
               </div>
             )}
             {product.sku && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">SKU</span>
+                <span className="text-neutral-500 dark:text-text-muted">SKU</span>
                 <span className="text-text-primary font-mono text-xs">{product.sku}</span>
               </div>
             )}
             {product.barcode && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Barcode</span>
+                <span className="text-neutral-500 dark:text-text-muted">Barcode</span>
                 <span className="text-text-primary font-mono text-xs">{product.barcode}</span>
               </div>
             )}
             {product.stock_status && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Stock</span>
+                <span className="text-neutral-500 dark:text-text-muted">Stock</span>
                 <span className={product.stock_status === 'inStock' ? 'text-emerald-600' : 'text-orange-400'}>{product.stock_status}</span>
               </div>
             )}
             {product.shipping_type && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Shipping</span>
+                <span className="text-neutral-500 dark:text-text-muted">Shipping</span>
                 <span className="text-text-primary">{product.shipping_type}</span>
               </div>
             )}
             {product.campaign_text && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Campaign</span>
+                <span className="text-neutral-500 dark:text-text-muted">Campaign</span>
                 <span className="text-emerald-600">{product.campaign_text}</span>
               </div>
             )}
             {product.discount_percentage && (
               <div className="flex justify-between py-1.5 border-b border-accent-primary/8">
-                <span className="text-neutral-500">Discount</span>
+                <span className="text-neutral-500 dark:text-text-muted">Discount</span>
                 <span className="text-emerald-600">-{product.discount_percentage}%</span>
               </div>
             )}
           </div>
           {product.category_path && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1 font-medium">Category Path</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1 font-medium">Category Path</div>
               <p className="text-xs text-text-body">{product.category_path}</p>
             </div>
           )}
           {product.seller_list && product.seller_list.length > 0 && (
             <div>
-              <div className="text-xs text-neutral-500 mb-2 font-medium">All Sellers ({product.seller_list.length})</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-2 font-medium">All Sellers ({product.seller_list.length})</div>
               <div className="space-y-1">
                 {product.seller_list.map((s: any, i: number) => (
                   <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-accent-primary/5">
                     <span className="text-text-primary">{s.name}</span>
-                    {s.id && <span className="text-neutral-500 font-mono text-[10px]">ID: {s.id}</span>}
+                    {s.id && <span className="text-neutral-500 dark:text-text-muted font-mono text-[10px]">ID: {s.id}</span>}
                   </div>
                 ))}
               </div>
@@ -255,13 +255,13 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
           )}
           {product.description && (
             <div>
-              <div className="text-xs text-neutral-500 mb-1 font-medium">Description</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-1 font-medium">Description</div>
               <p className="text-xs text-text-body leading-relaxed max-h-40 overflow-y-auto whitespace-pre-line">{product.description}</p>
             </div>
           )}
           {product.specs && Object.keys(product.specs).length > 0 && (
             <div>
-              <div className="text-xs text-neutral-500 mb-2 font-medium">Specifications</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-2 font-medium">Specifications</div>
               <div className="space-y-1">
                 {Object.entries(product.specs).map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs py-1 px-2 rounded bg-accent-primary/5">
@@ -274,25 +274,25 @@ function CatProductDetailPanel({ product, onClose, onDelete, formatPrice }: {
           )}
           {detail && Object.keys(detail).length > 0 && !product.specs && (
             <div>
-              <div className="text-xs text-neutral-500 mb-2 font-medium">Additional Details</div>
+              <div className="text-xs text-neutral-500 dark:text-text-muted mb-2 font-medium">Additional Details</div>
               {detail.description && !product.description && (
                 <div className="mb-2">
-                  <div className="text-xs text-neutral-500 mb-1">Description</div>
+                  <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Description</div>
                   <p className="text-xs text-text-body leading-relaxed max-h-32 overflow-y-auto">{detail.description}</p>
                 </div>
               )}
               {detail.category && !product.category_path && (
                 <div className="mb-2">
-                  <div className="text-xs text-neutral-500 mb-1">Category</div>
+                  <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Category</div>
                   <p className="text-xs text-text-body">{detail.category}</p>
                 </div>
               )}
               {detail.product_specs && Object.keys(detail.product_specs).length > 0 && (
                 <div className="mb-2">
-                  <div className="text-xs text-neutral-500 mb-1">Specifications</div>
+                  <div className="text-xs text-neutral-500 dark:text-text-muted mb-1">Specifications</div>
                   <div className="space-y-1">
                     {Object.entries(detail.product_specs).map(([k, v]) => (
-                      <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500">{k}</span><span className="text-text-body">{String(v)}</span></div>
+                      <div key={k} className="flex justify-between text-xs py-0.5"><span className="text-neutral-500 dark:text-text-muted">{k}</span><span className="text-text-body">{String(v)}</span></div>
                     ))}
                   </div>
                 </div>

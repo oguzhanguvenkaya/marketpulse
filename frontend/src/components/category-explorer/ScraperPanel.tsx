@@ -21,7 +21,7 @@ export default function ScraperPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
           <span className="text-sm font-medium text-accent-primary">Scrape Category Page</span>
-          <span className="text-[10px] text-neutral-500 ml-auto">Step 1: Collect product listings from marketplace</span>
+          <span className="text-[10px] text-neutral-500 dark:text-text-muted ml-auto">Step 1: Collect product listings from marketplace</span>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -65,7 +65,7 @@ export default function ScraperPanel({
 
           <div className="flex items-center gap-2 sm:ml-auto">
             {scrapeUrl && (
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-neutral-500 dark:text-text-muted">
                 {scrapeUrl.includes('hepsiburada') ? 'HB' : scrapeUrl.includes('trendyol') ? 'TY' : 'URL'}
                 {scrapePageCount > 1 && ` • ${scrapePageCount} pages: ${
                   scrapeUrl.includes('trendyol') ? '?pi=1...' + scrapePageCount : '?sayfa=1...' + scrapePageCount

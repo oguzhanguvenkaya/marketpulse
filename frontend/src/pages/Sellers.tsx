@@ -238,10 +238,11 @@ export default function Sellers() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
             {filteredSellers.map((seller) => (
-              <div
+              <button
+                type="button"
                 key={seller.merchant_id}
                 onClick={() => navigate(`/sellers/${seller.merchant_id}?platform=${platform}`)}
-                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-surface-hover/45 ${getCardBackground(seller)}`}
+                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-surface-hover/45 text-left w-full ${getCardBackground(seller)}`}
               >
                 <div className="flex items-start gap-3">
                   {seller.merchant_logo && (
@@ -295,7 +296,7 @@ export default function Sellers() {
                     )}
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         )}

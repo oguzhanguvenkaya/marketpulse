@@ -25,7 +25,7 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Platform</h3>
+        <h3 className="text-xs font-medium text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-2 px-2">Platform</h3>
         <div className="space-y-0.5">
           {[
             { key: '' as Platform, label: 'All Platforms', count: platformStats.total, color: 'text-text-body' },
@@ -48,14 +48,14 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
       </div>
 
       <div className="border-t border-accent-primary/8 pt-3">
-        <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Categories</h3>
+        <h3 className="text-xs font-medium text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-2 px-2">Categories</h3>
         <CategoryTree {...ce} />
       </div>
 
       {viewMode === 'my_products' && (
         <>
           <div className="border-t border-accent-primary/8 pt-3">
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Brand</h3>
+            <h3 className="text-xs font-medium text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-2 px-2">Brand</h3>
             <select
               value={selectedBrand}
               onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
@@ -69,7 +69,7 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
           </div>
 
           <div className="border-t border-accent-primary/8 pt-3">
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Price Range</h3>
+            <h3 className="text-xs font-medium text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-2 px-2">Price Range</h3>
             <div className="flex gap-2 px-1">
               <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
                 className="w-1/2 bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30" />
@@ -79,7 +79,7 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
           </div>
 
           <div className="border-t border-accent-primary/8 pt-3">
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Min Rating</h3>
+            <h3 className="text-xs font-medium text-neutral-500 dark:text-text-muted uppercase tracking-wider mb-2 px-2">Min Rating</h3>
             <select
               value={minRating}
               onChange={(e) => { setMinRating(e.target.value); setPage(1); }}

@@ -43,6 +43,7 @@ export default function MonitoredProductList({
         <div className="flex gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowInactive(false)}
+            aria-pressed={!showInactive}
             className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
               !showInactive ? 'bg-success/20 text-success border border-success/30' : 'bg-surface-hover text-text-muted hover:bg-surface-hover-active'
             }`}
@@ -51,6 +52,7 @@ export default function MonitoredProductList({
           </button>
           <button
             onClick={() => setShowInactive(true)}
+            aria-pressed={showInactive}
             className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
               showInactive ? 'bg-neutral-500/20 text-text-body border border-neutral-500/30' : 'bg-surface-hover text-text-muted hover:bg-surface-hover-active'
             }`}
@@ -80,6 +82,7 @@ export default function MonitoredProductList({
         </select>
         <button
           onClick={() => setPriceAlertOnly(!priceAlertOnly)}
+          aria-pressed={priceAlertOnly}
           className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
             priceAlertOnly
               ? 'bg-danger/20 text-danger border border-danger/30'
@@ -90,6 +93,7 @@ export default function MonitoredProductList({
         </button>
         <button
           onClick={() => setCampaignAlertOnly(!campaignAlertOnly)}
+          aria-pressed={campaignAlertOnly}
           className={`px-3 py-2 text-sm rounded-lg font-medium transition-all whitespace-nowrap ${
             campaignAlertOnly
               ? 'bg-warning/20 text-warning border border-warning/30'
@@ -118,10 +122,11 @@ export default function MonitoredProductList({
       ) : (
         <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
           {(showInactive ? inactiveProducts : activeProducts).map((product) => (
-            <div
+            <button
+              type="button"
               key={product.id}
               onClick={() => handleProductClick(product)}
-              className={`p-3 md:p-4 rounded-lg border cursor-pointer transition-all ${
+              className={`p-3 md:p-4 rounded-lg border cursor-pointer transition-all text-left w-full ${
                 selectedProduct?.id === product.id
                   ? 'border-accent-primary/50 bg-accent-primary/5'
                   : showInactive
@@ -208,7 +213,7 @@ export default function MonitoredProductList({
                   </button>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}

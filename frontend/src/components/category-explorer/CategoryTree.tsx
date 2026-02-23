@@ -43,7 +43,7 @@ function CategoryNodeItem({
         <span className="flex-1 truncate" onClick={() => selectCategory(node.full_path)}>
           {node.name}
         </span>
-        <span className="text-[10px] text-text-faded group-hover:text-neutral-500 flex-shrink-0">{node.count}</span>
+        <span className="text-[10px] text-text-faded group-hover:text-neutral-500 dark:text-text-muted flex-shrink-0">{node.count}</span>
       </div>
       {hasChildren && isExpanded && (
         <div>
