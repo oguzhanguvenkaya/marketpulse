@@ -28,38 +28,38 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
         <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Platform</h3>
         <div className="space-y-0.5">
           {[
-            { key: '' as Platform, label: 'All Platforms', count: platformStats.total, color: 'text-[#5f471d] dark:text-[#A7C4B8]' },
+            { key: '' as Platform, label: 'All Platforms', count: platformStats.total, color: 'text-text-body' },
             { key: 'hepsiburada' as Platform, label: 'Hepsiburada', count: platformStats.hb, color: 'text-orange-400' },
-            { key: 'trendyol' as Platform, label: 'Trendyol', count: platformStats.ty, color: 'text-[#9e8b66] dark:text-[#6B8F80]' },
+            { key: 'trendyol' as Platform, label: 'Trendyol', count: platformStats.ty, color: 'text-text-muted' },
             { key: 'web' as Platform, label: 'Web', count: platformStats.web, color: 'text-blue-400' },
           ].map(p => (
             <button
               key={p.key}
               onClick={() => handlePlatformChange(p.key)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                platform === p.key ? 'bg-[#5b4824]/8 dark:bg-[#4ADE80]/8 text-[#0f1419] dark:text-[#F0FDF4]' : 'text-[#9e8b66] dark:text-[#6B8F80] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 hover:text-[#3d3427] dark:hover:text-[#F0FDF4]'
+                platform === p.key ? 'bg-accent-primary/8 text-text-primary' : 'text-text-muted hover:bg-accent-primary/5 hover:text-text-secondary'
               }`}
             >
               <span className={platform === p.key ? p.color : ''}>{p.label}</span>
-              <span className="text-[10px] text-[#b5a382] dark:text-[#6B8F80]">{p.count}</span>
+              <span className="text-[10px] text-text-faded">{p.count}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 pt-3">
+      <div className="border-t border-accent-primary/8 pt-3">
         <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Categories</h3>
         <CategoryTree {...ce} />
       </div>
 
       {viewMode === 'my_products' && (
         <>
-          <div className="border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 pt-3">
+          <div className="border-t border-accent-primary/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Brand</h3>
             <select
               value={selectedBrand}
               onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
-              className="w-full bg-[#f7eede] dark:bg-[#1C2E28] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 rounded-lg px-3 py-2 text-sm text-[#3d3427] dark:text-[#A7C4B8] focus:outline-none focus:border-[#5b4824]/30 dark:focus:border-[#4ADE80]/30"
+              className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-3 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30"
             >
               <option value="">All Brands</option>
               {filters?.brands.map(b => (
@@ -68,22 +68,22 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
             </select>
           </div>
 
-          <div className="border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 pt-3">
+          <div className="border-t border-accent-primary/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Price Range</h3>
             <div className="flex gap-2 px-1">
               <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
-                className="w-1/2 bg-[#f7eede] dark:bg-[#1C2E28] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 rounded-lg px-2.5 py-1.5 text-sm text-[#3d3427] dark:text-[#A7C4B8] focus:outline-none focus:border-[#5b4824]/30 dark:focus:border-[#4ADE80]/30" />
+                className="w-1/2 bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30" />
               <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-1/2 bg-[#f7eede] dark:bg-[#1C2E28] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 rounded-lg px-2.5 py-1.5 text-sm text-[#3d3427] dark:text-[#A7C4B8] focus:outline-none focus:border-[#5b4824]/30 dark:focus:border-[#4ADE80]/30" />
+                className="w-1/2 bg-dark-800 border border-accent-primary/12 rounded-lg px-2.5 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30" />
             </div>
           </div>
 
-          <div className="border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 pt-3">
+          <div className="border-t border-accent-primary/8 pt-3">
             <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2 px-2">Min Rating</h3>
             <select
               value={minRating}
               onChange={(e) => { setMinRating(e.target.value); setPage(1); }}
-              className="w-full bg-[#f7eede] dark:bg-[#1C2E28] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 rounded-lg px-3 py-2 text-sm text-[#3d3427] dark:text-[#A7C4B8] focus:outline-none focus:border-[#5b4824]/30 dark:focus:border-[#4ADE80]/30"
+              className="w-full bg-dark-800 border border-accent-primary/12 rounded-lg px-3 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent-primary/30"
             >
               <option value="">Any</option>
               <option value="4">4+ Stars</option>
@@ -96,7 +96,7 @@ export default function CategoryFilters(ce: UseCategoryExplorerReturn) {
       )}
 
       {(selectedCategory || selectedBrand || minPrice || maxPrice || minRating) && (
-        <div className="border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 pt-3">
+        <div className="border-t border-accent-primary/8 pt-3">
           <button
             onClick={() => {
               setSelectedCategory('');

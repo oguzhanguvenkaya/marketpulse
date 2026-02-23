@@ -200,14 +200,14 @@ export default function Layout({ children }: LayoutProps) {
           collapsed ? 'justify-center px-0 py-3' : `gap-3 px-4 ${indented ? 'py-2.5 ml-2' : 'py-3'}`
         } ${isActive ? 'nav-item-active text-[#3a2d14] dark:text-[#F0FDF4]' : 'text-[#7a6b4e] dark:text-[#6B8F80]'}`}
       >
-        <span className={`flex-shrink-0 ${isActive ? 'text-[#5b4824] dark:text-[#4ADE80]' : 'text-[#9e8b66] dark:text-[#6B8F80]'}`}>
+        <span className={`flex-shrink-0 ${isActive ? 'text-accent-primary' : 'text-text-muted'}`}>
           {item.icon}
         </span>
         {!collapsed && (
           <>
             <span className="truncate">{item.label}</span>
             {isActive && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#f7ce86] dark:bg-[#4ADE80] shadow-glow-gold flex-shrink-0" />
+              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-secondary shadow-glow-gold flex-shrink-0" />
             )}
           </>
         )}
@@ -216,7 +216,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen app-shell text-[#5f471d] dark:text-[#A7C4B8] flex">
+    <div className="min-h-screen app-shell text-text-body flex">
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -229,7 +229,7 @@ export default function Layout({ children }: LayoutProps) {
           mobileOpen ? 'translate-x-0 !w-72' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className={`border-b border-[#5b4824]/10 dark:border-[#4ADE80]/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
+        <div className={`border-b border-accent-primary/10 transition-all duration-300 ${collapsed ? 'p-3' : 'p-6'}`}>
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-xl brand-mark flex items-center justify-center flex-shrink-0">
@@ -240,13 +240,13 @@ export default function Layout({ children }: LayoutProps) {
               {!collapsed && (
                 <div className="min-w-0">
                   <span className="text-xl font-bold text-[#3a2d14] dark:text-[#F0FDF4] tracking-tight">MarketPulse</span>
-                  <span className="text-xs text-[#9e8b66] dark:text-[#6B8F80] block">Intelligence Console</span>
+                  <span className="text-xs text-text-muted block">Intelligence Console</span>
                 </div>
               )}
             </Link>
             <button
               onClick={() => setMobileOpen(false)}
-              className="p-2 text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#5b4824] dark:hover:text-[#4ADE80] hover:bg-[#5b4824]/10 dark:hover:bg-[#4ADE80]/10 rounded-lg transition-colors md:hidden"
+              className="p-2 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -270,15 +270,15 @@ export default function Layout({ children }: LayoutProps) {
                     <button
                       onClick={() => toggleGroup(group.label)}
                       className={`w-full flex items-center justify-between px-4 py-2 mt-3 mb-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.12em] transition-all duration-200 ${
-                        hasActiveChild ? 'text-[#5b4824] dark:text-[#4ADE80]' : 'text-[#b5a382] dark:text-[#6B8F80]'
-                      } hover:text-[#5b4824] dark:hover:text-[#4ADE80] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5`}
+                        hasActiveChild ? 'text-accent-primary' : 'text-text-faded'
+                      } hover:text-accent-primary hover:bg-accent-primary/5`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[#9e8b66] dark:text-[#6B8F80]">{group.icon}</span>
+                        <span className="text-text-muted">{group.icon}</span>
                         <span>{group.label}</span>
                       </div>
                       <svg
-                        className={`w-3.5 h-3.5 text-[#9e8b66] dark:text-[#6B8F80] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -291,7 +291,7 @@ export default function Layout({ children }: LayoutProps) {
                       className="flex justify-center py-2 mt-3 mb-1"
                       title={group.label}
                     >
-                      <span className="text-[#9e8b66] dark:text-[#6B8F80]">{group.icon}</span>
+                      <span className="text-text-muted">{group.icon}</span>
                     </div>
                   )}
                   {(isExpanded || collapsed) && (
@@ -305,10 +305,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </nav>
 
-        <div className={`border-t border-[#5b4824]/10 dark:border-[#4ADE80]/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
+        <div className={`border-t border-accent-primary/10 transition-all duration-300 ${collapsed ? 'p-2' : 'p-4'}`}>
           <button
             onClick={() => setCollapsed(c => !c)}
-            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#5b4824] dark:hover:text-[#4ADE80] hover:bg-[#5b4824]/10 dark:hover:bg-[#4ADE80]/10 ${
+            className={`hidden md:flex items-center w-full rounded-xl transition-all duration-200 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 ${
               collapsed ? 'justify-center py-3' : 'gap-3 px-4 py-3'
             }`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -319,7 +319,7 @@ export default function Layout({ children }: LayoutProps) {
             {!collapsed && <span className="text-sm">Collapse</span>}
           </button>
           {!collapsed && (
-            <div className="px-4 py-3 mt-2 rounded-xl bg-[#f7eede] dark:bg-[#1C2E28] border border-[#5b4824]/10 dark:border-[#4ADE80]/10">
+            <div className="px-4 py-3 mt-2 rounded-xl bg-dark-800 border border-accent-primary/10">
               <div className="flex items-center gap-2 text-xs text-[#7a6b4e] dark:text-[#6B8F80]">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Realtime services active
@@ -339,14 +339,14 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 -ml-1 text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#5b4824] dark:hover:text-[#4ADE80] hover:bg-[#5b4824]/10 dark:hover:bg-[#4ADE80]/10 rounded-lg transition-colors md:hidden"
+              className="p-2 -ml-1 text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-colors md:hidden"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-[#b5a382] dark:text-[#6B8F80]">Workspace</p>
+              <p className="text-xs uppercase tracking-[0.15em] text-text-faded">Workspace</p>
               <h1 className="text-base md:text-lg font-bold text-[#3a2d14] dark:text-[#F0FDF4]">{activeLabel}</h1>
             </div>
           </div>
@@ -354,7 +354,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="hidden sm:flex items-center gap-3">
             <button
               onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
-              className="p-2 rounded-lg text-[#9e8b66] hover:text-[#5b4824] hover:bg-[#5b4824]/10 dark:text-[#6B8F80] dark:hover:text-[#4ADE80] dark:hover:bg-[#4ADE80]/10 transition-colors"
+              className="p-2 rounded-lg text-text-muted hover:text-accent-primary hover:bg-accent-primary/10 transition-colors"
               title={theme === 'light' ? 'Dark mode' : 'Light mode'}
             >
               {theme === 'light' ? (
@@ -368,7 +368,7 @@ export default function Layout({ children }: LayoutProps) {
               )}
             </button>
             <div className="badge badge-info">Live analytics</div>
-            <div className="text-sm text-[#9e8b66] dark:text-[#6B8F80]">
+            <div className="text-sm text-text-muted">
               {new Date().toLocaleDateString('en-US', {
                 weekday: 'short',
                 year: 'numeric',

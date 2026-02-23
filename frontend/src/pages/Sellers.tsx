@@ -57,7 +57,7 @@ export default function Sellers() {
     } else if (seller.campaign_alert_count > 0) {
       return 'bg-orange-50 dark:bg-orange-950/30 border border-orange-300/40 dark:border-orange-400/20';
     }
-    return 'bg-[#f7eede] dark:bg-[#162420]';
+    return 'bg-dark-800';
   };
 
   const exportProgressPercent = exportProgress.total > 0
@@ -114,8 +114,8 @@ export default function Sellers() {
     <div className="space-y-5 md:space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">Sellers</h1>
-          <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#6B8F80] mt-1">View all sellers and their alert products</p>
+          <h1 className="text-xl md:text-2xl font-bold text-text-primary">Sellers</h1>
+          <p className="text-sm md:text-base text-text-muted mt-1">View all sellers and their alert products</p>
         </div>
         {sellersWithAlerts.length > 0 && (
           <div className="relative">
@@ -126,7 +126,7 @@ export default function Sellers() {
             >
               {bulkExporting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900 dark:border-[#022c22]"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900 dark:border-accent-on-primary"></div>
                   <span>Exporting {exportProgress.current}/{exportProgress.total}</span>
                 </>
               ) : (
@@ -142,26 +142,26 @@ export default function Sellers() {
               )}
             </button>
             {showBulkExportMenu && (
-              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-[#f7eede] dark:bg-[#162420] rounded-lg shadow-lg border border-dark-500 dark:border-[#2A4039] z-10">
+              <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-dark-800 rounded-lg shadow-lg border border-dark-500 dark:border-border-default z-10">
                 <button
                   onClick={() => handleBulkExport('price')}
                   disabled={filteredSellers.filter(s => s.price_alert_count > 0).length === 0}
-                  className="w-full px-4 py-3 text-left text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="w-full px-4 py-3 text-left text-text-body hover:bg-surface-hover rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span className="w-2 h-2 bg-danger rounded-full"></span>
                   <span>Export Price Alerts</span>
-                  <span className="ml-auto text-xs text-neutral-500 dark:text-[#6B8F80]">
+                  <span className="ml-auto text-xs text-text-muted">
                     ({filteredSellers.filter(s => s.price_alert_count > 0).length} sellers)
                   </span>
                 </button>
                 <button
                   onClick={() => handleBulkExport('campaign')}
                   disabled={filteredSellers.filter(s => s.campaign_alert_count > 0).length === 0}
-                  className="w-full px-4 py-3 text-left text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="w-full px-4 py-3 text-left text-text-body hover:bg-surface-hover rounded-b-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span className="w-2 h-2 bg-warning rounded-full"></span>
                   <span>Export Campaign Alerts</span>
-                  <span className="ml-auto text-xs text-neutral-500 dark:text-[#6B8F80]">
+                  <span className="ml-auto text-xs text-text-muted">
                     ({filteredSellers.filter(s => s.campaign_alert_count > 0).length} sellers)
                   </span>
                 </button>
@@ -176,11 +176,11 @@ export default function Sellers() {
           <div className="flex items-center gap-3">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent-primary"></div>
             <div>
-              <div className="text-[#0f1419] dark:text-[#F0FDF4] font-medium">Exporting: {exportProgress.sellerName}</div>
-              <div className="text-[#9e8b66] dark:text-[#6B8F80] text-sm">{exportProgress.current} of {exportProgress.total} sellers</div>
+              <div className="text-text-primary font-medium">Exporting: {exportProgress.sellerName}</div>
+              <div className="text-text-muted text-sm">{exportProgress.current} of {exportProgress.total} sellers</div>
             </div>
           </div>
-          <div className="mt-3 bg-[#f7eede] dark:bg-[#162420] rounded-full h-2 overflow-hidden">
+          <div className="mt-3 bg-dark-800 rounded-full h-2 overflow-hidden">
             <div 
               className="bg-accent-primary h-full transition-all duration-300"
               style={{ width: `${exportProgressPercent}%` }}
@@ -194,8 +194,8 @@ export default function Sellers() {
           onClick={() => setPlatform('hepsiburada')}
           className={`px-4 py-2 rounded-lg transition-all ${
             platform === 'hepsiburada'
-              ? 'bg-accent-primary text-dark-900 dark:text-[#022c22] font-medium'
-              : 'bg-[#f7eede] dark:bg-[#162420] text-[#9e8b66] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28]'
+              ? 'bg-accent-primary text-dark-900 dark:text-accent-on-primary font-medium'
+              : 'bg-dark-800 text-text-muted hover:bg-surface-hover'
           }`}
         >
           Hepsiburada
@@ -204,8 +204,8 @@ export default function Sellers() {
           onClick={() => setPlatform('trendyol')}
           className={`px-4 py-2 rounded-lg transition-all ${
             platform === 'trendyol'
-              ? 'bg-accent-primary text-dark-900 dark:text-[#022c22] font-medium'
-              : 'bg-[#f7eede] dark:bg-[#162420] text-[#9e8b66] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28]'
+              ? 'bg-accent-primary text-dark-900 dark:text-accent-on-primary font-medium'
+              : 'bg-dark-800 text-text-muted hover:bg-surface-hover'
           }`}
         >
           Trendyol
@@ -221,7 +221,7 @@ export default function Sellers() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input-dark flex-1"
           />
-          <div className="text-[#9e8b66] dark:text-[#6B8F80] text-xs md:text-sm">
+          <div className="text-text-muted text-xs md:text-sm">
             {filteredSellers.length} sellers
           </div>
         </div>
@@ -229,10 +229,10 @@ export default function Sellers() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
-            <span className="ml-3 text-[#9e8b66] dark:text-[#6B8F80]">Loading sellers...</span>
+            <span className="ml-3 text-text-muted">Loading sellers...</span>
           </div>
         ) : filteredSellers.length === 0 ? (
-          <div className="text-center py-12 text-[#9e8b66] dark:text-[#6B8F80]">
+          <div className="text-center py-12 text-text-muted">
             No sellers found
           </div>
         ) : (
@@ -241,43 +241,43 @@ export default function Sellers() {
               <div
                 key={seller.merchant_id}
                 onClick={() => navigate(`/sellers/${seller.merchant_id}?platform=${platform}`)}
-                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-[#f0e8d8]/45 dark:hover:bg-[#1C2E28]/45 ${getCardBackground(seller)}`}
+                className={`p-3 md:p-4 rounded-lg cursor-pointer transition-all hover:bg-surface-hover/45 ${getCardBackground(seller)}`}
               >
                 <div className="flex items-start gap-3">
                   {seller.merchant_logo && (
                     <img
                       src={seller.merchant_logo}
                       alt={seller.merchant_name}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-white dark:bg-[#162420] p-1"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-white dark:bg-surface-card p-1"
                   />
                 )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#0f1419] dark:text-[#F0FDF4] truncate">{seller.merchant_name}</h3>
+                    <h3 className="font-semibold text-text-primary truncate">{seller.merchant_name}</h3>
                     {seller.merchant_rating && (
                       <div className="flex items-center gap-1 mt-1">
                         <span className="text-warning text-sm">★</span>
-                        <span className="text-[#5f471d] dark:text-[#A7C4B8] text-sm">{formatRating(seller.merchant_rating)}</span>
+                        <span className="text-text-body text-sm">{formatRating(seller.merchant_rating)}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-[#e5e0d2] dark:border-[#2A4039]">
+                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-border-default">
                   <div className="text-center">
-                    <div className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">{seller.product_count}</div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Products</div>
+                    <div className="text-xl md:text-2xl font-bold text-text-primary">{seller.product_count}</div>
+                    <div className="text-xs text-text-muted">Products</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-neutral-500 dark:text-[#6B8F80]'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.price_alert_count > 0 ? 'text-danger' : 'text-text-muted'}`}>
                       {seller.price_alert_count}
                     </div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Price</div>
+                    <div className="text-xs text-text-muted">Price</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-neutral-500 dark:text-[#6B8F80]'}`}>
+                    <div className={`text-xl md:text-2xl font-bold ${seller.campaign_alert_count > 0 ? 'text-warning' : 'text-text-muted'}`}>
                       {seller.campaign_alert_count}
                     </div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">Campaign</div>
+                    <div className="text-xs text-text-muted">Campaign</div>
                   </div>
                 </div>
 
