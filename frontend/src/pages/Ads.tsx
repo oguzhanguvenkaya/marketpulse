@@ -77,15 +77,15 @@ export default function Ads() {
     <div className="space-y-5 md:space-y-6 animate-fade-in">
       <div>
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419]">Ads</h1>
-          <p className="text-sm md:text-base text-[#9e8b66] mt-1">Analyze sponsored products and brand advertisements</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">Ads</h1>
+          <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#6B8F80] mt-1">Analyze sponsored products and brand advertisements</p>
         </div>
       </div>
 
       <div className="card-dark p-4 md:p-5">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
           <div className="flex-1 min-w-0 sm:min-w-64">
-            <label className="block text-sm font-medium text-[#9e8b66] mb-2">
+            <label className="block text-sm font-medium text-[#9e8b66] dark:text-[#6B8F80] mb-2">
               Search Keyword
             </label>
             <select
@@ -104,7 +104,7 @@ export default function Ads() {
 
           {selectedKeyword && (
             <div className="px-3 md:px-4 py-2 rounded-lg bg-accent-primary/10 border border-accent-primary/20 w-full sm:w-auto">
-              <span className="text-sm text-[#9e8b66]">Selected:</span>
+              <span className="text-sm text-[#9e8b66] dark:text-[#6B8F80]">Selected:</span>
               <span className="ml-2 text-accent-primary font-medium break-all">"{selectedKeyword}"</span>
             </div>
           )}
@@ -112,14 +112,14 @@ export default function Ads() {
       </div>
 
       <div className="card-dark overflow-hidden">
-        <div className="border-b border-[#5b4824]/8">
+        <div className="border-b border-[#5b4824]/8 dark:border-[#4ADE80]/8">
           <nav className="flex overflow-x-auto scrollbar-thin">
             <button
               onClick={() => setActiveTab('sponsored')}
               className={`px-4 md:px-6 py-3.5 md:py-4 text-xs md:text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'sponsored'
                   ? 'border-accent-primary text-accent-primary'
-                  : 'border-transparent text-[#9e8b66] hover:text-[#3d3427]'
+                  : 'border-transparent text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#3d3427] dark:hover:text-[#F0FDF4]'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -134,7 +134,7 @@ export default function Ads() {
               className={`px-4 md:px-6 py-3.5 md:py-4 text-xs md:text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'brands'
                   ? 'border-accent-primary text-accent-primary'
-                  : 'border-transparent text-[#9e8b66] hover:text-[#3d3427]'
+                  : 'border-transparent text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#3d3427] dark:hover:text-[#F0FDF4]'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -154,12 +154,12 @@ export default function Ads() {
             </div>
           ) : !selectedTaskId ? (
             <div className="text-center py-12">
-              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-[#9e8b66]">Please select a search keyword</p>
+              <p className="text-[#9e8b66] dark:text-[#6B8F80]">Please select a search keyword</p>
             </div>
           ) : activeTab === 'sponsored' ? (
             <SponsoredProductsTab products={sponsoredProducts} formatPrice={formatPrice} />
@@ -186,12 +186,12 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
           <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <p className="text-[#9e8b66]">No sponsored products found for this search</p>
+        <p className="text-[#9e8b66] dark:text-[#6B8F80]">No sponsored products found for this search</p>
       </div>
     );
   }
@@ -199,17 +199,17 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
       {products.map((product, index) => (
-        <div key={index} className="card-dark border border-[#5b4824]/8 overflow-hidden hover:border-accent-primary/30 transition-all group">
+        <div key={index} className="card-dark border border-[#5b4824]/8 dark:border-[#4ADE80]/8 overflow-hidden hover:border-accent-primary/30 transition-all group">
           <div className="relative">
             {product.image_url ? (
               <img 
                 src={product.image_url} 
                 alt={product.product_name || 'Product'} 
-                className="w-full h-48 object-contain bg-[#fffbef] p-2"
+                className="w-full h-48 object-contain bg-[#fffbef] dark:bg-[#0F1A17] p-2"
               />
             ) : (
-              <div className="w-full h-48 bg-[#f7eede] flex items-center justify-center">
-                <svg className="w-12 h-12 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-full h-48 bg-[#f7eede] dark:bg-[#162420] flex items-center justify-center">
+                <svg className="w-12 h-12 text-[#b5a382] dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -222,7 +222,7 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
             </div>
           </div>
           <div className="p-4">
-            <h3 className="font-medium text-sm text-[#3d3427] line-clamp-2 mb-2 min-h-[2.5rem]">
+            <h3 className="font-medium text-sm text-[#3d3427] dark:text-[#A7C4B8] line-clamp-2 mb-2 min-h-[2.5rem]">
               {product.product_name || 'Unnamed Product'}
             </h3>
             {product.seller_name && (
@@ -241,7 +241,7 @@ function SponsoredProductsTab({ products, formatPrice }: SponsoredProductsTabPro
                   </span>
                 </>
               ) : (
-                <span className="text-lg font-bold text-[#3d3427]">
+                <span className="text-lg font-bold text-[#3d3427] dark:text-[#A7C4B8]">
                   {formatPrice(product.price)}
                 </span>
               )}
@@ -272,12 +272,12 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
   if (brands.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
           <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
         </div>
-        <p className="text-[#9e8b66]">No brand ads found for this search</p>
+        <p className="text-[#9e8b66] dark:text-[#6B8F80]">No brand ads found for this search</p>
         <p className="text-sm text-neutral-500 mt-1">Brand ads are loaded dynamically and may not be captured</p>
       </div>
     );
@@ -286,22 +286,22 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
   return (
     <div className="space-y-3">
       {brands.map((brand, index) => (
-        <div key={index} className="rounded-lg border border-[#5b4824]/8 overflow-hidden">
+        <div key={index} className="rounded-lg border border-[#5b4824]/8 dark:border-[#4ADE80]/8 overflow-hidden">
           <button
             onClick={() => setExpandedBrand(expandedBrand === brand.seller_name ? null : brand.seller_name)}
-            className="w-full px-4 py-4 flex items-start sm:items-center justify-between gap-2 bg-[#f7eede]/50 hover:bg-[#f0e8d8]/50 transition-colors"
+            className="w-full px-4 py-4 flex items-start sm:items-center justify-between gap-2 bg-[#f7eede]/50 dark:bg-[#162420]/50 hover:bg-[#f0e8d8]/50 dark:hover:bg-[#1C2E28]/50 transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="badge badge-info text-[10px]">
                 #{brand.position || index + 1}
               </span>
-              <span className="font-medium text-[#3d3427] truncate">{brand.seller_name}</span>
+              <span className="font-medium text-[#3d3427] dark:text-[#A7C4B8] truncate">{brand.seller_name}</span>
               <span className="text-xs md:text-sm text-neutral-500 whitespace-nowrap">
                 ({brand.products?.length || 0} products)
               </span>
             </div>
             <svg 
-              className={`w-5 h-5 text-[#9e8b66] transition-transform ${expandedBrand === brand.seller_name ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-[#9e8b66] dark:text-[#6B8F80] transition-transform ${expandedBrand === brand.seller_name ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -311,11 +311,11 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
           </button>
           
           {expandedBrand === brand.seller_name && brand.products && brand.products.length > 0 && (
-            <div className="p-3 md:p-4 border-t border-[#5b4824]/8 bg-[#f7eede]/50">
+            <div className="p-3 md:p-4 border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 bg-[#f7eede]/50 dark:bg-[#162420]/50">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {brand.products.map((product, pIndex) => (
-                  <div key={pIndex} className="rounded-lg border border-[#5b4824]/8 overflow-hidden hover:border-accent-primary/20 transition-all bg-[#f7eede]/30">
-                    <div className="relative bg-[#fffbef] h-28">
+                  <div key={pIndex} className="rounded-lg border border-[#5b4824]/8 dark:border-[#4ADE80]/8 overflow-hidden hover:border-accent-primary/20 transition-all bg-[#f7eede]/30 dark:bg-[#162420]/30">
+                    <div className="relative bg-[#fffbef] dark:bg-[#0F1A17] h-28">
                       {product.image_url ? (
                         <img 
                           src={product.image_url} 
@@ -324,14 +324,14 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <svg className="w-8 h-8 text-[#b5a382]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-8 h-8 text-[#b5a382] dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
                       )}
                     </div>
                     <div className="p-3">
-                      <p className="text-xs font-medium text-[#5f471d] line-clamp-2 mb-2 min-h-[2rem]">
+                      <p className="text-xs font-medium text-[#5f471d] dark:text-[#A7C4B8] line-clamp-2 mb-2 min-h-[2rem]">
                         {product.name || 'Product'}
                       </p>
                       <div className="flex items-center gap-2 mb-2">
@@ -345,7 +345,7 @@ function BrandAdsTab({ brands, expandedBrand, setExpandedBrand, formatPrice }: B
                             </span>
                           </>
                         ) : product.price ? (
-                          <span className="text-sm font-bold text-[#3d3427]">
+                          <span className="text-sm font-bold text-[#3d3427] dark:text-[#A7C4B8]">
                             {formatPrice(product.price)}
                           </span>
                         ) : (

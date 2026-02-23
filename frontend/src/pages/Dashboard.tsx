@@ -102,8 +102,8 @@ export default function Dashboard() {
     <div className="space-y-5 md:space-y-6 animate-fade-in">
       <div className="mb-2 md:mb-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#f5f0e8]">Dashboard</h1>
-          <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#8a7d65] mt-1">Monitor marketplace data and analytics</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">Dashboard</h1>
+          <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#6B8F80] mt-1">Monitor marketplace data and analytics</p>
         </div>
       </div>
 
@@ -114,7 +114,7 @@ export default function Dashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#f5f0e8]">Keyword Search</h2>
+          <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#F0FDF4]">Keyword Search</h2>
         </div>
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <input
@@ -155,12 +155,12 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div className="flex items-start md:items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
-                <span className="text-sm md:text-base text-[#0f1419] dark:text-[#f5f0e8]">Searching for "<span className="text-accent-primary">{currentTask.keyword}</span>"</span>
+                <span className="text-sm md:text-base text-[#0f1419] dark:text-[#F0FDF4]">Searching for "<span className="text-accent-primary">{currentTask.keyword}</span>"</span>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 {getStatusBadge(currentTask.status)}
                 {currentTask.status === 'completed' && (
-                  <span className="text-xs md:text-sm text-[#9e8b66]">{currentTask.total_products} products found</span>
+                  <span className="text-xs md:text-sm text-[#9e8b66] dark:text-[#6B8F80]">{currentTask.total_products} products found</span>
                 )}
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function Dashboard() {
                   </div>
                   {trends && <TrendIndicator data={trends[stat.trendKey]} />}
                 </div>
-                <div className="text-xs md:text-sm text-[#9e8b66] dark:text-[#8a7d65]">{stat.label}</div>
+                <div className="text-xs md:text-sm text-[#9e8b66] dark:text-[#6B8F80]">{stat.label}</div>
               </div>
               <div className="p-2 rounded-lg" style={{ backgroundColor: `${stat.color}15` }}>
                 <span style={{ color: stat.color }}>{stat.icon}</span>
@@ -199,43 +199,43 @@ export default function Dashboard() {
       </div>
 
       <div className="card-dark overflow-hidden">
-        <div className="px-4 md:px-6 py-3 md:py-4 border-b border-[#5b4824]/8 flex items-center gap-3">
+        <div className="px-4 md:px-6 py-3 md:py-4 border-b border-[#5b4824]/8 dark:border-[#4ADE80]/8 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center">
             <svg className="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#f5f0e8]">Recent Searches</h2>
+          <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#F0FDF4]">Recent Searches</h2>
         </div>
-        <div className="divide-y divide-[#5b4824]/8">
+        <div className="divide-y divide-[#5b4824]/8 dark:divide-[#4ADE80]/8">
           {tasks.length === 0 ? (
             <div className="px-4 md:px-6 py-10 md:py-12 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <p className="text-[#9e8b66]">No searches yet</p>
+              <p className="text-[#9e8b66] dark:text-[#6B8F80]">No searches yet</p>
               <p className="text-sm text-neutral-500 mt-1">Start by entering a keyword above</p>
             </div>
           ) : (
             tasks.map((task, index) => (
               <div 
                 key={task.id} 
-                className="px-4 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-[#5b4824]/[0.03] transition-colors"
+                className="px-4 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-[#5b4824]/[0.03] dark:hover:bg-[#4ADE80]/[0.03] transition-colors"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-[#f0e8d8] flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[#9e8b66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-[#f0e8d8] dark:bg-[#1C2E28] flex items-center justify-center">
+                    <svg className="w-5 h-5 text-[#9e8b66] dark:text-[#6B8F80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
                   <div className="min-w-0">
-                    <div className="font-medium text-[#0f1419] dark:text-[#f5f0e8] truncate">{task.keyword}</div>
+                    <div className="font-medium text-[#0f1419] dark:text-[#F0FDF4] truncate">{task.keyword}</div>
                     <div className="text-xs md:text-sm text-neutral-500 flex items-center gap-2">
                       <span className="capitalize">{task.platform}</span>
-                      <span className="text-[#b5a382]">•</span>
+                      <span className="text-[#b5a382] dark:text-[#6B8F80]">•</span>
                       <span>{new Date(task.created_at).toLocaleString('en-US', { 
                         month: 'short', 
                         day: 'numeric', 
@@ -246,7 +246,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-                  <span className="text-xs md:text-sm text-[#9e8b66]">{task.total_products} products</span>
+                  <span className="text-xs md:text-sm text-[#9e8b66] dark:text-[#6B8F80]">{task.total_products} products</span>
                   {getStatusBadge(task.status)}
                 </div>
               </div>

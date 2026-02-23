@@ -225,7 +225,7 @@ export default function UrlScraper() {
       stopped: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
     };
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-neutral-500/20 text-[#9e8b66]'}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-neutral-500/20 text-[#9e8b66] dark:text-[#6B8F80]'}`}>
         {status === 'running' && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />}
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
@@ -276,49 +276,49 @@ export default function UrlScraper() {
     return (
       <div className="mt-3 space-y-3">
         {productName && (
-          <div className="text-sm"><span className="text-[#9e8b66]">Name:</span> <span className="text-[#0f1419] font-medium">{productName}</span></div>
+          <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">Name:</span> <span className="text-[#0f1419] dark:text-[#F0FDF4] font-medium">{productName}</span></div>
         )}
         {(productBrand || productSku || productBarcode || productCategory) && (
           <div className="flex flex-wrap gap-3">
-            {productBrand && <div className="text-sm"><span className="text-[#9e8b66]">Brand:</span> <span className="text-[#3d3427]">{productBrand}</span></div>}
-            {productSku && <div className="text-sm"><span className="text-[#9e8b66]">SKU:</span> <span className="text-[#3d3427]">{productSku}</span></div>}
-            {productBarcode && <div className="text-sm"><span className="text-[#9e8b66]">Barcode:</span> <span className="text-[#3d3427]">{productBarcode}</span></div>}
-            {productCategory && <div className="text-sm"><span className="text-[#9e8b66]">Category:</span> <span className="text-[#3d3427]">{productCategory}</span></div>}
+            {productBrand && <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">Brand:</span> <span className="text-[#3d3427] dark:text-[#A7C4B8]">{productBrand}</span></div>}
+            {productSku && <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">SKU:</span> <span className="text-[#3d3427] dark:text-[#A7C4B8]">{productSku}</span></div>}
+            {productBarcode && <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">Barcode:</span> <span className="text-[#3d3427] dark:text-[#A7C4B8]">{productBarcode}</span></div>}
+            {productCategory && <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">Category:</span> <span className="text-[#3d3427] dark:text-[#A7C4B8]">{productCategory}</span></div>}
           </div>
         )}
         {price && (
           <div className="text-sm flex items-center gap-3">
-            <span><span className="text-[#9e8b66]">Price:</span> <span className="text-accent-primary font-bold">{price} {currency}</span></span>
-            {originalPrice && <span><span className="text-[#9e8b66]">Was:</span> <span className="text-neutral-500 line-through">{originalPrice}</span></span>}
+            <span><span className="text-[#9e8b66] dark:text-[#6B8F80]">Price:</span> <span className="text-accent-primary font-bold">{price} {currency}</span></span>
+            {originalPrice && <span><span className="text-[#9e8b66] dark:text-[#6B8F80]">Was:</span> <span className="text-neutral-500 line-through">{originalPrice}</span></span>}
           </div>
         )}
         {(productDescription || metaDescription) && (
           <div className="text-sm">
-            <span className="text-[#9e8b66]">Description:</span>
-            <div className="text-[#5f471d] mt-1 whitespace-pre-line line-clamp-4 bg-[#f7eede]/50 rounded px-3 py-2 border border-[#e5e0d2]/30">{productDescription || metaDescription}</div>
+            <span className="text-[#9e8b66] dark:text-[#6B8F80]">Description:</span>
+            <div className="text-[#5f471d] dark:text-[#A7C4B8] mt-1 whitespace-pre-line line-clamp-4 bg-[#f7eede]/50 dark:bg-[#162420]/50 rounded px-3 py-2 border border-[#e5e0d2]/30 dark:border-[#2A4039]/30">{productDescription || metaDescription}</div>
           </div>
         )}
         {productSpecs && Object.keys(productSpecs).length > 0 && (
           <div className="text-sm">
-            <span className="text-[#9e8b66]">Specifications:</span>
-            <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 bg-[#f7eede]/50 rounded px-3 py-2 border border-[#e5e0d2]/30">
+            <span className="text-[#9e8b66] dark:text-[#6B8F80]">Specifications:</span>
+            <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 bg-[#f7eede]/50 dark:bg-[#162420]/50 rounded px-3 py-2 border border-[#e5e0d2]/30 dark:border-[#2A4039]/30">
               {Object.entries(productSpecs).slice(0, 10).map(([k, v]) => (
                 <div key={k} className="text-xs">
-                  <span className="text-neutral-500">{k}:</span> <span className="text-[#5f471d]">{String(v)}</span>
+                  <span className="text-neutral-500">{k}:</span> <span className="text-[#5f471d] dark:text-[#A7C4B8]">{String(v)}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
         {images && images.length > 0 && (
-          <div className="text-sm"><span className="text-[#9e8b66]">Images:</span> <span className="text-[#5f471d]">{images.length} found</span></div>
+          <div className="text-sm"><span className="text-[#9e8b66] dark:text-[#6B8F80]">Images:</span> <span className="text-[#5f471d] dark:text-[#A7C4B8]">{images.length} found</span></div>
         )}
         {Object.entries(data).filter(([key]) => !HIDDEN_KEYS.includes(key)).map(([key, value]) => {
           if (value === null || value === undefined || value === '') return null;
           return (
             <div key={key} className="text-sm">
-              <span className="text-[#9e8b66]">{FIELD_LABELS[key] || key}:</span>{' '}
-              <span className="text-[#5f471d]">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+              <span className="text-[#9e8b66] dark:text-[#6B8F80]">{FIELD_LABELS[key] || key}:</span>{' '}
+              <span className="text-[#5f471d] dark:text-[#A7C4B8]">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
             </div>
           );
         })}
@@ -329,8 +329,8 @@ export default function UrlScraper() {
   return (
     <div className="space-y-5 md:space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-[#0f1419]">URL Scraper</h1>
-        <p className="text-sm md:text-base text-[#9e8b66] mt-1">Scrape product data from URLs - single or bulk</p>
+        <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">URL Scraper</h1>
+        <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#6B8F80] mt-1">Scrape product data from URLs - single or bulk</p>
       </div>
 
       {error && (
@@ -351,14 +351,14 @@ export default function UrlScraper() {
         </div>
       )}
 
-      <div className="bg-[#fefbf0] border border-[#5b4824]/8 rounded-xl p-4 md:p-6">
+      <div className="bg-[#fefbf0] dark:bg-[#0F1A17] border border-[#5b4824]/8 dark:border-[#4ADE80]/8 rounded-xl p-4 md:p-6">
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setInputMode('single')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               inputMode === 'single'
-                ? 'bg-accent-primary text-dark-900'
-                : 'bg-[#f7eede] text-[#5f471d] hover:bg-[#f0e8d8] hover:text-[#0f1419]'
+                ? 'bg-accent-primary text-dark-900 dark:text-[#022c22]'
+                : 'bg-[#f7eede] dark:bg-[#162420] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] hover:text-[#0f1419] dark:hover:text-[#F0FDF4]'
             }`}
           >
             Single URL
@@ -367,8 +367,8 @@ export default function UrlScraper() {
             onClick={() => setInputMode('bulk')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               inputMode === 'bulk'
-                ? 'bg-accent-primary text-dark-900'
-                : 'bg-[#f7eede] text-[#5f471d] hover:bg-[#f0e8d8] hover:text-[#0f1419]'
+                ? 'bg-accent-primary text-dark-900 dark:text-[#022c22]'
+                : 'bg-[#f7eede] dark:bg-[#162420] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] hover:text-[#0f1419] dark:hover:text-[#F0FDF4]'
             }`}
           >
             Bulk Import
@@ -378,45 +378,45 @@ export default function UrlScraper() {
         {inputMode === 'single' ? (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-[#9e8b66] mb-1.5">URL *</label>
+              <label className="block text-sm text-[#9e8b66] dark:text-[#6B8F80] mb-1.5">URL *</label>
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.example.com/product/..."
-                className="w-full bg-[#f7eede] border border-[#5b4824]/12 text-[#0f1419] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                className="w-full bg-[#f7eede] dark:bg-[#162420] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 text-[#0f1419] dark:text-[#F0FDF4] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-[#9e8b66] mb-1.5">Product Name (optional)</label>
+                <label className="block text-sm text-[#9e8b66] dark:text-[#6B8F80] mb-1.5">Product Name (optional)</label>
                 <input
                   type="text"
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                   placeholder="Product name"
-                  className="w-full bg-[#f7eede] border border-[#5b4824]/12 text-[#0f1419] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                  className="w-full bg-[#f7eede] dark:bg-[#162420] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 text-[#0f1419] dark:text-[#F0FDF4] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#9e8b66] mb-1.5">Barcode (optional)</label>
+                <label className="block text-sm text-[#9e8b66] dark:text-[#6B8F80] mb-1.5">Barcode (optional)</label>
                 <input
                   type="text"
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                   placeholder="Barcode / EAN"
-                  className="w-full bg-[#f7eede] border border-[#5b4824]/12 text-[#0f1419] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
+                  className="w-full bg-[#f7eede] dark:bg-[#162420] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 text-[#0f1419] dark:text-[#F0FDF4] rounded-lg px-4 py-2 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500"
                 />
               </div>
             </div>
             <button
               onClick={handleSingleScrape}
               disabled={scraping || !url.trim()}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 dark:text-[#022c22] font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
             >
               {scraping ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900 dark:border-[#022c22]" />
                   Scraping...
                 </>
               ) : (
@@ -436,8 +436,8 @@ export default function UrlScraper() {
                 onClick={() => setBulkMode('csv')}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   bulkMode === 'csv'
-                    ? 'bg-[#f0e8d8] text-[#0f1419] border border-[#5b4824]/12'
-                    : 'text-[#9e8b66] hover:text-[#0f1419]'
+                    ? 'bg-[#f0e8d8] dark:bg-[#1C2E28] text-[#0f1419] dark:text-[#F0FDF4] border border-[#5b4824]/12 dark:border-[#4ADE80]/12'
+                    : 'text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#0f1419] dark:hover:text-[#F0FDF4]'
                 }`}
               >
                 CSV Upload
@@ -446,8 +446,8 @@ export default function UrlScraper() {
                 onClick={() => setBulkMode('json')}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   bulkMode === 'json'
-                    ? 'bg-[#f0e8d8] text-[#0f1419] border border-[#5b4824]/12'
-                    : 'text-[#9e8b66] hover:text-[#0f1419]'
+                    ? 'bg-[#f0e8d8] dark:bg-[#1C2E28] text-[#0f1419] dark:text-[#F0FDF4] border border-[#5b4824]/12 dark:border-[#4ADE80]/12'
+                    : 'text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#0f1419] dark:hover:text-[#F0FDF4]'
                 }`}
               >
                 JSON Input
@@ -466,7 +466,7 @@ export default function UrlScraper() {
                       ? 'border-accent-primary bg-accent-primary/5'
                       : csvFile
                         ? 'border-green-500/30 bg-green-500/5'
-                        : 'border-[#5b4824]/12 hover:border-[#5b4824]/15 bg-[#f7eede]/50'
+                        : 'border-[#5b4824]/12 dark:border-[#4ADE80]/12 hover:border-[#5b4824]/15 dark:hover:border-[#4ADE80]/15 bg-[#f7eede]/50 dark:bg-[#162420]/50'
                   }`}
                 >
                   {csvFile ? (
@@ -474,15 +474,15 @@ export default function UrlScraper() {
                       <svg className="w-8 h-8 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p className="text-[#0f1419] font-medium">{csvFile.name}</p>
-                      <p className="text-[#9e8b66] text-sm">{(csvFile.size / 1024).toFixed(1)} KB</p>
+                      <p className="text-[#0f1419] dark:text-[#F0FDF4] font-medium">{csvFile.name}</p>
+                      <p className="text-[#9e8b66] dark:text-[#6B8F80] text-sm">{(csvFile.size / 1024).toFixed(1)} KB</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <svg className="w-8 h-8 text-[#9e8b66] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-8 h-8 text-[#9e8b66] dark:text-[#6B8F80] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
-                      <p className="text-[#5f471d]">Drop CSV file here or click to browse</p>
+                      <p className="text-[#5f471d] dark:text-[#A7C4B8]">Drop CSV file here or click to browse</p>
                       <p className="text-neutral-500 text-xs">Supports comma (,) semicolon (;) or tab delimiters. Columns: url (+ url_1, url_2...), product_name (optional), barcode (optional)</p>
                     </div>
                   )}
@@ -497,13 +497,13 @@ export default function UrlScraper() {
               </div>
             ) : (
               <div>
-                <label className="block text-sm text-[#9e8b66] mb-1.5">JSON Array</label>
+                <label className="block text-sm text-[#9e8b66] dark:text-[#6B8F80] mb-1.5">JSON Array</label>
                 <textarea
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
                   placeholder={'[\n  { "url": "https://example.com/product1", "product_name": "Product 1", "barcode": "123456" },\n  { "url": "https://example.com/product2" }\n]'}
                   rows={6}
-                  className="w-full bg-[#f7eede] border border-[#5b4824]/12 text-[#0f1419] rounded-lg px-4 py-3 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500 font-mono text-sm"
+                  className="w-full bg-[#f7eede] dark:bg-[#162420] border border-[#5b4824]/12 dark:border-[#4ADE80]/12 text-[#0f1419] dark:text-[#F0FDF4] rounded-lg px-4 py-3 focus:border-accent-primary focus:outline-none placeholder:text-neutral-500 font-mono text-sm"
                 />
               </div>
             )}
@@ -511,11 +511,11 @@ export default function UrlScraper() {
             <button
               onClick={handleBulkScrape}
               disabled={scraping || (bulkMode === 'csv' ? !csvFile : !jsonInput.trim())}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 dark:text-[#022c22] font-medium px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto"
             >
               {scraping ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-900 dark:border-[#022c22]" />
                   Starting...
                 </>
               ) : (
@@ -531,12 +531,12 @@ export default function UrlScraper() {
         )}
       </div>
 
-      <div className="bg-[#fefbf0] border border-[#5b4824]/8 rounded-xl p-4 md:p-6">
+      <div className="bg-[#fefbf0] dark:bg-[#0F1A17] border border-[#5b4824]/8 dark:border-[#4ADE80]/8 rounded-xl p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-[#0f1419]">Scrape Jobs</h2>
+          <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#F0FDF4]">Scrape Jobs</h2>
           <button
             onClick={loadJobs}
-            className="bg-[#f7eede] hover:bg-[#f0e8d8] text-[#5f471d] px-3 py-1.5 rounded-lg text-sm transition-all flex items-center gap-1.5"
+            className="bg-[#f7eede] dark:bg-[#162420] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] text-[#5f471d] dark:text-[#A7C4B8] px-3 py-1.5 rounded-lg text-sm transition-all flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -551,17 +551,17 @@ export default function UrlScraper() {
           </div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="w-12 h-12 text-[#b5a382] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 text-[#b5a382] dark:text-[#6B8F80] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9" />
             </svg>
-            <p className="text-[#9e8b66]">No scrape jobs yet</p>
+            <p className="text-[#9e8b66] dark:text-[#6B8F80]">No scrape jobs yet</p>
             <p className="text-neutral-500 text-sm mt-1">Start by scraping a URL above</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px]">
               <thead>
-                <tr className="text-left text-xs text-[#9e8b66] uppercase tracking-wider border-b border-[#5b4824]/8">
+                <tr className="text-left text-xs text-[#9e8b66] dark:text-[#6B8F80] uppercase tracking-wider border-b border-[#5b4824]/8 dark:border-[#4ADE80]/8">
                   <th className="pb-3 pr-4">Status</th>
                   <th className="pb-3 pr-4">Total URLs</th>
                   <th className="pb-3 pr-4">Completed</th>
@@ -570,18 +570,18 @@ export default function UrlScraper() {
                   <th className="pb-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#5b4824]/8">
+              <tbody className="divide-y divide-[#5b4824]/8 dark:divide-[#4ADE80]/8">
                 {jobs.map((job) => (
                   <tr key={job.id} className="group">
                     <td className="py-3 pr-4">{getStatusBadge(job.status)}</td>
-                    <td className="py-3 pr-4 text-[#0f1419] text-sm">{job.total_urls}</td>
+                    <td className="py-3 pr-4 text-[#0f1419] dark:text-[#F0FDF4] text-sm">{job.total_urls}</td>
                     <td className="py-3 pr-4 text-sm">
                       <span className="text-green-400">{job.completed_urls}</span>
                     </td>
                     <td className="py-3 pr-4 text-sm">
                       <span className={job.failed_urls > 0 ? 'text-red-400' : 'text-neutral-500'}>{job.failed_urls}</span>
                     </td>
-                    <td className="py-3 pr-4 text-[#9e8b66] text-sm">{formatDate(job.created_at)}</td>
+                    <td className="py-3 pr-4 text-[#9e8b66] dark:text-[#6B8F80] text-sm">{formatDate(job.created_at)}</td>
                     <td className="py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {job.status === 'running' && (
@@ -601,14 +601,14 @@ export default function UrlScraper() {
                           className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                             expandedJobId === job.id
                               ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30'
-                              : 'bg-[#f7eede] text-[#5f471d] hover:bg-[#f0e8d8] hover:text-[#0f1419]'
+                              : 'bg-[#f7eede] dark:bg-[#162420] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] hover:text-[#0f1419] dark:hover:text-[#F0FDF4]'
                           }`}
                         >
                           {expandedJobId === job.id ? 'Hide' : 'View'}
                         </button>
                         <button
                           onClick={() => handleDownload(job.id)}
-                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-[#f7eede] text-[#5f471d] hover:bg-[#f0e8d8] hover:text-[#0f1419] transition-all"
+                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-[#f7eede] dark:bg-[#162420] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#f0e8d8] dark:hover:bg-[#1C2E28] hover:text-[#0f1419] dark:hover:text-[#F0FDF4] transition-all"
                           title="Download JSON"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -617,7 +617,7 @@ export default function UrlScraper() {
                         </button>
                         <button
                           onClick={() => handleDelete(job.id)}
-                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-[#f7eede] text-red-400 hover:bg-red-500/20 transition-all"
+                          className="px-2.5 py-1 rounded-md text-xs font-medium bg-[#f7eede] dark:bg-[#162420] text-red-400 hover:bg-red-500/20 transition-all"
                           title="Delete job"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -635,15 +635,15 @@ export default function UrlScraper() {
       </div>
 
       {expandedJobId && (
-        <div className="bg-[#fefbf0] border border-[#5b4824]/8 rounded-xl p-4 md:p-6">
+        <div className="bg-[#fefbf0] dark:bg-[#0F1A17] border border-[#5b4824]/8 dark:border-[#4ADE80]/8 rounded-xl p-4 md:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-[#0f1419]">Job Results</h2>
-              <p className="text-[#9e8b66] text-sm mt-0.5">ID: {expandedJobId.slice(0, 12)}...</p>
+              <h2 className="text-lg font-semibold text-[#0f1419] dark:text-[#F0FDF4]">Job Results</h2>
+              <p className="text-[#9e8b66] dark:text-[#6B8F80] text-sm mt-0.5">ID: {expandedJobId.slice(0, 12)}...</p>
             </div>
             <button
               onClick={() => handleDownload(expandedJobId)}
-              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 font-medium px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
+              className="bg-accent-primary hover:bg-accent-primary/90 text-dark-900 dark:text-[#022c22] font-medium px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -663,10 +663,10 @@ export default function UrlScraper() {
                   key={result.id}
                   className={`rounded-lg p-4 border ${
                     result.status === 'completed'
-                      ? 'bg-[#f7eede]/50 border-[#5b4824]/8'
+                      ? 'bg-[#f7eede]/50 dark:bg-[#162420]/50 border-[#5b4824]/8 dark:border-[#4ADE80]/8'
                       : result.status === 'failed'
                         ? 'bg-red-500/5 border-red-500/20'
-                        : 'bg-[#f7eede]/30 border-[#5b4824]/8'
+                        : 'bg-[#f7eede]/30 dark:bg-[#162420]/30 border-[#5b4824]/8 dark:border-[#4ADE80]/8'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -674,7 +674,7 @@ export default function UrlScraper() {
                       <div className="flex items-center gap-2 mb-1">
                         {getStatusBadge(result.status)}
                         {result.product_name && (
-                          <span className="text-sm text-[#0f1419] font-medium truncate">{result.product_name}</span>
+                          <span className="text-sm text-[#0f1419] dark:text-[#F0FDF4] font-medium truncate">{result.product_name}</span>
                         )}
                       </div>
                       <a
@@ -699,7 +699,7 @@ export default function UrlScraper() {
             </div>
           ) : jobDetail ? (
             <div className="text-center py-8">
-              <p className="text-[#9e8b66]">No results yet</p>
+              <p className="text-[#9e8b66] dark:text-[#6B8F80]">No results yet</p>
             </div>
           ) : null}
         </div>

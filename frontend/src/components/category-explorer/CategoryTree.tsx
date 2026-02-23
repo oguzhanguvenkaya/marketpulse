@@ -25,14 +25,14 @@ function CategoryNodeItem({
     <div key={node.full_path}>
       <div
         className={`flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer text-sm transition-colors group ${
-          isSelected ? 'bg-[#5b4824]/10 text-[#5b4824]' : isAncestor ? 'text-[#7a6b4e]' : 'text-[#9e8b66] hover:text-[#3d3427] hover:bg-[#5b4824]/5'
+          isSelected ? 'bg-[#5b4824]/10 dark:bg-[#4ADE80]/10 text-[#5b4824] dark:text-[#4ADE80]' : isAncestor ? 'text-[#7a6b4e] dark:text-[#6B8F80]' : 'text-[#9e8b66] dark:text-[#6B8F80] hover:text-[#3d3427] dark:hover:text-[#F0FDF4] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5'
         }`}
         style={{ paddingLeft: `${depth * 14 + 8}px` }}
       >
         {hasChildren && (
           <button
             onClick={(e) => { e.stopPropagation(); toggleCategory(node.full_path); }}
-            className="p-0.5 hover:bg-[#5b4824]/8 rounded flex-shrink-0"
+            className="p-0.5 hover:bg-[#5b4824]/8 dark:hover:bg-[#4ADE80]/8 rounded flex-shrink-0"
           >
             <svg className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -43,7 +43,7 @@ function CategoryNodeItem({
         <span className="flex-1 truncate" onClick={() => selectCategory(node.full_path)}>
           {node.name}
         </span>
-        <span className="text-[10px] text-[#b5a382] group-hover:text-neutral-500 flex-shrink-0">{node.count}</span>
+        <span className="text-[10px] text-[#b5a382] dark:text-[#6B8F80] group-hover:text-neutral-500 flex-shrink-0">{node.count}</span>
       </div>
       {hasChildren && isExpanded && (
         <div>
@@ -86,7 +86,7 @@ export default function CategoryTree({
           />
         ))
       ) : (
-        <p className="text-xs text-[#b5a382] px-2">No categories</p>
+        <p className="text-xs text-[#b5a382] dark:text-[#6B8F80] px-2">No categories</p>
       )}
     </div>
   );

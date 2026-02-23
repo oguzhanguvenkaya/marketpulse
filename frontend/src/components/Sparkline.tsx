@@ -51,7 +51,7 @@ export function TrendIndicator({ data }: { data: number[] }) {
   const isFlat = Math.abs(change) < 1;
 
   if (isFlat) {
-    return <span className="text-xs text-[#9e8b66] dark:text-[#8a7d65]">--</span>;
+    return <span className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">--</span>;
   }
 
   return (
