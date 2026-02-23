@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 interface SparklineProps {
   data: number[];
   color: string;
@@ -6,6 +8,7 @@ interface SparklineProps {
 }
 
 export default function Sparkline({ data, color, width = 100, height = 28 }: SparklineProps) {
+  const uniqueId = useId();
   if (!data.length || data.every(v => v === 0)) return null;
 
   const max = Math.max(...data, 1);
@@ -20,7 +23,7 @@ export default function Sparkline({ data, color, width = 100, height = 28 }: Spa
 
   const linePath = `M${points.join(' L')}`;
   const areaPath = `${linePath} L${width},${height} L0,${height} Z`;
-  const gradientId = `sparkGrad-${color.replace('#', '')}`;
+  const gradientId = `sparkGrad-${uniqueId}`;
 
   return (
     <svg width={width} height={height} className="overflow-visible">

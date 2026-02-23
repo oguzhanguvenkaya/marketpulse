@@ -3,7 +3,7 @@
 // Internal shimmer wrapper - not exported
 function Shimmer() {
   return (
-    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 dark:via-white/5 to-transparent" />
   )
 }
 
@@ -18,7 +18,7 @@ export function SkeletonLine({
 }) {
   return (
     <div
-      className={`${width} ${height} rounded-lg bg-dark-600/30 overflow-hidden relative`}
+      className={`${width} ${height} rounded-lg bg-dark-600/30 dark:bg-dark-400/20 overflow-hidden relative`}
     >
       <Shimmer />
     </div>
@@ -28,7 +28,7 @@ export function SkeletonLine({
 export function SkeletonCircle({ size = 'w-10 h-10' }: { size?: string }) {
   return (
     <div
-      className={`${size} rounded-full bg-dark-600/30 overflow-hidden relative`}
+      className={`${size} rounded-full bg-dark-600/30 dark:bg-dark-400/20 overflow-hidden relative`}
     >
       <Shimmer />
     </div>
@@ -90,7 +90,7 @@ export function SkeletonChart() {
   return (
     <div className="card-dark p-5">
       <SkeletonLine width="w-1/4" height="h-5" />
-      <div className="mt-4 w-full h-56 rounded-lg bg-dark-600/30 overflow-hidden relative">
+      <div className="mt-4 w-full h-56 rounded-lg bg-dark-600/30 dark:bg-dark-400/20 overflow-hidden relative">
         <Shimmer />
       </div>
     </div>
