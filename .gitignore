@@ -42,3 +42,8 @@ frontend/dist/
 .cache/
 *.log
 backend/.env
+
+# Large asset directories
+attached_assets/
+awesome-llm-apps-main/
+superpowers-main/
