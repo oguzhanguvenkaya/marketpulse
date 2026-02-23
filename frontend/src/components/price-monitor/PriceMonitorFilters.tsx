@@ -26,8 +26,8 @@ export default function PriceMonitorFilters({
     <>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0f1419] dark:text-[#F0FDF4]">Price Monitor</h1>
-          <p className="text-sm md:text-base text-[#9e8b66] dark:text-[#6B8F80] mt-1">Track seller prices and identify violations</p>
+          <h1 className="text-xl md:text-2xl font-bold text-text-primary">Price Monitor</h1>
+          <p className="text-sm md:text-base text-text-muted mt-1">Track seller prices and identify violations</p>
         </div>
         <div className="flex flex-wrap gap-2 md:gap-3">
           <button onClick={() => setShowImportModal(true)} className="btn-secondary flex items-center gap-2">
@@ -62,30 +62,30 @@ export default function PriceMonitorFilters({
                 </svg>
               </button>
               {showFetchMenu && (
-                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] card-dark border border-[#5b4824]/12 dark:border-[#4ADE80]/12 z-20 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] card-dark border border-accent-primary/12 z-20 overflow-hidden">
                   <button
                     onClick={() => handleFetchAll('active')}
                     disabled={activeTotalCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium">Active Products</div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">{activeTotalCount} products</div>
+                    <div className="text-xs text-text-muted">{activeTotalCount} products</div>
                   </button>
                   <button
                     onClick={() => handleFetchAll('last_inactive')}
                     disabled={lastInactiveCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors border-t border-accent-primary/8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium text-orange-400">Last Inactive</div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">{lastInactiveCount} SKUs from last fetch</div>
+                    <div className="text-xs text-text-muted">{lastInactiveCount} SKUs from last fetch</div>
                   </button>
                   <button
                     onClick={() => handleFetchAll('inactive')}
                     disabled={inactiveTotalCount === 0}
-                    className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors border-t border-[#5b4824]/8 dark:border-[#4ADE80]/8 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors border-t border-accent-primary/8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="font-medium text-red-400">All Inactive</div>
-                    <div className="text-xs text-[#9e8b66] dark:text-[#6B8F80]">{inactiveTotalCount} products</div>
+                    <div className="text-xs text-text-muted">{inactiveTotalCount} products</div>
                   </button>
                 </div>
               )}
@@ -103,14 +103,14 @@ export default function PriceMonitorFilters({
               </svg>
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] card-dark border border-[#5b4824]/12 dark:border-[#4ADE80]/12 z-20 overflow-hidden">
-                <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors">
+              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] card-dark border border-accent-primary/12 z-20 overflow-hidden">
+                <button onClick={() => handleExport('all')} className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors">
                   All ({totalProducts})
                 </button>
-                <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors">
+                <button onClick={() => handleExport('active')} className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors">
                   Active Only ({activeTotalCount})
                 </button>
-                <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-[#3d3427] dark:text-[#A7C4B8] hover:bg-[#5b4824]/5 dark:hover:bg-[#4ADE80]/5 transition-colors">
+                <button onClick={() => handleExport('inactive')} className="w-full text-left px-4 py-3 text-sm text-text-secondary hover:bg-accent-primary/5 transition-colors">
                   Inactive Only ({inactiveTotalCount})
                 </button>
               </div>
@@ -138,8 +138,8 @@ export default function PriceMonitorFilters({
           onClick={() => setPlatform('hepsiburada')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'hepsiburada'
-              ? 'bg-[#ff6000] text-[#0f1419] dark:text-[#F0FDF4] shadow-glow-orange'
-              : 'bg-[#f0e8d8] dark:bg-[#1C2E28] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#e8dfcf] dark:hover:bg-[#1C2E28]'
+              ? 'bg-[#ff6000] text-text-primary shadow-glow-orange'
+              : 'bg-surface-hover text-text-body hover:bg-surface-hover-active dark:hover:bg-dark-700'
           }`}
         >
           Hepsiburada
@@ -148,8 +148,8 @@ export default function PriceMonitorFilters({
           onClick={() => setPlatform('trendyol')}
           className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             platform === 'trendyol'
-              ? 'bg-[#ff6000] text-[#0f1419] dark:text-[#F0FDF4] shadow-glow-orange'
-              : 'bg-[#f0e8d8] dark:bg-[#1C2E28] text-[#5f471d] dark:text-[#A7C4B8] hover:bg-[#e8dfcf] dark:hover:bg-[#1C2E28]'
+              ? 'bg-[#ff6000] text-text-primary shadow-glow-orange'
+              : 'bg-surface-hover text-text-body hover:bg-surface-hover-active dark:hover:bg-dark-700'
           }`}
         >
           Trendyol
