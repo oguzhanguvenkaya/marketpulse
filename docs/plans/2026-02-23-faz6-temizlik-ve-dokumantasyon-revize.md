@@ -1,82 +1,122 @@
-# Faz 6: Temizlik ve Dokümantasyon — Revize Ekip Planı
+# Faz 6: Temizlik ve Dokümantasyon — Netleştirilmiş Plan (2026-02-24)
 
-**Context:**
-Faz 1-5'in başarıyla tamamlanmasının ardından, repoda biriken teknik borcun temizlenmesi gerekmektedir. Önceki analizlerde tespit edilen geniş çaplı "blast radius" riskini minimize etmek adına süreç birbirine bağımlı olmayan 3 Track'e (Aşama) bölünmüştür. Bu durum rollback (geri alma) stratejisini çok daha güvenli kılacaktır.
+## Context
+Faz 6 planı kod bazında tekrar doğrulandı. Bu doküman artık "ne kaldı / ne tamamlandı / ne beklemede" ayrımını net gösterir.
 
----
+## Özet Karar
 
-## 🛤️ TRACK 1: Backend Hygiene & Configuration (Backend Hijyeni ve Config)
-**Öncelik:** Çok Yüksek | **Risk:** Düşük | **Tahmini Süre:** 1-2 Saat
-
-Bu adım sadece backend logları, yapılandırma dosyaları ve reponun statik git durumunu doğrudan hedefler.
-
-### 1.1 Repo Temizliği (Tracked Assets Untrack)
-*   **Sorun:** `attached_assets/` (73MB) ve `hepsiburada_active_products.json` git geçmişinde yer alıyor. Bunlar `.gitignore` listesine dahil edilmeli ve repo temizlenmelidir.
-*   **Aksiyon:**
-    ```bash
-    git rm --cached -r attached_assets/
-    git rm --cached hepsiburada_active_products.json
-    ```
-
-### 1.2 Graceful Deprecation: `SCRAPPER` -> `SCRAPER_API_KEY`
-*   **Sorun:** Kötü isimlendirilmiş environment değişkeleri anında silinirse canlı sistemler (replit/sunucu) çökebilir.
-*   **Aksiyon:** `backend/app/core/config.py` içerisinde:
-    *   Bir okuma (fallback) stratejisi yazılacak.
-    *   Eğer ortam değişkenlerinde `SCRAPPER_API` dolu gelirse bir sistem log'u atılacak:
-        `logger.warning("DEPRECATION WARNING: 'SCRAPPER_API' kullanımı durdurulacak. Lütfen ortam değişkenlerini 'SCRAPER_API_KEY' olarak güncelleyin.")`
-    *   `transcript_service.py` ve sistem kodları yeni `settings.SCRAPER_API_KEY` tanımına yönlendirilecek.
-    *   Değişken 1 tam release döngüsünün ardından (Faz 7'de) tamamen kaldırılacak.
-
-### 1.3 `DEBUG_SAVE_HTML` Standardizasyonu
-*   **Sorun:** Canlıda her HTML'in kaydedilmesi bellek sızıntısına ve yetersiz depolamaya yol acar. Default'un `True` bırakılması yanlıştır.
-*   **Aksiyon:** Pydantic modelinde default değer `False` çekilecek.
-*   **Operasyonel Belgeleme:** `DEPLOY.md` veya `DEBUG.md` dosyasına şu satır eklenecek:
-    * *"Scraper debug'ı yapmak ve fail eden HTML'leri görmek için Production'da gecici olarak ortam değişkenlerine `DEBUG_SAVE_HTML=True` ekleyerek container'ı restart edin. Debug bitince mutlaka kapatın."*
-
-### 1.4 `.env.example` Otomasyonu
-*   **Sorun:** Manuel `.env` kopyalaması drift yaratır (uzun vadede geçerliliğini yitirir).
-*   **Aksiyon:** Python'da ufak bir script (`scripts/generate_env_example.py`) yazılacak veya Pydantic BaseSettings'den doğrudan parse edilecek biçimde güncel key'leri placeholder değerlerle çıkaracak bir sistem kurulacak. Bu sayede dosya her dev/build işleminde senkronize olur.
+| Track | Durum | Karar |
+| --- | --- | --- |
+| Track 1 (Backend Hygiene) | Tamamlanmış | SKIP |
+| Track 2 (Dependency & Security) | Ağ kısıtı + audit doğrulama eksik | BEKLEMEDE |
+| Track 3 (Frontend Token Migration) | Kısmen tamamlandı, kalan iş var | AKTİF |
 
 ---
 
-## 🛤️ TRACK 2: Dependency & Security Update (Paket ve Güvenlik Güncellemeleri)
-**Öncelik:** Yüksek | **Risk:** Orta | **Tahmini Süre:** 1 Saat
+## 🛤️ TRACK 1: Backend Hygiene & Configuration
+**Durum:** Tamamlanmış  
+**Karar:** SKIP (yeni işlem yok)
 
-Npm ağacındaki CVE (güvenlik zafiyeti) barındıran paketlerin ve React ekosisteminin riskli varyasyonlarından kurtulması amaçlanır. Frontend kodunda **hiçbir business-logic değişikliği yapılmadan** izole uygulanıp test edilmelidir.
+### 1.1 Repo Temizliği
+- `attached_assets/` ve `hepsiburada_active_products.json` `.gitignore` içinde.
+- `git ls-files` çıktısı her iki hedef için `0`.
+- Untrack işlemi geçmişte yapılmış: commit `d2d18d8`.
 
-### 2.1 Güvenlik ve Minor Güncellemeler
-*   **Aksiyon:** Sadece `minor` ve `patch` paket güncellemeleri yapılacak. (Major/Breaking update'ler - örneğin eslint 9->10 atlanacak).
-    *   `react-router-dom`: 7.10.1 → 7.13.1 (3 CVE fix)
-    *   `react` / `react-dom`: 19.2.1 → 19.2.4
-    *   `vite`, `tailwindcss` ve `plotly.js` minor versiyon artışları.
-*   **Test & Onay:**
-    *   Network (ENOTFOUND) kısıtlamaları yüzünden komutlar CI pipeline'larında veya unrestricted development ortamında çalıştırılmalıdır:
-    ```bash
-    cd frontend && npm update && npm audit fix
-    npm run build
-    ```
+### 1.2 SCRAPPER -> SCRAPER_API_KEY Geçişi
+- Fallback tuple hazır: `("SCRAPER_API_KEY", "SCRAPPER_API", "SCRAPPPER_API")`.
+- Deprecation warning log'u mevcut.
+- `transcript_service.py` artık `settings.SCRAPER_API_KEY` kullanıyor.
+
+### 1.3 DEBUG_SAVE_HTML
+- Varsayılan değer zaten `false`.
+
+### 1.4 `.env.example`
+- Dosya mevcut ve aktif kullanılan backend env değişkenleriyle uyumlu.
+- Otomasyon script'i bu aşamada zorunlu değil (tek geliştirici akışında over-engineering).
+
+---
+
+## 🛤️ TRACK 2: Dependency & Security Update
+**Durum:** Kısmen uygulanmış, audit doğrulaması eksik  
+**Karar:** BEKLEMEDE (internet erişimli ortamda finalize edilecek)
+
+### 2.1 Mevcut Paket Durumu (runtime lock)
+Aşağıdaki sürümler kurulu durumda:
+- `react-router-dom@7.13.1`
+- `react@19.2.4`
+- `react-dom@19.2.4`
+- `vite@7.3.1`
+- `tailwindcss@4.2.1`
+- `@tailwindcss/postcss@4.2.1`
+- `plotly.js@3.4.0`
+- `typescript-eslint@8.56.1`
+- `eslint@9.39.3`
+
+Not: `package.json` aralıkları (`^`) eski görünebilir; lock ve kurulu paketler daha güncel.
+
+### 2.2 Güvenlik/Audit Durumu
+- Lokal ortamda `npm audit` ağ kısıtı nedeniyle çalışmıyor (`ENOTFOUND registry.npmjs.org`).
+- Bu nedenle "kaç high var ve tam kaynağı ne" çıktısı bu ortamda kesinlenemedi.
+
+### 2.3 Track 2 Kapanış Koşulu
+İnternet erişimli CI/dev ortamında:
+
+```bash
+cd frontend
+npm audit
+npm run build
+```
+
+- Audit raporu dosyalanacak.
+- Kalan açıklar sadece dev-dependency ise risk notu ile kabul/erteleme kararı verilecek.
 
 ---
 
-## 🛤️ TRACK 3: Frontend Token Migration (Görsel ve UI Refactoring)
-**Öncelik:** Yüksek | **Risk:** Yüksek | **Tahmini Süre:** 4-6 Saat
+## 🛤️ TRACK 3: Frontend Token Migration
+**Durum:** Devam ediyor  
+**Karar:** AKTİF
 
-Arayüz geliştirmenin Tailwind V4 doğasına entegrasyonu, semantic token kullanımının tamamen projeye hakim olması.
+### 3.1 Güncel Metrikler (doğrulandı)
+- `dark:` occurrence (TSX): **284**
+- `#[RRGGBB]` occurrence (TSX, genel): **65**
+- `#[RRGGBB]` unique (TSX): **25**
+- Bracket bazlı hardcoded renk class satırı (`[...]`): **15**
+- `index.css` içinde unique semantic color token (`--color-*`): **26** (light/dark eşlenmiş)
 
-### 3.1 CSS Theming Base'in Kurulumu
-*   **Aksiyon:** `frontend/src/index.css` dosyasına Hex->Token eşleştirme tablosunda yer alan eksik renkler tanım olarak (theme variable) eklenecektir. (Örn: `--color-text-faded`, `--color-surface-hover` vb.)
+### 3.2 3 Batch Revize Uygulama
 
-### 3.2 3 Fazlı TSX Migrasyonu
-*   **Büyük Resim:** Taramalara göre Frontend TSX klasöründe toplam **977 adet** (önceki verideki gibi 604 değil) `dark:` override tespiti bulunmaktadır. Amaç bu kirliliği 0'a yakınlaştırmak ve semantic renklere devretmektir.
-*   **Yaklaşım:** Değerler 3 Batch'e bölünerek, her batch sonrası Visual / QA doğrulaması yapılacaktır.
-    *   **Batch 1 (Küçük Etki):** ErrorBoundary, ConfirmDialog, DetayPaneller vb. 15 küçük dosya.
-    *   **Batch 2 (Orta Etki):** Sidebar, Products, Ads, Layout vb. ana grid yapıları. 8 dosya.
-    *   **Batch 3 (Büyük Etki):** JsonEditor, Sellers, ProductCards vb. en büyük bileşenlerin override satır satır incelenerek güncellenmesi.
+**Batch 1 (küçük etki):**
+- Hedef: küçük dosyalarda kolay `dark:*` temizliği ve açık hardcoded class dönüşümü.
+- Dosyalar: `ErrorBoundary`, `ConfirmDialog`, `ApiKeyModal`, `Skeleton`, `Layout`, `CategoryFilters`, `CategoryTree`, `DetailFetchPanel`, `ProductCards`, `ScraperPanel`, `MonitoredProductList`, `PriceMonitorFilters`, `SellerDetailPanel`, `Ads`.
 
-### 3.3 Validasyon Kriterleri
-*   Derleme esnasında tipik hataların oluşmadığı: `npx tsc --noEmit`
-*   `grep -roh 'dark:' frontend/src/ --include="*.tsx" | wc -l` değerinin %90+ oranında azaldığının (margin-of-error hariç) doğrulanması.
-*   Opacity class'larında tailwind config mix/rgb hatalarına yol açılmaması (örn `border-accent-primary/20` kullanımının render bozukluğu yaratmaması).
+**Batch 2 (orta etki):**
+- Hedef: sayfa seviyesinde token standardizasyonu.
+- Dosyalar: `CategoryExplorer`, `ProductDetail`, `SellerDetail`, `Sellers`, `Dashboard`, `Products`.
+
+**Batch 3 (yüksek etki):**
+- Hedef: en yoğun `dark:*` kullanan bileşenlerin satır-satır dönüşümü.
+- Dosyalar: `UrlScraper`, `VideoTranscripts`, `ProductDetailModal`, `MarketplaceProductList`, `JsonEditor`.
+
+### 3.3 Track 3 Kapanış Kriterleri
+
+```bash
+cd frontend
+npx tsc --noEmit
+npm run build
+grep -roh 'dark:' src/ --include='*.tsx' | wc -l
+grep -rn '#[0-9A-Fa-f]\{6\}' src/ --include='*.tsx'
+```
+
+Hedef:
+- `dark:` sayısı `284` -> `<=50`
+- Bracket hardcoded class satırları `15` -> `<=5` (marka rengi/plotly özel durumları hariç)
+- Build ve type-check hatasız
 
 ---
-**Deployment Stratejisi:** Track 1, Track 2 ve Track 3 birbirinden ayrı Pull Request / Dev Branch süreçlerinde yürütülerek ana projeye (main) Merge edilmelidir. İşlem bitiminde `DEPLOY.md` tüm developer'lara dağıtılmalıdır.
+
+## Deployment Stratejisi
+- Track 2 ve Track 3 ayrı PR/branch olarak yürütülecek.
+- Track 1 için yeni PR açılmayacak (tamamlandı).
+- Faz 6 kapanışı için final çıktılar:
+  - Track 2 audit raporu
+  - Track 3 migration diff + görsel doğrulama notları
