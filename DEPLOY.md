@@ -38,6 +38,8 @@ cp .env.example .env
 | `DEBUG_SAVE_HTML` | `false` | Save raw HTML responses to disk for debugging |
 | `CORS_ALLOWED_ORIGINS` | `localhost:5173` | Comma-separated origins. `REPLIT_DOMAINS` auto-detected |
 | `OPENAI_API_KEY` | — | For AI-powered transcript summaries |
+| `REDIS_URL` | — | Redis connection string (gerekli sadece celery executor kullanildiginda) |
+| `PROXY_PROVIDER` | `auto` | auto/scraperapi/brightdata/direct (varsayilan: auto) |
 
 ## Build
 

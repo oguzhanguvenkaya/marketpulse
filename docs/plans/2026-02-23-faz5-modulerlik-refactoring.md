@@ -1,12 +1,14 @@
 # Faz 5: Modulerlik ve Refactoring — Detayli Uygulama Plani
 
+> **Durum: TAMAMLANDI (commit 6ef31ab)**
+
 > Tarih: 2026-02-23
 > On kosul: Faz 3 (test altyapisi) tamamlanmis
 > Kapsam: 5.1 routes.py bolme + 5.2 api.ts bolme (5.3, 5.4 zaten tamamlandi)
 
 ---
 
-## 5.1 Backend: `routes.py` Bolme (2163 satir → 7 dosya)
+## 5.1 Backend: `routes.py` Bolme (2163 satir → 7 dosya, routes.py artik 27 satirlik barrel modül)
 
 ### Hedef Yapi
 
@@ -82,7 +84,7 @@ backend/app/api/
 
 ---
 
-## 5.2 Frontend: `api.ts` Bolme (1120 satir → 7 dosya)
+## 5.2 Frontend: `api.ts` Bolme (1120 satir → 7 dosya, api.ts artik 12 satirlik barrel modül)
 
 ### Hedef Yapi
 

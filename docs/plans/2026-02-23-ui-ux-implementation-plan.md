@@ -1,5 +1,17 @@
 # MarketPulse UI/UX Improvements Implementation Plan
 
+## Güncel Durum Notu
+
+Bu plan büyük ölçüde uygulanmistir ancak bazi uygulama detaylari plandan sapmistir:
+
+- **Dark tema:** 'Warm amber' yerine 'Forest Data' yesil paleti kullanildi
+- **State yönetimi:** useReducer yerine bireysel useState hook'lari kullanildi
+- **Component isimleri:** ProductMonitorCard→MonitoredProductList, FetchTaskHistory→FetchTaskProgress, CategoryResultsTable→ProductCards, CategoryStats→inline, CategoryScrapeModal→ScraperPanel
+- **API modülaritesi:** api.ts 12 satirlik barrel'a dönüstü, servisler ayri dosyalarda
+- **Ek componentler:** SellerDetailPanel, ImportModal, DeleteModal, DetailFetchPanel, ProductDetailModal (planda belirtilmemis)
+
+---
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Improve MarketPulse frontend with grouped navigation, skeleton loading, dark mode, enhanced dashboard, and component decomposition.

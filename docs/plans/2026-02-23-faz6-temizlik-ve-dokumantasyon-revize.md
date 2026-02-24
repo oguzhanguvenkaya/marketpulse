@@ -1,4 +1,4 @@
-# Faz 6: Temizlik ve Dokümantasyon — Netleştirilmiş Plan (2026-02-24)
+# Faz 6: Temizlik ve Dokümantasyon — Netleştirilmiş Plan (2026-02-24, güncelleme: 2026-02-24)
 
 ## Context
 Faz 6 planı kod bazında tekrar doğrulandı. Bu doküman artık "ne kaldı / ne tamamlandı / ne beklemede" ayrımını net gösterir.
@@ -7,14 +7,14 @@ Faz 6 planı kod bazında tekrar doğrulandı. Bu doküman artık "ne kaldı / n
 
 | Track | Durum | Karar |
 | --- | --- | --- |
-| Track 1 (Backend Hygiene) | Tamamlanmış | SKIP |
+| Track 1 (Backend Hygiene) | TAMAMLANDI | SKIP |
 | Track 2 (Dependency & Security) | Ağ kısıtı + audit doğrulama eksik | BEKLEMEDE |
-| Track 3 (Frontend Token Migration) | Kısmen tamamlandı, kalan iş var | AKTİF |
+| Track 3 (Frontend Token Migration) | REGRESYON - Yeniden planlama gerekli | YENİDEN PLANLANACAK |
 
 ---
 
 ## 🛤️ TRACK 1: Backend Hygiene & Configuration
-**Durum:** Tamamlanmış  
+**Durum:** TAMAMLANDI
 **Karar:** SKIP (yeni işlem yok)
 
 ### 1.1 Repo Temizliği
@@ -31,8 +31,12 @@ Faz 6 planı kod bazında tekrar doğrulandı. Bu doküman artık "ne kaldı / n
 - Varsayılan değer zaten `false`.
 
 ### 1.4 `.env.example`
-- Dosya mevcut ve aktif kullanılan backend env değişkenleriyle uyumlu.
+- Dosya mevcut ve aktif kullanılan backend env değişkenleriyle uyumlu (commit `98aa497`).
 - Otomasyon script'i bu aşamada zorunlu değil (tek geliştirici akışında over-engineering).
+
+### 1.5 Dokümantasyon Temizliği
+- `template_schema.md` ve `ui-ux-improvements-design.md` silindi (artık geçersiz).
+- `SCRAPING_DEBUG_REPORT.md` arşivlendi: `docs/archive/` altına taşındı.
 
 ---
 
@@ -73,15 +77,24 @@ npm run build
 ---
 
 ## 🛤️ TRACK 3: Frontend Token Migration
-**Durum:** Devam ediyor  
-**Karar:** AKTİF
+**Durum:** REGRESYON - Yeniden planlama gerekli
+**Karar:** YENİDEN PLANLANACAK
 
-### 3.1 Güncel Metrikler (doğrulandı)
-- `dark:` occurrence (TSX): **284**
-- `#[RRGGBB]` occurrence (TSX, genel): **65**
-- `#[RRGGBB]` unique (TSX): **25**
-- Bracket bazlı hardcoded renk class satırı (`[...]`): **15**
-- `index.css` içinde unique semantic color token (`--color-*`): **26** (light/dark eşlenmiş)
+### 3.0 Regresyon Notu (2026-02-24)
+
+> **Ozet:** Token migration calismasi basarili bir sekilde ilerledi ancak sonraki accessibility commit'leri kazanimlari geri aldi.
+>
+> - 3 batch commit ile `dark:` sayisi **284 -> 87**'ye dusuruldu (commit'ler: `0a01fd8`, `8d12b76`, `62e2d7f`).
+> - Ancak sonraki accessibility commit'leri (`444c181`, `422a6c5`) **195 yeni `dark:` class** ekledi.
+> - Guncel `dark:` sayisi: **284** — baslangic degeriyle ayni.
+> - Token migration calismasinin accessibility gereksinimleriyle uyumlu sekilde yeniden planlanmasi gerekiyor.
+
+### 3.1 Guncel Metrikler (2026-02-24 guncelleme)
+- `dark:` occurrence (TSX): **284** (baslangica geri dondu)
+- Hardcoded hex: **~36 satir** (onceki 65 tahmini yanlisti)
+- Bracket bazli hardcoded renk class satiri (`[...]`): **15**
+- Semantic token'lar eklendi ve calisiyor (`index.css` `@theme` block)
+- `index.css` icinde unique semantic color token (`--color-*`): **26** (light/dark eslenmis)
 
 ### 3.2 3 Batch Revize Uygulama
 
@@ -107,10 +120,12 @@ grep -roh 'dark:' src/ --include='*.tsx' | wc -l
 grep -rn '#[0-9A-Fa-f]\{6\}' src/ --include='*.tsx'
 ```
 
-Hedef:
-- `dark:` sayısı `284` -> `<=50`
-- Bracket hardcoded class satırları `15` -> `<=5` (marka rengi/plotly özel durumları hariç)
-- Build ve type-check hatasız
+Hedef (regresyon sonrasi revize):
+- `dark:` sayisi `284` -> `<=50` (accessibility uyumlu sekilde)
+- Hardcoded hex `~36` -> `<=10` (marka rengi/plotly ozel durumlari haric)
+- Bracket hardcoded class satirlari `15` -> `<=5`
+- Build ve type-check hatasiz
+- **Onemli:** Accessibility commit'leriyle catisma olmayacak sekilde planlanmali
 
 ---
 

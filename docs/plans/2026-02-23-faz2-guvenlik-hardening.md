@@ -1,5 +1,9 @@
 # Faz 2: Guvenlik Hardening ve Migration — Implementation Plan
 
+> **Durum: TAMAMLANDI — Tüm görevler uygulanmis ve test edilmistir (commit f2a74d1).**
+
+> **Not: Faz 5 sonrasi routes.py barrel modüle dönüstü. Bu plandaki routes.py satir referanslari artik gecersizdir.**
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** CORS wildcard fallback'i kapat, hata mesaji sizintilarini duzelt, SSRF korumasiekle, bare except'leri temizle, Alembic migration altyapisini kur.

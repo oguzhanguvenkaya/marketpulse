@@ -1,4 +1,4 @@
-# Architecture Reference
+# Architecture Reference (Updated: 2026-02-24)
 
 ## System Overview
 
@@ -8,9 +8,11 @@
 │  React 19 + TypeScript + Vite 7 + TailwindCSS v4             │
 │  Port 5173 (dev) / Static build served by backend            │
 │                                                              │
-│  Pages: Dashboard, Products, ProductDetail, Ads,             │
-│         PriceMonitor, Sellers, SellerDetail,                  │
-│         UrlScraper, VideoTranscripts, JsonEditor              │
+│  14 Page Components (lazy-loaded):                            │
+│  Dashboard, Products, ProductDetail, Ads, PriceMonitor,       │
+│  Sellers, SellerDetail, UrlScraper, VideoTranscripts,         │
+│  JsonEditor, HepsiburadaProducts, TrendyolProducts,           │
+│  WebProducts, CategoryExplorer                                │
 └──────────────────┬───────────────────────────────────────────┘
                    │ HTTP (axios → /api/*)
                    ▼
@@ -18,19 +20,33 @@
 │                     BACKEND (FastAPI)                         │
 │                     Port 8000                                 │
 │                                                              │
-│  ┌─────────────┐  ┌──────────────────┐  ┌────────────────┐  │
-│  │ routes.py   │  │ url_scraper_     │  │ transcript_    │  │
-│  │ /api/*      │  │ routes.py        │  │ routes.py      │  │
-│  │             │  │ /api/url-scraper │  │ /api/transcripts│  │
-│  └──────┬──────┘  └────────┬─────────┘  └───────┬────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ routes.py (barrel module, re-exports from):             │  │
+│  │   search_routes.py    product_routes.py                 │  │
+│  │   stats_routes.py     price_monitor_routes.py           │  │
+│  │   seller_routes.py    _shared.py (Pydantic models)      │  │
+│  └──────────────────────────┬─────────────────────────────┘  │
+│                             │                                │
+│  ┌──────────────┐ ┌────────────────────┐ ┌───────────────┐  │
+│  │ url_scraper_ │ │ store_product_     │ │ transcript_   │  │
+│  │ routes.py    │ │ routes.py          │ │ routes.py     │  │
+│  └──────┬───────┘ └────────┬───────────┘ └──────┬────────┘  │
+│  ┌──────────────┐ ┌────────────────────┐ ┌───────────────┐  │
+│  │ category_    │ │ json_editor_       │ │               │  │
+│  │ explorer_    │ │ routes.py          │ │  (mounted in  │  │
+│  │ routes.py    │ │                    │ │   main.py)    │  │
+│  └──────┬───────┘ └────────┬───────────┘ └──────┬────────┘  │
 │         │                  │                     │           │
 │  ┌──────┴──────────────────┴─────────────────────┴────────┐  │
 │  │                    SERVICES                             │  │
 │  │  scraping.py          price_monitor_service.py          │  │
 │  │  proxy_providers.py   trendyol_price_monitor_service.py │  │
 │  │  llm_service.py       url_scraper_service.py            │  │
-│  │  transcript_service.py                                  │  │
+│  │  transcript_service.py  category_scraper_service.py     │  │
 │  └────────────┬──────────────────────┬─────────────────────┘  │
+│  ┌────────────────────────────────────────────────────────┐   │
+│  │  CORE: url_validator.py (SSRF protection)              │   │
+│  └────────────────────────────────────────────────────────┘   │
 │               │                      │                        │
 │  ┌────────────▼──────┐   ┌──────────▼──────────┐            │
 │  │  Proxy System     │   │  Celery Tasks       │            │
@@ -45,7 +61,7 @@
     ┌──────────────┐         ┌──────────────┐     ┌──────────────┐
     │  PostgreSQL   │         │    Redis      │     │ External APIs│
     │  (Neon)       │         │  Queue/Cache  │     │ ScraperAPI   │
-    │  13 tables    │         │              │     │ Bright Data  │
+    │  18 tables    │         │              │     │ Bright Data  │
     │              │         │              │     │ OpenAI       │
     └──────────────┘         └──────────────┘     │ YouTube API  │
                                                    └──────────────┘
@@ -171,6 +187,41 @@ json_files                       # JSON editor storage
 ├── created_at, updated_at
 ```
 
+### Store & Category Tables
+
+```
+store_products                   # Marketplace ürün verileri (Hepsiburada, Trendyol, Web)
+├── id: UUID (PK)
+├── platform, product_url, title, brand
+├── price, original_price, currency
+├── seller_name, seller_url
+├── rating, review_count
+├── image_url, category
+├── attributes: JSON
+├── source_type
+├── scraped_at, created_at
+
+category_sessions                # Kategori tarama oturumlari
+├── id: UUID (PK)
+├── name, platform, category_url
+├── status
+├── total_products
+├── created_at, updated_at
+
+category_products                # Kategori ürün verileri
+├── id: UUID (PK)
+├── session_id: UUID (FK → category_sessions)
+├── product_url, title, brand, seller_name
+├── sku, barcode
+├── price, original_price
+├── image_url, rating, review_count
+├── stock_status, shipping_type
+├── category_path, description
+├── specs: JSON, seller_list: JSON, detail_data: JSON
+├── detail_fetched
+├── created_at
+```
+
 ## API Endpoints
 
 ### Main Routes (`/api/*`)
@@ -252,6 +303,32 @@ json_files                       # JSON editor storage
 | DELETE | `/api/json-editor/files/{id}` | Delete file |
 | DELETE | `/api/json-editor/files` | Delete all files |
 
+### Store Products (`/api/store-products/*`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/store-products/` | Ürün listesi (filtreleme, sayfalama) |
+| GET | `/api/store-products/categories` | Kategori agaci |
+| GET | `/api/store-products/{id}` | Ürün detay |
+| POST | `/api/store-products/scrape-from-urls` | URL'lerden ürün çek |
+| POST | `/api/store-products/scrape-from-monitor` | Monitor'dan ürün çek |
+| POST | `/api/store-products/import-excel` | Excel'den import |
+| DELETE | `/api/store-products/{id}` | Ürün sil |
+| POST | `/api/store-products/backfill-prices` | Fiyat gecmisi doldur |
+
+### Category Explorer (`/api/category-explorer/*`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/category-explorer/scrape-page` | Kategori sayfasi tara |
+| GET | `/api/category-explorer/sessions` | Oturum listesi |
+| GET | `/api/category-explorer/sessions/{id}` | Oturum detay |
+| DELETE | `/api/category-explorer/sessions/{id}` | Oturum sil |
+| POST | `/api/category-explorer/fetch-detail` | Tekil ürün detay çek |
+| POST | `/api/category-explorer/bulk-fetch` | Toplu detay çek |
+| GET | `/api/category-explorer/category-filters` | Kategori filtreleri |
+| GET | `/api/category-explorer/products-by-category` | Kategoriye göre ürünler |
+
 ### Health
 
 | Method | Path | Description |
@@ -311,6 +388,6 @@ Celery uses Redis as both broker and result backend. Configure via `REDIS_URL`.
 ### URL Scraping
 1. User submits URLs → `POST /api/url-scraper/scrape-bulk`
 2. `ScrapeJob` created, URLs queued as `ScrapeResult` (status: pending)
-3. Background workers (15 concurrent) fetch each URL via ScraperAPI
+3. Background workers (40 concurrent) fetch each URL via ScraperAPI
 4. Extract data via meta tags, JSON-LD, Open Graph, HTML parsing
 5. Results downloadable as JSON

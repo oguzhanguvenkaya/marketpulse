@@ -26,11 +26,15 @@ The platform is built with a clear separation of concerns, featuring a FastAPI b
 ### Backend Structure
 ```
 backend/app/
-├── api/           → Route handlers (routes.py, url_scraper_routes.py, transcript_routes.py, json_editor_routes.py)
-├── core/          → config.py (Settings), security.py (API key auth), logger.py
+├── api/           → Route handlers: routes.py (barrel re-export), _shared.py (Pydantic models),
+│                    search_routes.py, product_routes.py, stats_routes.py, seller_routes.py,
+│                    price_monitor_routes.py, store_product_routes.py, category_explorer_routes.py,
+│                    url_scraper_routes.py, transcript_routes.py, json_editor_routes.py
+├── core/          → config.py (Settings), security.py (API key auth), logger.py, url_validator.py (SSRF protection)
 ├── db/            → database.py (SQLAlchemy engine), models.py (13 ORM models)
 ├── services/      → scraping.py, price_monitor_service.py, trendyol_price_monitor_service.py,
-│                    proxy_providers.py, llm_service.py, url_scraper_service.py, transcript_service.py
+│                    proxy_providers.py, llm_service.py, url_scraper_service.py, transcript_service.py,
+│                    category_scraper_service.py
 ├── tasks.py       → Celery app + task definitions (run_scraping_task, run_price_monitor_fetch_task)
 └── main.py        → FastAPI app init, CORS, health endpoint, SPA serving
 ```
@@ -41,8 +45,13 @@ frontend/src/
 ├── pages/         → 14 lazy-loaded pages (Dashboard, Products, ProductDetail, Ads, PriceMonitor,
 │                    Sellers, SellerDetail, HepsiburadaProducts, TrendyolProducts, WebProducts,
 │                    CategoryExplorer, UrlScraper, VideoTranscripts, JsonEditor)
-├── components/    → Layout.tsx (sidebar, header, mobile menu)
-├── services/      → api.ts (Axios client, 700+ lines), queryCache.ts (TTL-based cache)
+├── hooks/         → useCategoryExplorer.ts, usePriceMonitor.ts
+├── components/    → ApiKeyModal, ConfirmDialog, ErrorBoundary, Layout, MarketplaceProductList,
+│                    Skeleton, Sparkline + sub-component dirs: category-explorer/, price-monitor/
+├── services/      → api.ts (12-line barrel re-export), client.ts (Axios instance + interceptors),
+│                    types.ts (interfaces), searchApi.ts, productApi.ts, statsApi.ts,
+│                    priceMonitorApi.ts, sellerApi.ts, scrapeApi.ts, transcriptApi.ts,
+│                    storeProductApi.ts, categoryApi.ts, queryCache.ts (TTL-based cache)
 ├── App.tsx        → Router setup
 └── main.tsx       → Entry point
 ```
@@ -65,10 +74,10 @@ Integrates OpenAI's GPT-4o-mini for generating insights from collected product d
 Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass). Includes debug logging and HTML saving to `/tmp/scraping_debug/` for troubleshooting.
 
 ### URL Scraper
-Generic URL scraping system. Supports single URL, bulk JSON, and CSV upload. Uses ScraperAPI to fetch pages, extracts data via meta tags, JSON-LD, Open Graph, and HTML parsing. 15 concurrent workers with stop/resume. DB models: `ScrapeJob`, `ScrapeResult`. Routes: `/api/url-scraper/`.
+Generic URL scraping system. Supports single URL, bulk JSON, and CSV upload. Uses ScraperAPI to fetch pages, extracts data via meta tags, JSON-LD, Open Graph, and HTML parsing. 40 concurrent workers with stop/resume. DB models: `ScrapeJob`, `ScrapeResult`. Routes: `/api/url-scraper/`.
 
 ### YouTube Video Transcript Scraper
-Extracts transcripts using `youtube-transcript-api`. Supports single URL, bulk JSON, and CSV upload (auto-detects Video_URL columns). 10 concurrent workers with stop/resume. DB models: `TranscriptJob`, `TranscriptResult`. Routes: `/api/transcripts/`. Frontend: `/video-transcripts`.
+Extracts transcripts using `youtube-transcript-api`. Supports single URL, bulk JSON, and CSV upload (auto-detects Video_URL columns). 40 concurrent workers with stop/resume. DB models: `TranscriptJob`, `TranscriptResult`. Routes: `/api/transcripts/`. Frontend: `/video-transcripts`.
 
 ### JSON Product Editor
 Full-stack tool for editing product catalog JSON files with PostgreSQL persistence. Fully dynamic rendering: all product keys auto-detected and rendered based on value type. Supports any JSON structure. DB model: `JsonFile`. Routes: `/api/json-editor/`. Frontend: `/json-editor`.
@@ -79,7 +88,7 @@ Three dedicated pages (Hepsiburada, Trendyol, Web) displaying scraped product da
 ### Category Explorer
 Competitive analysis tool to scrape and browse marketplace category pages. Paste a Hepsiburada or Trendyol category URL to view all product listings, breadcrumb navigation, filter by brand/price/sponsored status, and fetch detailed product data for each item. Two-step scraping: category page listing data first, then individual product detail on demand. Supports pagination via platform-specific parameters (sayfa for HB, pi for Trendyol). DB models: `CategorySession`, `CategoryProduct`. Routes: `/api/category-explorer/`. Frontend: `/category-explorer`.
 
-## Database Models (17 tables)
+## Database Models (18 tables)
 - `Product`, `ProductSnapshot`, `ProductSeller`, `ProductReview`
 - `SearchTask`, `SponsoredBrandAd`, `SearchSponsoredProduct`
 - `MonitoredProduct`, `SellerSnapshot`, `PriceMonitorTask`

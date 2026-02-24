@@ -1,5 +1,9 @@
 # Faz 4: UX Iyilestirmeleri — Implementation Plan
 
+> **Durum: TAMAMLANDI (commit 046d4ba)**
+
+> **Not: Dark tema 'warm amber' yerine 'Forest Data' (yesil) paleti ile uygulanmistir.**
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** ErrorBoundary, sonner toast ve ozel ConfirmDialog ile 14 native alert/confirm dialogu degistirip kullanici deneyimini iyilestirmek.

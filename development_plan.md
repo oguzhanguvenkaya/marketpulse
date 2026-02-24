@@ -1,7 +1,7 @@
 # MarketPulse - Gelistirme Plani (Filtrelenmis)
 
-> Son guncelleme: 2026-02-23
-> Baz commit: `34530c58` (main)
+> Son guncelleme: 2026-02-24
+> Baz commit: `76ffa21` (main)
 > Deployment: Replit Autoscale (stateless, multi-instance)
 > Cikarilan/Ertelenen maddeler asagida ayri bolumde listelenmistir.
 
@@ -66,6 +66,8 @@ Replit Autoscale deployment'ta su ozellikler gecerlidir:
 ## Faz 1: Kritik Guvenlik ve Runtime Bug Fix (P0)
 
 > Hedef: Tum maddeler 1 gunde kapanabilir. Scraping islemleri hicbir maddeden etkilenmez.
+>
+> Not: Faz 5 sonrasi `frontend/src/services/api.ts` 12 satirlik barrel module donustu. Eski satir referanslari gecersizdir.
 
 ---
 
@@ -74,7 +76,7 @@ Replit Autoscale deployment'ta su ozellikler gecerlidir:
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/main.py` satir 136-146 |
-| **Durum** | ACIK |
+| **Durum** | TAMAMLANDI (commit `0e6b8ca`) |
 | **Risk** | `../../etc/passwd` benzeri path ile frontend root disina erisim |
 | **Efor** | 15 dakika |
 | **Scraping Etkisi** | YOK |
@@ -93,7 +95,7 @@ from pathlib import Path
 
 frontend_root = Path(frontend_dist).resolve()
 requested = (frontend_root / full_path).resolve()
-if full_path and requested.is_file() and str(requested).startswith(str(frontend_root)):
+if full_path and requested.is_file() and frontend_root in requested.parents:
     return FileResponse(str(requested))
 ```
 
@@ -108,7 +110,7 @@ if full_path and requested.is_file() and str(requested).startswith(str(frontend_
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `frontend/src/services/api.ts` satir 8-10 |
-| **Durum** | ACIK — `VITE_INTERNAL_API_KEY` build-time'da bundle'a gomuluyor |
+| **Durum** | TAMAMLANDI (commits `ab4c893`, `a162f3d`, `5c80c04`). ApiKeyModal + sessionStorage ile uygulandı, basit `prompt()` yerine |
 | **Risk** | DevTools'tan key gorunur, mutating endpoint'lere yetkisiz erisim |
 | **Efor** | 30 dakika |
 | **Scraping Etkisi** | YOK |
@@ -166,7 +168,7 @@ api.interceptors.response.use(
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/api/store_product_routes.py` satir 532 |
-| **Durum** | ACIK |
+| **Durum** | TAMAMLANDI (commit `5ce2f0c`) |
 | **Risk** | `AttributeError` → 500 hatasi (model'de `fetched_at` yok, dogru alan `snapshot_date`) |
 | **Efor** | 5 dakika |
 | **Scraping Etkisi** | YOK |
@@ -191,7 +193,7 @@ api.interceptors.response.use(
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/api/url_scraper_routes.py` satir 351-352 |
-| **Durum** | ACIK — bare `except: pass` |
+| **Durum** | TAMAMLANDI (commit `b834651`) |
 | **Risk** | Job sonsuza kadar `running` kalir |
 | **Efor** | 15 dakika |
 | **Scraping Etkisi** | OLUMLU — Hatalar loglanir, job durumu dogru guncellenir |
@@ -220,7 +222,7 @@ api.interceptors.response.use(
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/api/transcript_routes.py` satir 366-367 |
-| **Durum** | ACIK — 1.4 ile birebir ayni pattern |
+| **Durum** | TAMAMLANDI (commit `e4c4891`) |
 | **Efor** | 15 dakika |
 | **Scraping Etkisi** | OLUMLU |
 | **Autoscale Uyumlu** | EVET |
@@ -234,7 +236,7 @@ api.interceptors.response.use(
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/main.py` satir 42-43 |
-| **Durum** | ACIK |
+| **Durum** | TAMAMLANDI (commit `8d92dc7`). `_init_db()` artik lifespan icinde senkron calisir |
 | **Risk** | DB init ayri thread'de ama route'lar init bitmeden istek alabilir |
 | **Efor** | 20 dakika |
 | **Scraping Etkisi** | YOK |
@@ -269,6 +271,8 @@ async def lifespan(app: FastAPI):
 
 ## Faz 2: Guvenlik Hardening ve Migration (P1)
 
+> Not: Faz 5 sonrasi `routes.py` 27 satirlik barrel module donustu. Eski satir referanslari gecersizdir.
+
 ---
 
 ### 2.1 Alembic Migration Entegrasyonu
@@ -276,6 +280,7 @@ async def lifespan(app: FastAPI):
 | Bilgi | Deger |
 |-------|-------|
 | **Dosyalar** | `backend/app/main.py`, `backend/app/db/database.py`, `backend/requirements.txt`, yeni `alembic/` dizini |
+| **Durum** | TAMAMLANDI (commit `f2a74d1`). `create_all()` kaldirildi, schema yonetimi Alembic'e devredildi |
 | **Efor** | 1 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET — migration build adiminda calisir |
@@ -301,6 +306,7 @@ async def lifespan(app: FastAPI):
 | Bilgi | Deger |
 |-------|-------|
 | **Dosyalar** | `backend/app/main.py` satir 48-53, `backend/app/core/config.py` satir 168-183 |
+| **Durum** | TAMAMLANDI (commit `f2a74d1`). Exception durumunda `["*"]` fallback kaldirildi |
 | **Risk** | Exception durumunda `["*"]`'a fallback |
 | **Efor** | 30 dakika |
 | **Scraping Etkisi** | YOK |
@@ -357,6 +363,7 @@ def _get_cors_origins():
 | Bilgi | Deger |
 |-------|-------|
 | **Dosyalar** | `backend/app/api/url_scraper_routes.py`, `backend/app/api/routes.py` |
+| **Durum** | TAMAMLANDI (commit `f2a74d1`). `url_validator.py` olusturuldu, url_scraper ve transcript route'larinda kullaniliyor. Faz 5 sonrasi validasyon `_shared.py` icinde |
 | **Risk** | SSRF, asiri buyuk payload |
 | **Efor** | 1.5 saat |
 | **Scraping Etkisi** | MINIMUM — Sadece local/private IP'leri engeller |
@@ -379,6 +386,7 @@ def _get_cors_origins():
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/services/scraping.py` (17 nokta) |
+| **Durum** | TAMAMLANDI (commit `f2a74d1`). Sifir bare `except:` kaldi |
 | **Efor** | 1.5 saat |
 | **Scraping Etkisi** | OLUMLU — Hata tespiti kolaylasir |
 | **Autoscale Uyumlu** | EVET |
@@ -406,6 +414,7 @@ def _get_cors_origins():
 | Bilgi | Deger |
 |-------|-------|
 | **Dosyalar** | `backend/app/services/llm_service.py`, `backend/app/api/routes.py`, `backend/app/services/price_monitor_service.py` |
+| **Durum** | TAMAMLANDI (commit `f2a74d1`). Global exception handler eklendi |
 | **Risk** | `str(e)` ile internal path, connection string veya API key ifsasi |
 | **Efor** | 1 saat |
 | **Scraping Etkisi** | YOK |
@@ -444,6 +453,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 | Bilgi | Deger |
 |-------|-------|
 | **Dosyalar** | Yeni `backend/tests/` dizini |
+| **Durum** | TAMAMLANDI (commit `e71bdfc`) |
 | **Efor** | 1 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
@@ -459,6 +469,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `e71bdfc`) |
 | **Efor** | 0.5-1 gun |
 
 **Yazilacak testler:**
@@ -473,6 +484,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `e71bdfc`) |
 | **Efor** | 2 saat |
 
 **Yapilacak degisiklik:**
@@ -489,9 +501,12 @@ async def global_exception_handler(request: Request, exc: Exception):
 | Bilgi | Deger |
 |-------|-------|
 | **Dosya** | `backend/app/api/routes.py` |
+| **Durum** | UYGULANMADI — hala beklemede |
 | **Efor** | 1-1.5 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
+
+> Not: Faz 5 sonrasi `routes.py` 27 satirlik barrel module donustu. Eski satir referanslari gecersizdir. N+1 noktalari artik `product_routes.py`, `price_monitor_routes.py` ve `seller_routes.py` icindedir.
 
 **Dogrulanmis N+1 noktalari:**
 - `routes.py` ~satir 423-473: `get_products` — her urun icin ayri `ProductSnapshot` sorgusu
@@ -510,6 +525,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | KISMEN — Plotly.js hala full bundle (~4.8MB) |
 | **Efor** | 1 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
@@ -525,6 +541,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `046d4ba`). sonner toasts, ErrorBoundary, ConfirmDialog eklendi, 14 native dialog degistirildi |
 | **Efor** | 1-1.5 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
@@ -561,9 +578,12 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `6ef31ab`). `routes.py` artik 27 satirlik barrel. `search_routes.py`, `product_routes.py`, `stats_routes.py`, `price_monitor_routes.py`, `seller_routes.py` + `_shared.py` olarak bolundu |
 | **Efor** | 2-3 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
+
+> Not: Faz 5 sonrasi `routes.py` 27 satirlik barrel module donustu. Eski satir referanslari gecersizdir.
 
 **Yapilacak degisiklikler:**
 1. `price_monitor_routes.py`, `product_routes.py`, `search_routes.py`, `seller_routes.py`, `stats_routes.py`
@@ -576,9 +596,12 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `6ef31ab`). `api.ts` artik 12 satirlik barrel. `client.ts`, `types.ts` + 9 feature API modulu olarak bolundu |
 | **Efor** | 1 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
+
+> Not: Faz 5 sonrasi `api.ts` 12 satirlik barrel module donustu. Eski satir referanslari gecersizdir.
 
 **Yapilacak degisiklikler:**
 1. `client.ts`, `types.ts`, feature bazli dosyalar + `index.ts` barrel
@@ -589,6 +612,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI. Artik 39 satir + `usePriceMonitor` hook + 6 alt komponent |
 | **Efor** | 1.5-2 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
@@ -603,6 +627,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI. Artik 272 satir + `useCategoryExplorer` hook + 6 alt komponent |
 | **Efor** | 1.5-2 gun |
 | **Scraping Etkisi** | YOK |
 | **Autoscale Uyumlu** | EVET |
@@ -621,6 +646,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commits `d2d18d8`, `98aa497`) |
 | **Efor** | 2 saat |
 | **Scraping Etkisi** | YOK |
 
@@ -636,6 +662,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | KISMEN TAMAMLANDI — semantic token'lar eklendi ancak `dark-*` isimlendirmesi korundu. Accessibility commit'lerinden regression mevcut |
 | **Efor** | 2-3 saat |
 | **Scraping Etkisi** | YOK |
 
@@ -648,6 +675,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `0dfd420`) |
 | **Efor** | 2 saat |
 
 ---
@@ -656,6 +684,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | TAMAMLANDI (commit `bebddd9`) |
 | **Efor** | 2 saat |
 
 ---
@@ -664,6 +693,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 | Bilgi | Deger |
 |-------|-------|
+| **Durum** | KISMEN — graceful deprecation uygulandı (eski isimler uyari ile kabul ediliyor) |
 | **Efor** | 1 saat |
 | **Scraping Etkisi** | MINIMUM |
 
@@ -740,4 +770,4 @@ Hafta 6:   Faz 6 (temizlik + tema borcu) + Faz 7'den secilen maddeler
 
 *Guncel kod tabani denetimi ve grep/LSP dogrulamasi ile olusturulmustur.*
 *Autoscale deployment uyumlulugu icin filtrelenmistir.*
-*Son guncelleme: 2026-02-23*
+*Son guncelleme: 2026-02-24*

@@ -57,6 +57,19 @@ Raporun en değerli kısmı **Adım 2: Hardcoded Temizliği**. Bu adım palet-ba
 --color-success     Light: #16a34a   Dark: #4ade80
 ```
 
+### 2.1b Belgelenmemis ama Kodda Mevcut Token'lar
+
+Asagidaki token'lar kodda kullanilmaktadir ancak yukaridaki listede yer almamaktadir:
+
+| Token | Light | Dark | Not |
+|-------|-------|------|-----|
+| `--color-text-faded` | `#b5a382` | `#6B8F80` | Soluk metin icin |
+| `--color-accent-on-primary` | `#ffffff` | `#022c22` | Accent buton üzerindeki metin |
+| `--color-surface-hover` | — | — | Hover durumu icin yüzey rengi |
+| `--color-surface-hover-active` | — | — | Aktif hover durumu icin yüzey rengi |
+
+> **Not:** Section 2.1'deki `.dark` blok degerleri eski warm amber paletini göstermektedir. Gercek uygulamada Forest Data yesil paleti kullanilmaktadir.
+
 ### 2.2 Eksik Token'lar (Eklenmesi Gerekenler)
 
 Hardcoded değerlerin analizi, mevcut token'ların bazı renk ihtiyaçlarını karşılamadığını gösteriyor:
