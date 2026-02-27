@@ -12,11 +12,20 @@ def get_celery_app():
     global _celery_app
     if _celery_app is None:
         from celery import Celery
+        redis_url = settings.REDIS_URL or ""
+
         _celery_app = Celery(
             'tasks',
-            broker=settings.REDIS_URL,
-            backend=settings.REDIS_URL
+            broker=redis_url,
+            backend=redis_url,
         )
+
+        # Upstash Redis TLS desteği
+        broker_use_ssl = None
+        if redis_url.startswith("rediss://"):
+            import ssl
+            broker_use_ssl = {"ssl_cert_reqs": ssl.CERT_NONE}
+
         _celery_app.conf.update(
             task_serializer='json',
             result_serializer='json',
@@ -25,6 +34,7 @@ def get_celery_app():
             enable_utc=True,
             task_track_started=True,
             result_expires=3600,
+            **({"broker_use_ssl": broker_use_ssl, "redis_backend_use_ssl": broker_use_ssl} if broker_use_ssl else {}),
         )
         _register_tasks(_celery_app)
     return _celery_app

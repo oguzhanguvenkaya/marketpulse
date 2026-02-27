@@ -13,7 +13,6 @@ from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, MonitoredProduct, SellerSnapshot, PriceMonitorTask
 from app.core.config import settings
 from app.core.logger import api_logger as logger, log_endpoint_metric
-from app.core.security import require_mutating_api_key
 
 
 def _get_scraping_service():

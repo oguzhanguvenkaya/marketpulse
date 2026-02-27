@@ -101,6 +101,23 @@ class Settings(BaseSettings):
     
     PROXY_PROVIDER: str = os.getenv("PROXY_PROVIDER", "auto")
     
+    # Supabase Auth ayarları
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+
+    # Email servisi
+    RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
+
+    # Stripe ödeme sistemi
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_PUBLISHABLE_KEY: str = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+    STRIPE_PRICE_STARTER: str = os.getenv("STRIPE_PRICE_STARTER", "")  # Stripe Price ID
+    STRIPE_PRICE_PRO: str = os.getenv("STRIPE_PRICE_PRO", "")
+    STRIPE_PRICE_ENTERPRISE: str = os.getenv("STRIPE_PRICE_ENTERPRISE", "")
+
     DEBUG_SAVE_HTML: bool = os.getenv("DEBUG_SAVE_HTML", "false").lower() == "true"
     DEBUG_HTML_PATH: str = os.getenv("DEBUG_HTML_PATH", "/tmp/scraping_debug")
     

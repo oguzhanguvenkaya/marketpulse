@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from app.db.database import get_db
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview
-from app.core.security import require_mutating_api_key
+from app.core.auth import get_current_user
 
 from app.api._shared import (
     AnalysisRequest,
@@ -18,7 +18,7 @@ from app.api._shared import (
     _get_llm_service,
 )
 
-router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get("/products", response_model=List[ProductResponse])
 async def list_products(

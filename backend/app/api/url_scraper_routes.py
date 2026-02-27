@@ -11,14 +11,14 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import ScrapeJob, ScrapeResult
-from app.core.security import require_mutating_api_key
+from app.db.models import ScrapeJob, ScrapeResult, User
+from app.core.auth import get_current_user
 from app.core.url_validator import validate_url_safe
 
 router = APIRouter(
     prefix="/api/url-scraper",
     tags=["URL Scraper"],
-    dependencies=[Depends(require_mutating_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -33,12 +33,12 @@ class BulkUrlRequest(BaseModel):
 
 
 @router.post("/scrape")
-async def scrape_single_url(req: SingleUrlRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def scrape_single_url(req: SingleUrlRequest, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     is_safe, error_msg = validate_url_safe(req.url)
     if not is_safe:
         raise HTTPException(status_code=400, detail=error_msg)
 
-    job = ScrapeJob(total_urls=1, status="running")
+    job = ScrapeJob(total_urls=1, status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -59,13 +59,13 @@ async def scrape_single_url(req: SingleUrlRequest, background_tasks: BackgroundT
 
 
 @router.post("/scrape-bulk")
-async def scrape_bulk_urls(req: BulkUrlRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def scrape_bulk_urls(req: BulkUrlRequest, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     for u in req.urls:
         is_safe, error_msg = validate_url_safe(u.url)
         if not is_safe:
             raise HTTPException(status_code=400, detail=f"URL guvenli degil ({u.url}): {error_msg}")
 
-    job = ScrapeJob(total_urls=len(req.urls), status="running")
+    job = ScrapeJob(total_urls=len(req.urls), status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -119,7 +119,7 @@ def _extract_urls_from_cell(cell: str) -> list[str]:
     return []
 
 @router.post("/scrape-csv")
-async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: BackgroundTasks = None, db: Session = Depends(get_db)):
+async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: BackgroundTasks = None, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     content = await file.read()
     text = content.decode('utf-8-sig')
 
@@ -175,7 +175,7 @@ async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: Back
     if unsafe_urls:
         raise HTTPException(status_code=400, detail=f"Guvenli olmayan URL'ler tespit edildi: {'; '.join(unsafe_urls)}")
 
-    job = ScrapeJob(total_urls=len(urls_to_scrape), status="running")
+    job = ScrapeJob(total_urls=len(urls_to_scrape), status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -201,8 +201,8 @@ async def scrape_csv_upload(file: UploadFile = File(...), background_tasks: Back
 
 
 @router.get("/jobs")
-async def get_scrape_jobs(limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
-    jobs = db.query(ScrapeJob).order_by(ScrapeJob.created_at.desc()).limit(limit).all()
+async def get_scrape_jobs(limit: int = Query(20, ge=1, le=100), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    jobs = db.query(ScrapeJob).filter(ScrapeJob.user_id == user.id).order_by(ScrapeJob.created_at.desc()).limit(limit).all()
     return [{
         "id": str(j.id),
         "status": j.status,

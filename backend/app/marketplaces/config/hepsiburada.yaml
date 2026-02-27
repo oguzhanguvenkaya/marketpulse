@@ -1,0 +1,29 @@
+# Hepsiburada Marketplace Konfigürasyonu
+platform: hepsiburada
+
+api:
+  listings_url: "https://www.hepsiburada.com/api/v1/product/listings/{sku}"
+  campaign_url: "https://obiwan-gw.hepsiburada.com/api/v2/Campaign/pdp"
+  campaign_payload_version: "2"
+
+selectors:
+  product_title: "h1[data-test-id='product-name']"
+  product_price: "span[data-test-id='price-current-price']"
+
+tag_patterns:
+  campaign_keywords:
+    - "indirim"
+    - "kampanya"
+    - "sepet"
+  percentage_pattern: "-(\\d+)-indirim$"
+  exclude_patterns:
+    - "\\d+-urune"
+    - "tl-ye"
+
+rate_limits:
+  max_concurrent: 40
+  request_delay_ms: 100
+  campaign_timeout_seconds: 15
+
+sku_extraction:
+  url_pattern: "-p[m]?-([A-Z0-9]+)"

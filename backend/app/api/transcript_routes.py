@@ -11,14 +11,14 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import TranscriptJob, TranscriptResult
-from app.core.security import require_mutating_api_key
+from app.db.models import TranscriptJob, TranscriptResult, User
+from app.core.auth import get_current_user
 from app.core.url_validator import validate_url_safe
 
 router = APIRouter(
     prefix="/api/transcripts",
     tags=["Video Transcripts"],
-    dependencies=[Depends(require_mutating_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -33,12 +33,12 @@ class BulkVideoRequest(BaseModel):
 
 
 @router.post("/fetch")
-async def fetch_single_transcript(req: SingleVideoRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def fetch_single_transcript(req: SingleVideoRequest, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     is_safe, error_msg = validate_url_safe(req.video_url)
     if not is_safe:
         raise HTTPException(status_code=400, detail=error_msg)
 
-    job = TranscriptJob(total_videos=1, status="running")
+    job = TranscriptJob(total_videos=1, status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -59,13 +59,13 @@ async def fetch_single_transcript(req: SingleVideoRequest, background_tasks: Bac
 
 
 @router.post("/fetch-bulk")
-async def fetch_bulk_transcripts(req: BulkVideoRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def fetch_bulk_transcripts(req: BulkVideoRequest, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     for v in req.videos:
         is_safe, error_msg = validate_url_safe(v.video_url)
         if not is_safe:
             raise HTTPException(status_code=400, detail=f"URL guvenli degil ({v.video_url}): {error_msg}")
 
-    job = TranscriptJob(total_videos=len(req.videos), status="running")
+    job = TranscriptJob(total_videos=len(req.videos), status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -106,7 +106,7 @@ def _extract_video_urls_from_cell(cell: str) -> list[str]:
 
 
 @router.post("/fetch-csv")
-async def fetch_csv_transcripts(file: UploadFile = File(...), background_tasks: BackgroundTasks = None, db: Session = Depends(get_db)):
+async def fetch_csv_transcripts(file: UploadFile = File(...), background_tasks: BackgroundTasks = None, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     content = await file.read()
     text = content.decode('utf-8-sig')
 
@@ -181,7 +181,7 @@ async def fetch_csv_transcripts(file: UploadFile = File(...), background_tasks: 
     duplicates_removed = len(videos_to_fetch) - len(unique_videos)
     videos_to_fetch = unique_videos
 
-    job = TranscriptJob(total_videos=len(videos_to_fetch), status="running")
+    job = TranscriptJob(total_videos=len(videos_to_fetch), status="running", user_id=user.id)
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -209,8 +209,8 @@ async def fetch_csv_transcripts(file: UploadFile = File(...), background_tasks: 
 
 
 @router.get("/jobs")
-async def get_transcript_jobs(limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
-    jobs = db.query(TranscriptJob).order_by(TranscriptJob.created_at.desc()).limit(limit).all()
+async def get_transcript_jobs(limit: int = Query(20, ge=1, le=100), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    jobs = db.query(TranscriptJob).filter(TranscriptJob.user_id == user.id).order_by(TranscriptJob.created_at.desc()).limit(limit).all()
     return [{
         "id": str(j.id),
         "status": j.status,

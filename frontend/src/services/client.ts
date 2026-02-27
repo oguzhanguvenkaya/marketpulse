@@ -1,62 +1,27 @@
 import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import { invalidateCacheByPrefix } from './queryCache';
 
 const api = axios.create({
   baseURL: '/api',
 });
 
-// Request interceptor: attach API key from sessionStorage
-api.interceptors.request.use((config) => {
-  const apiKey = sessionStorage.getItem('mp_api_key');
-  if (apiKey) {
-    config.headers['X-API-Key'] = apiKey;
+// Request interceptor: Supabase Bearer token ekle
+api.interceptors.request.use(async (config) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    config.headers['Authorization'] = `Bearer ${session.access_token}`;
   }
   return config;
 });
 
-// Response interceptor: trigger API key prompt on auth failure
-let isPromptingApiKey = false;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let pendingAuthQueue: Array<{ resolve: (v: any) => void; reject: (e: any) => void; config: any }> = [];
-
+// Response interceptor: 401'de login'e redirect
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if ([401, 403].includes(error.response?.status)) {
-      if (isPromptingApiKey) {
-        // Queue concurrent 401s to retry after key is entered
-        return new Promise((resolve, reject) => {
-          pendingAuthQueue.push({ resolve, reject, config: error.config });
-        });
-      }
-
-      isPromptingApiKey = true;
-      window.dispatchEvent(new CustomEvent('mp:api-key-required'));
-
-      return new Promise((resolve, reject) => {
-        const handler = (e: Event) => {
-          window.removeEventListener('mp:api-key-set', handler);
-          isPromptingApiKey = false;
-          const key = (e as CustomEvent).detail;
-          if (key) {
-            error.config.headers['X-API-Key'] = key;
-            // Drain queued requests
-            const queued = [...pendingAuthQueue];
-            pendingAuthQueue = [];
-            queued.forEach((q) => {
-              q.config.headers['X-API-Key'] = key;
-              q.resolve(api.request(q.config));
-            });
-            resolve(api.request(error.config));
-          } else {
-            const queued = [...pendingAuthQueue];
-            pendingAuthQueue = [];
-            queued.forEach((q) => q.reject(error));
-            reject(error);
-          }
-        };
-        window.addEventListener('mp:api-key-set', handler);
-      });
+    if (error.response?.status === 401) {
+      supabase.auth.signOut();
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

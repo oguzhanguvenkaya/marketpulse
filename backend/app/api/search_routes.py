@@ -1,13 +1,13 @@
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
-from typing import List
+from sqlalchemy import desc, func, distinct
+from typing import List, Optional
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct
+from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, User
 from app.core.logger import api_logger as logger
-from app.core.security import require_mutating_api_key
+from app.core.auth import get_current_user
 
 from app.api._shared import (
     SearchRequest,
@@ -16,7 +16,7 @@ from app.api._shared import (
     _parse_review_date,
 )
 
-router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 async def run_scraping_background(task_id: str):
     db = SessionLocal()
@@ -230,11 +230,12 @@ async def run_scraping_background(task_id: str):
         db.close()
 
 @router.post("/search", response_model=SearchTaskResponse)
-async def create_search_task(request: SearchRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def create_search_task(request: SearchRequest, background_tasks: BackgroundTasks, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     task = SearchTask(
         keyword=request.keyword,
         platform=request.platform,
-        status="pending"
+        status="pending",
+        user_id=user.id
     )
     db.add(task)
     db.commit()
@@ -268,9 +269,10 @@ async def get_search_task(task_id: str, db: Session = Depends(get_db)):
 @router.get("/tasks", response_model=List[SearchTaskResponse])
 async def list_tasks(
     limit: int = Query(10, ge=1, le=100),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    tasks = db.query(SearchTask).order_by(desc(SearchTask.created_at)).limit(limit).all()
+    tasks = db.query(SearchTask).filter(SearchTask.user_id == user.id).order_by(desc(SearchTask.created_at)).limit(limit).all()
     return [
         SearchTaskResponse(
             id=str(t.id),
@@ -306,6 +308,93 @@ async def get_sponsored_brands(task_id: str, db: Session = Depends(get_db)):
             for ad in brand_ads
         ]
     }
+
+@router.get("/keyword-history")
+async def get_keyword_history(
+    platform: Optional[str] = None,
+    limit: int = Query(20, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Kullanıcının arama geçmişi — tekil keyword'ler, son arama tarihi ve toplam sonuç."""
+    query = db.query(
+        SearchTask.keyword,
+        SearchTask.platform,
+        func.count(SearchTask.id).label("search_count"),
+        func.max(SearchTask.created_at).label("last_searched"),
+        func.max(SearchTask.total_products).label("max_products"),
+    ).filter(
+        SearchTask.user_id == user.id,
+        SearchTask.status == "completed"
+    )
+
+    if platform:
+        query = query.filter(SearchTask.platform == platform)
+
+    results = query.group_by(
+        SearchTask.keyword, SearchTask.platform
+    ).order_by(
+        func.max(SearchTask.created_at).desc()
+    ).limit(limit).all()
+
+    return {
+        "keywords": [
+            {
+                "keyword": r.keyword,
+                "platform": r.platform,
+                "search_count": r.search_count,
+                "last_searched": r.last_searched.isoformat() if r.last_searched else None,
+                "max_products": r.max_products,
+            }
+            for r in results
+        ]
+    }
+
+
+@router.get("/keyword-comparison/{keyword}")
+async def compare_keyword_over_time(
+    keyword: str,
+    platform: str = Query("hepsiburada"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Aynı keyword'ün zaman içindeki arama sonuçlarını karşılaştır."""
+    tasks = db.query(SearchTask).filter(
+        SearchTask.user_id == user.id,
+        SearchTask.keyword == keyword,
+        SearchTask.platform == platform,
+        SearchTask.status == "completed"
+    ).order_by(desc(SearchTask.created_at)).limit(10).all()
+
+    if not tasks:
+        raise HTTPException(404, "Bu keyword için arama sonucu bulunamadı")
+
+    comparison = []
+    for task in tasks:
+        # Her task için sponsorlu ürün sayısını al
+        sponsored_count = db.query(func.count(SearchSponsoredProduct.id)).filter(
+            SearchSponsoredProduct.search_task_id == task.id
+        ).scalar() or 0
+
+        brand_ad_count = db.query(func.count(SponsoredBrandAd.id)).filter(
+            SponsoredBrandAd.search_task_id == task.id
+        ).scalar() or 0
+
+        comparison.append({
+            "task_id": str(task.id),
+            "date": task.created_at.isoformat(),
+            "total_products": task.total_products,
+            "sponsored_products": sponsored_count,
+            "brand_ads": brand_ad_count,
+        })
+
+    return {
+        "keyword": keyword,
+        "platform": platform,
+        "total_searches": len(comparison),
+        "history": comparison,
+    }
+
 
 @router.get("/search/{task_id}/sponsored-products")
 async def get_sponsored_products(task_id: str, db: Session = Depends(get_db)):

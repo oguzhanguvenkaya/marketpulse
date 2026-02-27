@@ -1,9 +1,47 @@
 import uuid
 from datetime import datetime, date
-from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON, Index
+from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
+
+class User(Base):
+    """Supabase Auth kullanıcısı — auth.users.id ile eşleşir."""
+    __tablename__ = "users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True)  # Supabase auth.users.id ile aynı
+    email = Column(String(255), unique=True, nullable=False)
+    full_name = Column(String(255), nullable=True)
+    plan_tier = Column(String(20), default="free")  # free, starter, pro, enterprise
+    email_alerts_enabled = Column(Boolean, default=True)
+    alert_frequency = Column(String(20), default="instant")  # instant, daily_digest
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    class Config:
+        from_attributes = True
+
+
+class Subscription(Base):
+    """Kullanıcı abonelik bilgisi — Stripe entegrasyonu için hazır."""
+    __tablename__ = "subscriptions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False)
+    plan_tier = Column(String(20), default="free")
+    status = Column(String(20), default="active")  # active, canceled, past_due
+    stripe_customer_id = Column(String(255), nullable=True)
+    stripe_subscription_id = Column(String(255), nullable=True)
+    sku_limit = Column(Integer, default=10)
+    scan_frequency = Column(Integer, default=1)  # günlük tarama sayısı
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", backref="subscription")
+
+    class Config:
+        from_attributes = True
+
 
 class Product(Base):
     __tablename__ = "products"
@@ -91,8 +129,9 @@ class ProductReview(Base):
 
 class SearchTask(Base):
     __tablename__ = "search_tasks"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     keyword = Column(String(255), nullable=False)
     platform = Column(String(20), nullable=False)
     status = Column(String(20), default="pending")
@@ -152,27 +191,33 @@ class SearchSponsoredProduct(Base):
 class MonitoredProduct(Base):
     """İzlenen ürünler - distribütör olarak takip edilen SKU'lar"""
     __tablename__ = "monitored_products"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    platform = Column(String(20), nullable=False, default='hepsiburada', index=True)  # hepsiburada, trendyol
-    sku = Column(String(100), nullable=False, index=True)  # unique kaldırıldı - platform ile birlikte unique olacak
-    barcode = Column(String(50))  # Trendyol için barkod
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    platform = Column(String(20), nullable=False, default='hepsiburada', index=True)
+    sku = Column(String(100), nullable=False, index=True)
+    barcode = Column(String(50))
     product_url = Column(Text, nullable=False)
     product_name = Column(Text)
     brand = Column(String(255), index=True)
-    seller_stock_code = Column(String(100), index=True)  # Satıcı stok kodu
-    threshold_price = Column(Numeric(10, 2))  # Eşik fiyat - original_price üzerinden alert (satıcı indirimine izin verir)
-    alert_campaign_price = Column(Numeric(10, 2))  # Campaign price eşik - Campaign API'den gelen indirimli fiyat için alert
+    seller_stock_code = Column(String(100), index=True)
+    threshold_price = Column(Numeric(10, 2))
+    alert_campaign_price = Column(Numeric(10, 2))
+    unit_cost = Column(Numeric(10, 2))  # Ürün maliyeti (kârlılık hesaplama)
+    shipping_cost = Column(Numeric(10, 2))  # Kargo bedeli (kârlılık hesaplama)
     image_url = Column(Text)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_fetched_at = Column(DateTime)
-    
+
+    user = relationship("User", backref="monitored_products")
     seller_snapshots = relationship("SellerSnapshot", back_populates="monitored_product", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index('ix_monitored_products_platform_active', 'platform', 'is_active'),
+        Index('ix_monitored_products_user_platform', 'user_id', 'platform', 'is_active'),
+        UniqueConstraint('user_id', 'platform', 'sku', name='uq_monitored_product_user_platform_sku'),
     )
 
     class Config:
@@ -221,8 +266,9 @@ class SellerSnapshot(Base):
 class PriceMonitorTask(Base):
     """Fiyat izleme görevi - toplu SKU çekme işlemi"""
     __tablename__ = "price_monitor_tasks"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     platform = Column(String(50), default="hepsiburada")
     status = Column(String(20), default="pending")
     stop_requested = Column(Boolean, default=False)
@@ -246,6 +292,7 @@ class JsonFile(Base):
     __tablename__ = "json_files"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     filename = Column(String(255), nullable=False)
     json_content = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -258,8 +305,9 @@ class JsonFile(Base):
 class ScrapeJob(Base):
     """URL kazıma görevi"""
     __tablename__ = "scrape_jobs"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     status = Column(String(20), default="pending")
     total_urls = Column(Integer, default=0)
     completed_urls = Column(Integer, default=0)
@@ -296,8 +344,9 @@ class ScrapeResult(Base):
 
 class TranscriptJob(Base):
     __tablename__ = "transcript_jobs"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     status = Column(String(20), default="pending")
     total_videos = Column(Integer, default=0)
     completed_videos = Column(Integer, default=0)
@@ -339,6 +388,7 @@ class StoreProduct(Base):
     __tablename__ = "store_products"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     platform = Column(String(30), nullable=False, index=True)
     source_url = Column(Text, nullable=False)
     sku = Column(String(100), index=True)
@@ -383,6 +433,7 @@ class CategorySession(Base):
     __tablename__ = "category_sessions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     platform = Column(String(30), nullable=False, index=True)
     category_url = Column(Text, nullable=False)
     category_name = Column(Text)
@@ -437,6 +488,139 @@ class CategoryProduct(Base):
     __table_args__ = (
         Index('ix_category_products_session_page', 'session_id', 'page_number'),
     )
+
+    class Config:
+        from_attributes = True
+
+
+class ScheduledTask(Base):
+    """Otomatik zamanlama görevi — plan tier'a göre periyodik fetch."""
+    __tablename__ = "scheduled_tasks"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    platform = Column(String(30), nullable=False)
+    task_type = Column(String(30), default="price_monitor")  # price_monitor, search
+    frequency_hours = Column(Integer, nullable=False)  # Plan tier'a göre: 24, 12, 6, 1
+    last_run_at = Column(DateTime, nullable=True)
+    next_run_at = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", backref="scheduled_tasks")
+
+    __table_args__ = (
+        Index('ix_scheduled_tasks_next_run', 'next_run_at', 'is_active'),
+        UniqueConstraint('user_id', 'platform', 'task_type', name='uq_scheduled_task_user_platform_type'),
+    )
+
+    class Config:
+        from_attributes = True
+
+
+class AlertLog(Base):
+    """Gönderilen fiyat alarmlarının kaydı."""
+    __tablename__ = "alert_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    product_id = Column(UUID(as_uuid=True), ForeignKey("monitored_products.id"), nullable=True, index=True)
+    alert_type = Column(String(30), nullable=False)  # price_change, buybox_lost, campaign_alert
+    old_value = Column(String(255))
+    new_value = Column(String(255))
+    email_sent = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", backref="alert_logs")
+
+    class Config:
+        from_attributes = True
+
+
+class ChatConversation(Base):
+    """Kullanıcı chat oturumu."""
+    __tablename__ = "chat_conversations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String(255), default="Yeni Sohbet")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    messages = relationship("ChatMessage", back_populates="conversation", cascade="all, delete-orphan")
+    user = relationship("User", backref="chat_conversations")
+
+    class Config:
+        from_attributes = True
+
+
+class ChatMessage(Base):
+    """Chat mesajı."""
+    __tablename__ = "chat_messages"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("chat_conversations.id"), nullable=False, index=True)
+    role = Column(String(20), nullable=False)  # user, assistant, tool
+    content = Column(Text, nullable=False)
+    tool_calls = Column(JSON, nullable=True)
+    tool_call_id = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    conversation = relationship("ChatConversation", back_populates="messages")
+
+    class Config:
+        from_attributes = True
+
+
+class CompetitorSeller(Base):
+    """Takip edilen rakip satıcı."""
+    __tablename__ = "competitor_sellers"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    platform = Column(String(30), nullable=False)
+    seller_id = Column(String(100), nullable=False)
+    seller_name = Column(String(255), nullable=False)
+    seller_url = Column(Text, nullable=True)
+    seller_rating = Column(Float, nullable=True)
+    seller_rating_count = Column(Integer, nullable=True)
+    total_products = Column(Integer, default=0)
+    notes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    last_checked_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", backref="competitor_sellers")
+    products = relationship("CompetitorProduct", back_populates="competitor", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'platform', 'seller_id', name='uq_competitor_user_platform_seller'),
+        Index('ix_competitor_sellers_user_platform', 'user_id', 'platform'),
+    )
+
+    class Config:
+        from_attributes = True
+
+
+class CompetitorProduct(Base):
+    """Rakip satıcının ürünü."""
+    __tablename__ = "competitor_products"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    competitor_id = Column(UUID(as_uuid=True), ForeignKey("competitor_sellers.id"), nullable=False, index=True)
+    sku = Column(String(100), nullable=True)
+    product_name = Column(Text, nullable=True)
+    product_url = Column(Text, nullable=True)
+    price = Column(Numeric(10, 2), nullable=True)
+    original_price = Column(Numeric(10, 2), nullable=True)
+    category = Column(Text, nullable=True)
+    image_url = Column(Text, nullable=True)
+    is_sponsored = Column(Boolean, default=False)
+    last_seen_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    competitor = relationship("CompetitorSeller", back_populates="products")
 
     class Config:
         from_attributes = True

@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask
-from app.core.security import require_mutating_api_key
+from app.core.auth import get_current_user
 
 from app.api._shared import _get_proxy_status
 
-router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get("/stats")
 async def get_stats(db: Session = Depends(get_db)):

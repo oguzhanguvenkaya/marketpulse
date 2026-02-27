@@ -730,11 +730,84 @@ class PriceMonitorService:
                 f"auth_errors={len(auth_failed_skus)};upstream_errors={len(upstream_failed_skus)}"
             )
         db.commit()
-        
+
         logger.info(
             f"Fetch task completed: {completed} success, {failed} failed, {len(inactive_skus)} marked inactive, "
             f"{len(auth_failed_skus)} auth_error, {len(upstream_failed_skus)} upstream_error"
         )
+
+        # Alert check — kullanıcının email alarm ayarları varsa bildirim gönder
+        try:
+            await self._check_alerts_for_products(db, products)
+        except Exception as e:
+            logger.error(f"Alert check failed: {e}")
+
+    async def _check_alerts_for_products(self, db: Session, products: list):
+        """Fetch tamamlandıktan sonra alert kontrolü yap."""
+        from app.db.models import User
+        from app.services.notification_service import check_and_send_alerts
+
+        # Ürünleri user_id bazında grupla
+        user_products: dict = {}
+        for product in products:
+            uid = product.user_id
+            if uid:
+                user_products.setdefault(uid, []).append(product)
+
+        total_alerts = 0
+        for user_id, user_prods in user_products.items():
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user or not user.email_alerts_enabled:
+                continue
+
+            for product in user_prods:
+                # Son 2 snapshot grubunu al (eski vs yeni karşılaştırma)
+                snapshots = (
+                    db.query(SellerSnapshot)
+                    .filter(SellerSnapshot.monitored_product_id == product.id)
+                    .order_by(SellerSnapshot.snapshot_date.desc())
+                    .limit(200)
+                    .all()
+                )
+
+                if not snapshots:
+                    continue
+
+                # En son tarihli snapshot'lar (yeni) ve ondan önceki (eski) ayıkla
+                latest_date = snapshots[0].snapshot_date
+                new_snapshots = []
+                old_snapshots = []
+                for s in snapshots:
+                    snap_dict = {
+                        "merchant_id": s.merchant_id,
+                        "merchant_name": s.merchant_name,
+                        "price": float(s.price) if s.price else None,
+                        "original_price": float(s.original_price) if s.original_price else None,
+                        "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+                        "buybox_order": s.buybox_order,
+                    }
+                    if s.snapshot_date == latest_date:
+                        new_snapshots.append(snap_dict)
+                    elif not old_snapshots or s.snapshot_date == old_snapshots[0].get("_date"):
+                        snap_dict["_date"] = s.snapshot_date
+                        old_snapshots.append(snap_dict)
+
+                # _date alanını temizle
+                for s in old_snapshots:
+                    s.pop("_date", None)
+
+                if new_snapshots:
+                    alerts = await check_and_send_alerts(
+                        db=db,
+                        user=user,
+                        product=product,
+                        old_snapshots=old_snapshots,
+                        new_snapshots=new_snapshots,
+                    )
+                    total_alerts += alerts
+
+        if total_alerts > 0:
+            logger.info(f"Sent {total_alerts} alerts after price monitor fetch")
 
     async def fetch_and_save_product(self, db: Session, product: MonitoredProduct) -> bool:
         """Tek bir ürünü çekip DB'ye kaydet."""

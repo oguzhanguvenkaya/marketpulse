@@ -11,15 +11,15 @@ from sqlalchemy import func, or_, cast, String
 from pydantic import BaseModel
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import StoreProduct, MonitoredProduct, ScrapeJob, ScrapeResult, SellerSnapshot
-from app.core.security import require_mutating_api_key
+from app.db.models import StoreProduct, MonitoredProduct, ScrapeJob, ScrapeResult, SellerSnapshot, User
+from app.core.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/store-products",
     tags=["Store Products"],
-    dependencies=[Depends(require_mutating_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -38,9 +38,10 @@ async def list_store_products(
     sort_dir: Optional[str] = Query("desc"),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    q = db.query(StoreProduct)
+    q = db.query(StoreProduct).filter(StoreProduct.user_id == user.id)
 
     if platform:
         q = q.filter(StoreProduct.platform == platform)
@@ -491,9 +492,10 @@ async def delete_store_product(product_id: str, db: Session = Depends(get_db)):
 @router.delete("")
 async def delete_all_store_products(
     platform: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    q = db.query(StoreProduct)
+    q = db.query(StoreProduct).filter(StoreProduct.user_id == user.id)
     if platform:
         q = q.filter(StoreProduct.platform == platform)
     count = q.delete()

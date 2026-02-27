@@ -1,0 +1,25 @@
+# Trendyol Marketplace Konfigürasyonu
+platform: trendyol
+
+api:
+  product_url_template: "https://www.trendyol.com/brand/product-p-{product_id}"
+  seller_list_key: "otherMerchants"
+
+selectors:
+  ssr_json_pattern: "__PRODUCT_DETAIL_APP_INITIAL_STATE__"
+
+parsing:
+  # SSR JSON'dan merchant verisi çıkarma
+  merchant_fields:
+    id: "merchantId"
+    name: "merchantName"
+    price: "sellingPrice"
+    original_price: "originalPrice"
+    rating: "merchantRating"
+
+rate_limits:
+  max_concurrent: 20
+  request_delay_ms: 200
+
+sku_extraction:
+  url_pattern: "-p-(\\d+)"

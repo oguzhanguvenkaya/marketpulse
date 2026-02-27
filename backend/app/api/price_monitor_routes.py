@@ -1,16 +1,18 @@
 import asyncio
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+import csv
+import io
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, or_, text
+from sqlalchemy import desc, func, or_, text
 from typing import List, Optional, Dict, Any
 from time import perf_counter
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask
+from app.db.models import MonitoredProduct, SellerSnapshot, PriceMonitorTask, User
 from app.core.config import settings
 from app.core.logger import api_logger as logger, log_endpoint_metric
-from app.core.security import require_mutating_api_key
+from app.core.auth import get_current_user
 
 from app.api._shared import (
     MonitoredProductInput,
@@ -31,19 +33,34 @@ from app.api._shared import (
     extract_sku_from_url,
 )
 
-router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.post("/price-monitor/products")
 async def add_monitored_products(
     request: BulkProductsRequest,
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """JSON formatında SKU listesi yükle - platform: hepsiburada veya trendyol"""
     added = 0
     updated = 0
     errors = []
     platform = request.platform.lower()
+
+    # Plan limiti kontrolü
+    from app.core.plan_limits import get_user_limits
+    limits = get_user_limits(user)
+    current_count = db.query(MonitoredProduct).filter(
+        MonitoredProduct.user_id == user.id,
+        MonitoredProduct.is_active == True,
+    ).count()
+    remaining = limits["max_skus"] - current_count
+    if remaining <= 0:
+        raise HTTPException(
+            status_code=403,
+            detail=f"SKU limitinize ulastiniz ({current_count}/{limits['max_skus']}). Planinizi yukseltin."
+        )
 
     for item in request.products:
         try:
@@ -61,8 +78,9 @@ async def add_monitored_products(
             resolved_product_url = _resolve_product_url(platform, sku, item.productUrl)
 
             existing = db.query(MonitoredProduct).filter(
+                MonitoredProduct.user_id == user.id,
                 MonitoredProduct.sku == sku,
-                MonitoredProduct.platform == platform
+                MonitoredProduct.platform == platform,
             ).first()
 
             if existing:
@@ -91,6 +109,7 @@ async def add_monitored_products(
                     round(item.price * 0.9, 2) if item.price else None
                 )
                 product = MonitoredProduct(
+                    user_id=user.id,
                     platform=platform,
                     sku=sku,
                     barcode=item.barcode,
@@ -100,7 +119,7 @@ async def add_monitored_products(
                     threshold_price=item.price,
                     alert_campaign_price=campaign_price,
                     seller_stock_code=item.sellerStockCode,
-                    is_active=True
+                    is_active=True,
                 )
                 db.add(product)
                 added += 1
@@ -120,8 +139,204 @@ async def add_monitored_products(
     }
 
 
+@router.post("/price-monitor/products/import")
+async def import_products_csv(
+    file: UploadFile = File(...),
+    platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """CSV veya Excel dosyasından ürün import et."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Dosya adı gerekli")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext not in ("csv", "xlsx", "xls"):
+        raise HTTPException(status_code=400, detail="Desteklenen formatlar: CSV, XLSX")
+
+    content = await file.read()
+
+    # Parse rows based on file type
+    rows = []
+    if ext == "csv":
+        text_content = content.decode("utf-8-sig")
+        # Auto-detect delimiter
+        first_lines = text_content.split("\n", 3)[:3]
+        sample = "\n".join(first_lines)
+        delimiters = {";": sample.count(";"), ",": sample.count(","), "\t": sample.count("\t")}
+        delimiter = max(delimiters, key=delimiters.get) if max(delimiters.values()) > 0 else ","
+
+        reader = csv.DictReader(io.StringIO(text_content), delimiter=delimiter)
+        for row in reader:
+            rows.append({k.strip().lower(): v.strip() if v else "" for k, v in row.items()})
+    else:
+        # Excel
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True)
+        ws = wb.active
+        headers = []
+        for i, row in enumerate(ws.iter_rows(values_only=True)):
+            if i == 0:
+                headers = [str(h).strip().lower() if h else f"col_{j}" for j, h in enumerate(row)]
+                continue
+            row_dict = {}
+            for j, val in enumerate(row):
+                if j < len(headers):
+                    row_dict[headers[j]] = str(val).strip() if val is not None else ""
+            rows.append(row_dict)
+        wb.close()
+
+    if not rows:
+        raise HTTPException(status_code=400, detail="Dosyada veri bulunamadı")
+
+    # Column mapping — flexible header detection
+    def _find_col(row: dict, candidates: list) -> str:
+        for key in row:
+            for candidate in candidates:
+                if candidate in key:
+                    return row[key]
+        return ""
+
+    added = 0
+    updated = 0
+    errors = []
+    skipped = 0
+
+    for i, row in enumerate(rows, start=2):  # Row 2 = first data row
+        sku = _find_col(row, ["sku", "ürün kodu", "urun kodu", "product_code", "product code"])
+        barcode = _find_col(row, ["barcode", "barkod"])
+        name = _find_col(row, ["name", "ürün adı", "urun adi", "product_name", "product name", "ürün"])
+        brand = _find_col(row, ["brand", "marka"])
+        threshold = _find_col(row, ["threshold", "eşik", "esik", "threshold_price"])
+        unit_cost = _find_col(row, ["cost", "maliyet", "unit_cost", "birim maliyet"])
+        shipping = _find_col(row, ["shipping", "kargo", "shipping_cost", "kargo bedeli"])
+        url = _find_col(row, ["url", "link", "product_url"])
+        seller_stock = _find_col(row, ["seller_stock", "stok kodu", "stok_kodu", "seller_stock_code"])
+
+        if not sku and not barcode and not url:
+            skipped += 1
+            continue
+
+        # SKU yoksa URL'den çıkar
+        if not sku and url:
+            try:
+                sku = extract_sku_from_url(url)
+            except Exception:
+                pass
+
+        if not sku:
+            errors.append({"row": i, "error": "SKU bulunamadı"})
+            continue
+
+        # URL yoksa oluştur
+        if not url:
+            try:
+                url = _resolve_product_url(platform, sku)
+            except Exception:
+                url = (
+                    f"https://www.hepsiburada.com/-p-{sku}"
+                    if platform == "hepsiburada"
+                    else f"https://www.trendyol.com/-p-{sku}"
+                )
+
+        # Mevcut ürün kontrolü
+        existing = db.query(MonitoredProduct).filter(
+            MonitoredProduct.user_id == user.id,
+            MonitoredProduct.platform == platform,
+            MonitoredProduct.sku == sku,
+        ).first()
+
+        if existing:
+            if name and not existing.product_name:
+                existing.product_name = name
+            if brand and not existing.brand:
+                existing.brand = brand
+            if barcode and not existing.barcode:
+                existing.barcode = barcode
+            if threshold:
+                try:
+                    existing.threshold_price = float(threshold.replace(",", "."))
+                except ValueError:
+                    pass
+            if unit_cost:
+                try:
+                    existing.unit_cost = float(unit_cost.replace(",", "."))
+                except ValueError:
+                    pass
+            if shipping:
+                try:
+                    existing.shipping_cost = float(shipping.replace(",", "."))
+                except ValueError:
+                    pass
+            if seller_stock:
+                existing.seller_stock_code = seller_stock
+            existing.is_active = True
+            updated += 1
+        else:
+            product = MonitoredProduct(
+                user_id=user.id,
+                platform=platform,
+                sku=sku,
+                barcode=barcode or None,
+                product_url=url,
+                product_name=name or None,
+                brand=brand or None,
+                seller_stock_code=seller_stock or None,
+                is_active=True,
+            )
+            if threshold:
+                try:
+                    product.threshold_price = float(threshold.replace(",", "."))
+                except ValueError:
+                    pass
+            if unit_cost:
+                try:
+                    product.unit_cost = float(unit_cost.replace(",", "."))
+                except ValueError:
+                    pass
+            if shipping:
+                try:
+                    product.shipping_cost = float(shipping.replace(",", "."))
+                except ValueError:
+                    pass
+            db.add(product)
+            added += 1
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Veritabanı hatası: {str(e)}")
+
+    return {
+        "success": True,
+        "added": added,
+        "updated": updated,
+        "skipped": skipped,
+        "errors": errors[:20],  # İlk 20 hata
+        "total_rows": len(rows),
+    }
+
+
+@router.get("/price-monitor/products/import/template")
+async def download_import_template():
+    """Örnek CSV template indir."""
+    from fastapi.responses import Response
+
+    csv_content = "SKU,Barcode,Product Name,Brand,Threshold Price,Unit Cost,Shipping Cost,Seller Stock Code\n"
+    csv_content += "HBV00001ABC12,8680001234567,Örnek Ürün Adı,Marka,99.90,50.00,15.00,STK-001\n"
+    csv_content += "HBV00002DEF34,8680009876543,İkinci Ürün,Diğer Marka,149.90,80.00,15.00,STK-002\n"
+
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=marketpulse_import_template.csv"},
+    )
+
+
 @router.get("/price-monitor/products")
 async def get_monitored_products(
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     active_only: bool = False,
     platform: Optional[str] = None,
@@ -135,7 +350,7 @@ async def get_monitored_products(
     """İzlenen ürün listesini getir - platform, marka, price/campaign alert ve arama filtresi ile"""
     start_time = perf_counter()
     # --- 1. Build product query with all SQL-level filters ---
-    base_query = db.query(MonitoredProduct)
+    base_query = db.query(MonitoredProduct).filter(MonitoredProduct.user_id == user.id)
     if platform:
         base_query = base_query.filter(MonitoredProduct.platform == platform.lower())
     if brand:
@@ -173,7 +388,7 @@ async def get_monitored_products(
                                COUNT(*) OVER() AS _total,
                                SUM(CASE WHEN is_active THEN 1 ELSE 0 END) OVER() AS _active
                         FROM monitored_products
-                        WHERE TRUE
+                        WHERE (user_id = :user_id OR user_id IS NULL)
                           {platform_clause}
                           {brand_clause}
                           {active_clause}
@@ -199,6 +414,7 @@ async def get_monitored_products(
                     search_clause="AND (sku ILIKE :search OR barcode ILIKE :search OR product_name ILIKE :search OR seller_stock_code ILIKE :search)" if search else "",
                 )),
                 {
+                    "user_id": str(user.id),
                     **({"platform": platform.lower()} if platform else {}),
                     **({"brand": brand} if brand else {}),
                     **({"search": f"%{search.lower()}%"} if search else {}),
@@ -382,14 +598,16 @@ async def get_monitored_products(
 async def export_price_monitor_data(
     platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
     active_filter: str = Query("all", description="Filtre: all, active, inactive"),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """SKU bazlı gruplandırılmış JSON olarak indir"""
     from fastapi.responses import StreamingResponse
     import json
 
     query = db.query(MonitoredProduct).filter(
-        MonitoredProduct.platform == platform.lower()
+        MonitoredProduct.user_id == user.id,
+        MonitoredProduct.platform == platform.lower(),
     )
 
     if active_filter == "active":
@@ -478,25 +696,185 @@ async def export_price_monitor_data(
 
 @router.get("/price-monitor/brands")
 async def get_monitored_product_brands(
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    platform: Optional[str] = None
+    platform: Optional[str] = None,
 ):
     """Platform için marka listesini getir"""
     from sqlalchemy import distinct
-    query = db.query(distinct(MonitoredProduct.brand)).filter(MonitoredProduct.brand.isnot(None))
+    query = db.query(distinct(MonitoredProduct.brand)).filter(
+        MonitoredProduct.user_id == user.id,
+        MonitoredProduct.brand.isnot(None),
+    )
     if platform:
         query = query.filter(MonitoredProduct.platform == platform.lower())
     brands = [b[0] for b in query.all() if b[0]]
     return {"brands": sorted(brands)}
 
 
+@router.get("/price-monitor/products/{product_id}/price-history")
+async def get_price_history(
+    product_id: str,
+    days: int = Query(30, ge=1, le=365, description="Kaç günlük geçmiş"),
+    merchant_id: Optional[str] = Query(None, description="Belirli satıcı filtresi"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ürünün fiyat geçmişi — satıcı bazlı trend verisi."""
+    import uuid as uuid_mod
+
+    product = db.query(MonitoredProduct).filter(
+        MonitoredProduct.id == uuid_mod.UUID(product_id),
+        MonitoredProduct.user_id == user.id,
+    ).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+
+    since = datetime.utcnow() - timedelta(days=days)
+
+    query = db.query(SellerSnapshot).filter(
+        SellerSnapshot.monitored_product_id == product.id,
+        SellerSnapshot.snapshot_date >= since,
+    )
+
+    if merchant_id:
+        query = query.filter(SellerSnapshot.merchant_id == merchant_id)
+
+    snapshots = query.order_by(SellerSnapshot.snapshot_date.asc()).all()
+
+    # Satıcı bazlı gruplama
+    merchants: Dict[str, dict] = {}
+    buybox_timeline = []
+
+    for s in snapshots:
+        mid = s.merchant_id
+        if mid not in merchants:
+            merchants[mid] = {
+                "merchant_id": mid,
+                "merchant_name": s.merchant_name,
+                "data_points": [],
+            }
+
+        merchants[mid]["data_points"].append({
+            "date": s.snapshot_date.isoformat(),
+            "price": float(s.price) if s.price else None,
+            "original_price": float(s.original_price) if s.original_price else None,
+            "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+            "buybox_order": s.buybox_order,
+            "stock_quantity": s.stock_quantity,
+        })
+
+        # Buybox winner tracking
+        if s.buybox_order == 1:
+            buybox_timeline.append({
+                "date": s.snapshot_date.isoformat(),
+                "merchant_id": mid,
+                "merchant_name": s.merchant_name,
+                "price": float(s.price) if s.price else None,
+            })
+
+    # Min/max/avg hesaplama per merchant
+    for mid, mdata in merchants.items():
+        prices = [dp["price"] for dp in mdata["data_points"] if dp["price"] is not None]
+        if prices:
+            mdata["min_price"] = min(prices)
+            mdata["max_price"] = max(prices)
+            mdata["avg_price"] = round(sum(prices) / len(prices), 2)
+            mdata["current_price"] = prices[-1]
+            mdata["price_change"] = round(prices[-1] - prices[0], 2) if len(prices) > 1 else 0
+            mdata["price_change_pct"] = (
+                round((prices[-1] - prices[0]) / prices[0] * 100, 2)
+                if len(prices) > 1 and prices[0] > 0
+                else 0
+            )
+
+    return {
+        "product_id": str(product.id),
+        "product_name": product.product_name,
+        "sku": product.sku,
+        "platform": product.platform,
+        "days": days,
+        "total_snapshots": len(snapshots),
+        "merchants": list(merchants.values()),
+        "buybox_timeline": buybox_timeline,
+    }
+
+
+@router.get("/price-monitor/products/{product_id}/price-summary")
+async def get_price_summary(
+    product_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ürünün güncel fiyat özeti — son snapshot'tan."""
+    import uuid as uuid_mod
+
+    product = db.query(MonitoredProduct).filter(
+        MonitoredProduct.id == uuid_mod.UUID(product_id),
+        MonitoredProduct.user_id == user.id,
+    ).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+
+    # En son snapshot tarihini bul
+    latest_date = db.query(func.max(SellerSnapshot.snapshot_date)).filter(
+        SellerSnapshot.monitored_product_id == product.id,
+    ).scalar()
+
+    if not latest_date:
+        return {"product_id": str(product.id), "sellers": [], "message": "Henüz veri yok"}
+
+    # Son snapshot'taki satıcıları getir (30 dk tolerans)
+    latest_snapshots = db.query(SellerSnapshot).filter(
+        SellerSnapshot.monitored_product_id == product.id,
+        SellerSnapshot.snapshot_date >= latest_date - timedelta(minutes=30),
+    ).order_by(SellerSnapshot.buybox_order.asc().nullslast()).all()
+
+    # Deduplicate — aynı merchant_id için en son snapshot'ı al
+    seen: Dict[str, Any] = {}
+    for s in latest_snapshots:
+        if s.merchant_id not in seen or s.snapshot_date > seen[s.merchant_id].snapshot_date:
+            seen[s.merchant_id] = s
+
+    sellers = []
+    for s in sorted(seen.values(), key=lambda x: x.buybox_order or 999):
+        sellers.append({
+            "merchant_id": s.merchant_id,
+            "merchant_name": s.merchant_name,
+            "price": float(s.price) if s.price else None,
+            "original_price": float(s.original_price) if s.original_price else None,
+            "campaign_price": float(s.campaign_price) if s.campaign_price else None,
+            "buybox_order": s.buybox_order,
+            "stock_quantity": s.stock_quantity,
+            "free_shipping": s.free_shipping,
+            "campaigns": s.campaigns,
+        })
+
+    return {
+        "product_id": str(product.id),
+        "product_name": product.product_name,
+        "sku": product.sku,
+        "last_fetched": latest_date.isoformat() if latest_date else None,
+        "seller_count": len(sellers),
+        "sellers": sellers,
+        "buybox_winner": sellers[0]["merchant_name"] if sellers else None,
+        "lowest_price": min((s["price"] for s in sellers if s["price"]), default=None),
+    }
+
+
 @router.get("/price-monitor/products/{product_id}")
 async def get_monitored_product_detail(
     product_id: str,
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Tek bir ürün ve satıcılarını getir"""
-    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    product = db.query(MonitoredProduct).filter(
+        MonitoredProduct.id == product_id,
+        MonitoredProduct.user_id == user.id,
+    ).first()
 
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
@@ -588,10 +966,14 @@ async def get_monitored_product_detail(
 @router.delete("/price-monitor/products/{product_id}")
 async def delete_monitored_product(
     product_id: str,
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """İzlenen ürünü sil"""
-    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    product = db.query(MonitoredProduct).filter(
+        MonitoredProduct.id == product_id,
+        MonitoredProduct.user_id == user.id,
+    ).first()
 
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")
@@ -605,17 +987,23 @@ async def delete_monitored_product(
 @router.delete("/price-monitor/products/bulk/all")
 async def delete_all_monitored_products(
     platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Belirli platformdaki tüm izlenen ürünleri sil"""
-    products = db.query(MonitoredProduct).filter(MonitoredProduct.platform == platform).all()
-    count = len(products)
-
-    if count == 0:
+    base = db.query(MonitoredProduct).filter(
+        MonitoredProduct.user_id == user.id,
+        MonitoredProduct.platform == platform,
+    )
+    # İlişkili snapshot'ları önce sil (cascade yerine explicit)
+    product_ids = [p.id for p in base.all()]
+    if not product_ids:
         return {"success": True, "deleted_count": 0, "message": "Silinecek ürün bulunamadı"}
 
-    for product in products:
-        db.delete(product)
+    db.query(SellerSnapshot).filter(
+        SellerSnapshot.monitored_product_id.in_(product_ids)
+    ).delete(synchronize_session=False)
+    count = base.delete(synchronize_session=False)
     db.commit()
 
     return {"success": True, "deleted_count": count, "message": f"{count} ürün silindi"}
@@ -624,20 +1012,23 @@ async def delete_all_monitored_products(
 @router.delete("/price-monitor/products/bulk/inactive")
 async def delete_inactive_monitored_products(
     platform: str = Query(..., description="Platform: hepsiburada veya trendyol"),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Belirli platformdaki inaktif ürünleri sil"""
-    products = db.query(MonitoredProduct).filter(
+    base = db.query(MonitoredProduct).filter(
+        MonitoredProduct.user_id == user.id,
         MonitoredProduct.platform == platform,
-        MonitoredProduct.is_active == False
-    ).all()
-    count = len(products)
-
-    if count == 0:
+        MonitoredProduct.is_active == False,
+    )
+    product_ids = [p.id for p in base.all()]
+    if not product_ids:
         return {"success": True, "deleted_count": 0, "message": "Silinecek inaktif ürün bulunamadı"}
 
-    for product in products:
-        db.delete(product)
+    db.query(SellerSnapshot).filter(
+        SellerSnapshot.monitored_product_id.in_(product_ids)
+    ).delete(synchronize_session=False)
+    count = base.delete(synchronize_session=False)
     db.commit()
 
     return {"success": True, "deleted_count": count, "message": f"{count} inaktif ürün silindi"}
@@ -670,8 +1061,9 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
 async def start_fetch_task(
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
     fetch_type: str = Query("active", description="Fetch type: active, last_inactive, inactive"),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    product_ids: Optional[List[str]] = None
+    product_ids: Optional[List[str]] = None,
 ):
     """Belirli platform için satıcı fiyatlarını çekmeye başla
 
@@ -685,7 +1077,7 @@ async def start_fetch_task(
     if executor != "local":
         _require_queue_or_503()
 
-    task = PriceMonitorTask(platform=platform, status="pending", fetch_type=fetch_type)
+    task = PriceMonitorTask(user_id=user.id, platform=platform, status="pending", fetch_type=fetch_type)
     db.add(task)
     db.commit()
     db.refresh(task)
@@ -820,12 +1212,16 @@ async def get_last_inactive_skus(
 @router.post("/price-monitor/fetch-single/{product_id}")
 async def fetch_single_product(
     product_id: str,
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Tek bir ürün için satıcı fiyatlarını çek - platform otomatik belirlenir"""
     _require_scraper_api_or_503()
 
-    product = db.query(MonitoredProduct).filter(MonitoredProduct.id == product_id).first()
+    product = db.query(MonitoredProduct).filter(
+        MonitoredProduct.id == product_id,
+        MonitoredProduct.user_id == user.id,
+    ).first()
 
     if not product:
         raise HTTPException(status_code=404, detail="Ürün bulunamadı")

@@ -15,8 +15,8 @@ from pydantic import BaseModel
 from bs4 import BeautifulSoup
 
 from app.db.database import get_db, SessionLocal
-from app.db.models import CategorySession, CategoryProduct
-from app.core.security import require_mutating_api_key
+from app.db.models import CategorySession, CategoryProduct, User
+from app.core.auth import get_current_user
 from app.services.category_scraper_service import CategoryScraperService
 from app.services.url_scraper_service import UrlScraperService
 from app.services.price_monitor_service import PriceMonitorService
@@ -29,7 +29,7 @@ _detail_semaphore = asyncio.Semaphore(10)
 router = APIRouter(
     prefix="/api/category-explorer",
     tags=["Category Explorer"],
-    dependencies=[Depends(require_mutating_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 scraper = CategoryScraperService()
@@ -114,7 +114,7 @@ def _serialize_session(s: CategorySession, include_products: bool = False) -> di
 
 
 @router.post("/scrape-page")
-async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get_db)):
+async def scrape_category_page(req: ScrapePageRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not req.url or not req.url.startswith('http'):
         raise HTTPException(400, "Valid URL required")
 
@@ -170,6 +170,7 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
                 filter_data=parsed.get('filter_data'),
                 pages_scraped=0,
                 status='active',
+                user_id=user.id,
             )
             db.add(session)
             db.flush()
@@ -278,9 +279,10 @@ async def scrape_category_page(req: ScrapePageRequest, db: Session = Depends(get
 async def list_sessions(
     platform: Optional[str] = Query(None),
     limit: int = Query(20, ge=1, le=100),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    q = db.query(CategorySession).order_by(CategorySession.created_at.desc())
+    q = db.query(CategorySession).filter(CategorySession.user_id == user.id).order_by(CategorySession.created_at.desc())
     if platform:
         q = q.filter(CategorySession.platform == platform)
     sessions = q.limit(limit).all()
@@ -310,10 +312,11 @@ async def get_session(session_id: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/sessions/{session_id}")
-async def delete_session(session_id: str, db: Session = Depends(get_db)):
+async def delete_session(session_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         session = db.query(CategorySession).filter(
-            CategorySession.id == uuid_mod.UUID(session_id)
+            CategorySession.id == uuid_mod.UUID(session_id),
+            CategorySession.user_id == user.id
         ).first()
     except (ValueError, Exception):
         raise HTTPException(404, "Session not found")

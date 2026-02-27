@@ -7,13 +7,13 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.db.database import get_db
-from app.db.models import JsonFile
-from app.core.security import require_mutating_api_key
+from app.db.models import JsonFile, User
+from app.core.auth import get_current_user
 
 router = APIRouter(
     prefix="/api/json-editor",
     tags=["JSON Editor"],
-    dependencies=[Depends(require_mutating_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -34,8 +34,8 @@ class JsonFileUpdateRequest(BaseModel):
 
 
 @router.get("/files")
-async def list_files(db: Session = Depends(get_db)):
-    files = db.query(JsonFile).order_by(JsonFile.updated_at.desc()).all()
+async def list_files(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    files = db.query(JsonFile).filter(JsonFile.user_id == user.id).order_by(JsonFile.updated_at.desc()).all()
     result = []
     for f in files:
         product_count = 0
@@ -59,10 +59,11 @@ async def list_files(db: Session = Depends(get_db)):
 
 
 @router.post("/files")
-async def create_file(req: JsonFileCreateRequest, db: Session = Depends(get_db)):
+async def create_file(req: JsonFileCreateRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     json_file = JsonFile(
         filename=req.filename,
         json_content=req.content,
+        user_id=user.id,
     )
     db.add(json_file)
     db.commit()
@@ -78,9 +79,9 @@ async def create_file(req: JsonFileCreateRequest, db: Session = Depends(get_db))
 
 
 @router.get("/files/{file_id}")
-async def get_file(file_id: str, db: Session = Depends(get_db)):
+async def get_file(file_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     uid = parse_uuid(file_id)
-    json_file = db.query(JsonFile).filter(JsonFile.id == uid).first()
+    json_file = db.query(JsonFile).filter(JsonFile.id == uid, JsonFile.user_id == user.id).first()
     if not json_file:
         raise HTTPException(status_code=404, detail="File not found")
 
@@ -94,9 +95,9 @@ async def get_file(file_id: str, db: Session = Depends(get_db)):
 
 
 @router.put("/files/{file_id}")
-async def update_file(file_id: str, req: JsonFileUpdateRequest, db: Session = Depends(get_db)):
+async def update_file(file_id: str, req: JsonFileUpdateRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     uid = parse_uuid(file_id)
-    json_file = db.query(JsonFile).filter(JsonFile.id == uid).first()
+    json_file = db.query(JsonFile).filter(JsonFile.id == uid, JsonFile.user_id == user.id).first()
     if not json_file:
         raise HTTPException(status_code=404, detail="File not found")
 
@@ -115,9 +116,9 @@ async def update_file(file_id: str, req: JsonFileUpdateRequest, db: Session = De
 
 
 @router.delete("/files/{file_id}")
-async def delete_file(file_id: str, db: Session = Depends(get_db)):
+async def delete_file(file_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     uid = parse_uuid(file_id)
-    json_file = db.query(JsonFile).filter(JsonFile.id == uid).first()
+    json_file = db.query(JsonFile).filter(JsonFile.id == uid, JsonFile.user_id == user.id).first()
     if not json_file:
         raise HTTPException(status_code=404, detail="File not found")
 
@@ -127,7 +128,7 @@ async def delete_file(file_id: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/files")
-async def delete_all_files(db: Session = Depends(get_db)):
-    count = db.query(JsonFile).delete()
+async def delete_all_files(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    count = db.query(JsonFile).filter(JsonFile.user_id == user.id).delete()
     db.commit()
     return {"success": True, "message": f"{count} file(s) deleted"}

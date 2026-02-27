@@ -5,10 +5,10 @@ from typing import Optional, Dict, Any
 from time import perf_counter
 
 from app.db.database import get_db
-from app.db.models import MonitoredProduct
+from app.db.models import MonitoredProduct, User
 from app.core.config import settings
 from app.core.logger import api_logger as logger, log_endpoint_metric
-from app.core.security import require_mutating_api_key
+from app.core.auth import get_current_user
 
 from app.api._shared import (
     _to_float,
@@ -17,7 +17,7 @@ from app.api._shared import (
     _run_read_query_with_retry,
 )
 
-router = APIRouter(dependencies=[Depends(require_mutating_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def _compute_seller_pricing(
@@ -68,6 +68,7 @@ def _build_seller_products(
     platform: str,
     price_alert_only: bool,
     campaign_alert_only: bool,
+    user_id: str = None,
 ) -> Dict[str, Any]:
     rows = db.execute(
         text(
@@ -86,6 +87,7 @@ def _build_seller_products(
                 WHERE mp.platform = :platform
                   AND mp.is_active = true
                   AND ss.merchant_id = :merchant_id
+                  AND (mp.user_id = :user_id OR mp.user_id IS NULL)
                 ORDER BY ss.monitored_product_id, ss.snapshot_date DESC
             )
             SELECT
@@ -110,7 +112,7 @@ def _build_seller_products(
             ORDER BY mp.created_at DESC
             """
         ),
-        {"platform": platform.lower(), "merchant_id": merchant_id},
+        {"platform": platform.lower(), "merchant_id": merchant_id, "user_id": str(user_id) if user_id else None},
     ).mappings().all()
 
     products = []
@@ -192,7 +194,8 @@ async def get_sellers(
     platform: str = Query("hepsiburada", description="Platform: hepsiburada veya trendyol"),
     limit: int = Query(200, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Tüm satıcıları listele - her satıcının ürün sayısı, price alert ve campaign alert sayısı ile"""
     start_time = perf_counter()
@@ -217,6 +220,7 @@ async def get_sellers(
                     JOIN monitored_products mp ON mp.id = ss.monitored_product_id
                     WHERE mp.platform = :platform
                       AND mp.is_active = true
+                      AND (mp.user_id = :user_id OR mp.user_id IS NULL)
                     ORDER BY ss.merchant_id, ss.monitored_product_id, ss.snapshot_date DESC
                 ),
                 aggregated AS (
@@ -286,6 +290,7 @@ async def get_sellers(
                 "is_trendyol": is_trendyol,
                 "limit": limit,
                 "offset": offset,
+                "user_id": str(user.id),
             },
         ).mappings().all()
 
@@ -298,9 +303,10 @@ async def get_sellers(
                     JOIN monitored_products mp ON mp.id = ss.monitored_product_id
                     WHERE mp.platform = :platform
                       AND mp.is_active = true
+                      AND (mp.user_id = :user_id OR mp.user_id IS NULL)
                     """
                 ),
-                {"platform": platform.lower()},
+                {"platform": platform.lower(), "user_id": str(user.id)},
             ).scalar() or 0
             return {"sellers": [], "total": int(total_count), "limit": limit, "offset": offset}
 
@@ -347,7 +353,8 @@ async def get_seller_products(
     campaign_alert_only: bool = Query(False, description="Sadece campaign alert olan ürünleri göster"),
     limit: int = Query(500, ge=1, le=5000),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Satıcının sattığı ürünleri listele - price alert ve campaign alert filtresi ile"""
     start_time = perf_counter()
@@ -359,6 +366,7 @@ async def get_seller_products(
             platform=platform,
             price_alert_only=price_alert_only,
             campaign_alert_only=campaign_alert_only,
+            user_id=user.id,
         )
         total = len(payload["products"])
         paged_products = payload["products"][offset: offset + limit]
@@ -392,7 +400,8 @@ async def export_seller_products(
     platform: str = Query("hepsiburada", description="Platform"),
     price_alert_only: bool = Query(False, description="Sadece price alert olan ürünleri indir"),
     campaign_alert_only: bool = Query(False, description="Sadece campaign alert olan ürünleri indir"),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Satıcının ürünlerini CSV olarak indir - campaign alert dahil"""
     from fastapi.responses import StreamingResponse
@@ -407,6 +416,7 @@ async def export_seller_products(
             platform=platform,
             price_alert_only=price_alert_only,
             campaign_alert_only=campaign_alert_only,
+            user_id=user.id,
         ),
         "sellers/export",
     )
