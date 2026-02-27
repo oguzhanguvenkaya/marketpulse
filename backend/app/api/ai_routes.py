@@ -1,6 +1,7 @@
 """AI Chat API endpoint'leri."""
-
 import uuid
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/api/ai", tags=["AI Chat"])
 
 class ChatRequest(BaseModel):
     message: str
-    conversation_id: str | None = None
+    conversation_id: Optional[str] = None
 
 
 class ChatResponse(BaseModel):

@@ -17,26 +17,26 @@ class AddCompetitorRequest(BaseModel):
     platform: str
     seller_id: str
     seller_name: str
-    seller_url: str | None = None
-    seller_rating: float | None = None
-    notes: str | None = None
+    seller_url: Optional[str] = None
+    seller_rating: Optional[float] = None
+    notes: Optional[str] = None
 
 
 class AddProductRequest(BaseModel):
-    sku: str | None = None
-    product_name: str | None = None
-    product_url: str | None = None
-    price: float | None = None
-    original_price: float | None = None
-    category: str | None = None
-    image_url: str | None = None
+    sku: Optional[str] = None
+    product_name: Optional[str] = None
+    product_url: Optional[str] = None
+    price: Optional[float] = None
+    original_price: Optional[float] = None
+    category: Optional[str] = None
+    image_url: Optional[str] = None
     is_sponsored: bool = False
 
 
 class UpdateCompetitorRequest(BaseModel):
-    seller_name: str | None = None
-    notes: str | None = None
-    is_active: bool | None = None
+    seller_name: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
 @router.post("")

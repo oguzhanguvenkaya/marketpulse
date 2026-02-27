@@ -1,4 +1,5 @@
 """AI Agent aksiyon tool'ları — yazma/değiştirme işlemleri (onay gerektirir)."""
+from __future__ import annotations
 
 import logging
 import uuid
