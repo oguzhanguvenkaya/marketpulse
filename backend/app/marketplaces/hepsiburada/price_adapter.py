@@ -35,10 +35,15 @@ class HepsiburadaPriceAdapter(BaseMarketplaceAdapter):
     async def get_seller_prices(self, sku: str, **kwargs) -> PriceResult:
         """SKU için satıcı fiyatlarını Listings API'den getir.
 
-        Mevcut PriceMonitorService._fetch_product_sellers() metoduna delegate eder.
+        PriceMonitorService.fetch_listings() + parse_listings() kullanır.
         """
         try:
-            sellers_data = await self.service._fetch_product_sellers(sku)
+            fetch_result = await self.service.fetch_listings(sku)
+
+            if not fetch_result.get("success"):
+                return PriceResult(sku=sku, platform=self.platform, is_active=False)
+
+            sellers_data = self.service.parse_listings(fetch_result["data"])
 
             if not sellers_data:
                 return PriceResult(sku=sku, platform=self.platform, is_active=False)
@@ -46,24 +51,24 @@ class HepsiburadaPriceAdapter(BaseMarketplaceAdapter):
             sellers = []
             for s in sellers_data:
                 sellers.append(SellerPrice(
-                    merchant_id=str(s.get("merchantId", "")),
-                    merchant_name=s.get("merchantName", ""),
+                    merchant_id=str(s.get("merchant_id", "")),
+                    merchant_name=s.get("merchant_name", ""),
                     price=Decimal(str(s.get("price", 0))),
-                    original_price=Decimal(str(s["originalPrice"])) if s.get("originalPrice") else None,
-                    minimum_price=Decimal(str(s["minimumPrice"])) if s.get("minimumPrice") else None,
-                    discount_rate=s.get("discountRate"),
-                    stock_quantity=s.get("stockQuantity"),
-                    buybox_order=s.get("buyboxOrder"),
-                    free_shipping=s.get("freeShipping", False),
-                    fast_shipping=s.get("fastShipping", False),
-                    is_fulfilled=s.get("isFulfilledByHB", False),
-                    merchant_rating=s.get("merchantRating"),
-                    merchant_rating_count=s.get("merchantRatingCount"),
-                    merchant_logo=s.get("merchantLogo"),
-                    merchant_url_postfix=s.get("merchantUrlPostfix"),
-                    merchant_city=s.get("merchantCity"),
+                    original_price=Decimal(str(s["original_price"])) if s.get("original_price") else None,
+                    minimum_price=Decimal(str(s["minimum_price"])) if s.get("minimum_price") else None,
+                    discount_rate=s.get("discount_rate"),
+                    stock_quantity=s.get("stock_quantity"),
+                    buybox_order=s.get("buybox_order"),
+                    free_shipping=s.get("free_shipping", False),
+                    fast_shipping=s.get("fast_shipping", False),
+                    is_fulfilled=s.get("is_fulfilled_by_hb", False),
+                    merchant_rating=s.get("merchant_rating"),
+                    merchant_rating_count=s.get("merchant_rating_count"),
+                    merchant_logo=s.get("merchant_logo"),
+                    merchant_url_postfix=s.get("merchant_url_postfix"),
+                    merchant_city=s.get("merchant_city"),
                     campaigns=s.get("campaigns"),
-                    campaign_price=Decimal(str(s["campaignPrice"])) if s.get("campaignPrice") else None,
+                    campaign_price=Decimal(str(s["campaign_price"])) if s.get("campaign_price") else None,
                 ))
 
             return PriceResult(

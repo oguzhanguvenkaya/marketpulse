@@ -218,6 +218,7 @@ from app.api.campaign_routes import router as campaign_router
 from app.api.automation_routes import router as automation_router
 from app.api.keyword_recommendation_routes import router as keyword_recommendation_router
 from app.api.customer_questions_routes import router as customer_questions_router
+from app.api.ai_streaming_routes import router as ai_streaming_router
 
 app.include_router(router, prefix="/api")
 app.include_router(url_scraper_router)
@@ -239,6 +240,7 @@ app.include_router(campaign_router)
 app.include_router(automation_router)
 app.include_router(keyword_recommendation_router)
 app.include_router(customer_questions_router)
+app.include_router(ai_streaming_router)
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 if os.path.exists(frontend_dist):

@@ -1,5 +1,4 @@
 import re
-import ssl
 import asyncio
 import aiohttp
 import urllib.parse
@@ -156,14 +155,8 @@ class PriceMonitorService:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
         }
         
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        connector = aiohttp.TCPConnector(ssl=ssl_context)
-        
         try:
-            async with aiohttp.ClientSession(connector=connector) as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.post(
                     self.CAMPAIGN_API_URL,
                     json=payload,
@@ -202,14 +195,8 @@ class PriceMonitorService:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         }
         
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        connector = aiohttp.TCPConnector(ssl=ssl_context)
-        
         try:
-            async with aiohttp.ClientSession(connector=connector) as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.post(
                     api_url,
                     json=payload,
@@ -283,17 +270,11 @@ class PriceMonitorService:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
         }
         
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        connector = aiohttp.TCPConnector(ssl=ssl_context)
-        
         try:
-            async with aiohttp.ClientSession(connector=connector) as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.get(
                     api_url,
-                    headers=headers, 
+                    headers=headers,
                     timeout=aiohttp.ClientTimeout(total=60)
                 ) as resp:
                     if resp.status == 200:

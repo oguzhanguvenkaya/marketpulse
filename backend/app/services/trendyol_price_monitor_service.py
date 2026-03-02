@@ -1,4 +1,3 @@
-import ssl
 import random
 import asyncio
 import aiohttp
@@ -338,13 +337,9 @@ class TrendyolPriceMonitorService:
             return
         
         self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
-        
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=self.max_concurrent_requests)
-        
+
+        connector = aiohttp.TCPConnector(limit=self.max_concurrent_requests)
+
         completed = 0
         failed = 0
         failed_skus = []
@@ -410,11 +405,7 @@ class TrendyolPriceMonitorService:
         """Tek bir Trendyol ürününü çekip DB'ye kaydet."""
         self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-
-        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=1)
+        connector = aiohttp.TCPConnector(limit=1)
 
         try:
             async with aiohttp.ClientSession(connector=connector) as http_session:

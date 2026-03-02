@@ -3,12 +3,15 @@
 import logging
 from sqlalchemy.orm import Session
 
+from app.core.logger import get_logger
 from .price_tools import get_price_alerts, compare_seller_prices, get_product_insights
 from .profitability_tools import calculate_profitability
-from .search_tools import search_keyword_analysis, get_portfolio_summary
+from .search_tools import search_keyword_analysis, get_portfolio_summary, search_products_by_name
+from .category_tools import get_category_analysis, get_product_descriptions, analyze_product_descriptions
 from .action_tools import add_sku_to_monitor, add_competitor, set_price_alert, start_keyword_search
+from .export_tools import export_data
 
-logger = logging.getLogger(__name__)
+logger = get_logger("ai.tools")
 
 # OpenAI function calling format
 TOOL_DEFINITIONS = [
@@ -126,6 +129,102 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_category_analysis",
+            "description": "Kategori tarama verilerini analiz eder. Fiyat dağılımı, marka ve satıcı dağılımı, sponsorlu ürünler. Marka veya satıcıya göre filtreleme yapabilir (örn: 'Sonax marka ürünlerin ortalama fiyatı').",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "category_name": {
+                        "type": "string",
+                        "description": "Kategori adı veya kısmı (örn: 'Hızlı Cila', 'Oto Aksesuar')",
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": ["hepsiburada", "trendyol"],
+                        "description": "Platform adı",
+                    },
+                    "brand": {
+                        "type": "string",
+                        "description": "Marka filtresi (örn: 'Sonax', 'Meguiars')",
+                    },
+                    "seller": {
+                        "type": "string",
+                        "description": "Satıcı filtresi (örn: 'Sonaxshop')",
+                    },
+                },
+                "required": ["category_name"],
+            },
+        },
+    },
+    # --- Product Description & Analysis ---
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_descriptions",
+            "description": "Kategori taramasındaki ürünlerin açıklamalarını (description), özelliklerini (specs) getirir. Ürün detaylarını görmek için kullan.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string",
+                        "description": "Ürün adı veya kelime (kısmi eşleşme)",
+                    },
+                    "category_name": {
+                        "type": "string",
+                        "description": "Kategori adı (opsiyonel, daraltmak için)",
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "analyze_product_descriptions",
+            "description": "Ürün açıklamalarındaki en çok geçen kelimeleri analiz eder ve ürünler arası karşılaştırır. Kelime frekansı, ortak kelimeler.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string",
+                        "description": "Ürün adı veya kelime (kısmi eşleşme)",
+                    },
+                    "category_name": {
+                        "type": "string",
+                        "description": "Kategori adı (opsiyonel)",
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    # --- Search by Name ---
+    {
+        "type": "function",
+        "function": {
+            "name": "search_products_by_name",
+            "description": "İzlenen ürünler arasında ürün adına, markaya veya anahtar kelimeye göre arama yapar. Yazım hatası toleranslı, anlamsal benzerlik destekler (hybrid search). Ürün adı, SKU, fiyat ve buybox bilgisi döndürür.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string",
+                        "description": "Aranacak ürün adı veya kelime (kısmi eşleşme)",
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": ["hepsiburada", "trendyol"],
+                        "description": "Platform filtresi (opsiyonel)",
+                    },
+                },
+                "required": ["product_name"],
+            },
+        },
+    },
     # --- Action Tools (yazma/değiştirme) ---
     {
         "type": "function",
@@ -190,6 +289,52 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    # --- Export Tools (dışa aktarım) ---
+    {
+        "type": "function",
+        "function": {
+            "name": "export_data",
+            "description": "Kullanıcının verilerini dosya olarak dışa aktarır. JSON, CSV, Markdown veya TXT formatında indirme linki oluşturur.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data_type": {
+                        "type": "string",
+                        "enum": [
+                            "monitored_products",
+                            "category_products",
+                            "seller_prices",
+                            "search_results",
+                        ],
+                        "description": "Dışa aktarılacak veri türü",
+                    },
+                    "format": {
+                        "type": "string",
+                        "enum": ["json", "csv", "md", "txt"],
+                        "description": "Dosya formatı",
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": ["hepsiburada", "trendyol"],
+                        "description": "Platform filtresi (opsiyonel)",
+                    },
+                    "category_name": {
+                        "type": "string",
+                        "description": "Kategori adı (category_products için)",
+                    },
+                    "sku": {
+                        "type": "string",
+                        "description": "Ürün SKU kodu (seller_prices için)",
+                    },
+                    "keyword": {
+                        "type": "string",
+                        "description": "Arama kelimesi (search_results için)",
+                    },
+                },
+                "required": ["data_type", "format"],
+            },
+        },
+    },
 ]
 
 # Tool name → function mapping
@@ -200,11 +345,17 @@ _TOOL_MAP = {
     "calculate_profitability": calculate_profitability,
     "search_keyword_analysis": search_keyword_analysis,
     "get_portfolio_summary": get_portfolio_summary,
+    "get_category_analysis": get_category_analysis,
+    "get_product_descriptions": get_product_descriptions,
+    "analyze_product_descriptions": analyze_product_descriptions,
+    "search_products_by_name": search_products_by_name,
     # Action tools
     "add_sku_to_monitor": add_sku_to_monitor,
     "add_competitor": add_competitor,
     "set_price_alert": set_price_alert,
     "start_keyword_search": start_keyword_search,
+    # Export tools
+    "export_data": export_data,
 }
 
 
@@ -219,4 +370,10 @@ async def execute_tool(tool_name: str, arguments: dict, user_id: str, db: Sessio
         return result
     except Exception as e:
         logger.error(f"Tool execution error ({tool_name}): {e}")
+        # DB transaction hatasında session'ı rollback et,
+        # yoksa sonraki tüm tool'lar da InFailedSqlTransaction ile çöker
+        try:
+            db.rollback()
+        except Exception:
+            pass
         return {"hata": f"Tool çalıştırma hatası: {str(e)}"}

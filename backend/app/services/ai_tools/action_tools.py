@@ -6,9 +6,10 @@ import uuid
 from datetime import datetime
 from sqlalchemy.orm import Session
 
+from app.core.logger import get_logger
 from app.db.models import MonitoredProduct, CompetitorSeller, SearchTask
 
-logger = logging.getLogger(__name__)
+logger = get_logger("ai.tools.action")
 
 
 async def add_sku_to_monitor(
@@ -47,7 +48,14 @@ async def add_sku_to_monitor(
         is_active=True,
     )
     db.add(product)
-    db.commit()
+    db.flush()
+
+    # Embedding uret (non-critical — basarisiz olursa ILIKE fallback aktif)
+    try:
+        from app.services.embedding_service import embed_monitored_product
+        await embed_monitored_product(product, db)
+    except Exception as e:
+        logger.warning("Embedding generation failed for %s: %s", sku, e)
 
     return {
         "durum": "eklendi",
@@ -89,7 +97,7 @@ async def add_competitor(
         seller_name=seller_name,
     )
     db.add(competitor)
-    db.commit()
+    db.flush()
 
     return {
         "durum": "eklendi",
@@ -121,7 +129,7 @@ async def set_price_alert(
 
     old_threshold = float(product.threshold_price) if product.threshold_price else None
     product.threshold_price = threshold_price
-    db.commit()
+    db.flush()
 
     return {
         "durum": "guncellendi",
@@ -149,7 +157,7 @@ async def start_keyword_search(
         status="pending",
     )
     db.add(task)
-    db.commit()
+    db.flush()
 
     return {
         "durum": "baslatildi",

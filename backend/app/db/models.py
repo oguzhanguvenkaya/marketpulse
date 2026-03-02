@@ -1,7 +1,12 @@
 import uuid
 from datetime import datetime, date
-from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON, Index, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Text, DateTime, Date, Float, Integer, Boolean, ForeignKey, Numeric, JSON, Index, UniqueConstraint, Computed
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
+
+try:
+    from pgvector.sqlalchemy import Vector
+except ImportError:
+    Vector = None  # pgvector not installed — embedding column will be skipped
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -131,7 +136,7 @@ class SearchTask(Base):
     __tablename__ = "search_tasks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     keyword = Column(String(255), nullable=False)
     platform = Column(String(20), nullable=False)
     status = Column(String(20), default="pending")
@@ -193,7 +198,7 @@ class MonitoredProduct(Base):
     __tablename__ = "monitored_products"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     platform = Column(String(20), nullable=False, default='hepsiburada', index=True)
     sku = Column(String(100), nullable=False, index=True)
     barcode = Column(String(50))
@@ -210,6 +215,17 @@ class MonitoredProduct(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_fetched_at = Column(DateTime)
+
+    # Hybrid search columns (Faz 1)
+    search_text = Column(Text, nullable=True)
+    embedding = Column(Vector(1536), nullable=True) if Vector else Column(Text, nullable=True)
+    search_tsv = Column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('simple', coalesce(product_name, '') || ' ' || coalesce(brand, '') || ' ' || coalesce(sku, ''))",
+            persisted=True,
+        ),
+    )
 
     user = relationship("User", backref="monitored_products")
     seller_snapshots = relationship("SellerSnapshot", back_populates="monitored_product", cascade="all, delete-orphan")
@@ -268,7 +284,7 @@ class PriceMonitorTask(Base):
     __tablename__ = "price_monitor_tasks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     platform = Column(String(50), default="hepsiburada")
     status = Column(String(20), default="pending")
     stop_requested = Column(Boolean, default=False)
@@ -292,7 +308,7 @@ class JsonFile(Base):
     __tablename__ = "json_files"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     filename = Column(String(255), nullable=False)
     json_content = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -307,7 +323,7 @@ class ScrapeJob(Base):
     __tablename__ = "scrape_jobs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     status = Column(String(20), default="pending")
     total_urls = Column(Integer, default=0)
     completed_urls = Column(Integer, default=0)
@@ -346,7 +362,7 @@ class TranscriptJob(Base):
     __tablename__ = "transcript_jobs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     status = Column(String(20), default="pending")
     total_videos = Column(Integer, default=0)
     completed_videos = Column(Integer, default=0)
@@ -388,7 +404,7 @@ class StoreProduct(Base):
     __tablename__ = "store_products"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     platform = Column(String(30), nullable=False, index=True)
     source_url = Column(Text, nullable=False)
     sku = Column(String(100), index=True)
@@ -433,7 +449,7 @@ class CategorySession(Base):
     __tablename__ = "category_sessions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     platform = Column(String(30), nullable=False, index=True)
     category_url = Column(Text, nullable=False)
     category_name = Column(Text)

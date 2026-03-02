@@ -1,0 +1,59 @@
+# Native AI Müşteri Hizmetleri Modülü (Botpress Olmadan)
+
+Harika bir karar! Eğer 5-10 dakikalık yanıt süreleri kabul edilebilirse (ki Trendyol ve Hepsiburada'da bu süre "Mükemmel" olarak sayılır), **harici hiçbir bot platformuna (Botpress, Dialogflow vb.) ihtiyacınız yok.**
+
+Tüm bu sistemi yazılımınızın (MarketPulse) tam merkezine, doğrudan **FastAPI + Celery + LLM (OpenAI/Claude)** kullanarak entegre edebilirsiniz. Bu mimari çok daha esnek, ucuz ve kontrol edilebilir olacaktır.
+
+İşte bu yapının MarketPulse altyapısında nasıl çalışacağının planı:
+
+---
+
+## 1. Mimari Tasarım (Backend - MarketPulse)
+
+Dışarıdan bir webhook beklemek yerine, MarketPulse'un zaten [plan.md](file:///Users/projectx/Desktop/marketpulse/plan.md)'de FAZ 0.4'te kuracağı **Celery Beat (Otomatik Zamanlayıcı)** yapısı ana motorumuz olacak.
+
+```mermaid
+graph TD
+    A[Celery Beat Timer\n(Her 5 dk)] -->|Tetikler| B(fetch_market_questions Task)
+    B -->|API GET İstekleri| C[Trendyol / Hepsiburada API]
+    C -->|JSON: Yeni 3 Soru| B
+    B --> D{Veritabanı: Müşteri Soruları}
+    D --> E(generate_ai_answer Task)
+    E -->|Soru + Ürün Bilgisi + Mağaza Kuralları| F[OpenAI veya Anthropic API]
+    F -->|Üretilen Cevap| E
+    E --> G{Onay Modeli\nOtomatik vs Manuel}
+    G -- "Otomatik" --> H(send_market_answer Task)
+    G -- "Manuel" --> I[Frontend Dashboard\nKullanıcı Bekliyor]
+    H -->|API POST İsteği| C
+```
+
+## 2. Sistemin Çalışma Akışı (Flow)
+
+### Adım 1: Veri Toplama (Polling Task)
+Arka planda çalışan bir Celery Task (`fetch_merchant_questions`), satıcının bağlı olduğu hesaplar için platformlarına (Trendyol/HB) örneğin her 5 dakikada bir istek atar. Status'ü `Unanswered` (Cevaplanmamış) olan soruları alır ve PostgreSQL veritabanındaki (örneğin) `customer_questions` tablosuna kaydeder.
+
+### Adım 2: Bağlam (Context) Hazırlama
+Soruyu basitçe LLM'e göndermek işe yaramaz ("Bu ürün ne renk?" - Hangi ürün?).
+Soru alındığında backend şu verileri derler:
+1.  **Sorunun sorulduğu ürünün detayı:** İsim, marka, varyant (Boyut: L, Renk: Kırmızı), ürün açıklaması (HTML'den temizlenmiş metin).
+2.  **Mağazanın statik bilgileri:** Satıcının belirlediği kurallar (Örn: "Cumartesi kargo çıkışımız yoktur", "Kişiselleştirme/İsim yazma yapamıyoruz", "İadeler X kargo ile yapılmalıdır").
+
+### Adım 3: AI Cevap Üretimi (LLM İşleme)
+Derlenen "Context" ve "Soru", güçlü bir sistem promptu ile LLM'e (gpt-4o-mini veya claude-3-haiku gibi hızlı/ucuz modellere) gönderilir.
+
+**Örnek LLM Prompt:**
+> "Sen MarketPulse kullanan satıcının (X Mağazası) asistanısın. Müşteri, 'Y Marka Kırmızı Kazak' ürünü için *"Siparişi bugün versem yarın elimde olur mu?"* diye sordu. Mağaza kargo kuralı: *"Saat 15:00'ten önceki siparişler aynı gün kargoya verilir"*. Ürün stoğu var. Müşteriye nazik, kısa ve net bir cevap hazırla."
+
+### Adım 4: İşlem ve Karar (Aksiyon)
+Yapay zekanın ürettiği cevap (LLM Output) döndüğünde sistem ne yapacak? İki opsiyon yapılmalıdır:
+
+1.  **Copilot Modu (Taslak - Güvenli İlk Aşama):** Çıkan cevap veritabanına `draft` (taslak) statüsünde kaydedilir. Kullanıcı MarketPulse arayüzüne (Frontend Dashboard) girdiğinde listeyi görür. *"Onayla ve Gönder"* butonuna basarak cevabı anında pazaryerine iletir. Yanlışsa elle düzeltip yollar.
+2.  **Autopilot Modu (Tam Otomatik):** Eğer kullanıcı sisteme çok güveniyorsa, veya "Sadece Genel Mağaza Kurallarını içeren soruları direkt yolla" ayarını seçmişse; LLM cevabı alır almaz Celery Task doğrudan `send_merchant_answer` API isteğiyle cevabı pazaryerine şutlar.
+
+## 3. Maliyet ve Verimlilik (Neden Botpress Sisteminden İyidir?)
+
+*   **Sıfır Ek Platform Ücreti:** Botpress gibi platformlar mesaj (session) başına veya aylık sabit ücret ister. API'yi kendiniz GPT-4o-mini (veyahaiku) ile entegre ederseniz, 1.000 soruyu cevaplatmanın maliyeti ortalama $0.15 (15 cent) civarındadır. Aylık binlerce sorusu olan bir mağaza için bile maliyetler yok denecek kadar azdır.
+*   **Tam Veri Kontrolü:** Sorular, ürün bilgileri ve üretilen cevaplar tamamen sizin veritabanınızda durur. Analytics (Bugün AI 50 soru cevapladı, 30'u "kargo ne zaman" sorusuydu) çıkarmanız çok daha kolay olur.
+*   **Bağlam Gücü:** Sizin kodunuz MarketPulse veritabanına bağlı olduğu için, kullanıcı "Dün sipariş ettiğim ürün kargolandı mı?" diye sorduğunda, bot ürün ID'sinden siparişi (Order API) anında sorgulayıp "Siparişiniz kargoya verilmiştir" diyebilir. Botpress ile sipariş detayına inmek çok meşakkatlidir.
+
+**Özetle:** Botpress'i devreden çıkarmak ve kendi sisteminizi (FastAPI backend) kullanarak basit bir kuyruk mimarisi (Celery) ile kendi otonom uygulamanızı yazmak tam olarak doğru bir ürün stratejisidir. Müşteriye (SaaS satacağınız satıcılara) "Bunu bağlamak için ekstra bir bot aracı kullanmanıza gerek yok, sadece API Key'inizi buraya girin ve 'Otomatik Cevapla' özelliğini açın" diyebilmeniz ürününüzü mükemmel bir "All-in-one" platform haline getirir.

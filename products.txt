@@ -1,0 +1,92 @@
+Request URL
+https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products?pathModel=pasta-cila-x-c143965&pi=2&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&offset=2200007&channelId=1&storefrontId=1&culture=tr-TR
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+104.16.151.136:443
+Referrer Policy
+same-origin
+access-control-allow-credentials
+true
+access-control-allow-origin
+https://www.trendyol.com
+cf-cache-status
+DYNAMIC
+cf-ray
+9d51dddd5e7cdbe7-FRA
+content-encoding
+gzip
+content-type
+application/json; charset=utf-8
+date
+Sat, 28 Feb 2026 18:08:20 GMT
+etag
+W/"1afcb-DK2BpIEipYvSkzxdkPrE68Q2Z9g"
+referrer-policy
+same-origin
+server
+cloudflare
+set-cookie
+ty-lb-vid=L2Rpc2NvdmVyeS1zZmludC1zZWFyY2gtc2VydmljZS9hcGkvc2VhcmNoL3Byb2R1Y3RzOjhiMWNjMTU3ZWJlYWQwNjFjMWU5YzdkNjhhODM0NjFmOjE3NzIzMDIxMDA6MTpyN084c1JNMEY1TUpxd3BiSnVsRzQvMnA2R3NBNWNWTG4wOElDKzRCZk53PQ==; Domain=.trendyol.com; Path=/; Secure; SameSite=Lax
+strict-transport-security
+max-age=15768000;
+ty-lb-fid
+GLP-IAF-CEQ-RKG-YO53-GERAQLBY-IRAHF
+ty-lb-tid
+8b1cc157ebead061c1e9c7d68a83461f
+ty-lb-upstream-status
+200
+vary
+Origin, Accept-Encoding
+x-content-type-options
+nosniff
+x-powered-by
+Express
+x-response-time
+131.143ms
+:authority
+apigw.trendyol.com
+:method
+GET
+:path
+/discovery-sfint-search-service/api/search/products?pathModel=pasta-cila-x-c143965&pi=2&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&offset=2200007&channelId=1&storefrontId=1&culture=tr-TR
+:scheme
+https
+accept
+application/json
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7
+baggage
+ty.kbt.name=ViewSearchResult,ty.platform=Web,ty.business_unit=Core%20Commerce,ty.channel=TR,com.trendyol.observability.business_transaction.name=ViewSearchResult,ty.source.service.name=Puzzle%20WEB%20Storefront%20TR,ty.source.deployment.environment=production,ty.source.service.version=607a6adc,ty.source.client.path=unknown,ty.source.service.type=client
+cache-control
+no-cache
+content-type
+application/json
+cookie
+storefrontId=1; language=tr; countryCode=TR; hvtb=1; platform=web; anonUserId=a92f7ab0-ca9e-11f0-aa79-09547db00ec4; _tt_enable_cookie=1; _ttp=01KAZK4AMMTP0E9WARBE34XDH1_.tt.1; pid=b0953f60-ca9e-11f0-a4e8-391395d0e5d5; WebAbTesting=A_16-B_86-C_87-D_17-E_9-F_71-G_3-H_53-I_85-J_77-K_100-L_44-M_78-N_62-O_79-P_80-Q_73-R_71-S_46-T_81-U_65-V_66-W_44-X_97-Y_55-Z_42; OptanonAlertBoxClosed=2025-11-26T08:05:38.631Z; _fbp=fb.1.1764144345190.460707841446659401; _ym_uid=176414434583793591; _ym_d=1764144345; navbarGenderId=1; sc-dev=OTVlNWJhNjgtN2JmYy00NzFhLTgyY2MtMzdmYTYwODM2MjA1OjMxNTM2MDAwMDAw; _hjSessionUser_1128546=eyJpZCI6ImIwZjljZmRkLWI3NWItNTYyMy1hNjRjLTBhMzNhY2JlODNjNCIsImNyZWF0ZWQiOjE3NzAxMjM5NzY2ODksImV4aXN0aW5nIjp0cnVlfQ==; _ga=GA1.2.879779734.1770123977; _ga_N1DYMXS48V=GS2.1.s1770194211$o3$g0$t1770194211$j60$l0$h0; VisitCount=1; sid=9MSYnsipUF; WebAbDecider=ABKB_B-ABMRLO_B-ABres_B-ABBMSA_B-ABRRIn_B-ABSCB_B-ABSuggestionHighlight_B-ABBP_B-ABCatTR_B-ABSuggestionTermActive_A-ABAZSmartlisting_62-ABBH2_B-ABMB_B-ABMRF_1-ABARR_B-ABMA_B-ABSP_B-ABPastSearches_B-ABSuggestionJFYProducts_B-ABSuggestionQF_B-ABBadgeBoost_A-ABFilterRelevancy_1-ABSuggestionBadges_B-ABProductGroupTopPerformer_B-ABOpenFilterToggle_2-ABRR_2-ABBS_2-ABSuggestionPopularCTR_B; forceUpdateAbDecider=forced; WebRecoAbDecider=ABcrossSameBrandVersion_1-ABsimilarRecoAdsVersion_1-ABsimilarRecoVersion_1-ABpdpGatewayVersion_1-ABallInOneRecoVersion_1-ABattributeRecoVersion_1-ABcrossRecoAdsVersion_1-ABcollectionRecoVersion_1-ABsimilarSameBrandVersion_1-ABcrossRecoVersion_1-ABbasketRecoVersion_1-ABshopTheLookVersion_1-ABcompleteTheLookVersion_1; AbTesting=regGender_B-SFWBFP_B-SFWBPFF_B-SFWCTyPlusBuyNowPopup_B-SFWDBSR_A-SFWDQL_B-SFWDRS_A-SFWDSAOFv2_B-SFWDSFAG_B-SFWDTKV2_A-SSTPRFL_B-STSBuynow_B-STSCouponV2_A-STSImageSocialProof_A-STSRecoRR_B-STSRecoSocialProof_A-WCBCouponModal_A-WCBRecoSliderArrowIteration_B-DynamicCard_B-ZZTest1_B%7C1772303830%7Cb0953f60-ca9e-11f0-a4e8-391395d0e5d5; msearchAb=ABRRAIC_B-ABAdvertSlotPeriod_1-ABFSR_B-ABKB_B-ABSuggestionNI_B-ABPR_B-ABQR_B-ABRF_1-ABsr_b-ABBSA_D-ABSuggestionCorpusExpansion_B-ABSuggestionNS_B-ABTRR_B; recoAb=collectionReco%3AcollectionReco_V1_3; homepageAb=homepage%3AadWidgetSorting_V8_2-componentSMHPLiveWidgetFix_V3_1-firstComponent_V3_1-sorter_V4_b-performanceSorting_V1_3-sectionBasedSortingAsIs_V1_1-sectionBasedSorting_V2_2-segmentBasedSortingAsIs_V1_1-topWidgets_V1_1-widgetForecast_V1_1%2CnavigationSection%3Asection_V1_1%2CnavigationSideMenu%3AsideMenu_V1_1; csrf-secret=WLkEA2ZyskUsbccDVv3WcO1B; __cf_bm=6D_xxBtty3lRqtGFuje94qxyQ7XWgImxWD7neroKdY0-1772302030-1.0.1.1-uSVUzAeLpyYkIGfq96GqKpZeRPq45Egt7j7Ox_7a5IhoaSrte9eqSofSicY1LAS4UbiPw8aaXqCOgdDhlQlNXt8nPcfaMSfLN64f_1k1cuE; _cfuvid=uj1ejYFmRBnPm9WAzEkbHqItE9gzrc.iob1ybWoaG_c-1772302030471-0.0.1.1-604800000; __cflb=04dToYCH9RsdhPpttQ38L6weyLKJVju1ma1LKvmxzy; UserInfo=%7B%22Gender%22%3Anull%2C%22UserTypeStatus%22%3Anull%2C%22ForceSet%22%3Afalse%7D; _gcl_au=1.1.192789769.1772302034; OptanonConsent=isGpcEnabled=0&datestamp=Sat+Feb+28+2026+21%3A07%3A38+GMT%2B0300+(GMT%2B03%3A00)&version=202402.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&genVendors=V77%3A0%2CV67%3A0%2CV79%3A0%2CV71%3A0%2CV69%3A0%2CV7%3A0%2CV5%3A0%2CV9%3A0%2CV1%3A0%2CV70%3A0%2CV3%3A0%2CV68%3A0%2CV78%3A0%2CV17%3A0%2CV76%3A0%2CV80%3A0%2CV16%3A0%2CV72%3A0%2CV10%3A0%2CV40%3A0%2C&consentId=da87f34e-f3b0-4347-bfb5-d4c13c4d7c68&interactionCount=2&isAnonUser=1&landingPath=NotLandingPage&groups=C0002%3A1%2CC0004%3A1%2CC0003%3A1%2CC0005%3A1%2CC0001%3A1%2CC0007%3A1%2CC0009%3A1&AwaitingReconsent=false&geolocation=TR%3B06; ttcsid=1772302034454::S2ck2Fz2E76x1KxS1m6h.20.1772302058982.0; ttcsid_CJ94PP3C77U0073JONJ0=1772302034451::_n0a1luss33Q1u0FxGcT.19.1772302058982.1; cto_bundle=GBvN419aaHlVc2d2M2V5YTVxWFNMdlBId2djaE1lJTJGR3JjWUplTlpnc2hMZkt1MzJaVWJUTnpOcDN2SFB0Nmo1MHl4OTRYSmVCaXZ5MVZiJTJGVTdlUkNFN2IzRThzMTRhdGxFQWoxOUQlMkZBUXN1Z0IwcEw4NkdneDhtTUJlY0RSOVdTNk9wOFdJVDI0ZlpoSCUyQldZWSUyRk5kYjdFNW1xOFI4MUw5JTJGS3dZODZUU1FYNXh0eDVseXJ6ckZpakNBWTFQdWtIMklTUXA; ty-lb-vid=L2Zhdmljb24uaWNvOmY3MzI2YTRlNjI1N2JmYTkwMjFkN2I2MmUwOTA3NzY4OjE3NzIzMDIwNzE6MTpqUW1jMGFJM1V0SHM1bGFZV0FYNDdGN1h4QmZJOUhqTVNuMVhZa0N3NGJBPQ==
+origin
+https://www.trendyol.com
+pragma
+no-cache
+priority
+u=1, i
+sec-ch-ua
+"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"macOS"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-site
+user-agent
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+x-request-source
+single-search-result

@@ -1,0 +1,5029 @@
+{
+    "appliedSearchStrategy": "DEFAULT",
+    "canonicalFilters": {
+        "colors": [],
+        "brands": [],
+        "categories": [
+            {
+                "key": "143965",
+                "beautifiedName": "pasta-cila",
+                "name": "Pasta Cila"
+            }
+        ],
+        "genders": [],
+        "landingPage": [],
+        "page": 2
+    },
+    "currency": "TL",
+    "products": [
+        {
+            "boutiqueId": 61,
+            "brand": "Sonax",
+            "webBrands": [
+                {
+                    "id": 102632,
+                    "name": "Sonax"
+                }
+            ],
+            "brandId": 11469,
+            "campaignId": 61,
+            "merchantId": 105173,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 2344131,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 2344131,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1648/prod/QC/20250312/11/08b32168-cdd3-340b-819c-3c6092414bed/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1648/prod/QC/20250312/11/08b32168-cdd3-340b-819c-3c6092414bed/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1648/prod/QC/20250312/11/5fbb3024-a5a0-3d07-860a-379aab401d34/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1649/prod/QC/20250312/11/b96569c9-7f75-3c21-9b3b-0e4d46b06445/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1647/prod/QC/20250312/11/3f242c8b-4e9c-3e49-805d-572a01b3fe99/1_org_zoom.jpg"
+            ],
+            "itemNumber": 12519349,
+            "listingId": "481c84ec0ae6e917df16972ad2399b8a",
+            "name": "Süper Parlatıcı Cila 250 ml",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 437,
+                "currentText": "437,00",
+                "originalPrice": 437,
+                "originalPriceText": "437,00",
+                "discountedPrice": 437,
+                "discountedPriceText": "437,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.462135922330097,
+                "totalCount": 515
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "priority": true,
+                    "title": "2 Adede %5",
+                    "type": "TAKE_MORE_PAY_LESS"
+                }
+            },
+            "stock": {},
+            "url": "/sonax/super-parlatici-cila-250-ml-p-2344131?boutiqueId=61&merchantId=105173",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 1880956,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Sonax",
+                "name": "Süper Parlatıcı Cila 250 ml",
+                "webBrandName": "Sonax"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "230"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "8K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "107"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26172770,
+                    "shortName": "2 Adede %5",
+                    "name": "2 Adet ve Üzeri %5 İndirim",
+                    "discountType": 2
+                },
+                {
+                    "id": 26172775,
+                    "shortName": "3 Adede %6",
+                    "name": "3 Adet ve Üzeri %6 İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "437,00 TL",
+                "priceNumerized": 437,
+                "priceWithoutCurrency": "437,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "437,00 TL",
+                "salePriceWihoutCurrency": "437,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "437,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "437.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "437,00",
+                "newPrice": "422,00",
+                "integerPart": "422,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "PICKED_BY_INFLUENCER",
+                "title": "Fenomen Seçimi",
+                "color": "linear-gradient(90deg, #FF9137 0%, #FF69FF 100%)"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "2 Adede %5",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "437 TL",
+                "salePriceWihoutCurrency": "437",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26172770,
+                "name": "2 Adet ve Üzeri %5 İndirim",
+                "promotionEndDate": "2026-07-01T23:00:00",
+                "shortName": "2 Adede %5"
+            },
+            "rushDelivery": false,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "parlawax",
+            "webBrands": [],
+            "brandId": 1256524,
+            "campaignId": 61,
+            "merchantId": 250172,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 342804850,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 342804850,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1553/product/media/images/ty1553/prod/QC/20240917/07/8b0890ec-b87f-348a-b893-3ff66dd59002/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1553/product/media/images/ty1553/prod/QC/20240917/07/8b0890ec-b87f-348a-b893-3ff66dd59002/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1548/product/media/images/ty1553/prod/QC/20240917/07/9c5d308b-2a5c-30a1-b258-f8bad17264ed/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1551/product/media/images/ty1553/prod/QC/20240917/07/975e8a77-dda6-37b8-bf03-f37dc7da6b6d/1_org_zoom.jpg"
+            ],
+            "itemNumber": 547486675,
+            "listingId": "b6aa597d961f058d30952fea1428a98d",
+            "name": "Seramik Katkılı Krem Cila 100 gr Ve Uygulama Pedi",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 443.8,
+                "currentText": "443,80",
+                "originalPrice": 443.8,
+                "originalPriceText": "443,80",
+                "discountedPrice": 443.8,
+                "discountedPriceText": "443,80",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.433192686357243,
+                "totalCount": 711
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "priority": true,
+                    "title": "2 Adede %10",
+                    "type": "TAKE_MORE_PAY_LESS"
+                }
+            },
+            "stock": {},
+            "url": "/parlawax/seramik-katkili-krem-cila-100-gr-ve-uygulama-pedi-p-342804850?boutiqueId=61&merchantId=250172",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 279314631,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "parlawax",
+                "name": "Seramik Katkılı Krem Cila 100 gr Ve Uygulama Pedi"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "403"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "8K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "162"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26557143,
+                    "shortName": "2 Adede %10",
+                    "name": "2 Adet ve Üzeri %10 İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "443,80 TL",
+                "priceNumerized": 443.8,
+                "priceWithoutCurrency": "443,80",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "443,80 TL",
+                "salePriceWihoutCurrency": "443,80",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "443,80",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "443.80"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "443,80",
+                "newPrice": "428,80",
+                "integerPart": "428,80",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "VIDEO_CONTENT",
+                "title": "Videolu Ürün",
+                "color": "#9747FF"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "2 Adede %10",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "443,80 TL",
+                "salePriceWihoutCurrency": "443,80",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26557143,
+                "name": "2 Adet ve Üzeri %10 İndirim",
+                "promotionEndDate": "2026-03-03T23:00:00",
+                "shortName": "2 Adede %10"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Farecla",
+            "webBrands": [
+                {
+                    "id": 147847,
+                    "name": "Farecla"
+                }
+            ],
+            "brandId": 135347,
+            "campaignId": 61,
+            "merchantId": 647786,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 80919177,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 80919177,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1463/product/media/images/prod/QC/20240805/08/3d82670c-b694-36dc-8907-26327c0e7fd2/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1463/product/media/images/prod/QC/20240805/08/3d82670c-b694-36dc-8907-26327c0e7fd2/1_org_zoom.jpg"
+            ],
+            "itemNumber": 137070320,
+            "listingId": "59202e45342f9f264701b61f77554973",
+            "name": "Universal Tüp Pasta 200gr Ve G3 Wax Cila 250ml",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 599,
+                "currentText": "599,00",
+                "originalPrice": 599,
+                "originalPriceText": "599,00",
+                "discountedPrice": 599,
+                "discountedPriceText": "599,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.4525993883792045,
+                "totalCount": 327
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/farecla/universal-tup-pasta-200gr-ve-g3-wax-cila-250ml-p-80919177?boutiqueId=61&merchantId=647786",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": true,
+            "emptyRating": false,
+            "groupId": 69448832,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Farecla",
+                "name": "Universal Tüp Pasta 200gr Ve G3 Wax Cila 250ml",
+                "webBrandName": "Farecla"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "2K"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26509371,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "1500 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "599,00 TL",
+                "priceNumerized": 599,
+                "priceWithoutCurrency": "599,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "599,00 TL",
+                "salePriceWihoutCurrency": "599,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "599,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "599.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "599,00",
+                "newPrice": "584,00",
+                "integerPart": "584,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "COLLECTABLE_COUPON",
+                    "title": "Kupon Fırsatı",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526381249.svg",
+                    "color": "#FF4988"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "599 TL",
+                "salePriceWihoutCurrency": "599",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26509371,
+                "name": "1500 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-03T23:00:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Gard",
+            "webBrands": [
+                {
+                    "id": 157732,
+                    "name": "Gard"
+                }
+            ],
+            "brandId": 25549,
+            "campaignId": 61,
+            "merchantId": 1011749,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 934306884,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 934306884,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1730/prod/QC_ENRICHMENT/20250821/12/6d45d97a-d8cc-372b-be8d-ae044c361312/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1730/prod/QC_ENRICHMENT/20250821/12/6d45d97a-d8cc-372b-be8d-ae044c361312/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1729/prod/QC_ENRICHMENT/20250821/12/2fd9f1a7-9a96-338f-8a19-71387a91743b/1_org_zoom.jpg"
+            ],
+            "itemNumber": 1321755032,
+            "listingId": "7fec26bf60be6ec580b51be2362ed435",
+            "name": "Gümüş Temizleme Ve Parlatıcı Cilası 125ml + 2Adet Eldiven + 2 Adet Parlatma Bezi",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 349.99,
+                "currentText": "349,99",
+                "originalPrice": 349.99,
+                "originalPriceText": "349,99",
+                "discountedPrice": 349.99,
+                "discountedPriceText": "349,99",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 5,
+                "totalCount": 4
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "sponsored",
+                    "hasStamp": true,
+                    "tag": "sponsored",
+                    "tagId": 4652
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/gard/gumus-temizleme-ve-parlatici-cilasi-125ml-2adet-eldiven-2-adet-parlatma-bezi-p-934306884?boutiqueId=61&merchantId=1011749",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 707457959,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Gard",
+                "name": "Gümüş Temizleme Ve Parlatıcı Cilası 125ml + 2Adet Eldiven + 2 Adet Parlatma Bezi",
+                "webBrandName": "Gard"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "157"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 25439161,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "1000 TL'ye 100 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "349,99 TL",
+                "priceNumerized": 349.99,
+                "priceWithoutCurrency": "349,99",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "349,99 TL",
+                "salePriceWihoutCurrency": "349,99",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "349,99",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "349.99"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "349,99",
+                "newPrice": "334,99",
+                "integerPart": "334,99",
+                "decimalPart": "00",
+                "discountPercentage": 4,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "ADS",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0.0426008,
+                "advertId": "61edefd0-2391-40b0-bb1c-003b9148fb23",
+                "advertSlot": 6,
+                "cpc": 2.2385,
+                "dynamicCpcEnabled": false,
+                "eCpc": 2.2385,
+                "minCpc": 2.4167
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "349,99 TL",
+                "salePriceWihoutCurrency": "349,99",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 25439161,
+                "name": "1000 TL'ye 100 TL İndirim",
+                "promotionEndDate": "2026-05-12T23:59:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Farecla",
+            "webBrands": [
+                {
+                    "id": 147847,
+                    "name": "Farecla"
+                }
+            ],
+            "brandId": 135347,
+            "campaignId": 61,
+            "merchantId": 647786,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 232006203,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 232006203,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1541/product/media/images/ty1542/prod/QC/20240913/17/3f51e556-6215-3d6e-a67f-7413d0ed06a8/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1541/product/media/images/ty1542/prod/QC/20240913/17/3f51e556-6215-3d6e-a67f-7413d0ed06a8/1_org_zoom.jpg"
+            ],
+            "itemNumber": 373093853,
+            "listingId": "a22183062587317ba56fc03229ec91dc",
+            "name": "Süper İkili Başlangıç Seti G3 Pasta 1lt + G3 Cila 1lt",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 1333.49,
+                "currentText": "1.333,49",
+                "originalPrice": 1333.49,
+                "originalPriceText": "1.333,49",
+                "discountedPrice": 1333.49,
+                "discountedPriceText": "1.333,49",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.582677165354331,
+                "totalCount": 127
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Hesaplı Ürünler",
+                    "hasStamp": true,
+                    "tag": "hesapli_urunler",
+                    "tagId": 4903,
+                    "tagType": "AffordableProducts"
+                },
+                {
+                    "displayName": "Peşin Fiyatına 3 Taksit",
+                    "hasStamp": true,
+                    "tag": "installment_pft3",
+                    "tagId": 4905,
+                    "tagType": "InstallmentBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/farecla/super-ikili-baslangic-seti-g3-pasta-1lt-g3-cila-1lt-p-232006203?boutiqueId=61&merchantId=647786",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": true,
+            "emptyRating": false,
+            "groupId": 200997845,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Farecla",
+                "name": "Süper İkili Başlangıç Seti G3 Pasta 1lt + G3 Cila 1lt",
+                "webBrandName": "Farecla"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "2K"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26509371,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "1500 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "1.333,49 TL",
+                "priceNumerized": 1333.49,
+                "priceWithoutCurrency": "1.333,49",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "1.333,49 TL",
+                "salePriceWihoutCurrency": "1.333,49",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "1.333,49",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "1333.49"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "1.333,49",
+                "newPrice": "1.318,49",
+                "integerPart": "1",
+                "decimalPart": "318,49",
+                "discountPercentage": 1,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "COUPON_DISCOUNT",
+                    "title": "40 TL Kupon",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526381249.svg",
+                    "color": "#FF4988"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "1.333,49 TL",
+                "salePriceWihoutCurrency": "1.333,49",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26509371,
+                "name": "1500 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-03T23:00:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "TRAX",
+            "webBrands": [
+                {
+                    "id": 163035,
+                    "name": "TRAX"
+                }
+            ],
+            "brandId": 42417,
+            "campaignId": 61,
+            "merchantId": 185368,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 299201388,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 299201388,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1636/prod/QC/20250217/12/9666511f-cf3d-326a-9c02-20f6fa7d1472/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1636/prod/QC/20250217/12/9666511f-cf3d-326a-9c02-20f6fa7d1472/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1636/prod/QC/20250217/12/1699098c-6979-3f81-944a-26a37880f707/1_org_zoom.jpg"
+            ],
+            "itemNumber": 477028912,
+            "listingId": "af2b2b4facd29ee550bcf83859e2f58a",
+            "name": "Oto Araç Pasta Cila Araba Parlaklık Verici 250ml",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 139.9,
+                "currentText": "139,90",
+                "originalPrice": 138.5,
+                "originalPriceText": "138,50",
+                "discountedPrice": 138.5,
+                "discountedPriceText": "138,50",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 3.4688346883468837,
+                "totalCount": 369
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/trax/oto-arac-pasta-cila-araba-parlaklik-verici-250ml-p-299201388?boutiqueId=61&merchantId=185368",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 250606003,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "TRAX",
+                "name": "Oto Araç Pasta Cila Araba Parlaklık Verici 250ml",
+                "webBrandName": "TRAX"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "3K"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26801694,
+                    "shortName": "İndirim Kodu",
+                    "name": "Kod: MEY50 - 1000 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                },
+                {
+                    "id": 26160132,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "350 TL'ye %3 İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": false,
+            "recommendedRetailPrice": {
+                "sellingPrice": "139,90 TL",
+                "sellingPriceWithoutCurrency": "139,90",
+                "sellingPriceNumerized": 139.9,
+                "discountedPromotionPrice": "138,50 TL",
+                "discountedPromotionPriceWithoutCurrency": "138,50",
+                "discountedPromotionPriceNumerized": 138.5,
+                "discountedPromotionPricePercentage": "-1%",
+                "promotionDiscountPercentage": 1,
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "138,50 TL",
+                "salePriceWihoutCurrency": "138,50",
+                "strikethroughPrice": "139,90",
+                "strikethroughPriceType": "sellingPrice",
+                "discountPercentage": "-1%",
+                "currency": "TL",
+                "discountType": "basketPromotion"
+            },
+            "discountBoxType": 2,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "138,50",
+                "lowestRecentPriceWithoutCurrency": "139,90",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "Sepette %1 İndirim",
+                    "type": 2
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "138.50"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "138,50",
+                "newPrice": "123,50",
+                "integerPart": "123,50",
+                "decimalPart": "00",
+                "discountPercentage": 11,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "CROSS_PROMOTION",
+                "title": "Birlikte Al Kazan",
+                "color": "#F27A1A"
+            },
+            "simplifiedBadges": [],
+            "hasOfficialSellerBadge": true,
+            "singlePrice": {
+                "salePrice": "138,50 TL",
+                "salePriceWihoutCurrency": "138,50",
+                "strikethroughPrice": "139,90 TL",
+                "currency": "TL",
+                "componentType": "BASKET_PROMO",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "2": {
+                        "name": "Sepette %1 İndirim"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "138.50"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26801694,
+                "name": "Kod: MEY50 - 1000 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-31T23:00:00",
+                "shortName": "İndirim Kodu"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Koch Chemie",
+            "webBrands": [
+                {
+                    "id": 148554,
+                    "name": "Koch Chemie"
+                }
+            ],
+            "brandId": 295048,
+            "campaignId": 61,
+            "merchantId": 646644,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 849064652,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 849064652,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1470/product/media/images/prod/QC/20240809/13/893e3276-a1b3-3451-8923-d8ef1f2617ac/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1470/product/media/images/prod/QC/20240809/13/893e3276-a1b3-3451-8923-d8ef1f2617ac/1_org_zoom.jpg"
+            ],
+            "itemNumber": 1145054799,
+            "listingId": "25dd27159561d180bcf5641f0f535765",
+            "name": "Pasta Seti (H8.02+F6.01+M3.02) 250ML",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 2000,
+                "currentText": "2.000,00",
+                "originalPrice": 2000,
+                "originalPriceText": "2.000,00",
+                "discountedPrice": 2000,
+                "discountedPriceText": "2.000,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.545454545454546,
+                "totalCount": 11
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Peşin Fiyatına 3 Taksit",
+                    "hasStamp": true,
+                    "tag": "installment_pft3",
+                    "tagId": 4905,
+                    "tagType": "InstallmentBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/koch-chemie/pasta-seti-h8-02-f6-01-m3-02-250ml-p-849064652?boutiqueId=61&merchantId=646644",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 647580438,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Koch Chemie",
+                "name": "Pasta Seti (H8.02+F6.01+M3.02) 250ML",
+                "webBrandName": "Koch Chemie"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "418"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "2.000,00 TL",
+                "priceNumerized": 2000,
+                "priceWithoutCurrency": "2.000,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "2.000,00 TL",
+                "salePriceWihoutCurrency": "2.000,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "2.000,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "2000.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "2.000,00",
+                "newPrice": "1.985,00",
+                "integerPart": "1",
+                "decimalPart": "985,00",
+                "discountPercentage": 1,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "2.000 TL",
+                "salePriceWihoutCurrency": "2.000",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": false,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Jo Moyner",
+            "webBrands": [],
+            "brandId": 1343331,
+            "campaignId": 61,
+            "merchantId": 105318,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 862003073,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 862003073,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1572/prod/QC/20240927/19/fcc148d0-637f-3195-9069-c289bb61c95d/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1572/prod/QC/20240927/19/fcc148d0-637f-3195-9069-c289bb61c95d/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1573/prod/QC/20240927/19/562cd0ae-b9aa-3f97-9590-c3b47e2dce8e/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1573/prod/QC/20240927/19/ef91585c-0795-3ae8-8b10-b04ccec456fb/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1573/prod/QC/20240927/19/5f1f3fc3-ceb5-3a8a-8799-7d5ed92a18d3/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1572/prod/QC/20240927/19/b6c09725-dafc-3b54-8755-5d466e750372/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1572/prod/QC/20240927/19/7c564a17-b44a-38f0-a083-58e66749f779/1_org_zoom.jpg"
+            ],
+            "itemNumber": 1167924036,
+            "listingId": "2596354bc90ec8c4ea510a96012fdb3f",
+            "name": "Nano Sihirli Sünger (MAGİC SPONGE) 2 Adet Büyük Boy Xl",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 129.9,
+                "currentText": "129,90",
+                "originalPrice": 129.9,
+                "originalPriceText": "129,90",
+                "discountedPrice": 129.9,
+                "discountedPriceText": "129,90",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 2,
+                "totalCount": 2
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "sponsored",
+                    "hasStamp": true,
+                    "tag": "sponsored",
+                    "tagId": 4652
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "priority": true,
+                    "title": "2. Ürün %10",
+                    "type": "TAKE_MORE_PAY_LESS"
+                }
+            },
+            "stock": {},
+            "url": "/jo-moyner/nano-sihirli-sunger-magic-sponge-2-adet-buyuk-boy-xl-p-862003073?boutiqueId=61&merchantId=105318",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 657734198,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": false,
+            "cleanUrlFragments": {
+                "brandName": "Jo Moyner",
+                "name": "Nano Sihirli Sünger (MAGİC SPONGE) 2 Adet Büyük Boy Xl"
+            },
+            "socialProof": [],
+            "promotions": [
+                {
+                    "id": 26376358,
+                    "shortName": "2. Ürün %10",
+                    "name": "2. Ürüne %10 İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": false,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "129,90 TL",
+                "priceNumerized": 129.9,
+                "priceWithoutCurrency": "129,90",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "129,90 TL",
+                "salePriceWihoutCurrency": "129,90",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "129,90",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "129.90"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "129,90",
+                "newPrice": "114,90",
+                "integerPart": "114,90",
+                "decimalPart": "00",
+                "discountPercentage": 12,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "ADS",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0.033012908,
+                "advertId": "5575a19d-8ce5-4bf2-b52a-8aa32a1a90e4",
+                "advertSlot": 7,
+                "cpc": 1.452,
+                "dynamicCpcEnabled": false,
+                "eCpc": 1.452,
+                "minCpc": 1.5873
+            },
+            "stripBadge": {
+                "type": "CROSS_PROMOTION",
+                "title": "Birlikte Al Kazan",
+                "color": "#F27A1A"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "2. Ürün %10",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "129,90 TL",
+                "salePriceWihoutCurrency": "129,90",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26376358,
+                "name": "2. Ürüne %10 İndirim",
+                "promotionEndDate": "2026-06-01T23:00:00",
+                "shortName": "2. Ürün %10"
+            },
+            "rushDelivery": false,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Menzerna",
+            "webBrands": [
+                {
+                    "id": 111290,
+                    "name": "Menzerna"
+                }
+            ],
+            "brandId": 39412,
+            "campaignId": 61,
+            "merchantId": 910394,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 43758711,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 43758711,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty20/product/media/images/20201104/15/22318468/77552897/1/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty20/product/media/images/20201104/15/22318468/77552897/1/1_org_zoom.jpg"
+            ],
+            "itemNumber": 77552897,
+            "listingId": "fa0c07ba7642797965598509c98435dd",
+            "name": "1000 3000 Sealingwax Kalın Pasta Hare Boya Kor. Set 1 Lt",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 4029.9,
+                "currentText": "4.029,90",
+                "originalPrice": 4029.9,
+                "originalPriceText": "4.029,90",
+                "discountedPrice": 4029.9,
+                "discountedPriceText": "4.029,90",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.59375,
+                "totalCount": 32
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Peşin Fiyatına 3 Taksit",
+                    "hasStamp": true,
+                    "tag": "installment_pft3",
+                    "tagId": 4905,
+                    "tagType": "InstallmentBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/menzerna/1000-3000-sealingwax-kalin-pasta-hare-boya-kor-set-1-lt-p-43758711?boutiqueId=61&merchantId=910394",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 36600915,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Menzerna",
+                "name": "1000 3000 Sealingwax Kalın Pasta Hare Boya Kor. Set 1 Lt",
+                "webBrandName": "Menzerna"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "565"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "4.029,90 TL",
+                "priceNumerized": 4029.9,
+                "priceWithoutCurrency": "4.029,90",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "4.029,90 TL",
+                "salePriceWihoutCurrency": "4.029,90",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "4.029,90",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "4029.90"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "4.029,90",
+                "newPrice": "4.014,90",
+                "integerPart": "4",
+                "decimalPart": "014,90",
+                "discountPercentage": 0,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "4.029,90 TL",
+                "salePriceWihoutCurrency": "4.029,90",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Telvesse",
+            "webBrands": [
+                {
+                    "id": 159585,
+                    "name": "Telvesse"
+                }
+            ],
+            "brandId": 1486357,
+            "campaignId": 61,
+            "merchantId": 130527,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 411923179,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 411923179,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty611/product/media/images/20221123/17/220168365/629805101/1/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty611/product/media/images/20221123/17/220168365/629805101/1/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty610/product/media/images/20221123/17/220168365/629805101/2/2_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty609/product/media/images/20221123/17/220168365/629805101/3/3_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty611/product/media/images/20221123/17/220168365/629805101/4/4_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty610/product/media/images/20221123/17/220168365/629805101/5/5_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty610/product/media/images/20221123/17/220168365/629805101/6/6_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty610/product/media/images/20221123/17/220168365/629805101/7/7_org_zoom.jpg"
+            ],
+            "itemNumber": 629805101,
+            "listingId": "1de30802848b198d0eaa4418c3310b1e",
+            "name": "Polisaj Yünü 3 Adet Pasta Cila Yünü Kuzu Postu Parlatma Pedi Polisaj Süngeri",
+            "price": {
+                "old": 299,
+                "oldText": "299,00",
+                "currency": "TL",
+                "current": 259,
+                "currentText": "259,00",
+                "originalPrice": 299,
+                "originalPriceText": "299,00",
+                "discountedPrice": 259,
+                "discountedPriceText": "259,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.223529411764706,
+                "totalCount": 85
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Son 14 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_14",
+                    "tagId": 7590,
+                    "tagType": "LowestPrice"
+                },
+                {
+                    "displayName": "Avantajlı Ürün",
+                    "hasStamp": true,
+                    "tag": "sari_kampanya_urunu",
+                    "tagId": 4897,
+                    "tagType": "CampaignBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/telvesse/polisaj-yunu-3-adet-pasta-cila-yunu-kuzu-postu-parlatma-pedi-polisaj-sungeri-p-411923179?boutiqueId=61&merchantId=130527",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 315566880,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Telvesse",
+                "name": "Polisaj Yünü 3 Adet Pasta Cila Yünü Kuzu Postu Parlatma Pedi Polisaj Süngeri",
+                "webBrandName": "Telvesse"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "970"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26743476,
+                    "shortName": "5 Al 4 Öde",
+                    "name": "5 Al 4 Öde",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": false,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": true,
+                "price": "259,00 TL",
+                "priceNumerized": 259,
+                "priceWithoutCurrency": "259,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": "299,00 TL",
+                "lowestRecentPriceNumerized": 299,
+                "lowestRecentPriceWithoutCurrency": "299,00",
+                "lowestRecentPercentage": "-13%",
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "259,00 TL",
+                "salePriceWihoutCurrency": "259,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "259,00",
+                "lowestRecentPriceWithoutCurrency": "299,00",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "lowestPriceDuration",
+                    "type": 1,
+                    "value": "14"
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "259.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "259,00",
+                "newPrice": "244,00",
+                "integerPart": "244,00",
+                "decimalPart": "00",
+                "discountPercentage": 6,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "AUTHORIZED_SELLER",
+                "title": "Yetkili Satıcı",
+                "color": "#E6362C",
+                "icon": "https://cdn.dsmcdn.com/sfint/production/icons/authorized_seller_1744696878660.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "5 Al 4 Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": true,
+            "singlePrice": {
+                "salePrice": "259 TL",
+                "salePriceWihoutCurrency": "259",
+                "strikethroughPrice": "299 TL",
+                "discountPercentage": "-13%",
+                "discountBadgeData": {
+                    "showBadge": true,
+                    "discountPercentage": "-13%",
+                    "showFlameIcon": false
+                },
+                "currency": "TL",
+                "componentType": "DISCOUNTED",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "1": {
+                        "name": "lowestPriceDuration",
+                        "value": "14"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "259.00"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26743476,
+                "name": "5 Al 4 Öde",
+                "promotionEndDate": "2026-03-04T19:00:00",
+                "shortName": "5 Al 4 Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Dyo",
+            "webBrands": [
+                {
+                    "id": 106524,
+                    "name": "Dyo"
+                }
+            ],
+            "brandId": 15733,
+            "campaignId": 61,
+            "merchantId": 603731,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 43365146,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 43365146,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1827/prod/QC_ENRICHMENT/20260223/16/099ade28-7c41-3598-823e-9e432dec36ee/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1827/prod/QC_ENRICHMENT/20260223/16/099ade28-7c41-3598-823e-9e432dec36ee/1_org_zoom.jpg"
+            ],
+            "itemNumber": 76917940,
+            "listingId": "c86a0f224f6a4ea9f5b02ddbb85675c1",
+            "name": "CİLA, 0,20 Litre",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 230,
+                "currentText": "230,00",
+                "originalPrice": 220,
+                "originalPriceText": "220,00",
+                "discountedPrice": 220,
+                "discountedPriceText": "220,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.52,
+                "totalCount": 50
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Teslimat",
+                    "type": "RUSH_DELIVERY"
+                }
+            },
+            "stock": {},
+            "url": "/dyo/cila-0-20-litre-p-43365146?boutiqueId=61&merchantId=603731",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 36260804,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Dyo",
+                "name": "CİLA, 0,20 Litre",
+                "webBrandName": "Dyo"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "719"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": false,
+            "recommendedRetailPrice": {
+                "sellingPrice": "230,00 TL",
+                "sellingPriceWithoutCurrency": "230,00",
+                "sellingPriceNumerized": 230,
+                "discountedPromotionPrice": "220,00 TL",
+                "discountedPromotionPriceWithoutCurrency": "220,00",
+                "discountedPromotionPriceNumerized": 220,
+                "discountedPromotionPricePercentage": "-4%",
+                "promotionDiscountPercentage": 4,
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "220,00 TL",
+                "salePriceWihoutCurrency": "220,00",
+                "strikethroughPrice": "230,00",
+                "strikethroughPriceType": "sellingPrice",
+                "discountPercentage": "-4%",
+                "currency": "TL",
+                "discountType": "basketPromotion"
+            },
+            "discountBoxType": 2,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "220,00",
+                "lowestRecentPriceWithoutCurrency": "230,00",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "Sepette 10 TL İndirim",
+                    "type": 2
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "220.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "220,00",
+                "newPrice": "205,00",
+                "integerPart": "205,00",
+                "decimalPart": "00",
+                "discountPercentage": 7,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "220 TL",
+                "salePriceWihoutCurrency": "220",
+                "strikethroughPrice": "230 TL",
+                "currency": "TL",
+                "componentType": "BASKET_PROMO",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "2": {
+                        "name": "Sepette 10 TL İndirim"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "220.00"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26903394,
+                "name": "Sepette 10 TL İndirim",
+                "promotionEndDate": "2026-03-26T23:00:00",
+                "shortName": ""
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "MeyZone",
+            "webBrands": [
+                {
+                    "id": 174610,
+                    "name": "MeyZone"
+                }
+            ],
+            "brandId": 979967,
+            "campaignId": 61,
+            "merchantId": 185368,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 130981185,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 130981185,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1545/product/media/images/ty1547/prod/QC/20240915/16/a39cc64c-7ed9-3738-9b69-982a06ae5d02/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1545/product/media/images/ty1547/prod/QC/20240915/16/a39cc64c-7ed9-3738-9b69-982a06ae5d02/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1546/product/media/images/ty1545/prod/QC/20240915/16/4ca45735-3f8b-3c13-96c5-e3e3981c72fa/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1545/product/media/images/ty1546/prod/QC/20240915/16/082c2c19-e0c8-39b4-b57e-4d38cc1e4be8/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1545/product/media/images/ty1546/prod/QC/20240915/16/172ec005-91ec-3d22-b4ff-c60fa93d215a/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1546/product/media/images/ty1545/prod/QC/20240915/16/67a5b909-ed25-3918-998c-da282e55254c/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1546/product/media/images/ty1546/prod/QC/20240915/16/1dcf0802-5759-3fc8-a076-96da08aac91e/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1547/product/media/images/ty1545/prod/QC/20240915/16/02bc3714-63ad-396a-af2b-cb08791d860e/1_org_zoom.jpg"
+            ],
+            "itemNumber": 224835644,
+            "listingId": "a516fcf7bd0a9b6ea955ddbd21e18f5f",
+            "name": "Oto Araç Tampon Torpido Plastik Aksam Parlatıcı Seramik Kaplama",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 379.9,
+                "currentText": "379,90",
+                "originalPrice": 368.5,
+                "originalPriceText": "368,50",
+                "discountedPrice": 364.82,
+                "discountedPriceText": "364,82",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.335858585858586,
+                "totalCount": 792
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Son 10 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_10",
+                    "tagId": 8581,
+                    "tagType": "LowestPrice"
+                }
+            ],
+            "badges": {
+                "topRankingBadge": {
+                    "priority": true,
+                    "title": "9",
+                    "type": "MOST_FAVOURITE"
+                },
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/meyzone/oto-arac-tampon-torpido-plastik-aksam-parlatici-seramik-kaplama-p-130981185?boutiqueId=61&merchantId=185368",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 115143736,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "MeyZone",
+                "name": "Oto Araç Tampon Torpido Plastik Aksam Parlatıcı Seramik Kaplama",
+                "webBrandName": "MeyZone"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "294"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "12K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "126"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26801694,
+                    "shortName": "İndirim Kodu",
+                    "name": "Kod: MEY50 - 1000 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                },
+                {
+                    "id": 26160132,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "350 TL'ye %3 İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "sellingPrice": "379,90 TL",
+                "sellingPriceWithoutCurrency": "379,90",
+                "sellingPriceNumerized": 379.9,
+                "discountedPromotionPrice": "364,82 TL",
+                "discountedPromotionPriceWithoutCurrency": "364,82",
+                "discountedPromotionPriceNumerized": 364.82,
+                "discountedPromotionPricePercentage": "-4%",
+                "promotionDiscountPercentage": 4,
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "364,82 TL",
+                "salePriceWihoutCurrency": "364,82",
+                "strikethroughPrice": "379,90",
+                "strikethroughPriceType": "sellingPrice",
+                "discountPercentage": "-4%",
+                "currency": "TL",
+                "discountType": "basketPromotion"
+            },
+            "discountBoxType": 2,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "364,82",
+                "lowestRecentPriceWithoutCurrency": "379,90",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "Kampanyalı Fiyat",
+                    "type": 2
+                },
+                {
+                    "name": "364.82",
+                    "type": 3
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "364.82"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "364,82",
+                "newPrice": "349,82",
+                "integerPart": "349,82",
+                "decimalPart": "00",
+                "discountPercentage": 4,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "MOST_FAVOURITE",
+                "title": "9",
+                "color": "linear-gradient(90deg, #F27A1A 0%, #FFC000 100%)",
+                "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1744696563803.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": true,
+            "singlePrice": {
+                "salePrice": "364,82 TL",
+                "salePriceWihoutCurrency": "364,82",
+                "strikethroughPrice": "379,90 TL",
+                "currency": "TL",
+                "componentType": "BASKET_PROMO",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "2": {
+                        "name": "Kampanyalı Fiyat"
+                    },
+                    "3": {
+                        "name": "364.82"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "364.82"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26801694,
+                "name": "Kod: MEY50 - 1000 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-31T23:00:00",
+                "shortName": "İndirim Kodu"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "TRAX",
+            "webBrands": [
+                {
+                    "id": 163035,
+                    "name": "TRAX"
+                }
+            ],
+            "brandId": 42417,
+            "campaignId": 61,
+            "merchantId": 910394,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 158435887,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 158435887,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1514/product/media/images/prod/QC/20240830/21/68c012e9-54f3-3e1e-beef-4e797951f78d/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1514/product/media/images/prod/QC/20240830/21/68c012e9-54f3-3e1e-beef-4e797951f78d/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1512/product/media/images/prod/QC/20240830/21/60c7bada-e516-3b2c-b0e3-b2ed405672c2/1_org_zoom.jpg"
+            ],
+            "itemNumber": 261111052,
+            "listingId": "530e375d8862a1568d8d2d30df09c966",
+            "name": "Araç Kaporta Boya Çizik Alıcı Çizik Giderici Pasta Cila Sıvı Cila 250ml",
+            "price": {
+                "old": 127.9,
+                "oldText": "127,90",
+                "currency": "TL",
+                "current": 125.9,
+                "currentText": "125,90",
+                "originalPrice": 127.9,
+                "originalPriceText": "127,90",
+                "discountedPrice": 125.9,
+                "discountedPriceText": "125,90",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 3.5864406779661016,
+                "totalCount": 295
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Avantajlı Ürün",
+                    "hasStamp": true,
+                    "tag": "sari_kampanya_urunu",
+                    "tagId": 4897,
+                    "tagType": "CampaignBadge"
+                },
+                {
+                    "displayName": "Son 10 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_10",
+                    "tagId": 8581,
+                    "tagType": "LowestPrice"
+                }
+            ],
+            "badges": {
+                "topRankingBadge": {
+                    "priority": true,
+                    "title": "9",
+                    "type": "BEST_SELLER"
+                },
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/trax/arac-kaporta-boya-cizik-alici-cizik-giderici-pasta-cila-sivi-cila-250ml-p-158435887?boutiqueId=61&merchantId=910394",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 135807765,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "TRAX",
+                "name": "Araç Kaporta Boya Çizik Alıcı Çizik Giderici Pasta Cila Sıvı Cila 250ml",
+                "webBrandName": "TRAX"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "257"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "2K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "149"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": false,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": true,
+                "price": "125,90 TL",
+                "priceNumerized": 125.9,
+                "priceWithoutCurrency": "125,90",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": "127,90 TL",
+                "lowestRecentPriceNumerized": 127.9,
+                "lowestRecentPriceWithoutCurrency": "127,90",
+                "lowestRecentPercentage": "-2%",
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "125,90 TL",
+                "salePriceWihoutCurrency": "125,90",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "125,90",
+                "lowestRecentPriceWithoutCurrency": "127,90",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "lowestPriceDuration",
+                    "type": 1,
+                    "value": "10"
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "125.90"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "125,90",
+                "newPrice": "110,90",
+                "integerPart": "110,90",
+                "decimalPart": "00",
+                "discountPercentage": 12,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "BEST_SELLER",
+                "title": "9",
+                "color": "linear-gradient(90deg, #F27A1A 0%, #FFC000 100%)",
+                "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1744696563803.svg"
+            },
+            "simplifiedBadges": [],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "125,90 TL",
+                "salePriceWihoutCurrency": "125,90",
+                "strikethroughPrice": "127,90 TL",
+                "discountPercentage": "-1%",
+                "discountBadgeData": {
+                    "showBadge": false,
+                    "discountPercentage": "-1%",
+                    "showFlameIcon": false
+                },
+                "currency": "TL",
+                "componentType": "DISCOUNTED",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "1": {
+                        "name": "lowestPriceDuration",
+                        "value": "10"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "125.90"
+                    }
+                }
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Telvesse",
+            "webBrands": [
+                {
+                    "id": 159585,
+                    "name": "Telvesse"
+                }
+            ],
+            "brandId": 1486357,
+            "campaignId": 61,
+            "merchantId": 130527,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 411908390,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 411908390,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty998/product/media/images/prod/SPM/PIM/20230829/15/0c5cf4c6-e576-37fc-ba16-60c991bd7271/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty998/product/media/images/prod/SPM/PIM/20230829/15/0c5cf4c6-e576-37fc-ba16-60c991bd7271/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty996/product/media/images/prod/SPM/PIM/20230829/15/5c5e1bc4-635f-3e8d-9e27-a4c2bd73de20/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty996/product/media/images/prod/SPM/PIM/20230829/15/27ae7604-bc6b-3e2a-884d-87019634006f/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty998/product/media/images/prod/SPM/PIM/20230829/15/e6d725f3-9a60-3f04-af8f-eb0bcb543bc2/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty997/product/media/images/prod/SPM/PIM/20230829/15/9451cdfa-43f0-32eb-a1d0-44ceb1299025/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty996/product/media/images/prod/SPM/PIM/20230829/15/21f6bddb-1fdc-318d-bf7f-025c6c4ea49b/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty997/product/media/images/prod/SPM/PIM/20230829/15/1a53634a-9c8a-3a0a-828b-c3360747e77f/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty998/product/media/images/prod/SPM/PIM/20230829/15/ad5aa294-6394-3723-8036-4b51f4871e6a/1_org_zoom.jpg"
+            ],
+            "itemNumber": 629780761,
+            "listingId": "b54d8e9721a7b922883930ccdc7b19f6",
+            "name": "Polisaj Süngeri Seti 4lü Matkap Uyumlu Pasta Cila Yünü Kuzu Postu Parlatma Pedi Seti",
+            "price": {
+                "old": 389,
+                "oldText": "389,00",
+                "currency": "TL",
+                "current": 329,
+                "currentText": "329,00",
+                "originalPrice": 389,
+                "originalPriceText": "389,00",
+                "discountedPrice": 329,
+                "discountedPriceText": "329,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.413127413127413,
+                "totalCount": 259
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Avantajlı Ürün",
+                    "hasStamp": true,
+                    "tag": "sari_kampanya_urunu",
+                    "tagId": 4897,
+                    "tagType": "CampaignBadge"
+                },
+                {
+                    "displayName": "Son 10 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_10",
+                    "tagId": 8581,
+                    "tagType": "LowestPrice"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/telvesse/polisaj-sungeri-seti-4lu-matkap-uyumlu-pasta-cila-yunu-kuzu-postu-parlatma-pedi-seti-p-411908390?boutiqueId=61&merchantId=130527",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 315553807,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Telvesse",
+                "name": "Polisaj Süngeri Seti 4lü Matkap Uyumlu Pasta Cila Yünü Kuzu Postu Parlatma Pedi Seti",
+                "webBrandName": "Telvesse"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "2K"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": true,
+                "price": "329,00 TL",
+                "priceNumerized": 329,
+                "priceWithoutCurrency": "329,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": "389,00 TL",
+                "lowestRecentPriceNumerized": 389,
+                "lowestRecentPriceWithoutCurrency": "389,00",
+                "lowestRecentPercentage": "-15%",
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "329,00 TL",
+                "salePriceWihoutCurrency": "329,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "329,00",
+                "lowestRecentPriceWithoutCurrency": "389,00",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "lowestPriceDuration",
+                    "type": 1,
+                    "value": "10"
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "280.44"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "329,00",
+                "newPrice": "314,00",
+                "integerPart": "314,00",
+                "decimalPart": "00",
+                "discountPercentage": 5,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "AUTHORIZED_SELLER",
+                "title": "Yetkili Satıcı",
+                "color": "#E6362C",
+                "icon": "https://cdn.dsmcdn.com/sfint/production/icons/authorized_seller_1744696878660.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": true,
+            "singlePrice": {
+                "salePrice": "280,44 TL",
+                "salePriceWihoutCurrency": "280,44",
+                "strikethroughPrice": "329 TL",
+                "currency": "TL",
+                "componentType": "TY_PLUS_PROMOTION",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Farecla",
+            "webBrands": [
+                {
+                    "id": 147847,
+                    "name": "Farecla"
+                }
+            ],
+            "brandId": 135347,
+            "campaignId": 61,
+            "merchantId": 647786,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 230095204,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 230095204,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1429/product/media/images/prod/QC/20240718/21/04c8a25d-3b7f-3210-b49b-2ff280b13c91/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1429/product/media/images/prod/QC/20240718/21/04c8a25d-3b7f-3210-b49b-2ff280b13c91/1_org_zoom.jpg"
+            ],
+            "itemNumber": 370445245,
+            "listingId": "6d25a691d7b04c2040d434053a4f6947",
+            "name": "Pasta Cila Seti",
+            "price": {
+                "old": 590,
+                "oldText": "590,00",
+                "currency": "TL",
+                "current": 570,
+                "currentText": "570,00",
+                "originalPrice": 590,
+                "originalPriceText": "590,00",
+                "discountedPrice": 570,
+                "discountedPriceText": "570,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.2439024390243905,
+                "totalCount": 82
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Son 10 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_10",
+                    "tagId": 8581,
+                    "tagType": "LowestPrice"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/farecla/pasta-cila-seti-p-230095204?boutiqueId=61&merchantId=647786",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": true,
+            "emptyRating": false,
+            "groupId": 199188582,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Farecla",
+                "name": "Pasta Cila Seti",
+                "webBrandName": "Farecla"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "617"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26509371,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "1500 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": true,
+                "price": "570,00 TL",
+                "priceNumerized": 570,
+                "priceWithoutCurrency": "570,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": "590,00 TL",
+                "lowestRecentPriceNumerized": 590,
+                "lowestRecentPriceWithoutCurrency": "590,00",
+                "lowestRecentPercentage": "-3%",
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "570,00 TL",
+                "salePriceWihoutCurrency": "570,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "570,00",
+                "lowestRecentPriceWithoutCurrency": "590,00",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "lowestPriceDuration",
+                    "type": 1,
+                    "value": "10"
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "570.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "570,00",
+                "newPrice": "555,00",
+                "integerPart": "555,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "COLLECTABLE_COUPON",
+                    "title": "Kupon Fırsatı",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526381249.svg",
+                    "color": "#FF4988"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "570 TL",
+                "salePriceWihoutCurrency": "570",
+                "strikethroughPrice": "590 TL",
+                "discountPercentage": "-3%",
+                "discountBadgeData": {
+                    "showBadge": false,
+                    "discountPercentage": "-3%",
+                    "showFlameIcon": false
+                },
+                "currency": "TL",
+                "componentType": "DISCOUNTED",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "1": {
+                        "name": "lowestPriceDuration",
+                        "value": "10"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "570.00"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26509371,
+                "name": "1500 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-03T23:00:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Telvesse",
+            "webBrands": [
+                {
+                    "id": 159585,
+                    "name": "Telvesse"
+                }
+            ],
+            "brandId": 1486357,
+            "campaignId": 61,
+            "merchantId": 130527,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 345577590,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 345577590,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty683/product/media/images/20230111/9/256356993/552377248/1/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty683/product/media/images/20230111/9/256356993/552377248/1/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty681/product/media/images/20230111/9/256356993/552377248/2/2_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty682/product/media/images/20230111/9/256356993/552377248/3/3_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty683/product/media/images/20230111/9/256356993/552377248/4/4_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty681/product/media/images/20230111/9/256356993/552377248/5/5_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty682/product/media/images/20230111/9/256356993/552377248/6/6_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty683/product/media/images/20230111/9/256356993/552377248/7/7_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty681/product/media/images/20230111/9/256356993/552377248/8/8_org_zoom.jpg"
+            ],
+            "itemNumber": 552377248,
+            "listingId": "d160f7bb219a8aefd202d06e36f07839",
+            "name": "5+1 Set Polisaj Süngeri Turuncu Oto Pasta Cila Parlatma Pedi 150mm + Matkap Aparatı",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 439,
+                "currentText": "439,00",
+                "originalPrice": 439,
+                "originalPriceText": "439,00",
+                "discountedPrice": 439,
+                "discountedPriceText": "439,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.2,
+                "totalCount": 80
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Avantajlı Ürün",
+                    "hasStamp": true,
+                    "tag": "sari_kampanya_urunu",
+                    "tagId": 4897,
+                    "tagType": "CampaignBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/telvesse/5-1-set-polisaj-sungeri-turuncu-oto-pasta-cila-parlatma-pedi-150mm-matkap-aparati-p-345577590?boutiqueId=61&merchantId=130527",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 281607865,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Telvesse",
+                "name": "5+1 Set Polisaj Süngeri Turuncu Oto Pasta Cila Parlatma Pedi 150mm + Matkap Aparatı",
+                "webBrandName": "Telvesse"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "103"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "1K"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "439,00 TL",
+                "priceNumerized": 439,
+                "priceWithoutCurrency": "439,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "439,00 TL",
+                "salePriceWihoutCurrency": "439,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "439,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "439.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "439,00",
+                "newPrice": "424,00",
+                "integerPart": "424,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "AUTHORIZED_SELLER",
+                "title": "Yetkili Satıcı",
+                "color": "#E6362C",
+                "icon": "https://cdn.dsmcdn.com/sfint/production/icons/authorized_seller_1744696878660.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": true,
+            "singlePrice": {
+                "salePrice": "439 TL",
+                "salePriceWihoutCurrency": "439",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Genel Markalar",
+            "webBrands": [],
+            "brandId": 1041874,
+            "campaignId": 61,
+            "merchantId": 938585,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 851601556,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 851601556,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1491/product/media/images/prod/QC/20240820/13/43b4f735-e966-3e72-b1f5-097c274749f0/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1491/product/media/images/prod/QC/20240820/13/43b4f735-e966-3e72-b1f5-097c274749f0/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1491/product/media/images/prod/QC/20240820/13/353f4aab-85bb-3374-b6be-5520c1f9b676/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1493/product/media/images/prod/QC/20240820/13/1cb90513-7095-3513-aaef-bb62825ee76f/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1492/product/media/images/prod/QC/20240820/13/4f5599d8-1b79-3eaa-b6c5-963d8f6805d9/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1491/product/media/images/prod/QC/20240820/13/9b44d40d-14de-3535-a35f-87c0473c0f9a/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1491/product/media/images/prod/QC/20240820/13/8c9529a8-fd69-3fed-8157-038393031943/1_org_zoom.jpg"
+            ],
+            "itemNumber": 1149523895,
+            "listingId": "13a275a62f059ac32b32a7a4adec862f",
+            "name": "Hellfire Seramik Katkılı Wax Krem Cila 100 gr",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 443,
+                "currentText": "443,00",
+                "originalPrice": 443,
+                "originalPriceText": "443,00",
+                "discountedPrice": 443,
+                "discountedPriceText": "443,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 3.37015503875969,
+                "totalCount": 1032
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "topRankingBadge": {
+                    "priority": true,
+                    "title": "6",
+                    "type": "MOST_FAVOURITE"
+                },
+                "unknownBadge": {
+                    "title": "Kargo Bedava",
+                    "type": "FREE_CARGO"
+                }
+            },
+            "stock": {},
+            "url": "/genel-markalar/hellfire-seramik-katkili-wax-krem-cila-100-gr-p-851601556?boutiqueId=61&merchantId=938585",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 649566825,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "hellfireeu",
+                "name": "Hellfire Seramik Katkılı Wax Krem Cila 100 gr"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "231"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "18K"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "443,00 TL",
+                "priceNumerized": 443,
+                "priceWithoutCurrency": "443,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "443,00 TL",
+                "salePriceWihoutCurrency": "443,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "443,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "443.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "443,00",
+                "newPrice": "428,00",
+                "integerPart": "428,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "MOST_FAVOURITE",
+                "title": "6",
+                "color": "linear-gradient(90deg, #F27A1A 0%, #FFC000 100%)",
+                "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1744696563803.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "443 TL",
+                "salePriceWihoutCurrency": "443",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": false,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Farecla",
+            "webBrands": [
+                {
+                    "id": 147847,
+                    "name": "Farecla"
+                }
+            ],
+            "brandId": 135347,
+            "campaignId": 61,
+            "merchantId": 418956,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 41494584,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 41494584,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty537/product/media/images/20220922/8/178308262/73466357/1/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty537/product/media/images/20220922/8/178308262/73466357/1/1_org_zoom.jpg"
+            ],
+            "itemNumber": 73466357,
+            "listingId": "01406c3c635e6680048e2470def2dcae",
+            "name": "G3 Sıvı Pasta- Advanced Liquid Compound (1 LİTRE)",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 785,
+                "currentText": "785,00",
+                "originalPrice": 785,
+                "originalPriceText": "785,00",
+                "discountedPrice": 785,
+                "discountedPriceText": "785,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.605263157894737,
+                "totalCount": 38
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/farecla/g3-sivi-pasta-advanced-liquid-compound-1-litre-p-41494584?boutiqueId=61&merchantId=418956",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 34626550,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Farecla",
+                "name": "G3 Sıvı Pasta- Advanced Liquid Compound (1 LİTRE)",
+                "webBrandName": "Farecla"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "783"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "785,00 TL",
+                "priceNumerized": 785,
+                "priceWithoutCurrency": "785,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "785,00 TL",
+                "salePriceWihoutCurrency": "785,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "785,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "785.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "785,00",
+                "newPrice": "770,00",
+                "integerPart": "770,00",
+                "decimalPart": "00",
+                "discountPercentage": 2,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "785 TL",
+                "salePriceWihoutCurrency": "785",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "MAGUREX",
+            "webBrands": [
+                {
+                    "id": 144708,
+                    "name": "magurex"
+                }
+            ],
+            "brandId": 948521,
+            "campaignId": 61,
+            "merchantId": 152318,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 40181078,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 40181078,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1820/prod/QC_ENRICHMENT/20260202/17/1acbd4e7-a931-3a55-97e9-ddf4b247d8a6/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1820/prod/QC_ENRICHMENT/20260202/17/1acbd4e7-a931-3a55-97e9-ddf4b247d8a6/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1762/prod/QC_ENRICHMENT/20250922/17/810daba6-88aa-3fd3-930b-bb9eff1b1fbd/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1762/prod/QC_ENRICHMENT/20250922/17/ffa215e7-4ff7-308e-91a2-e5df2a346f6e/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1762/prod/QC_ENRICHMENT/20250922/17/59dd9b86-e156-3f2d-8cba-981577d2d767/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1763/prod/QC_ENRICHMENT/20250922/17/aa5a0fdc-f1d4-366d-83dd-649adfcfab7b/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1763/prod/QC_ENRICHMENT/20250922/17/203f9062-6787-3282-a4ea-73e39ed45836/1_org_zoom.jpg"
+            ],
+            "itemNumber": 71142453,
+            "listingId": "13aed825af13cedb16cee0b7f45f9d87",
+            "name": "Ultra Hızlı Cila Seramik Görünümlü",
+            "price": {
+                "old": 399,
+                "oldText": "399,00",
+                "currency": "TL",
+                "current": 371.13,
+                "currentText": "371,13",
+                "originalPrice": 399,
+                "originalPriceText": "399,00",
+                "discountedPrice": 371.13,
+                "discountedPriceText": "371,13",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.20979020979021,
+                "totalCount": 143
+            },
+            "stamps": {},
+            "tagDetails": [
+                {
+                    "displayName": "Son 10 Günün En Düşük Fiyatı",
+                    "hasStamp": true,
+                    "tag": "lowest_price_duration_10",
+                    "tagId": 8581,
+                    "tagType": "LowestPrice"
+                },
+                {
+                    "displayName": "Bugün Fiyatı Düşenler",
+                    "hasStamp": true,
+                    "tag": "daily_discount",
+                    "tagId": 6751,
+                    "tagType": "DailyDiscountBadge"
+                },
+                {
+                    "displayName": "Avantajlı Ürün",
+                    "hasStamp": true,
+                    "tag": "sari_kampanya_urunu",
+                    "tagId": 4897,
+                    "tagType": "CampaignBadge"
+                }
+            ],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/magurex/ultra-hizli-cila-seramik-gorunumlu-p-40181078?boutiqueId=61&merchantId=152318",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 33491402,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "MAGUREX",
+                "name": "Ultra Hızlı Cila Seramik Görünümlü",
+                "webBrandName": "magurex"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "653"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "4K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "418"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": true,
+                "price": "371,13 TL",
+                "priceNumerized": 371.13,
+                "priceWithoutCurrency": "371,13",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": "399,00 TL",
+                "lowestRecentPriceNumerized": 399,
+                "lowestRecentPriceWithoutCurrency": "399,00",
+                "lowestRecentPercentage": "-7%",
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "371,13 TL",
+                "salePriceWihoutCurrency": "371,13",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "371,13",
+                "lowestRecentPriceWithoutCurrency": "399,00",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "lowestPriceDuration",
+                    "type": 1,
+                    "value": "10"
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "331.82"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "371,13",
+                "newPrice": "356,13",
+                "integerPart": "356,13",
+                "decimalPart": "00",
+                "discountPercentage": 4,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "TOP_VIEWED",
+                "title": "4",
+                "color": "linear-gradient(90deg, #F27A1A 0%, #FFC000 100%)",
+                "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1744696563803.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "331,82 TL",
+                "salePriceWihoutCurrency": "331,82",
+                "strikethroughPrice": "371,13 TL",
+                "currency": "TL",
+                "componentType": "TY_PLUS_PROMOTION",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Turtle Wax",
+            "webBrands": [
+                {
+                    "id": 109472,
+                    "name": "Turtle Wax"
+                }
+            ],
+            "brandId": 22257,
+            "campaignId": 61,
+            "merchantId": 124494,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 39292712,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 39292712,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1805/prod/QC_ENRICHMENT/20251223/20/e4891538-d4fd-3061-9e00-a157524af5ca/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1805/prod/QC_ENRICHMENT/20251223/20/e4891538-d4fd-3061-9e00-a157524af5ca/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1803/prod/QC_ENRICHMENT/20251223/20/9ce9106b-6e5b-35bc-81a7-59d8cb104099/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1804/prod/QC_ENRICHMENT/20251223/20/d9818eed-b976-3363-9f8c-aa9a828d9d6f/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1804/prod/QC_ENRICHMENT/20251223/20/ad5fd14d-2d54-3c5e-8e74-ec07fed93272/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1622/prod/QC/20250109/20/2a141aa5-65e0-3dd5-93d1-9d4abe8bfe1b/1_org_zoom.jpg"
+            ],
+            "itemNumber": 69529750,
+            "listingId": "be9c80df9a74028601a8e83e38ded45c",
+            "name": "Carnauba Sıvı Cila Boya Koruyucu ve Parlatıcı 500 ml + Uygulama Bezi ve Cila Süngeri",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 889.9,
+                "currentText": "889,90",
+                "originalPrice": 889.9,
+                "originalPriceText": "889,90",
+                "discountedPrice": 889.9,
+                "discountedPriceText": "889,90",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.4071729957805905,
+                "totalCount": 474
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/turtle-wax/carnauba-sivi-cila-boya-koruyucu-ve-parlatici-500-ml-uygulama-bezi-ve-cila-sungeri-p-39292712?boutiqueId=61&merchantId=124494",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 2230539,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Turtle Wax",
+                "name": "Carnauba Sıvı Cila Boya Koruyucu ve Parlatıcı 500 ml + Uygulama Bezi ve Cila Süngeri",
+                "webBrandName": "Turtle Wax"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "125"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "7K"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26677175,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "2. Ürüne 40 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "889,90 TL",
+                "priceNumerized": 889.9,
+                "priceWithoutCurrency": "889,90",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "889,90 TL",
+                "salePriceWihoutCurrency": "889,90",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "889,90",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "889.90"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "889,90",
+                "newPrice": "874,90",
+                "integerPart": "874,90",
+                "decimalPart": "00",
+                "discountPercentage": 2,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "SUCCESSFUL_SELLER",
+                "title": "Başarılı Satıcı",
+                "color": "#F27A1A",
+                "icon": "https://cdn.dsmcdn.com/sfint/production/icons/successful_seller_1744696878660.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "889,90 TL",
+                "salePriceWihoutCurrency": "889,90",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26677175,
+                "name": "2. Ürüne 40 TL İndirim",
+                "promotionEndDate": "2026-03-10T23:00:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Menzerna",
+            "webBrands": [
+                {
+                    "id": 111290,
+                    "name": "Menzerna"
+                }
+            ],
+            "brandId": 39412,
+            "campaignId": 61,
+            "merchantId": 647786,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 49110004,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 49110004,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1576/prod/QC/20241001/18/86693cee-e1c0-3239-8e4c-af75266e10e6/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1576/prod/QC/20241001/18/86693cee-e1c0-3239-8e4c-af75266e10e6/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1575/prod/QC/20241001/18/a05d85d4-3643-3821-b5e0-fe9994fc1fe8/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1575/prod/QC/20241001/18/4bd5ec9b-504c-3522-ba8b-7c8e2d66c9ee/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1577/prod/QC/20241001/18/a7442878-c097-35fa-b0b5-f61812063326/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1575/prod/QC/20241001/18/7134281e-b076-308e-a8be-06389ed3b633/1_org_zoom.jpg"
+            ],
+            "itemNumber": 87080260,
+            "listingId": "ca582074fed1ec3cb0b2994412c5c3be",
+            "name": "AS 30 Ağır Çizik Giderici Krem Kalın Pasta - 1 kg",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 949,
+                "currentText": "949,00",
+                "originalPrice": 949,
+                "originalPriceText": "949,00",
+                "discountedPrice": 949,
+                "discountedPriceText": "949,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 3.9361702127659575,
+                "totalCount": 47
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/menzerna/as-30-agir-cizik-giderici-krem-kalin-pasta-1-kg-p-49110004?boutiqueId=61&merchantId=647786",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": true,
+            "emptyRating": false,
+            "groupId": 41277662,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Menzerna",
+                "name": "AS 30 Ağır Çizik Giderici Krem Kalın Pasta - 1 kg",
+                "webBrandName": "Menzerna"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "512"
+                }
+            ],
+            "promotions": [
+                {
+                    "id": 26509371,
+                    "shortName": "Çok Al Az Öde",
+                    "name": "1500 TL'ye 50 TL İndirim",
+                    "discountType": 2
+                }
+            ],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "949,00 TL",
+                "priceNumerized": 949,
+                "priceWithoutCurrency": "949,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "949,00 TL",
+                "salePriceWihoutCurrency": "949,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "949,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "949.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "949,00",
+                "newPrice": "934,00",
+                "integerPart": "934,00",
+                "decimalPart": "00",
+                "discountPercentage": 2,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                },
+                {
+                    "type": "COUPON_DISCOUNT",
+                    "title": "40 TL Kupon",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526381249.svg",
+                    "color": "#FF4988"
+                },
+                {
+                    "type": "TAKE_MORE_PAY_LESS",
+                    "title": "Çok Al Az Öde",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526420395.svg",
+                    "color": "#F27A1A"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "949 TL",
+                "salePriceWihoutCurrency": "949",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26509371,
+                "name": "1500 TL'ye 50 TL İndirim",
+                "promotionEndDate": "2026-03-03T23:00:00",
+                "shortName": "Çok Al Az Öde"
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Menzerna",
+            "webBrands": [
+                {
+                    "id": 111290,
+                    "name": "Menzerna"
+                }
+            ],
+            "brandId": 39412,
+            "campaignId": 61,
+            "merchantId": 910394,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 70520046,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 70520046,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1678/prod/QC/20250514/15/1eab8ece-69f4-32b6-820b-eb529473422c/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1678/prod/QC/20250514/15/1eab8ece-69f4-32b6-820b-eb529473422c/1_org_zoom.jpg"
+            ],
+            "itemNumber": 122007477,
+            "listingId": "c673b20938f3280b2eaa63854c9f7f98",
+            "name": "Sealing Wax Protect - Boya Koruma Cilası 250 ml",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 649,
+                "currentText": "649,00",
+                "originalPrice": 649,
+                "originalPriceText": "649,00",
+                "discountedPrice": 649,
+                "discountedPriceText": "649,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.6923076923076925,
+                "totalCount": 39
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "Hızlı Satıcı",
+                    "type": "FAST_SELLER"
+                }
+            },
+            "stock": {},
+            "url": "/menzerna/sealing-wax-protect-boya-koruma-cilasi-250-ml-p-70520046?boutiqueId=61&merchantId=910394",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 60441580,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Menzerna",
+                "name": "Sealing Wax Protect - Boya Koruma Cilası 250 ml",
+                "webBrandName": "Menzerna"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "831"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "649,00 TL",
+                "priceNumerized": 649,
+                "priceWithoutCurrency": "649,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "649,00 TL",
+                "salePriceWihoutCurrency": "649,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "649,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "649.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "649,00",
+                "newPrice": "634,00",
+                "integerPart": "634,00",
+                "decimalPart": "00",
+                "discountPercentage": 2,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "649 TL",
+                "salePriceWihoutCurrency": "649",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "Dyo",
+            "webBrands": [
+                {
+                    "id": 106524,
+                    "name": "Dyo"
+                }
+            ],
+            "brandId": 15733,
+            "campaignId": 61,
+            "merchantId": 603731,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 43371841,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 43371841,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty1591/prod/QC/20241023/09/3a411a52-42c9-3a44-b9e1-d8dbebc25e14/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty1591/prod/QC/20241023/09/3a411a52-42c9-3a44-b9e1-d8dbebc25e14/1_org_zoom.jpg"
+            ],
+            "itemNumber": 76928243,
+            "listingId": "d173450ffabda526ca08bba31dc05602",
+            "name": "Wax Cila Parlaklık Koruyucu 1 Lt",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 824.99,
+                "currentText": "824,99",
+                "originalPrice": 814.99,
+                "originalPriceText": "814,99",
+                "discountedPrice": 814.99,
+                "discountedPriceText": "814,99",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.136363636363637,
+                "totalCount": 22
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "unknownBadge": {
+                    "title": "3 Ay Ertelemeli Kredi Fırsatı!",
+                    "type": "CREDIT_SUITABLE"
+                }
+            },
+            "stock": {},
+            "url": "/dyo/wax-cila-parlaklik-koruyucu-1-lt-p-43371841?boutiqueId=61&merchantId=603731",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 36267116,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "Dyo",
+                "name": "Wax Cila Parlaklık Koruyucu 1 Lt",
+                "webBrandName": "Dyo"
+            },
+            "socialProof": [
+                {
+                    "key": "favoriteCount",
+                    "value": "398"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "sellingPrice": "824,99 TL",
+                "sellingPriceWithoutCurrency": "824,99",
+                "sellingPriceNumerized": 824.99,
+                "discountedPromotionPrice": "814,99 TL",
+                "discountedPromotionPriceWithoutCurrency": "814,99",
+                "discountedPromotionPriceNumerized": 814.99,
+                "discountedPromotionPricePercentage": "-1%",
+                "promotionDiscountPercentage": 1,
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "814,99 TL",
+                "salePriceWihoutCurrency": "814,99",
+                "strikethroughPrice": "824,99",
+                "strikethroughPriceType": "sellingPrice",
+                "discountPercentage": "-1%",
+                "currency": "TL",
+                "discountType": "basketPromotion"
+            },
+            "discountBoxType": 2,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "814,99",
+                "lowestRecentPriceWithoutCurrency": "824,99",
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "Sepette 10 TL İndirim",
+                    "type": 2
+                },
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "814.99"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "814,99",
+                "newPrice": "799,99",
+                "integerPart": "799,99",
+                "decimalPart": "00",
+                "discountPercentage": 2,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": null,
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "814,99 TL",
+                "salePriceWihoutCurrency": "814,99",
+                "strikethroughPrice": "824,99 TL",
+                "currency": "TL",
+                "componentType": "BASKET_PROMO",
+                "storefrontType": "TR",
+                "priceLabels": {
+                    "2": {
+                        "name": "Sepette 10 TL İndirim"
+                    },
+                    "4": {
+                        "name": "TY Plus",
+                        "value": "814.99"
+                    }
+                }
+            },
+            "singlePromotion": {
+                "discountType": 2,
+                "id": 26903394,
+                "name": "Sepette 10 TL İndirim",
+                "promotionEndDate": "2026-03-26T23:00:00",
+                "shortName": ""
+            },
+            "rushDelivery": true,
+            "sameDayShipping": false
+        },
+        {
+            "boutiqueId": 61,
+            "brand": "garage bulls",
+            "webBrands": [
+                {
+                    "id": 148311,
+                    "name": "Garagebulls"
+                }
+            ],
+            "brandId": 1208618,
+            "campaignId": 61,
+            "merchantId": 1215574,
+            "category": {
+                "name": "Pasta Cila",
+                "id": 4785
+            },
+            "contentId": 117464158,
+            "discount": {
+                "discountName": ""
+            },
+            "id": 117464158,
+            "image": "https://cdn.dsmcdn.com/mnresize/400/-/ty112/product/media/images/20210510/15/87231511/172793255/1/1_org_zoom.jpg",
+            "images": [
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty112/product/media/images/20210510/15/87231511/172793255/1/1_org_zoom.jpg",
+                "https://cdn.dsmcdn.com/mnresize/400/-/ty113/product/media/images/20210510/15/87231511/172793255/2/2_org_zoom.jpg"
+            ],
+            "itemNumber": 189159536,
+            "listingId": "6cc4afa9006ba96b782c24c642c29f33",
+            "name": "Plastik Yenileyici Ve Onarıcı Seramik Kaplama",
+            "price": {
+                "old": 0,
+                "oldText": "0,00",
+                "currency": "TL",
+                "current": 430,
+                "currentText": "430,00",
+                "originalPrice": 430,
+                "originalPriceText": "430,00",
+                "discountedPrice": 430,
+                "discountedPriceText": "430,00",
+                "currencySymbol": "TL"
+            },
+            "ratingScore": {
+                "averageRating": 4.107509881422925,
+                "totalCount": 3795
+            },
+            "stamps": {},
+            "tagDetails": [],
+            "badges": {
+                "topRankingBadge": {
+                    "priority": true,
+                    "title": "2",
+                    "type": "MOST_RATED"
+                },
+                "unknownBadge": {
+                    "title": "Kargo Bedava",
+                    "type": "FREE_CARGO"
+                }
+            },
+            "stock": {},
+            "url": "/garagebulls/plastik-yenileyici-ve-onarici-seramik-kaplama-p-117464158?boutiqueId=61&merchantId=1215574",
+            "placeholder": "https://cdn.dsmcdn.com/sfint/production/images/trendyol-product-card-placeholder_1759241898120.svg",
+            "isSexualContent": false,
+            "hasCollectableCoupon": false,
+            "emptyRating": false,
+            "groupId": 103399056,
+            "variantValue": "Tek Ebat",
+            "variantId": "tek-ebat",
+            "isOneSize": true,
+            "hasReviewPhoto": true,
+            "cleanUrlFragments": {
+                "brandName": "garage bulls",
+                "name": "Plastik Yenileyici Ve Onarıcı Seramik Kaplama",
+                "webBrandName": "Garagebulls"
+            },
+            "socialProof": [
+                {
+                    "key": "basketCount",
+                    "value": "425"
+                },
+                {
+                    "key": "favoriteCount",
+                    "value": "23K"
+                },
+                {
+                    "key": "pageViewCount",
+                    "value": "185"
+                }
+            ],
+            "promotions": [],
+            "freeCargo": true,
+            "recommendedRetailPrice": {
+                "isPriceDiscounted": false,
+                "price": "430,00 TL",
+                "priceNumerized": 430,
+                "priceWithoutCurrency": "430,00",
+                "suggestedPrice": null,
+                "suggestedPriceWithoutCurrency": null,
+                "suggestedPriceNumerized": null,
+                "suggestedPricePercentage": null,
+                "lowestRecentPrice": null,
+                "lowestRecentPriceNumerized": null,
+                "lowestRecentPriceWithoutCurrency": null,
+                "lowestRecentPercentage": null,
+                "currency": "TL"
+            },
+            "binaryPrice": {
+                "salePrice": "430,00 TL",
+                "salePriceWihoutCurrency": "430,00",
+                "strikethroughPrice": null,
+                "strikethroughPriceType": null,
+                "discountPercentage": null,
+                "currency": "TL",
+                "discountType": "rrp"
+            },
+            "discountBoxType": 0,
+            "isChoiceNNStoreProduct": false,
+            "choiceNNPrice": {
+                "priceWithoutCurrency": "430,00",
+                "lowestRecentPriceWithoutCurrency": null,
+                "currency": "TL"
+            },
+            "hasFlashSaleTag": false,
+            "hasFastDeliveryTag": false,
+            "priceLabels": [
+                {
+                    "name": "TY Plus",
+                    "type": 4,
+                    "value": "430.00"
+                }
+            ],
+            "tagStockBar": {
+                "isSoldOut": false
+            },
+            "appPrice": {
+                "oldPrice": "430,00",
+                "newPrice": "415,00",
+                "integerPart": "415,00",
+                "decimalPart": "00",
+                "discountPercentage": 3,
+                "currency": "TL",
+                "codeName": "HELLO40",
+                "discountLimit": 37
+            },
+            "hasCodePromo": false,
+            "cardType": "PRODUCT",
+            "advertType": "DEFAULT",
+            "advert": {
+                "adScore": 0,
+                "adScores": {},
+                "advertId": "",
+                "advertSlot": 0,
+                "cpc": 0,
+                "eCpc": 0,
+                "minCpc": 0,
+                "sortingScore": 0
+            },
+            "stripBadge": {
+                "type": "MOST_RATED",
+                "title": "2",
+                "color": "linear-gradient(90deg, #F27A1A 0%, #FFC000 100%)",
+                "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1744696563803.svg"
+            },
+            "simplifiedBadges": [
+                {
+                    "type": "FREE_CARGO",
+                    "title": "Kargo Bedava",
+                    "icon": "https://cdn.dsmcdn.com/sfint/prod/fp/icon_1746526403138.svg",
+                    "color": "#666"
+                }
+            ],
+            "hasOfficialSellerBadge": false,
+            "singlePrice": {
+                "salePrice": "430 TL",
+                "salePriceWihoutCurrency": "430",
+                "currency": "TL",
+                "componentType": "DEFAULT",
+                "storefrontType": "TR"
+            },
+            "singlePromotion": null,
+            "rushDelivery": true,
+            "sameDayShipping": false
+        }
+    ],
+    "query": {
+        "pathModel": "pasta-cila-x-c143965",
+        "offsetParameters": "Product_22,Ads_7,LastAdSlot_5",
+        "offset": "2200007",
+        "culture": "tr-TR"
+    },
+    "resolvedQuery": {
+        "filters": [
+            {
+                "filterKey": "WebCategory",
+                "filterType": "LIST",
+                "type": "WebCategory",
+                "filterField": "webCategoryIds",
+                "values": [
+                    "143965"
+                ],
+                "filters": [
+                    {
+                        "key": "143965",
+                        "beautifiedName": "pasta-cila",
+                        "name": "Pasta Cila"
+                    }
+                ]
+            }
+        ],
+        "searchKey": ""
+    },
+    "sortValue": "SCORE",
+    "title": "Pasta Cila",
+    "generatedSearchQuery": "Pasta Cila",
+    "total": 4988,
+    "roughTotal": "4988",
+    "_links": {
+        "sort": [
+            {
+                "name": "Score",
+                "value": "Score",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=SCORE",
+                "id": "SCORE",
+                "default": true
+            },
+            {
+                "name": "PriceByAsc",
+                "value": "PriceByAsc",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=PRICE_BY_ASC",
+                "id": "PRICE_BY_ASC"
+            },
+            {
+                "name": "PriceByDesc",
+                "value": "PriceByDesc",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=PRICE_BY_DESC",
+                "id": "PRICE_BY_DESC"
+            },
+            {
+                "name": "MostRecent",
+                "value": "MostRecent",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=MOST_RECENT",
+                "id": "MOST_RECENT"
+            },
+            {
+                "name": "BestSeller",
+                "value": "BestSeller",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=BEST_SELLER",
+                "id": "BEST_SELLER",
+                "isQuickSort": true,
+                "color": "red",
+                "iconName": "fire-filled",
+                "order": 1
+            },
+            {
+                "name": "MostFavourite",
+                "value": "MostFavourite",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=MOST_FAVOURITE",
+                "id": "MOST_FAVOURITE",
+                "isQuickSort": true,
+                "color": "orange",
+                "iconName": "int-favorites-full",
+                "order": 3
+            },
+            {
+                "name": "MostRated",
+                "value": "MostRated",
+                "link": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014&sst=MOST_RATED",
+                "id": "MOST_RATED",
+                "isQuickSort": true,
+                "color": "yellow",
+                "iconName": "star-filled",
+                "order": 2
+            }
+        ],
+        "next": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=3&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014",
+        "previous": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=1&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014",
+        "current": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=2&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014",
+        "aggregation": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/aggregations?pathModel=pasta-cila-x-c143965&pi=2&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24",
+        "product": "https://apigw.trendyol.com/discovery-sfint-search-service/api/search/products/?pathModel=pasta-cila-x-c143965&pi=2&offsetParameters=Product_22%2CAds_7%2CLastAdSlot_5&channelId=1&culture=tr-TR&pageSize=24&offset=4400014"
+    },
+    "pageIndex": 2,
+    "searchWidgets": {
+        "bannerWidgets": {},
+        "productSliderWidgets": {},
+        "justForYouWidget": {},
+        "relatedFilterWidget": {},
+        "aeChoiceWidget": {},
+        "visualCategoryWidget": {},
+        "eventPageFilterWidget": {}
+    },
+    "singleSearchWidgets": [
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_0",
+            "displayOrder": 1,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 1,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_1",
+            "displayOrder": 6,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 2,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_2",
+            "displayOrder": 11,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 3,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_3",
+            "displayOrder": 16,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 4,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_4",
+            "displayOrder": 21,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 5,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_5",
+            "displayOrder": 26,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 6,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_6",
+            "displayOrder": 31,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 7,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_7",
+            "displayOrder": 36,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 8,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_8",
+            "displayOrder": 41,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 9,
+            "displayTypeVariation": "HORIZONTAL"
+        },
+        {
+            "title": "Sponsorlu",
+            "eventKey": "pasta cila",
+            "displayCount": 1,
+            "androidClientVersion": 323,
+            "iosClientVersion": 100,
+            "forUpperClientVersion": true,
+            "type": "SELLER_STORE",
+            "displayType": "SLIDER",
+            "feedingSource": "STORE_ADS",
+            "feedingSourceDataKey": "pasta cila_9",
+            "displayOrder": 46,
+            "itemCount": 1,
+            "active": true,
+            "widgetOrder": 10,
+            "displayTypeVariation": "HORIZONTAL"
+        }
+    ],
+    "headerBannerWidget": null,
+    "appPriceParams": {
+        "codeName": "HELLO40",
+        "currency": "TL",
+        "discountLimit": 37
+    },
+    "offsetParameters": "Product_44,Ads_14,LastAdSlot_7",
+    "offset": 4400014,
+    "relevancyKey": "cila_pasta",
+    "uxLayout": "General Merchandise",
+    "alternateTitles": [],
+    "storeAdsWidgets": [
+        {
+            "seller": {
+                "imgUrl": "https://cdn.dsmcdn.com/seller-store/uploads/741509/d46f5c80-cdb0-478e-89cd-39fe17139683.jpeg",
+                "markers": [],
+                "badges": [],
+                "ratingColor": "049B24",
+                "rating": 9.6,
+                "sellerName": "AUTO POWER",
+                "cpm": {
+                    "min": 86.12,
+                    "charged": 187,
+                    "e-cpm": 187
+                },
+                "advertId": "3a5c5f5e-c981-49ad-87c1-c665259be176",
+                "id": 741509,
+                "score": 187,
+                "normalizedKeyword": "pasta cila",
+                "broadMatch": false,
+                "link": {
+                    "platform": "WEB",
+                    "url": "https://www.trendyol.com/magaza/X-m-741509"
+                }
+            },
+            "products": [
+                {
+                    "brand": "Pro Strong Wax",
+                    "title": "Araba Oto Çizik Giderici, Güneş Yanığı Boya Koruma Su Ve Kir Itici, Parlatıcı Wax, Pasta Cila 150 ml",
+                    "id": 649372359,
+                    "price": "459 TL",
+                    "imgUrl": "https://cdn.dsmcdn.com/ty1639/prod/QC/20250219/00/94ebb956-b572-31b7-bcbd-8fb4b51d3e25/1_org_zoom.jpg",
+                    "productUrl": "/pro-strong-wax/araba-oto-cizik-giderici-gunes-yanigi-boya-koruma-su-ve-kir-itici-parlatici-wax-pasta-cila-150-ml-p-649372359?merchantId=741509",
+                    "isSexualContent": false,
+                    "hasReviewPhoto": true,
+                    "ratingScore": {
+                        "averageRating": 4.10998761865456,
+                        "totalCount": 4846
+                    },
+                    "lowestPriceDuration": 0,
+                    "priceInfos": {
+                        "buyingPrice": 0,
+                        "currency": "TRY",
+                        "discountRatio": 0,
+                        "discountedPrice": 459,
+                        "originalPrice": 459,
+                        "sellingPrice": 459
+                    }
+                },
+                {
+                    "brand": "Pro Strong Wax",
+                    "title": "Oto Araba Çizik Giderici, Güneş Yanığı Boya Koruma Su Itici, Parlatıcı Wax Cila, Pasta Cila 150 ml",
+                    "id": 860743675,
+                    "price": "449 TL",
+                    "imgUrl": "https://cdn.dsmcdn.com/ty1639/prod/QC/20250219/00/73789d6d-b18e-3649-b0da-3ed8853ed8ba/1_org_zoom.jpg",
+                    "productUrl": "/pro-strong-wax/oto-araba-cizik-giderici-gunes-yanigi-boya-koruma-su-itici-parlatici-wax-cila-pasta-cila-150-ml-p-860743675?merchantId=741509",
+                    "isSexualContent": false,
+                    "hasReviewPhoto": true,
+                    "ratingScore": {
+                        "averageRating": 4.343453510436433,
+                        "totalCount": 1581
+                    },
+                    "lowestPriceDuration": 0,
+                    "priceInfos": {
+                        "buyingPrice": 0,
+                        "currency": "TRY",
+                        "discountRatio": 0,
+                        "discountedPrice": 449,
+                        "originalPrice": 449,
+                        "sellingPrice": 449
+                    }
+                },
+                {
+                    "brand": "K-Auto Ceramics",
+                    "title": "Araba Oto Çizik Giderici, Güneş Yanığı, Boya Koruma Su Itici, Seramik Katkılı, Pasta Cila 150 ml",
+                    "id": 654362003,
+                    "price": "449 TL",
+                    "imgUrl": "https://cdn.dsmcdn.com/ty1639/prod/QC/20250219/00/04ab423c-02aa-31cf-a686-d90649bf3412/1_org_zoom.jpg",
+                    "productUrl": "/k-auto-ceramics/araba-oto-cizik-giderici-gunes-yanigi-boya-koruma-su-itici-seramik-katkili-pasta-cila-150-ml-p-654362003?merchantId=741509",
+                    "isSexualContent": false,
+                    "hasReviewPhoto": true,
+                    "ratingScore": {
+                        "averageRating": 4.356048765239137,
+                        "totalCount": 3199
+                    },
+                    "lowestPriceDuration": 0,
+                    "priceInfos": {
+                        "buyingPrice": 0,
+                        "currency": "TRY",
+                        "discountRatio": 0,
+                        "discountedPrice": 449,
+                        "originalPrice": 449,
+                        "sellingPrice": 449
+                    }
+                },
+                {
+                    "brand": "K-Auto Ceramics",
+                    "title": "Oto Araba Çizik Giderici, Güneş Yanığı, Boya Koruma, Su Ve Kir Itici, Cila, Seramik Kaplama 150 ml",
+                    "id": 639402656,
+                    "price": "459 TL",
+                    "imgUrl": "https://cdn.dsmcdn.com/ty1640/prod/QC/20250219/00/b5e872d0-ce70-3901-b7a5-80f609577a24/1_org_zoom.jpg",
+                    "productUrl": "/k-auto-ceramics/oto-araba-cizik-giderici-gunes-yanigi-boya-koruma-su-ve-kir-itici-cila-seramik-kaplama-150-ml-p-639402656?merchantId=741509",
+                    "isSexualContent": false,
+                    "hasReviewPhoto": true,
+                    "ratingScore": {
+                        "averageRating": 4.22179675994109,
+                        "totalCount": 3395
+                    },
+                    "lowestPriceDuration": 0,
+                    "priceInfos": {
+                        "buyingPrice": 0,
+                        "currency": "TRY",
+                        "discountRatio": 0,
+                        "discountedPrice": 459,
+                        "originalPrice": 459,
+                        "sellingPrice": 459
+                    }
+                }
+            ],
+            "mediaType": "DEFAULT"
+        }
+    ]
+}

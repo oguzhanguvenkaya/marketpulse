@@ -100,12 +100,16 @@ class Settings(BaseSettings):
     SCRAPER_API_KEY: str = _resolve_scraper_api_key()
     
     PROXY_PROVIDER: str = os.getenv("PROXY_PROVIDER", "auto")
-    
+
+    # Hybrid Search (pgvector + pg_trgm)
+    HYBRID_SEARCH_ENABLED: bool = os.getenv("HYBRID_SEARCH_ENABLED", "true").lower() == "true"
+
     # Supabase Auth ayarları
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+    SUPABASE_JWT_JWK: str = os.getenv("SUPABASE_JWT_JWK", "")
 
     # Email servisi
     RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")

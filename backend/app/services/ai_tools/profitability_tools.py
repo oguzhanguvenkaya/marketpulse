@@ -1,8 +1,9 @@
 """Kârlılık hesaplama AI tool fonksiyonları."""
 
 import logging
+from app.core.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger("ai.tools.profitability")
 
 
 async def calculate_profitability(

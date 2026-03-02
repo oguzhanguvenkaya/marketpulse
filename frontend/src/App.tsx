@@ -71,8 +71,8 @@ function App() {
           <Suspense fallback={<PageSkeleton />}>
             <AppRoutes />
           </Suspense>
+          <ChatPanel />
         </ErrorBoundary>
-        <ChatPanel />
         <Toaster
           position="top-right"
           toastOptions={{

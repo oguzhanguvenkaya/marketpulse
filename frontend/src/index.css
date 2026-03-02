@@ -644,3 +644,29 @@ textarea:focus {
     border-radius: 12px;
   }
 }
+
+/* --- Chat Panel: tablo icindeki gorseller kucuk thumbnail --- */
+.chat-table img.chat-img {
+  max-width: 40px;
+  max-height: 40px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+/* Chat disindaki gorseller normal boyut */
+.chat-img {
+  max-width: 200px;
+  max-height: 200px;
+  margin: 4px 0;
+}
+
+/* Chat tablo hucreleri: uzun text'leri kes */
+.chat-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chat tablo: satir yuksekligi compact */
+.chat-table tr {
+  line-height: 1.3;
+}

@@ -1,0 +1,51 @@
+# MarketPulse Pro Modüller: Kârlılık Yönetimi ve AI Müşteri Hizmetleri
+
+Bu doküman, MarketPulse platformunu basit bir fiyat takip aracından (Price Tracker) çıkarıp, e-ticaret satıcılarının gelirini maksimize eden ve operasyonel yükünü sıfırlayan tam teşekküllü bir **"Gelir Optimizasyon ve Asistan Platformuna" (Revenue Optimization SaaS)** dönüştürecek iki ana vizyon modülünü birleştirir.
+
+---
+
+## 1. MODÜL: Kampanya, Kupon ve Kârlılık Yönetimi Merkezi
+
+E-ticaret işletmelerinin pazar yerlerindeki karmaşık komisyon, kargo ve promosyon matematiklerinde kaybolmasını engeller. Zararına satışı durdurur ve kârlı fırsatları otomatik yakalar.
+
+### A. Kârlılık Simülatörü ve Basitleştirilmiş Maliyet Modeli
+*   **Net Kâr Formülü:** `Satış Fiyatı - Alış Maliyeti - Sabit Kategori Komisyonu - Sabit Kargo (Örn. 90₺) + Kampanya Desteği`
+*   **İşleyiş:** Karmaşık kargo baremleri yerine "Ortalama Kargo (örn: 90 TL)" ve sabit kategori komisyonları kullanılır. Dinamik API yükü yaratmaz.
+*   **Çıktı (Grafiksel):** Kullanıcıya şelale (Waterfall) grafiği ile net tablo sunulur. Fiyat kestiği anda günün sonunda cebine kalacak net kâr şeffaftır.
+
+### B. Kampanya Fırsat Merkezi (Opportunity Hub)
+*   **Aktif Kampanyalar Listesi:** Pazar yerinin sunduğu yeni kampanyalar ve fırsatlar tek panelde.
+*   **Sıcak Fırsat Bildirimleri:** *"Buybox'ı 5 TL ile kaybettin. Ancak şu an 'Süper İndirim' kampanyası var. Katılırsan hem Buybox'ı alacaksın hem de net kârın 22 TL artacak."*
+
+### C. Kampanya ve Kârlılık Otomasyonu
+*   **Kırmızı Çizgi (Red Line):** Kullanıcının belirlediği "Minimum %15 Kâr Marjı" veya "Min 30 TL Kâr".
+*   **Otonom Katılım:** Platform sürekli yeni kampanya/kuponları dinler. Kırmızı çizgi içindeki kârlı bir fırsat yakaladığında *ilgili Promosyon API'si aracılığıyla* algoritma kullanıcının haberi olmadan bile kampanyaya girer.
+
+---
+
+## 2. MODÜL: Native AI Müşteri Hizmetleri (Botpress Olmadan)
+
+Satıcıların en büyük operasyonel zaman kaybı olan müşteri sorularına harici bir bot (Botpress/Dialogflow) maliyeti olmadan platform içinden yanıt verme altyapısıdır.
+
+### A. Mimari ve Çalışma Mantığı (Backend)
+Dış webhooklar yerine MarketPulse içindeki "Celery Beat" motoru kullanılır:
+1.  **Polling:** Her 5 dakikada bir HB/TY "Müşteri Soruları" API'si çekilir.
+2.  **Context (Bağlam):** Gelen soru, veritabanındaki "Ürün Açıklaması" ve "Mağaza Kuralları" (örn. hafta sonu kargo yok) ile birleştirilir.
+3.  **LLM İşleme:** GPT-4o-mini veya Claude-3-haiku gibi hızlı ve maliyet-etkin bir yapay zeka servisine (soru başına maliyet < $0.001) gönderilerek cevap üretilir.
+
+### B. Modlar ve Esneklik
+*   **Taslak (Copilot) Modu:** İlk aşamada güven için. AI soruyu cevaplar ama listeye "Taslak" olarak atar. Satıcı tek tuşla "Onayla ve Pazaryerine Gönder" der.
+*   **Tam Otomatik (Autopilot) Modu:** Eğer kullanıcı izin verirse veya soru ürün açıklamasında çok net geçiyorsa (örn: "Uyumlu mu?"), cevap 5 dakika içinde pazaryerine doğrudan basılır.
+
+### C. Geleneksel Botlara (Botpress) Göre Avantajı
+Pazaryeri sorularında 5-10 dakika bekleme süresi son derece makul. Bu yüzden anlık webhook botlara gerek yoktur.
+*   **Sıfır Ek Platform Ücreti.**
+*   **Tam Veri Erişimi:** MarketPulse DB içinde olduğu için sipariş durumunu veya stoğu anında SQL'den kontrol eder.
+
+---
+
+## Tüm Yapının "SaaS Değer Önerisi"
+
+> *"Kâr etmediğiniz satışı yapmayın, yetişemediğiniz sorulara boğulmayın. MarketPulse sizin adınıza kârınızı hesaplar, zarar edeceğiniz kampanyalara girmenizi engeller ve müşterilerinizin sorularına saniyeler içinde yanıt verir."*
+
+Bu iki modülün tam entegrasyonu, yazılımı standart bir "Fiyat Bildirim" skriptinden kurtarıp, Premium ücretler (Pro/Enterprise tier) talep edebilecek benzersiz bir ticari asistana çevirir.

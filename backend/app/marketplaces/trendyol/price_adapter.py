@@ -6,6 +6,7 @@ Mevcut TrendyolPriceMonitorService'i delegate olarak kullanır.
 """
 
 import logging
+import aiohttp
 from decimal import Decimal
 
 from app.marketplaces.base import BaseMarketplaceAdapter
@@ -34,11 +35,22 @@ class TrendyolPriceAdapter(BaseMarketplaceAdapter):
     async def get_seller_prices(self, sku: str, **kwargs) -> PriceResult:
         """SKU için satıcı fiyatlarını TY SSR JSON'dan getir.
 
-        Mevcut TrendyolPriceMonitorService'e delegate eder.
+        TrendyolPriceMonitorService.fetch_product_page() + parse_merchants_from_json() kullanır.
         """
         product_url = kwargs.get("product_url", "")
+        if not product_url:
+            logger.warning(f"[TY] product_url verilmedi, SKU={sku}")
+            return PriceResult(sku=sku, platform=self.platform, is_active=False)
+
         try:
-            sellers_data = await self.service._fetch_product_sellers(sku, product_url=product_url)
+            async with aiohttp.ClientSession() as http_session:
+                fetch_result = await self.service.fetch_product_page(product_url, http_session)
+
+            html = fetch_result.get("html")
+            if not html:
+                return PriceResult(sku=sku, platform=self.platform, is_active=False)
+
+            sellers_data = self.service.parse_merchants_from_json(html)
 
             if not sellers_data:
                 return PriceResult(sku=sku, platform=self.platform, is_active=False)
@@ -46,15 +58,14 @@ class TrendyolPriceAdapter(BaseMarketplaceAdapter):
             sellers = []
             for s in sellers_data:
                 sellers.append(SellerPrice(
-                    merchant_id=str(s.get("merchantId", "")),
-                    merchant_name=s.get("merchantName", ""),
+                    merchant_id=str(s.get("merchant_id", "")),
+                    merchant_name=s.get("merchant_name", ""),
                     price=Decimal(str(s.get("price", 0))),
-                    original_price=Decimal(str(s["originalPrice"])) if s.get("originalPrice") else None,
-                    discount_rate=s.get("discountRate"),
-                    stock_quantity=s.get("stockQuantity"),
-                    merchant_rating=s.get("merchantRating"),
-                    delivery_info=s.get("deliveryInfo"),
-                    campaign_info=s.get("campaignInfo"),
+                    original_price=Decimal(str(s["original_price"])) if s.get("original_price") else None,
+                    discount_rate=s.get("discount_rate"),
+                    merchant_rating=s.get("merchant_rating"),
+                    delivery_info=s.get("delivery_info"),
+                    campaign_info=s.get("campaign_info"),
                 ))
 
             return PriceResult(
