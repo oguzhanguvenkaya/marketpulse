@@ -22,9 +22,9 @@ from app.core.config import settings
 from app.core.logger import scraping_logger as logger
 from app.services.proxy_providers import proxy_manager, debug_logger, ProxyProvider
 
-stealth = Stealth()
+stealth = Stealth() if Stealth else None
 
-MAX_PRODUCTS_PER_SEARCH = 8
+MAX_PRODUCTS_PER_SEARCH = 50
 MAX_RETRIES = 2
 
 SCRAPERAPI_BASE_URL = "http://api.scraperapi.com"
@@ -389,6 +389,402 @@ class ScrapingService:
                 logger.debug(f"Error parsing tracking URL: {e}")
         return None
     
+    # ──────────────────────────────────────────────────────────────
+    # MORIA JSON Parse — embedded search data extraction
+    # ──────────────────────────────────────────────────────────────
+
+    def _extract_moria_products_from_html(self, html: str) -> Optional[List[Dict]]:
+        """Extract product list from embedded MORIA JSON in rendered search page.
+
+        Searches for window.MORIA.VERTICALFILTER or window.MORIA.PRODUCTLIST STATE data,
+        handles both escaped (\\\"products\\\") and unescaped ("products") JSON formats.
+        Returns parsed product list or None on failure (triggers CSS fallback).
+        """
+        try:
+            # Detect format: escaped (\\\"products\\\") vs unescaped ("products")
+            # Allow optional whitespace around colons and brackets
+            escaped_match = re.search(r'\\"products\\":\s*\[\s*\{\s*\\"productId\\"', html)
+            unescaped_match = None if escaped_match else re.search(r'"products"\s*:\s*\[\s*\{\s*"productId"', html)
+
+            is_escaped = escaped_match is not None
+            is_unescaped = unescaped_match is not None
+
+            if not is_escaped and not is_unescaped:
+                logger.debug("MORIA: No products marker found in HTML")
+                return None
+
+            if is_escaped:
+                # Find the escaped products key and opening bracket
+                key_match = re.search(r'\\"products\\":\s*\[', html)
+            else:
+                key_match = re.search(r'"products"\s*:\s*\[', html)
+
+            if not key_match:
+                return None
+            products_key_pos = key_match.start()
+
+            # Position at the opening '[' of the array
+            array_start = html.find('[', products_key_pos)
+            if array_start == -1:
+                return None
+
+            # Bracket matching to find the end of the array
+            if is_escaped:
+                esc_open = '\\"'
+                bracket_depth = 0
+                i = array_start
+                while i < len(html):
+                    ch = html[i]
+                    if ch == '[':
+                        bracket_depth += 1
+                    elif ch == ']':
+                        bracket_depth -= 1
+                        if bracket_depth == 0:
+                            raw_array = html[array_start:i + 1]
+                            break
+                    i += 1
+                else:
+                    logger.warning("MORIA: Bracket matching failed (escaped)")
+                    return None
+
+                # Unescape
+                json_str = raw_array.replace('\\"', '"')
+            else:
+                bracket_depth = 0
+                i = array_start
+                while i < len(html):
+                    ch = html[i]
+                    if ch == '[':
+                        bracket_depth += 1
+                    elif ch == ']':
+                        bracket_depth -= 1
+                        if bracket_depth == 0:
+                            json_str = html[array_start:i + 1]
+                            break
+                    i += 1
+                else:
+                    logger.warning("MORIA: Bracket matching failed (unescaped)")
+                    return None
+
+            products = json.loads(json_str)
+
+            if not isinstance(products, list) or len(products) == 0:
+                logger.warning("MORIA: Parsed JSON is empty or not a list")
+                return None
+
+            # Validate first product has expected structure
+            first = products[0]
+            if not isinstance(first, dict) or 'productId' not in first:
+                logger.warning("MORIA: First product missing productId")
+                return None
+
+            logger.info(f"MORIA: Successfully parsed {len(products)} products from HTML")
+            return products
+
+        except json.JSONDecodeError as e:
+            logger.warning(f"MORIA: JSON decode error: {e}")
+            return None
+        except Exception as e:
+            logger.warning(f"MORIA: Unexpected error during extraction: {e}")
+            return None
+
+    def _normalize_moria_product(self, product: Dict, order_index: int) -> Dict[str, Any]:
+        """Normalize a MORIA product dict to the standard scraping return format.
+
+        Maps MORIA fields to the format expected by search_routes.py and the DB models.
+        """
+        variant = {}
+        listing = {}
+        price_info = {}
+        campaign_price_info = {}
+        images = []
+
+        variant_list = product.get('variantList', [])
+        if variant_list:
+            variant = variant_list[0] if isinstance(variant_list[0], dict) else {}
+            listing = variant.get('listing', {}) or {}
+            price_info = listing.get('priceInfo', {}) or {}
+            campaign_price_info = listing.get('campaignPriceInfo', {}) or {}
+            images = variant.get('images', []) or []
+
+        # Extract URL — handle adservice tracking URLs
+        raw_url = variant.get('url', '')
+        url = self._resolve_moria_url(raw_url, variant.get('sku', ''))
+
+        # Sponsored detection
+        boosting = product.get('boostingFactors', []) or []
+        is_sponsored = 'sponsoredProduct' in boosting
+
+        return {
+            'platform': 'hepsiburada',
+            'external_id': str(product.get('productId', '')),
+            'name': variant.get('name', ''),
+            'brand': product.get('brand', ''),
+            'sku': variant.get('sku', ''),
+            'url': url,
+            'image_url': images[0].get('url', '') if images else '',
+            'price': self._parse_float(price_info.get('price')),
+            'original_price': self._parse_float(price_info.get('originalPrice')),
+            'discounted_price': self._parse_float(campaign_price_info.get('discountedPrice')),
+            'discount_percentage': self._parse_float(price_info.get('discountRate')),
+            'seller_name': listing.get('merchantName', ''),
+            'seller_id': listing.get('merchantId', ''),
+            'rating': self._parse_float(product.get('customerReviewRating')),
+            'reviews_count': self._parse_int(product.get('customerReviewCount')),
+            'is_sponsored': is_sponsored,
+            'campaigns': listing.get('campaigns', []),
+            'coupons': [],
+            'other_sellers': [],
+            'reviews': [],
+            'order_index': order_index,
+        }
+
+    def _resolve_moria_url(self, raw_url: str, sku: str = '') -> str:
+        """Resolve a MORIA product URL, handling adservice tracking redirects."""
+        if not raw_url:
+            if sku:
+                return f"https://www.hepsiburada.com/-p-{sku}"
+            return ''
+
+        # Handle adservice tracking URLs
+        if 'adservice.' in raw_url and 'redirect=' in raw_url:
+            real_url = self._extract_real_url_from_tracking(raw_url)
+            if real_url:
+                return real_url.split('?')[0]
+
+        # Handle relative URLs
+        if raw_url.startswith('/'):
+            return f"https://www.hepsiburada.com{raw_url}".split('?')[0]
+
+        # Handle full URLs
+        if raw_url.startswith('http'):
+            return raw_url.split('?')[0]
+
+        return raw_url
+
+    def _build_sponsored_products_from_moria(self, products: List[Dict]) -> List[Dict[str, Any]]:
+        """Extract sponsored products list from normalized MORIA products.
+
+        Returns list matching SearchSponsoredProduct DB schema and frontend SponsoredProduct interface.
+        """
+        sponsored = []
+        for p in products:
+            if p.get('is_sponsored'):
+                sponsored.append({
+                    'order_index': p.get('order_index', 0),
+                    'url': p.get('url', ''),
+                    'product_url': p.get('url', ''),
+                    'product_name': p.get('name', ''),
+                    'name': p.get('name', ''),
+                    'seller_name': p.get('seller_name', ''),
+                    'price': p.get('price'),
+                    'discounted_price': p.get('discounted_price'),
+                    'image_url': p.get('image_url', ''),
+                    'is_sponsored': True,
+                })
+        return sponsored
+
+    # ──────────────────────────────────────────────────────────────
+    # Sponsored Brands Display API
+    # ──────────────────────────────────────────────────────────────
+
+    async def _fetch_sponsored_brands_api(self, keyword: str) -> List[Dict[str, Any]]:
+        """Fetch sponsored brand ads via HB Display API (hepsiads-gw).
+
+        Flow:
+        1. Call Pages API to discover which pages have brand ads
+        2. Call Display API for page 1 + discovered pages in parallel
+        3. Normalize results to frontend-compatible format
+
+        Returns empty list on any error (brand ads are optional).
+        """
+        if not settings.SCRAPER_API_KEY:
+            return []
+
+        encoded_keyword = quote_plus(keyword)
+        base_domain = "hepsiads-gw.hepsiburada.com"
+
+        try:
+            # Step 1: Discover pages with brand ads
+            pages_url = (
+                f"https://{base_domain}/sponsored-brands/v2/display/api/v1/"
+                f"{encoded_keyword}/pages?page=1&productCount=47"
+                f"&q={encoded_keyword}&showFirst=false&showSize=12"
+            )
+            pages_response = await self._fetch_hb_ads_api(pages_url)
+
+            # Determine which pages to fetch
+            pages_to_fetch = [1]  # Page 1 always exists
+            if pages_response:
+                try:
+                    extra_pages = json.loads(pages_response)
+                    if isinstance(extra_pages, list):
+                        pages_to_fetch.extend(extra_pages)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+            # Step 2: Fetch all display pages in parallel
+            display_tasks = []
+            for page_num in pages_to_fetch:
+                display_url = (
+                    f"https://{base_domain}/sponsored-brands/v2/display/api/v1/"
+                    f"{encoded_keyword}?page={page_num}&platform=desktop"
+                )
+                display_tasks.append(self._fetch_hb_ads_api(display_url))
+
+            responses = await asyncio.gather(*display_tasks, return_exceptions=True)
+
+            # Step 3: Parse and normalize
+            all_brands = []
+            for idx, resp in enumerate(responses):
+                if isinstance(resp, Exception) or not resp:
+                    continue
+                try:
+                    data = json.loads(resp)
+                    if isinstance(data, dict):
+                        brands = self._normalize_display_api_response(data, pages_to_fetch[idx])
+                        all_brands.extend(brands)
+                    elif isinstance(data, list):
+                        for item in data:
+                            if isinstance(item, dict):
+                                brands = self._normalize_display_api_response(item, pages_to_fetch[idx])
+                                all_brands.extend(brands)
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.debug(f"Display API page parse error: {e}")
+                    continue
+
+            if all_brands:
+                total_products = sum(len(b.get('products', [])) for b in all_brands)
+                logger.info(f"Display API: {len(all_brands)} brand ads, {total_products} products")
+
+            return all_brands
+
+        except Exception as e:
+            logger.warning(f"Sponsored brands API error: {e}")
+            return []
+
+    async def _fetch_hb_ads_api(self, url: str) -> Optional[str]:
+        """Fetch HB ads API endpoint via ScraperAPI proxy port with required headers."""
+        proxy_url = "http://proxy-server.scraperapi.com:8001"
+
+        username_parts = [
+            "scraperapi",
+            "country_code=eu",
+            "device_type=desktop",
+        ]
+        proxy_username = ".".join(username_parts)
+
+        headers = {
+            'Authorization': 'Bearer undefined',
+            'hb-source-app': 'hepsi-ads-spon-brands',
+            'Accept': 'application/json, text/plain, */*',
+            'Origin': 'https://www.hepsiburada.com',
+            'Referer': 'https://www.hepsiburada.com/',
+        }
+
+        try:
+            timeout = aiohttp.ClientTimeout(total=30)
+            connector = aiohttp.TCPConnector(ssl=False)
+            auth = aiohttp.BasicAuth(
+                login=proxy_username,
+                password=settings.SCRAPER_API_KEY
+            )
+
+            async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
+                async with session.get(
+                    url,
+                    proxy=proxy_url,
+                    proxy_auth=auth,
+                    headers=headers,
+                    ssl=False
+                ) as response:
+                    if response.status == 200:
+                        return await response.text()
+                    else:
+                        logger.debug(f"HB Ads API {response.status} for {url[:80]}")
+                        return None
+        except Exception as e:
+            logger.debug(f"HB Ads API error: {e}")
+            return None
+
+    def _normalize_display_api_response(self, data: Dict, page_num: int) -> List[Dict[str, Any]]:
+        """Normalize Display API response to frontend-compatible sponsored brand format.
+
+        Ensures products have snake_case keys matching BrandProduct interface:
+        url, name, price, discounted_price, image_url
+        """
+        brands = []
+
+        # Display API response can have brand data at top level or nested
+        items = data.get('items', [data]) if 'items' not in data else data['items']
+        if not isinstance(items, list):
+            items = [data]
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            merchant_name = item.get('merchantName', '')
+            merchant_id = item.get('merchantId', '')
+            if not merchant_name and not merchant_id:
+                continue
+
+            # Normalize products
+            raw_products = item.get('products', []) or []
+            normalized_products = []
+            for rp in raw_products:
+                if not isinstance(rp, dict):
+                    continue
+
+                # Handle campaign price
+                campaign_info = rp.get('campaignPriceInfo', {}) or {}
+                discounted = self._parse_float(campaign_info.get('discountedPrice'))
+                if not discounted:
+                    discounted = self._parse_float(rp.get('discountedPrice'))
+
+                # Build image URL
+                image_url = ''
+                image_list = rp.get('imageList', []) or rp.get('images', []) or []
+                if image_list and isinstance(image_list[0], str):
+                    image_url = image_list[0]
+                elif rp.get('imageUrl'):
+                    image_url = rp['imageUrl']
+
+                # Build product URL
+                sku = rp.get('sku', '')
+                product_url = ''
+                if sku:
+                    product_url = f"https://www.hepsiburada.com/-p-{sku}"
+
+                normalized_products.append({
+                    'url': product_url,
+                    'name': rp.get('name', ''),
+                    'price': self._parse_float(rp.get('price')),
+                    'discounted_price': discounted,
+                    'image_url': image_url,
+                    # Extra fields (optional, won't break frontend)
+                    'brand': rp.get('brand', ''),
+                    'sku': sku,
+                    'productId': rp.get('productId', ''),
+                    'tags': rp.get('tags', []),
+                    'merchant_name': merchant_name,
+                })
+
+            if normalized_products:
+                brand_entry = {
+                    'seller_name': merchant_name,
+                    'seller_id': merchant_id,
+                    'position': page_num,
+                    'products': normalized_products,
+                    # Extra fields
+                    'merchant_rate': self._parse_float(item.get('merchantRate')),
+                    'ad_rank': self._parse_float(item.get('adRank')),
+                    'campaign_id': item.get('campaignId', ''),
+                }
+                brands.append(brand_entry)
+
+        return brands
+
     def _extract_sponsored_brands_from_search(self, html: str) -> List[Dict[str, Any]]:
         """Extract brand carousel ads (AUTO POWER, MTS Kimya vb.) from search page with full product data"""
         sponsored_brands = []
@@ -686,66 +1082,118 @@ class ScrapingService:
         return urls
     
     async def _get_product_urls_via_http_api(self, keyword: str, max_products: int) -> Dict[str, Any]:
-        """Get product URLs using ScraperAPI Async Jobs method
-        
+        """Get search data using ScraperAPI Async Jobs with MORIA-first strategy.
+
+        Flow:
+        1. Fetch rendered search page via ScraperAPI async jobs
+        2. Try MORIA JSON parse (fast, reliable, 47+ products)
+        3. If MORIA succeeds: normalize products, fetch brand ads via Display API
+        4. If MORIA fails: fallback to existing CSS selector extraction
+
         Returns dict with:
-        - urls: List of product URLs to scrape
-        - sponsored_brands: List of brand ads (AUTO POWER, MTS Kimya vb.)
-        - sponsored_product_urls: Set of URLs that are sponsored
+        - moria_parsed: bool — whether MORIA path was used
+        - normalized_products: List[Dict] — full product data (MORIA path only)
+        - urls: List[str] — product URLs to scrape (CSS fallback only)
+        - sponsored_brands: List — brand ads
+        - sponsored_products: List — individual sponsored products
+        - sponsored_product_urls: Set — URLs of sponsored products
         """
-        
+
         search_url = f"https://www.hepsiburada.com/ara?q={keyword.replace(' ', '+')}"
         logger.info(f"Fetching search results: {search_url[:60]}...")
-        
-        # Async Jobs kullan - JavaScript sayfaları için daha iyi çalışır
+
+        # Async Jobs — JavaScript render for MORIA data
         html = await self._fetch_with_scraperapi_async(search_url, render=True, premium=True, max_wait=60)
-        
+
         if html:
             soup_check = BeautifulSoup(html, 'html.parser')
             title = soup_check.find('title')
             title_text = title.get_text() if title else ""
-            
-            # Sayfa doğru yüklendi mi kontrol et
+
             if "Loading interface" in title_text or "Anasayfa" in title_text:
-                logger.warning(f"Sayfa tam yüklenmemiş (title: {title_text[:50]})")
-                logger.info("Async job ile tekrar deneniyor...")
+                logger.warning(f"Sayfa tam yüklenmemiş (title: {title_text[:50]}), tekrar deneniyor...")
                 html = await self._fetch_with_scraperapi_async(search_url, render=True, premium=True, max_wait=90)
-        
+
         if not html:
             logger.error("ScraperAPI Async Jobs başarısız oldu.")
-            logger.info("Not: ScraperAPI planınızı ve API key'inizi kontrol edin.")
-            return {'urls': [], 'sponsored_brands': [], 'sponsored_product_urls': set(), 'error': 'ScraperAPI başarısız oldu'}
-        
-        soup = BeautifulSoup(html, 'html.parser')
-        
-        title = soup.find('title')
-        title_text = title.get_text() if title else "No title"
-        logger.debug(f"Page title: {title_text[:80]}")
-        
+            return {
+                'moria_parsed': False,
+                'urls': [], 'sponsored_brands': [], 'sponsored_products': [],
+                'sponsored_product_urls': set(), 'basket_campaign_prices': {},
+                'normalized_products': [],
+                'error': 'ScraperAPI başarısız oldu',
+            }
+
         if settings.DEBUG_SAVE_HTML:
-            import os
             debug_dir = "/tmp/scraping_debug"
             os.makedirs(debug_dir, exist_ok=True)
             debug_file = f"{debug_dir}/search_{keyword.replace(' ', '_')}.html"
             with open(debug_file, 'w', encoding='utf-8') as f:
                 f.write(html)
             logger.debug(f"Saved search HTML to {debug_file}")
-        
+
+        # ── PRIMARY PATH: MORIA JSON Parse ──────────────────────
+        moria_products = self._extract_moria_products_from_html(html)
+
+        if moria_products is not None:
+            # Normalize all products
+            normalized = []
+            for idx, mp in enumerate(moria_products[:max_products], start=1):
+                normalized.append(self._normalize_moria_product(mp, idx))
+
+            sponsored_count = sum(1 for p in normalized if p.get('is_sponsored'))
+            organic_count = len(normalized) - sponsored_count
+            logger.info(
+                f"MORIA parse başarılı: {len(normalized)} ürün "
+                f"({organic_count} organic, {sponsored_count} sponsored)"
+            )
+
+            # Extract sponsored products list from MORIA data
+            sponsored_products = self._build_sponsored_products_from_moria(normalized)
+
+            # Fetch brand ads via Display API (parallel, non-blocking)
+            try:
+                sponsored_brands = await self._fetch_sponsored_brands_api(keyword)
+            except Exception as e:
+                logger.warning(f"Display API hata, regex fallback deneniyor: {e}")
+                sponsored_brands = self._extract_sponsored_brands_from_search(html)
+
+            return {
+                'moria_parsed': True,
+                'normalized_products': normalized,
+                'urls': [],
+                'sponsored_brands': sponsored_brands,
+                'sponsored_products': sponsored_products,
+                'sponsored_product_urls': {p.get('url', '') for p in sponsored_products},
+                'basket_campaign_prices': {},
+            }
+
+        # ── FALLBACK PATH: CSS Selector Extraction ──────────────
+        logger.info("MORIA parse başarısız, CSS selector fallback kullanılıyor...")
+
+        soup = BeautifulSoup(html, 'html.parser')
+
+        title = soup.find('title')
+        title_text = title.get_text() if title else "No title"
+        logger.debug(f"Page title: {title_text[:80]}")
+
         sponsored_brands = self._extract_sponsored_brands_from_search(html)
-        
+
         sponsored_products = self._extract_sponsored_products_from_search(soup)
         sponsored_product_urls = {p['url'] for p in sponsored_products if p.get('url')}
-        
+
         basket_campaign_prices = self._extract_basket_campaign_prices(soup)
-        
+
         urls = self._extract_product_urls_from_soup(soup, max_products, sponsored_urls=sponsored_product_urls)
-        
+
         return {
+            'moria_parsed': False,
+            'normalized_products': [],
             'urls': urls,
             'sponsored_brands': sponsored_brands,
             'sponsored_products': sponsored_products,
             'sponsored_product_urls': sponsored_product_urls,
-            'basket_campaign_prices': basket_campaign_prices
+            'basket_campaign_prices': basket_campaign_prices,
         }
     
     async def _scrape_product_via_http_api(self, url: str, session_number: int = None) -> Optional[Dict[str, Any]]:
@@ -832,37 +1280,61 @@ class ScrapingService:
         return None
     
     async def scrape_hepsiburada_search(self, keyword: str, max_products: int = MAX_PRODUCTS_PER_SEARCH) -> Dict[str, Any]:
-        """Scrape Hepsiburada search results
-        
+        """Scrape Hepsiburada search results.
+
+        MORIA-first strategy: If MORIA JSON parse succeeds, products are returned
+        directly without detail page scraping. Falls back to per-URL scraping otherwise.
+
         Returns dict with:
-        - products: List of scraped ORGANIC product data (excludes sponsored)
-        - sponsored_brands: List of brand carousel ads (AUTO POWER, MTS Kimya vb.)
+        - products: List of product data (organic + sponsored mixed, is_sponsored flagged)
+        - sponsored_brands: List of brand carousel ads
         - sponsored_products: List of sponsored products with display order
         """
         provider = proxy_manager.get_primary_provider()
         self.current_provider_name = provider.name if provider else "direct"
-        
+
         sponsored_brands = []
         sponsored_products = []
         sponsored_product_urls = set()
         basket_campaign_prices = {}
-        
+
         if self.current_provider_name == "scraperapi":
             search_result = await self._get_product_urls_via_http_api(keyword, max_products)
+
+            # ── MORIA PATH: products already normalized ──
+            if search_result.get('moria_parsed'):
+                products = search_result.get('normalized_products', [])
+                sponsored_brands = search_result.get('sponsored_brands', [])
+                sponsored_products = search_result.get('sponsored_products', [])
+
+                organic = [p for p in products if not p.get('is_sponsored')]
+                sponsored_count = len(products) - len(organic)
+                logger.info(
+                    f"MORIA: {len(products)} ürün döndü "
+                    f"({len(organic)} organic, {sponsored_count} sponsored), "
+                    f"{len(sponsored_brands)} brand ads — detail scraping atlandı"
+                )
+                return {
+                    'products': products,
+                    'sponsored_brands': sponsored_brands,
+                    'sponsored_products': sponsored_products,
+                }
+
+            # ── CSS FALLBACK PATH: per-URL detail scraping ──
             product_urls = search_result['urls']
-            sponsored_brands = search_result['sponsored_brands']
+            sponsored_brands = search_result.get('sponsored_brands', [])
             sponsored_products = search_result.get('sponsored_products', [])
-            sponsored_product_urls = search_result['sponsored_product_urls']
+            sponsored_product_urls = search_result.get('sponsored_product_urls', set())
             basket_campaign_prices = search_result.get('basket_campaign_prices', {})
         else:
             if not self.browser:
                 await self.init_browser()
             product_urls = await self._get_product_urls_from_search(keyword, max_products)
-        
+
         logger.info(f"Found {len(product_urls)} product URLs to scrape (using {self.current_provider_name})")
         if basket_campaign_prices:
             logger.info(f"Found {len(basket_campaign_prices)} basket campaign prices from search page")
-        
+
         products = []
         for i, url in enumerate(product_urls[:max_products]):
             logger.info(f"Scraping product {i+1}/{len(product_urls[:max_products])}: {url[:60]}...")
@@ -871,25 +1343,25 @@ class ScrapingService:
                 if product_data:
                     if url in sponsored_product_urls:
                         product_data['is_sponsored'] = True
-                    
+
                     if url in basket_campaign_prices and not product_data.get('discounted_price'):
                         product_data['discounted_price'] = basket_campaign_prices[url]
                         if product_data.get('price') and basket_campaign_prices[url]:
                             product_data['discount_percentage'] = round((1 - basket_campaign_prices[url] / product_data['price']) * 100, 1)
                         logger.debug(f"Applied basket campaign price from search: {basket_campaign_prices[url]} TL")
-                    
+
                     products.append(product_data)
                     logger.debug(f"Scraped: {product_data.get('name', 'Unknown')[:50]}")
                 await self._random_delay(1000, 3000)
             except Exception as e:
                 debug_logger.log_error(url, self.current_provider_name, e)
                 continue
-        
+
         logger.info(f"Scraped {len(products)} organic products, {len(sponsored_products)} sponsored, {len(sponsored_brands)} brand ads")
         return {
             'products': products,
             'sponsored_brands': sponsored_brands,
-            'sponsored_products': sponsored_products
+            'sponsored_products': sponsored_products,
         }
     
     async def _get_product_urls_from_search(self, keyword: str, max_products: int, retry_count: int = 0) -> List[str]:
@@ -950,14 +1422,14 @@ class ScrapingService:
         return urls
     
     async def _scrape_product_via_playwright(self, url: str) -> Optional[Dict[str, Any]]:
-        """Scrape product using Playwright with Bright Data proxy for JS-rendered content
-        
+        """Scrape product using Playwright with proxy for JS-rendered content
+
         This is used as a fallback when ScraperAPI doesn't find discounted_price.
         It only returns html_data (discounted_price, coupons, campaigns, etc.)
         to be merged with the ScraperAPI product_data.
         """
         if not self.browser or not self.context:
-            await self.init_browser("brightdata")
+            await self.init_browser()
         
         page = await self.context.new_page()
         await stealth.apply_stealth_async(page)
@@ -1006,7 +1478,7 @@ class ScrapingService:
             product_data = await self._scrape_product_via_http_api(url)
             
             if not product_data:
-                # Bright Data fallback devre dışı - bakiye yüklenmedi
+                # ScraperAPI başarısız oldu, fallback yok
                 logger.warning(f"ScraperAPI failed for product: {url[:50]}...")
                 return None
             else:

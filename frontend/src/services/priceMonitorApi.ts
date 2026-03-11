@@ -91,6 +91,19 @@ export const getFetchTaskStatus = async (taskId: string): Promise<FetchTask & { 
   return response.data;
 };
 
+export const getActiveFetchTask = async (platform: string = 'hepsiburada'): Promise<{
+  active: boolean;
+  id?: string;
+  status?: string;
+  total_products?: number;
+  completed_products?: number;
+  failed_products?: number;
+  fetch_type?: string;
+}> => {
+  const response = await api.get('/price-monitor/fetch/active', { params: { platform } });
+  return response.data;
+};
+
 export const getLastInactiveSkus = async (platform: string = 'hepsiburada'): Promise<{
   skus: string[];
   count: number;
@@ -133,6 +146,36 @@ export const exportPriceMonitorData = async (
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   link.download = `price_monitor_${platform}_${timestamp}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+export const exportPriceMonitorExcel = async (
+  platform: string | null = null,
+  activeFilter: ExportActiveFilter = 'all'
+): Promise<void> => {
+  const params: Record<string, string> = { active_filter: activeFilter };
+  if (platform) params.platform = platform;
+
+  const response = await api.get('/price-monitor/export-excel', {
+    params,
+    responseType: 'blob',
+  });
+
+  const blob = new Blob([response.data], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const suffix = platform || 'all';
+  link.download = `price_monitor_categories_${suffix}_${timestamp}.xlsx`;
 
   document.body.appendChild(link);
   link.click();

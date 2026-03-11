@@ -35,6 +35,8 @@ const CACHE_PREFIX = {
   priceMonitorLastInactive: 'price-monitor/last-inactive',
   sellers: 'sellers',
   sellerProducts: 'seller-products',
+  myStoreProducts: 'my-store/products',
+  myStoreBrands: 'my-store/brands',
 } as const;
 
 const invalidateDashboardCache = () => {
@@ -50,6 +52,11 @@ const invalidatePriceMonitorCache = () => {
   invalidateCacheByPrefix(CACHE_PREFIX.sellerProducts);
 };
 
-export { api, CACHE_PREFIX, invalidateDashboardCache, invalidatePriceMonitorCache };
+const invalidateMyStoreCache = () => {
+  invalidateCacheByPrefix(CACHE_PREFIX.myStoreProducts);
+  invalidateCacheByPrefix(CACHE_PREFIX.myStoreBrands);
+};
+
+export { api, CACHE_PREFIX, invalidateDashboardCache, invalidatePriceMonitorCache, invalidateMyStoreCache };
 export { buildCacheKey, getCachedOrFetch, invalidateCacheByPrefix } from './queryCache';
 export default api;

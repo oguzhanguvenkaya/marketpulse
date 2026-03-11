@@ -241,6 +241,121 @@ export interface LastInactiveProduct {
 
 export type ExportActiveFilter = 'all' | 'active' | 'inactive';
 
+// ── My Store Types ──
+
+export type MyStorePlatformFilter = 'all' | 'web' | 'hepsiburada' | 'trendyol';
+
+export interface MyStorePlatformSummary {
+  web?: { price: number | null; url: string | null; image_count: number };
+  hepsiburada?: {
+    product_id: string;
+    price: number | null;
+    seller_count: number;
+    last_fetched: string | null;
+    is_active: boolean;
+    sku: string;
+    product_name: string | null;
+  };
+  trendyol?: {
+    product_id: string;
+    price: number | null;
+    seller_count: number;
+    last_fetched: string | null;
+    is_active: boolean;
+    sku: string;
+    product_name: string | null;
+  };
+}
+
+export interface MyStoreProduct {
+  id: number;
+  title: string;
+  subtitle?: string;
+  barcode?: string;
+  stock_code?: string;
+  brand?: string;
+  price?: number;
+  image_url?: string;
+  web_url?: string;
+  hepsiburada_sku?: string;
+  category?: string;
+  category_path?: string;
+  is_active: boolean;
+  platforms: string[];
+  platform_summary: MyStorePlatformSummary;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MyStoreProductDetail {
+  web?: {
+    title: string;
+    subtitle?: string;
+    stock_code?: string;
+    barcode?: string;
+    brand?: string;
+    supplier?: string;
+    price?: number;
+    category?: string;
+    category_path?: string;
+    detail_html?: string;
+    image_url?: string;
+    image_url_2?: string;
+    image_list?: string[];
+    web_url?: string;
+    meta_title?: string;
+    meta_description?: string;
+    meta_keywords?: string;
+    seo_link?: string;
+  };
+  hepsiburada?: {
+    product: {
+      id: string;
+      sku: string;
+      barcode?: string;
+      product_name?: string;
+      product_url: string;
+      brand?: string;
+      image_url?: string;
+      is_active: boolean;
+      threshold_price?: number;
+      alert_campaign_price?: number;
+      last_fetched_at?: string;
+    };
+    sellers: SellerSnapshot[];
+    seller_count: number;
+  };
+  trendyol?: {
+    product: {
+      id: string;
+      sku: string;
+      barcode?: string;
+      product_name?: string;
+      product_url: string;
+      brand?: string;
+      image_url?: string;
+      is_active: boolean;
+      threshold_price?: number;
+      alert_campaign_price?: number;
+      last_fetched_at?: string;
+    };
+    sellers: SellerSnapshot[];
+    seller_count: number;
+  };
+}
+
+export interface MyStoreListResponse {
+  products: MyStoreProduct[];
+  total: number;
+  limit: number;
+  offset: number;
+  stats: {
+    web_count: number;
+    hb_matched: number;
+    ty_matched: number;
+  };
+}
+
 export type FetchType = 'active' | 'last_inactive' | 'inactive';
 
 export interface SellerInfo {

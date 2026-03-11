@@ -5,7 +5,7 @@ export default function FetchTaskProgress({
   fetchProgress,
   progressPercent,
 }: UsePriceMonitorReturn) {
-  if (fetchStatus !== 'running') return null;
+  if (!fetchStatus || fetchStatus === 'completed' || fetchStatus === 'stopped' || fetchStatus === 'failed') return null;
 
   return (
     <div className="p-4 rounded-lg bg-accent-primary/5 border border-accent-primary/20">

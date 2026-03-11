@@ -38,21 +38,6 @@ class ScraperAPIProvider(ProxyProvider):
         return "ScraperAPI Proxy (Ucuz, JavaScript rendering destekli)"
 
 
-class BrightDataProvider(ProxyProvider):
-    name = "brightdata"
-    
-    def get_proxy_config(self, premium: bool = False) -> Optional[Dict[str, str]]:
-        if not self.is_available():
-            return None
-        return settings.bright_data_proxy_config
-    
-    def is_available(self) -> bool:
-        return settings.has_bright_data()
-    
-    def get_description(self) -> str:
-        return "Bright Data Residential Proxy (Premium, en guvenilir)"
-
-
 class DirectProvider(ProxyProvider):
     name = "direct"
     
@@ -70,11 +55,10 @@ class ProxyManager:
     def __init__(self):
         self.providers = {
             "scraperapi": ScraperAPIProvider(),
-            "brightdata": BrightDataProvider(),
             "direct": DirectProvider()
         }
         self.current_provider: Optional[str] = None
-        self.fallback_chain = ["scraperapi", "brightdata", "direct"]
+        self.fallback_chain = ["scraperapi", "direct"]
     
     def get_provider(self, name: str) -> Optional[ProxyProvider]:
         return self.providers.get(name)

@@ -38,8 +38,8 @@ export default function Settings() {
   const fetchData = useCallback(async () => {
     try {
       const [subRes, plansRes] = await Promise.all([
-        api.get('/api/billing/subscription'),
-        api.get('/api/billing/plans'),
+        api.get('/billing/subscription'),
+        api.get('/billing/plans'),
       ])
       setSubscription(subRes.data)
       setPlans(plansRes.data.plans || [])
@@ -58,7 +58,7 @@ export default function Settings() {
     setUpgradeLoading(tier)
     try {
       const origin = window.location.origin
-      const res = await api.post('/api/billing/checkout', {
+      const res = await api.post('/billing/checkout', {
         plan_tier: tier,
         success_url: `${origin}/settings?payment=success`,
         cancel_url: `${origin}/settings?payment=canceled`,
@@ -75,7 +75,7 @@ export default function Settings() {
 
   const handleManageBilling = async () => {
     try {
-      const res = await api.post('/api/billing/portal', {
+      const res = await api.post('/billing/portal', {
         return_url: `${window.location.origin}/settings`,
       })
       if (res.data.portal_url) {

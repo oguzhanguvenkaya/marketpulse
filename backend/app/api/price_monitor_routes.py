@@ -694,6 +694,264 @@ async def export_price_monitor_data(
         )
 
 
+@router.get("/price-monitor/export-excel")
+async def export_price_monitor_excel(
+    platform: str = Query(None, description="Platform filtresi (opsiyonel): hepsiburada veya trendyol"),
+    active_filter: str = Query("all", description="Filtre: all, active, inactive"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ürünleri pazaryeri kategori ağacı ile Excel dosyasına aktar.
+
+    Her platform ayrı sheet olarak eklenir.  Kategori bilgisi sırasıyla
+    store_products, products ve monitored_products.product_url'den çıkarılır.
+    """
+    from fastapi.responses import StreamingResponse
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from collections import defaultdict
+
+    platforms = [platform.lower()] if platform else ["hepsiburada", "trendyol"]
+
+    wb = Workbook()
+    wb.remove(wb.active)  # Boş varsayılan sheet'i kaldır
+
+    # ---------- Kategori çözümleme yardımcıları ----------
+    def _category_from_store_products(db: Session, user_id, mp: MonitoredProduct) -> Optional[str]:
+        """store_products tablosundan kategori breadcrumbs bul."""
+        from app.db.models import StoreProduct
+        filters = [StoreProduct.user_id == user_id, StoreProduct.platform == mp.platform]
+        if mp.barcode:
+            sp = db.query(StoreProduct).filter(*filters, StoreProduct.barcode == mp.barcode).first()
+            if sp:
+                if sp.category_breadcrumbs:
+                    names = [c.get("name") or c.get("text", "") for c in sp.category_breadcrumbs if isinstance(c, dict)]
+                    if names:
+                        return " > ".join(n for n in names if n)
+                if sp.category:
+                    return sp.category
+        if mp.sku:
+            sp = db.query(StoreProduct).filter(*filters, StoreProduct.sku == mp.sku).first()
+            if sp:
+                if sp.category_breadcrumbs:
+                    names = [c.get("name") or c.get("text", "") for c in sp.category_breadcrumbs if isinstance(c, dict)]
+                    if names:
+                        return " > ".join(n for n in names if n)
+                if sp.category:
+                    return sp.category
+        return None
+
+    def _category_from_products_table(db: Session, mp: MonitoredProduct) -> Optional[str]:
+        """products tablosundan kategori bul (keyword search sonuçları)."""
+        from app.db.models import Product
+        if mp.sku:
+            p = db.query(Product).filter(
+                Product.platform == mp.platform,
+                Product.external_id == mp.sku,
+            ).first()
+            if p:
+                return p.category_hierarchy or p.category_path
+        return None
+
+    def _category_from_url(url: str) -> Optional[str]:
+        """Trendyol URL'inden kategori çıkar (slug'dan)."""
+        if not url:
+            return None
+        import re
+        # Trendyol URL: /brand/category-slug-p-123456
+        m = re.search(r'trendyol\.com/([^/]+)/([^?]+)-p-\d+', url)
+        if m:
+            brand_slug = m.group(1).replace('-', ' ').title()
+            return brand_slug
+        return None
+
+    def _resolve_category(db: Session, user_id, mp: MonitoredProduct) -> str:
+        cat = _category_from_store_products(db, user_id, mp)
+        if cat:
+            return cat
+        cat = _category_from_products_table(db, mp)
+        if cat:
+            return cat
+        cat = _category_from_url(mp.product_url)
+        if cat:
+            return cat
+        return "Kategorisiz"
+
+    # ---------- Stil tanımları ----------
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="2B3544", end_color="2B3544", fill_type="solid")
+    category_font = Font(bold=True, size=11, color="FF6000")
+    category_fill = PatternFill(start_color="FFF3E0", end_color="FFF3E0", fill_type="solid")
+    thin_border = Border(
+        bottom=Side(style="thin", color="DDDDDD"),
+    )
+
+    summary_data: Dict[str, Dict[str, int]] = {}  # platform -> {category: count}
+
+    for plat in platforms:
+        query = db.query(MonitoredProduct).filter(
+            MonitoredProduct.user_id == user.id,
+            MonitoredProduct.platform == plat,
+        )
+        if active_filter == "active":
+            query = query.filter(MonitoredProduct.is_active == True)
+        elif active_filter == "inactive":
+            query = query.filter(MonitoredProduct.is_active == False)
+
+        products = query.order_by(MonitoredProduct.brand, MonitoredProduct.product_name).all()
+        if not products:
+            continue
+
+        # Son snapshot fiyatlarını toplu çek
+        product_ids = [p.id for p in products]
+        snap_rows = db.execute(
+            text("""
+                SELECT DISTINCT ON (monitored_product_id, merchant_id)
+                       monitored_product_id, merchant_id, merchant_name, price, original_price,
+                       campaign_price, buybox_order, free_shipping, discount_rate
+                FROM seller_snapshots
+                WHERE monitored_product_id = ANY(:pids)
+                ORDER BY monitored_product_id, merchant_id, snapshot_date DESC
+            """),
+            {"pids": product_ids},
+        ).fetchall()
+
+        snap_map: Dict[str, list] = defaultdict(list)
+        for row in snap_rows:
+            snap_map[str(row[0])].append({
+                "merchant_name": row[2],
+                "price": float(row[3]) if row[3] else None,
+                "original_price": float(row[4]) if row[4] else None,
+                "campaign_price": float(row[5]) if row[5] else None,
+                "buybox_order": row[6],
+                "free_shipping": row[7],
+                "discount_rate": float(row[8]) if row[8] else None,
+            })
+
+        # Kategori bazlı gruplama
+        cat_products: Dict[str, list] = defaultdict(list)
+        for mp in products:
+            cat = _resolve_category(db, user.id, mp)
+            cat_products[cat].append(mp)
+
+        summary_data[plat] = {cat: len(prods) for cat, prods in cat_products.items()}
+
+        # Sheet oluştur
+        sheet_name = "Hepsiburada" if plat == "hepsiburada" else "Trendyol"
+        ws = wb.create_sheet(title=sheet_name)
+
+        headers = [
+            "Kategori", "Ürün Adı", "SKU", "Barkod", "Marka",
+            "Stok Kodu", "Durum", "Satıcı Sayısı",
+            "En Düşük Fiyat", "Buybox Satıcı", "Buybox Fiyat",
+            "Eşik Fiyat", "Kampanya Eşik",
+        ]
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        ws.freeze_panes = "A2"
+
+        row_num = 2
+        sorted_cats = sorted(cat_products.keys(), key=lambda c: (c == "Kategorisiz", c))
+
+        for cat in sorted_cats:
+            prods = cat_products[cat]
+
+            # Kategori başlık satırı
+            ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=len(headers))
+            cat_cell = ws.cell(row=row_num, column=1, value=f"{cat}  ({len(prods)} ürün)")
+            cat_cell.font = category_font
+            cat_cell.fill = category_fill
+            cat_cell.alignment = Alignment(horizontal="left", vertical="center")
+            row_num += 1
+
+            for mp in prods:
+                snaps = snap_map.get(str(mp.id), [])
+                seller_count = len(snaps)
+
+                # En düşük fiyat
+                prices = [s["price"] for s in snaps if s["price"] is not None]
+                min_price = min(prices) if prices else None
+
+                # Buybox winner
+                buybox = next((s for s in snaps if s.get("buybox_order") == 0), None)
+                if not buybox and snaps:
+                    sorted_snaps = sorted(snaps, key=lambda s: s.get("buybox_order") or 999)
+                    buybox = sorted_snaps[0]
+
+                ws.cell(row=row_num, column=1, value=cat)
+                ws.cell(row=row_num, column=2, value=mp.product_name or "")
+                ws.cell(row=row_num, column=3, value=mp.sku or "")
+                ws.cell(row=row_num, column=4, value=mp.barcode or "")
+                ws.cell(row=row_num, column=5, value=mp.brand or "")
+                ws.cell(row=row_num, column=6, value=mp.seller_stock_code or "")
+                ws.cell(row=row_num, column=7, value="Aktif" if mp.is_active else "İnaktif")
+                ws.cell(row=row_num, column=8, value=seller_count)
+                ws.cell(row=row_num, column=9, value=min_price)
+                ws.cell(row=row_num, column=10, value=buybox["merchant_name"] if buybox else "")
+                ws.cell(row=row_num, column=11, value=buybox["price"] if buybox else None)
+                ws.cell(row=row_num, column=12, value=float(mp.threshold_price) if mp.threshold_price else None)
+                ws.cell(row=row_num, column=13, value=float(mp.alert_campaign_price) if mp.alert_campaign_price else None)
+
+                for col_idx in range(1, len(headers) + 1):
+                    ws.cell(row=row_num, column=col_idx).border = thin_border
+
+                row_num += 1
+
+        # Sütun genişlikleri
+        col_widths = [30, 45, 18, 16, 20, 15, 10, 12, 14, 25, 14, 14, 14]
+        for i, w in enumerate(col_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = w
+
+    # ---------- Özet Sheet ----------
+    if summary_data:
+        ws_summary = wb.create_sheet(title="Kategori Özeti", index=0)
+
+        sum_headers = ["Platform", "Kategori", "Ürün Sayısı"]
+        for col_idx, h in enumerate(sum_headers, 1):
+            cell = ws_summary.cell(row=1, column=col_idx, value=h)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        ws_summary.freeze_panes = "A2"
+        row_num = 2
+
+        for plat, cats in summary_data.items():
+            plat_label = "Hepsiburada" if plat == "hepsiburada" else "Trendyol"
+            for cat in sorted(cats.keys(), key=lambda c: (c == "Kategorisiz", c)):
+                ws_summary.cell(row=row_num, column=1, value=plat_label)
+                ws_summary.cell(row=row_num, column=2, value=cat)
+                ws_summary.cell(row=row_num, column=3, value=cats[cat])
+                row_num += 1
+
+        ws_summary.column_dimensions["A"].width = 18
+        ws_summary.column_dimensions["B"].width = 50
+        ws_summary.column_dimensions["C"].width = 14
+
+    if not wb.sheetnames:
+        ws = wb.create_sheet(title="Boş")
+        ws.cell(row=1, column=1, value="Seçilen filtrelere uygun ürün bulunamadı.")
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    plat_suffix = platform or "all"
+    filename = f"price_monitor_categories_{plat_suffix}_{timestamp}.xlsx"
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("/price-monitor/brands")
 async def get_monitored_product_brands(
     user: User = Depends(get_current_user),
@@ -1053,6 +1311,17 @@ async def run_fetch_task(task_id: str, platform: str, product_ids: List[str] = N
                 await _get_trendyol_price_monitor_service().fetch_all_products(db, task, product_ids, platform, fetch_type)
             else:
                 await _get_price_monitor_service().fetch_all_products(db, task, product_ids, platform, fetch_type)
+    except Exception as exc:
+        logger.error("Background fetch task failed task_id=%s: %s", task_id, exc)
+        try:
+            task = db.query(PriceMonitorTask).filter(PriceMonitorTask.id == task_id).first()
+            if task and task.status not in ("completed", "failed", "stopped"):
+                task.status = "failed"
+                task.error_message = str(exc)[:500]
+                task.completed_at = datetime.utcnow()
+                db.commit()
+        except Exception:
+            pass
     finally:
         db.close()
 
@@ -1077,13 +1346,26 @@ async def start_fetch_task(
     if executor != "local":
         _require_queue_or_503()
 
+    # Aynı platform için zaten running bir task varsa engelle
+    existing_running = db.query(PriceMonitorTask).filter(
+        PriceMonitorTask.user_id == user.id,
+        PriceMonitorTask.platform == platform,
+        PriceMonitorTask.status.in_(["pending", "running"]),
+    ).first()
+    if existing_running:
+        raise HTTPException(
+            status_code=409,
+            detail=f"{platform} için zaten devam eden bir fetch işlemi var (task_id: {existing_running.id})"
+        )
+
     task = PriceMonitorTask(user_id=user.id, platform=platform, status="pending", fetch_type=fetch_type)
     db.add(task)
     db.commit()
     db.refresh(task)
 
     if executor == "local":
-        asyncio.create_task(run_fetch_task(str(task.id), platform, product_ids, fetch_type))
+        bg = asyncio.create_task(run_fetch_task(str(task.id), platform, product_ids, fetch_type))
+        bg.add_done_callback(lambda t: t.exception() if not t.cancelled() and t.exception() else None)
     else:
         try:
             from app.tasks import send_price_monitor_task
@@ -1125,6 +1407,34 @@ async def stop_fetch_task(
     return {
         "success": True,
         "message": "Durdurma isteği gönderildi, mevcut ürün tamamlandıktan sonra duracak"
+    }
+
+
+@router.get("/price-monitor/fetch/active")
+async def get_active_fetch_task(
+    platform: str = Query("hepsiburada"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Kullanıcının aktif (running/pending) fetch task'ını döndür."""
+    task = db.query(PriceMonitorTask).filter(
+        PriceMonitorTask.user_id == user.id,
+        PriceMonitorTask.platform == platform,
+        PriceMonitorTask.status.in_(["pending", "running"]),
+    ).order_by(desc(PriceMonitorTask.created_at)).first()
+
+    if not task:
+        return {"active": False}
+
+    return {
+        "active": True,
+        "id": str(task.id),
+        "status": task.status,
+        "total_products": task.total_products,
+        "completed_products": task.completed_products,
+        "failed_products": task.failed_products,
+        "fetch_type": task.fetch_type,
+        "created_at": task.created_at.isoformat(),
     }
 
 

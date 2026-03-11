@@ -89,9 +89,9 @@ export default function Dashboard() {
     setLoading(true)
     try {
       const [summaryRes, moversRes, profitRes] = await Promise.allSettled([
-        api.get('/api/dashboard/summary'),
-        api.get('/api/dashboard/price-movers'),
-        api.get('/api/dashboard/profitability-overview'),
+        api.get('/dashboard/summary'),
+        api.get('/dashboard/price-movers'),
+        api.get('/dashboard/profitability-overview'),
       ])
       if (summaryRes.status === 'fulfilled') setSummary(summaryRes.value.data)
       if (moversRes.status === 'fulfilled') setMovers(moversRes.value.data)

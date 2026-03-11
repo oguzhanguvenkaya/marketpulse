@@ -230,3 +230,8 @@ def send_scraping_task(task_id: str):
         'tasks.run_scraping_task',
         args=[task_id],
     )
+
+
+# Celery CLI icin modul seviyesinde instance
+# Kullanim: celery -A app.tasks:celery_app worker --loglevel=info
+celery_app = get_celery_app()

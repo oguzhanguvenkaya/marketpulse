@@ -10,8 +10,10 @@ import {
   startFetchTask,
   stopFetchTask,
   getFetchTaskStatus,
+  getActiveFetchTask,
   fetchSingleProduct,
   exportPriceMonitorData,
+  exportPriceMonitorExcel,
   getBrands,
   getLastInactiveSkus,
 } from '../services/api';
@@ -164,9 +166,29 @@ export function usePriceMonitor() {
     }
     mountedPlatformRef.current = platform;
 
+    // Platform değiştiğinde mevcut fetch polling'i temizle
+    setFetchTaskId(null);
+    setFetchStatus('');
+    setFetchProgress({ completed: 0, total: 0 });
+
     setCurrentOffset(0);
     currentOffsetRef.current = 0;
     void Promise.all([loadProducts(0), loadBrands(), loadLastInactive()]);
+
+    // Aktif fetch task varsa polling'i başlat
+    void getActiveFetchTask(platform).then((data) => {
+      if (data.active && data.id) {
+        setFetchTaskId(data.id);
+        setFetchStatus(data.status || 'running');
+        setFetchProgress({
+          completed: data.completed_products || 0,
+          total: data.total_products || 0,
+        });
+        if (data.fetch_type) {
+          setCurrentFetchType(data.fetch_type as FetchType);
+        }
+      }
+    }).catch(() => {});
   }, [platform, loadBrands, loadLastInactive, loadProducts]);
 
   useEffect(() => {
@@ -328,6 +350,20 @@ export function usePriceMonitor() {
     }
   };
 
+  const handleExportExcel = async (filter: 'all' | 'active' | 'inactive' = 'all', allPlatforms: boolean = false) => {
+    try {
+      setExportLoading(true);
+      setShowExportMenu(false);
+      await exportPriceMonitorExcel(allPlatforms ? null : platform, filter);
+      toast.success('Excel dosyası indirildi');
+    } catch (e) {
+      console.error('Error exporting Excel:', e);
+      toast.error('Excel export failed');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const handleBulkDelete = async () => {
     if (!showDeleteModal) return;
     try {
@@ -464,6 +500,7 @@ export function usePriceMonitor() {
     handleDeleteConfirm,
     handleDeleteCancel,
     handleExport,
+    handleExportExcel,
     handleBulkDelete,
     loadProducts,
 

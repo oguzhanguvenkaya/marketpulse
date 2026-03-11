@@ -302,6 +302,7 @@ class TrendyolPriceMonitorService:
         - inactive: Tüm inactive ürünleri çek
         """
         query = db.query(MonitoredProduct).filter(
+            MonitoredProduct.user_id == task.user_id,
             MonitoredProduct.platform == 'trendyol'
         )
         
@@ -311,6 +312,7 @@ class TrendyolPriceMonitorService:
             query = query.filter(MonitoredProduct.is_active == False)
         elif fetch_type == "last_inactive":
             last_task = db.query(PriceMonitorTask).filter(
+                PriceMonitorTask.user_id == task.user_id,
                 PriceMonitorTask.platform == 'trendyol',
                 PriceMonitorTask.status == 'completed'
             ).order_by(PriceMonitorTask.completed_at.desc()).first()

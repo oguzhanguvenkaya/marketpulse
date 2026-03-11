@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/client';
 
-const API_BASE = '/api/json-editor';
+const API_BASE = '/json-editor';
 
 interface CategoryData {
   metadata: Record<string, unknown>;
@@ -75,7 +75,7 @@ export default function JsonEditor() {
 
   const fetchDbFileList = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_BASE}/files`);
+      const res = await api.get(`${API_BASE}/files`);
       setDbFiles(res.data);
     } catch (error) {
       console.error('Failed to fetch JSON files:', error);
@@ -113,9 +113,9 @@ export default function JsonEditor() {
     try {
       const content = { metadata: cat.metadata, products: cat.products };
       if (cat._dbId) {
-        await axios.put(`${API_BASE}/files/${cat._dbId}`, { content });
+        await api.put(`${API_BASE}/files/${cat._dbId}`, { content });
       } else {
-        const res = await axios.post(`${API_BASE}/files`, { filename: cat._fileName, content });
+        const res = await api.post(`${API_BASE}/files`, { filename: cat._fileName, content });
         setCategories(prev => prev.map((c, i) => i === activeTab ? { ...c, _dbId: res.data.id } : c));
       }
       setCategories(prev => prev.map((c, i) => i === activeTab ? { ...c, _originalProducts: JSON.stringify(c.products) } : c));
@@ -134,7 +134,7 @@ export default function JsonEditor() {
 
   const clearAllFiles = async () => {
     try {
-      await axios.delete(`${API_BASE}/files`);
+      await api.delete(`${API_BASE}/files`);
       setCategories([]);
       setActiveTab(0);
       setActiveProduct(0);
@@ -158,7 +158,7 @@ export default function JsonEditor() {
         const data = JSON.parse(text);
         if (data.metadata && data.products) {
           const content = { metadata: data.metadata, products: data.products };
-          const res = await axios.post(`${API_BASE}/files`, { filename: file.name, content });
+          const res = await api.post(`${API_BASE}/files`, { filename: file.name, content });
           newCategories.push({
             metadata: data.metadata,
             products: data.products,
@@ -1150,7 +1150,7 @@ export default function JsonEditor() {
 
   const removeFileFromDb = async (dbId: string) => {
     try {
-      await axios.delete(`${API_BASE}/files/${dbId}`);
+      await api.delete(`${API_BASE}/files/${dbId}`);
       fetchDbFileList();
     } catch (error) {
       console.error('Failed to remove JSON file from database:', error);
@@ -1183,7 +1183,7 @@ export default function JsonEditor() {
       return;
     }
     try {
-      const res = await axios.get(`${API_BASE}/files/${dbFile.id}`);
+      const res = await api.get(`${API_BASE}/files/${dbFile.id}`);
       const data = res.data.json_content;
       const cat: CategoryData = {
         metadata: data.metadata || {},

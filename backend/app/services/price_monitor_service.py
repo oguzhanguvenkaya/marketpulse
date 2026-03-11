@@ -576,12 +576,14 @@ class PriceMonitorService:
         
         if fetch_type == "last_inactive":
             last_task = db.query(PriceMonitorTask).filter(
+                PriceMonitorTask.user_id == task.user_id,
                 PriceMonitorTask.platform == platform,
                 PriceMonitorTask.status == "completed"
             ).order_by(PriceMonitorTask.completed_at.desc()).first()
-            
+
             if last_task and last_task.last_inactive_skus:
                 products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.user_id == task.user_id,
                     MonitoredProduct.sku.in_(last_task.last_inactive_skus),
                     MonitoredProduct.platform == platform
                 ).all()
@@ -591,6 +593,7 @@ class PriceMonitorService:
                 logger.warning("No last inactive SKUs found")
         elif fetch_type == "inactive":
             products = db.query(MonitoredProduct).filter(
+                MonitoredProduct.user_id == task.user_id,
                 MonitoredProduct.platform == platform,
                 MonitoredProduct.is_active == False
             ).all()
@@ -598,12 +601,14 @@ class PriceMonitorService:
         else:
             if product_ids:
                 products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.user_id == task.user_id,
                     MonitoredProduct.id.in_(product_ids),
                     MonitoredProduct.platform == platform,
                     MonitoredProduct.is_active == True
                 ).all()
             else:
                 products = db.query(MonitoredProduct).filter(
+                    MonitoredProduct.user_id == task.user_id,
                     MonitoredProduct.platform == platform,
                     MonitoredProduct.is_active == True
                 ).all()
@@ -640,7 +645,7 @@ class PriceMonitorService:
         
         batch_size = 50
         total_batches = (len(products) + batch_size - 1) // batch_size
-        
+
         for batch_idx in range(total_batches):
             db.refresh(task)
             if task.stop_requested:
@@ -651,26 +656,30 @@ class PriceMonitorService:
                 task.last_inactive_skus = inactive_skus
                 db.commit()
                 return
-            
+
             start_idx = batch_idx * batch_size
             end_idx = min(start_idx + batch_size, len(products))
             batch_products = products[start_idx:end_idx]
-            
+
             logger.info(f"Batch {batch_idx + 1}/{total_batches}: {len(batch_products)} ürün paralel işleniyor...")
-            
-            tasks = [fetch_with_semaphore(p) for p in batch_products]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            for result in results:
-                if isinstance(result, Exception):
-                    logger.error(f"Batch exception: {result}")
+
+            batch_tasks = [fetch_with_semaphore(p) for p in batch_products]
+
+            for coro in asyncio.as_completed(batch_tasks):
+                try:
+                    result = await coro
+                except Exception as exc:
+                    logger.error(f"Batch exception: {exc}")
                     failed += 1
+                    task.completed_products = completed
+                    task.failed_products = failed
+                    db.commit()
                     continue
-                
+
                 product = product_map.get(str(result['product_id']))
                 if not product:
                     continue
-                
+
                 if result['inactive']:
                     inactive_skus.append(result['sku'])
                     failed += 1
@@ -684,18 +693,18 @@ class PriceMonitorService:
                         auth_failed_skus.append(result['sku'])
                     elif result.get('error') == 'upstream_error':
                         upstream_failed_skus.append(result['sku'])
-            
-            db.commit()
-            
-            task.completed_products = completed
-            task.failed_products = failed
+
+                task.completed_products = completed
+                task.failed_products = failed
+                db.commit()
+
             task.last_processed_index = end_idx
             if auth_failed_skus or upstream_failed_skus:
                 task.error_message = (
                     f"auth_errors={len(auth_failed_skus)};upstream_errors={len(upstream_failed_skus)}"
                 )
             db.commit()
-            
+
             logger.info(
                 f"Batch {batch_idx + 1} tamamlandı: toplam {completed} başarılı, {failed} başarısız, "
                 f"{len(inactive_skus)} inactive, {len(auth_failed_skus)} auth_error, {len(upstream_failed_skus)} upstream_error"

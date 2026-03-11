@@ -34,7 +34,7 @@ export default function Onboarding() {
     setError('')
     setLoading(true)
     try {
-      const res = await api.post('/api/price-monitor/products', {
+      const res = await api.post('/price-monitor/products', {
         platform,
         products: [{ sku: sku.trim() }],
       })
