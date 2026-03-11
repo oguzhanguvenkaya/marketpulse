@@ -17,6 +17,32 @@ _db_initialized = False
 _last_cleanup_date = None
 
 
+def _cleanup_stuck_tasks():
+    """Server restart sonrası stuck kalan running/pending task'ları temizle."""
+    try:
+        from app.db.database import get_session_local
+        from app.db.models import PriceMonitorTask
+        from datetime import datetime
+
+        SessionLocal = get_session_local()
+        db = SessionLocal()
+        try:
+            stuck = db.query(PriceMonitorTask).filter(
+                PriceMonitorTask.status.in_(["running", "pending"])
+            ).all()
+            if stuck:
+                for t in stuck:
+                    t.status = "failed"
+                    t.error_message = "Server restart — task interrupted"
+                    t.completed_at = datetime.utcnow()
+                db.commit()
+                logger.info("Cleaned %d stuck tasks after server restart", len(stuck))
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning("Stuck task cleanup failed: %s", e)
+
+
 def _init_db():
     global _db_initialized
     try:
@@ -93,6 +119,9 @@ async def lifespan(app: FastAPI):
         pass
 
     _init_db()
+
+    # Stuck "running"/"pending" task'ları temizle (server restart sonrası)
+    _cleanup_stuck_tasks()
 
     # Background scheduler loop başlat
     _scheduler_task = asyncio.create_task(_scheduler_loop())
@@ -219,6 +248,7 @@ from app.api.automation_routes import router as automation_router
 from app.api.keyword_recommendation_routes import router as keyword_recommendation_router
 from app.api.customer_questions_routes import router as customer_questions_router
 from app.api.ai_streaming_routes import router as ai_streaming_router
+from app.api.my_store_routes import router as my_store_router
 
 app.include_router(router, prefix="/api")
 app.include_router(url_scraper_router)
@@ -241,6 +271,7 @@ app.include_router(automation_router)
 app.include_router(keyword_recommendation_router)
 app.include_router(customer_questions_router)
 app.include_router(ai_streaming_router)
+app.include_router(my_store_router)
 
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 if os.path.exists(frontend_dist):

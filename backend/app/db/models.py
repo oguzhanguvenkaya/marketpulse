@@ -499,6 +499,17 @@ class CategoryProduct(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Hybrid search columns (Faz 2A)
+    search_text = Column(Text, nullable=True)
+    embedding = Column(Vector(1536), nullable=True) if Vector else Column(Text, nullable=True)
+    search_tsv = Column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('simple', coalesce(name, '') || ' ' || coalesce(brand, '') || ' ' || coalesce(description, ''))",
+            persisted=True,
+        ),
+    )
+
     session = relationship("CategorySession", back_populates="category_products")
 
     __table_args__ = (
@@ -637,6 +648,46 @@ class CompetitorProduct(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     competitor = relationship("CompetitorSeller", back_populates="products")
+
+    class Config:
+        from_attributes = True
+
+
+class MyStoreProduct(Base):
+    """Kullanıcının kendi web sitesindeki ürünler — CSV'den import edilir."""
+    __tablename__ = "my_store_products"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(Text, nullable=False)
+    subtitle = Column(Text)
+    seo_link = Column(Text)
+    stock_code = Column(String(100), index=True)
+    barcode = Column(String(50), index=True)
+    meta_keywords = Column(Text)
+    meta_title = Column(Text)
+    meta_description = Column(Text)
+    category = Column(Text)
+    brand = Column(String(255), index=True)
+    supplier = Column(String(255))
+    price = Column(Numeric(10, 2))
+    detail_html = Column(Text)
+    hepsiburada_sku = Column(String(100), index=True)
+    category_path = Column(Text)
+    image_url = Column(Text)
+    image_url_2 = Column(Text)
+    image_list = Column(JSON)
+    web_url = Column(Text)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", backref="my_store_products")
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'barcode', name='uq_my_store_product_user_barcode'),
+        Index('ix_my_store_products_user_brand', 'user_id', 'brand'),
+    )
 
     class Config:
         from_attributes = True
