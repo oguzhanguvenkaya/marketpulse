@@ -107,6 +107,44 @@ async def generate_embeddings_batch(
     return results
 
 
+def build_search_text_category(product) -> str:
+    """CategoryProduct icin search text olustur.
+
+    name + brand + description[:500] + specs values[:300]
+    """
+    parts = [product.name, product.brand]
+
+    if product.description:
+        parts.append(product.description[:500])
+
+    if product.specs and isinstance(product.specs, dict):
+        spec_text = " ".join(str(v) for v in product.specs.values())
+        parts.append(spec_text[:300])
+
+    return " | ".join(p for p in parts if p).strip()
+
+
+async def embed_category_product(product, db) -> bool:
+    """CategoryProduct icin embedding uret ve kaydet.
+
+    search_text degismemisse skip eder.
+    Returns True if embedding was updated, False otherwise.
+    """
+    search_text = build_search_text_category(product)
+    if not search_text:
+        return False
+    if search_text == product.search_text and product.embedding is not None:
+        return False  # Degisiklik yok
+
+    embedding = await generate_embedding(search_text)
+    if embedding is None:
+        return False
+
+    product.search_text = search_text
+    product.embedding = embedding
+    return True
+
+
 async def embed_monitored_product(product, db) -> bool:
     """MonitoredProduct icin embedding uret ve kaydet.
 

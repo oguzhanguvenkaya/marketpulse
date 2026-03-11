@@ -1,13 +1,19 @@
-"""Kategori analizi AI tool fonksiyonları."""
+"""Kategori analizi AI tool fonksiyonları.
+
+Faz 2A: Hybrid search + reranker entegrasyonu.
+ILIKE yerine hybrid_search_category + rerank_products kullanir.
+"""
 
 import logging
 import re
 from collections import Counter
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, text
 
 from app.core.logger import get_logger
 from app.db.models import CategorySession, CategoryProduct
+from app.services.query_normalizer import normalize_query, extract_brand
+from app.services.embedding_service import build_search_text_category
 
 logger = get_logger("ai.tools.category")
 
@@ -52,9 +58,20 @@ async def get_category_analysis(
         CategoryProduct.session_id == session.id,
     )
 
-    # Marka filtresi
+    # Marka filtresi — word_similarity fuzzy match ile
     if brand:
-        product_query = product_query.filter(CategoryProduct.brand.ilike(f"%{brand}%"))
+        normalized_brand = normalize_query(brand)
+        brand_alias, _ = extract_brand(brand)
+        if brand_alias:
+            # Bilinen marka — exact match (case-insensitive)
+            product_query = product_query.filter(
+                func.lower(CategoryProduct.brand) == brand_alias.lower()
+            )
+        else:
+            # Bilinmeyen marka — word_similarity fuzzy match
+            product_query = product_query.filter(
+                text("word_similarity(:brand, brand) > 0.3")
+            ).params(brand=normalized_brand)
     # Satıcı filtresi
     if seller:
         product_query = product_query.filter(CategoryProduct.seller_name.ilike(f"%{seller}%"))
@@ -155,35 +172,45 @@ async def get_category_analysis(
 async def get_product_descriptions(
     user_id: str, db: Session, product_name: str = "", category_name: str = "", **kwargs
 ) -> dict:
-    """Kategori ürünlerinin açıklamalarını ve detaylarını getir."""
+    """Kategori ürünlerinin açıklamalarını ve detaylarını getir. Hybrid search + reranker."""
     if not product_name and not category_name:
         return {"hata": "product_name veya category_name parametresi gerekli."}
 
-    # Önce session bul
-    session_query = db.query(CategorySession).filter(
-        CategorySession.user_id == user_id,
-    )
-    if category_name:
-        session_query = session_query.filter(
-            CategorySession.category_name.ilike(f"%{category_name}%")
-        )
-
-    sessions = session_query.order_by(desc(CategorySession.created_at)).limit(5).all()
-    if not sessions:
-        return {"mesaj": "Kategori taraması bulunamadı."}
-
-    session_ids = [s.id for s in sessions]
-
-    # Ürünleri bul
-    product_query = db.query(CategoryProduct).filter(
-        CategoryProduct.session_id.in_(session_ids),
-    )
     if product_name:
-        product_query = product_query.filter(
-            CategoryProduct.name.ilike(f"%{product_name}%")
+        # Hybrid search kullan
+        from app.services.hybrid_search_service import hybrid_search_category
+        from app.services.reranker_service import rerank_products
+
+        normalized = normalize_query(product_name)
+        products = await hybrid_search_category(
+            db, user_id, normalized, category_name=category_name, limit=20
         )
 
-    products = product_query.limit(10).all()
+        if products:
+            products = await rerank_products(
+                query=normalized,
+                products=products,
+                build_doc_fn=build_search_text_category,
+                top_n=10,
+            )
+    else:
+        # Sadece kategori adı ile — session bazlı arama
+        session_query = db.query(CategorySession).filter(
+            CategorySession.user_id == user_id,
+        )
+        if category_name:
+            session_query = session_query.filter(
+                CategorySession.category_name.ilike(f"%{category_name}%")
+            )
+
+        sessions = session_query.order_by(desc(CategorySession.created_at)).limit(5).all()
+        if not sessions:
+            return {"mesaj": "Kategori taraması bulunamadı."}
+
+        session_ids = [s.id for s in sessions]
+        products = db.query(CategoryProduct).filter(
+            CategoryProduct.session_id.in_(session_ids),
+        ).limit(10).all()
 
     if not products:
         return {"mesaj": f"'{product_name or category_name}' ile eşleşen ürün bulunamadı."}
@@ -210,34 +237,43 @@ async def get_product_descriptions(
 async def analyze_product_descriptions(
     user_id: str, db: Session, product_name: str = "", category_name: str = "", **kwargs
 ) -> dict:
-    """Ürün açıklamalarındaki en çok geçen kelimeleri analiz et ve karşılaştır."""
+    """Ürün açıklamalarındaki en çok geçen kelimeleri analiz et ve karşılaştır. Hybrid search + reranker."""
     if not product_name and not category_name:
         return {"hata": "product_name veya category_name parametresi gerekli."}
 
-    # Session bul
-    session_query = db.query(CategorySession).filter(
-        CategorySession.user_id == user_id,
-    )
-    if category_name:
-        session_query = session_query.filter(
-            CategorySession.category_name.ilike(f"%{category_name}%")
-        )
-
-    sessions = session_query.order_by(desc(CategorySession.created_at)).limit(5).all()
-    if not sessions:
-        return {"mesaj": "Kategori taraması bulunamadı."}
-
-    session_ids = [s.id for s in sessions]
-
-    product_query = db.query(CategoryProduct).filter(
-        CategoryProduct.session_id.in_(session_ids),
-    )
     if product_name:
-        product_query = product_query.filter(
-            CategoryProduct.name.ilike(f"%{product_name}%")
+        from app.services.hybrid_search_service import hybrid_search_category
+        from app.services.reranker_service import rerank_products
+
+        normalized = normalize_query(product_name)
+        products = await hybrid_search_category(
+            db, user_id, normalized, category_name=category_name, limit=20
         )
 
-    products = product_query.limit(10).all()
+        if products:
+            products = await rerank_products(
+                query=normalized,
+                products=products,
+                build_doc_fn=build_search_text_category,
+                top_n=10,
+            )
+    else:
+        session_query = db.query(CategorySession).filter(
+            CategorySession.user_id == user_id,
+        )
+        if category_name:
+            session_query = session_query.filter(
+                CategorySession.category_name.ilike(f"%{category_name}%")
+            )
+
+        sessions = session_query.order_by(desc(CategorySession.created_at)).limit(5).all()
+        if not sessions:
+            return {"mesaj": "Kategori taraması bulunamadı."}
+
+        session_ids = [s.id for s in sessions]
+        products = db.query(CategoryProduct).filter(
+            CategoryProduct.session_id.in_(session_ids),
+        ).limit(10).all()
 
     if not products:
         return {"mesaj": f"'{product_name or category_name}' ile eşleşen ürün bulunamadı."}

@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from app.db.database import get_db, SessionLocal
 from app.db.models import Product, ProductSnapshot, ProductSeller, ProductReview, SearchTask, SponsoredBrandAd, SearchSponsoredProduct, User
+from app.core.config import settings
 from app.core.logger import api_logger as logger
 from app.core.auth import get_current_user
 
@@ -34,7 +35,7 @@ async def run_scraping_background(task_id: str):
             if task.platform == "hepsiburada":
                 await scraper.init_browser()
                 browser_initialized = True
-                search_result = await scraper.scrape_hepsiburada_search(task.keyword, max_products=8)
+                search_result = await scraper.scrape_hepsiburada_search(task.keyword, max_products=settings.HB_SEARCH_MAX_PRODUCTS)
                 products_data = search_result.get('products', [])
                 sponsored_brands = search_result.get('sponsored_brands', [])
                 sponsored_products = search_result.get('sponsored_products', [])

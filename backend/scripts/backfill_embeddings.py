@@ -5,6 +5,7 @@ Kullanim:
     cd backend
     python -m scripts.backfill_embeddings --table monitored_products --batch-size 100
     python -m scripts.backfill_embeddings --table monitored_products --user-id <uuid>
+    python -m scripts.backfill_embeddings --table category_products --batch-size 50
 """
 from __future__ import annotations
 
@@ -21,9 +22,10 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app.core.config import settings  # noqa: E402
 from app.db.database import get_session_local  # noqa: E402
-from app.db.models import MonitoredProduct  # noqa: E402
+from app.db.models import MonitoredProduct, CategoryProduct  # noqa: E402
 from app.services.embedding_service import (  # noqa: E402
     build_search_text_monitored,
+    build_search_text_category,
     generate_embeddings_batch,
 )
 
@@ -34,7 +36,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 TABLE_MAP = {
-    "monitored_products": (MonitoredProduct, build_search_text_monitored),
+    "monitored_products": (MonitoredProduct, build_search_text_monitored, "product_name"),
+    "category_products": (CategoryProduct, build_search_text_category, "name"),
 }
 
 
@@ -43,16 +46,16 @@ async def backfill(table_name: str, batch_size: int = 100, user_id: str | None =
         logger.error("OPENAI_API_KEY is not configured. Aborting.")
         sys.exit(1)
 
-    model_class, build_fn = TABLE_MAP[table_name]
+    model_class, build_fn, name_col = TABLE_MAP[table_name]
     SessionLocal = get_session_local()
     db = SessionLocal()
 
     try:
         query = db.query(model_class).filter(
             model_class.embedding.is_(None),
-            model_class.product_name.isnot(None),
+            getattr(model_class, name_col).isnot(None),
         )
-        if user_id:
+        if user_id and hasattr(model_class, "user_id"):
             query = query.filter(model_class.user_id == user_id)
 
         total = query.count()
