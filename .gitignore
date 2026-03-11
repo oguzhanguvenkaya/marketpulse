@@ -48,3 +48,15 @@ attached_assets/
 hepsiburada_active_products.json
 awesome-llm-apps-main/
 superpowers-main/
+
+# Data files (Excel, JSON exports, scraping outputs)
+*.xlsx
+*.xls
+enriched_products.json
+hb_scrapp/
+ty_scrapp
+md files/
+barkod_karsilastir.py
+webproducts.xlsx
+price_monitor_kategoriler.xlsx
+excel/
