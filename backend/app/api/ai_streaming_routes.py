@@ -24,6 +24,7 @@ class ChatStreamRequest(BaseModel):
     message: str
     conversation_id: Optional[str] = None
     page_context: Optional[dict] = None
+    search_scope: Optional[str] = "auto"  # "page" | "global" | "auto"
 
 
 @router.post("/chat/stream")
@@ -41,12 +42,18 @@ async def chat_stream(
     # page_context field'larini sanitize et (prompt injection onlemi)
     safe_context = _sanitize_context(request.page_context)
 
+    # search_scope validate
+    search_scope = request.search_scope or "auto"
+    if search_scope not in ("page", "global", "auto"):
+        search_scope = "auto"
+
     async def generate():
         async for event in ai_streaming_service.stream_chat(
             user=current_user,
             conversation_id=conversation_id,
             message=request.message,
             page_context=safe_context,
+            search_scope=search_scope,
             db=db,
         ):
             yield event

@@ -34,6 +34,9 @@ TOOL_LABELS: Dict[str, str] = {
     "get_product_descriptions": "Urun aciklamalari getiriliyor...",
     "analyze_product_descriptions": "Urun aciklamalari analiz ediliyor...",
     "export_data": "Dosya hazirlaniyor...",
+    "detect_price_anomalies": "Fiyat anomalileri tespit ediliyor...",
+    "get_competitive_intel": "Rekabet analizi yapiliyor...",
+    "suggest_campaign_price": "Kampanya fiyati hesaplaniyor...",
 }
 
 # Veri degistiren (mutasyon yapan) action tool'lari
@@ -105,7 +108,7 @@ def _is_explicit_confirmation(message: str) -> bool:
     return bool(_CONFIRMATION_PATTERNS.match(message.strip()))
 
 
-def _build_system_prompt(page_context: Optional[dict]) -> str:
+def _build_system_prompt(page_context: Optional[dict], search_scope: str = "auto") -> str:
     """
     Base prompt + zengin sayfa baglamini birlestir.
 
@@ -182,6 +185,15 @@ def _build_system_prompt(page_context: Optional[dict]) -> str:
         if filter_parts:
             lines.append(f"Aktif filtreler: {', '.join(filter_parts)}")
 
+    # Search scope bilgisi
+    scope_info = {
+        "page": "\n[Arama Kapsamı: SAYFA] Sadece mevcut sayfa/kategori kapsamında ara. category_name parametresini kullan.",
+        "global": "\n[Arama Kapsamı: GLOBAL] Tüm kullanıcı verileri üzerinde ara. category_name parametresi boş bırakılabilir.",
+        "auto": "\n[Arama Kapsamı: OTOMATİK] Önce mevcut sayfa kapsamında ara. Sonuç bulunamazsa kapsamı genişlet.",
+    }
+    if search_scope in scope_info:
+        lines.append(scope_info[search_scope])
+
     return BASE_SYSTEM_PROMPT + "\n".join(lines)
 
 
@@ -253,9 +265,38 @@ def _trim_orphan_tool_messages(msgs: list) -> list:
     return msgs[start:]
 
 
+def _get_langfuse():
+    """Langfuse client dondur. Yapilandirilmamissa None.
+
+    Langfuse v3 API:
+    - lf.start_span() → root span (trace gorevi gorur)
+    - root.update_trace(user_id=, session_id=) → trace metadata
+    - root.start_observation(as_type='generation', ...) → LLM call
+    - root.start_span() → child span (tool call)
+    - .end() ile kapat, lf.flush() ile gonder
+    """
+    if not settings.LANGFUSE_PUBLIC_KEY or not settings.LANGFUSE_SECRET_KEY:
+        return None
+    try:
+        from langfuse import Langfuse
+        return Langfuse(
+            public_key=settings.LANGFUSE_PUBLIC_KEY,
+            secret_key=settings.LANGFUSE_SECRET_KEY,
+            host=settings.LANGFUSE_HOST,
+        )
+    except ImportError:
+        logger.debug("[LANGFUSE] langfuse package not installed")
+        return None
+    except Exception as e:
+        logger.warning("[LANGFUSE] Init failed: %s", e)
+        return None
+
+
 class AIChatStreamingService:
     def __init__(self):
         self._client = None
+        self._langfuse = None
+        self._langfuse_checked = False
 
     @property
     def client(self):
@@ -264,6 +305,13 @@ class AIChatStreamingService:
             self._client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         return self._client
 
+    @property
+    def langfuse(self):
+        if not self._langfuse_checked:
+            self._langfuse = _get_langfuse()
+            self._langfuse_checked = True
+        return self._langfuse
+
     async def stream_chat(
         self,
         user: User,
@@ -271,6 +319,7 @@ class AIChatStreamingService:
         message: str,
         page_context: Optional[dict],
         db: Session,
+        search_scope: str = "auto",
     ) -> AsyncGenerator[str, None]:
         """
         SSE event stream yield eder:
@@ -282,14 +331,43 @@ class AIChatStreamingService:
         """
         request_start = time.time()
 
+        # --- Guardrails: Input kontrolu ---
+        from app.services.guardrails import check_input_guardrails
+        is_safe, reason = await check_input_guardrails(message)
+        if not is_safe:
+            logger.warning("[GUARDRAIL] Blocked: %s", reason)
+            yield _sse("error", {"message": reason})
+            return
+
         # --- Log: Request baslangici ---
         logger.info(
-            "[CHAT_START] user=%s conv=%s message=%s page=%s",
+            "[CHAT_START] user=%s conv=%s message=%s page=%s scope=%s",
             user.id,
             conversation_id[:8],
             _truncate(message, 80),
             page_context.get("page", "-") if page_context else "-",
+            search_scope,
         )
+
+        # --- Langfuse: Trace baslat (v3 API) ---
+        trace = None
+        if self.langfuse:
+            try:
+                trace = self.langfuse.start_span(
+                    name="chat_stream",
+                    input=message,
+                    metadata={
+                        "page": page_context.get("page", "") if page_context else "",
+                        "search_scope": search_scope,
+                    },
+                )
+                trace.update_trace(
+                    user_id=str(user.id),
+                    session_id=conversation_id,
+                )
+            except Exception as e:
+                logger.debug("[LANGFUSE] Trace creation failed: %s", e)
+                trace = None
 
         if not self.client:
             logger.error("[CHAT_ERROR] OpenAI client yapilandirilmamis")
@@ -336,7 +414,7 @@ class AIChatStreamingService:
         recent = history[-20:]
         recent = _trim_orphan_tool_messages(recent)
 
-        messages = [{"role": "system", "content": _build_system_prompt(page_context)}]
+        messages = [{"role": "system", "content": _build_system_prompt(page_context, search_scope)}]
         for msg in recent:
             if msg.role == "tool":
                 messages.append({
@@ -386,6 +464,25 @@ class AIChatStreamingService:
 
                 choice = response.choices[0]
                 usage = response.usage
+
+                # --- Langfuse: Generation kaydi (v3 API) ---
+                if trace:
+                    try:
+                        gen = trace.start_observation(
+                            as_type="generation",
+                            name=f"llm_iter_{iteration}",
+                            model="gpt-4o-mini",
+                            input=messages[-1] if messages else {},
+                            output=choice.message.content or "",
+                            usage_details={
+                                "input": usage.prompt_tokens if usage else 0,
+                                "output": usage.completion_tokens if usage else 0,
+                            },
+                            metadata={"finish_reason": choice.finish_reason},
+                        )
+                        gen.end()
+                    except Exception:
+                        pass
 
                 # --- Log: LLM yaniti ---
                 logger.info(
@@ -505,6 +602,19 @@ class AIChatStreamingService:
                         result_str = json.dumps(result, ensure_ascii=False, default=str)
                         total_tools_called += 1
 
+                        # --- Langfuse: Tool span (v3 API) ---
+                        if trace:
+                            try:
+                                tool_span = trace.start_span(
+                                    name=f"tool_{tool_name}",
+                                    input=args,
+                                    metadata={"elapsed_s": round(tool_elapsed, 2)},
+                                )
+                                tool_span.update(output=result)
+                                tool_span.end()
+                            except Exception:
+                                pass
+
                         # --- Log: Tool sonucu ---
                         has_error = isinstance(result, dict) and "hata" in result
                         logger.info(
@@ -612,6 +722,22 @@ class AIChatStreamingService:
                 len(final_content),
                 total_elapsed,
             )
+
+            # --- Langfuse: Trace tamamla (v3 API) ---
+            if trace:
+                try:
+                    trace.update(
+                        output=final_content[:500],
+                        metadata={
+                            "tools_called": total_tools_called,
+                            "iterations": iteration + 1,
+                            "elapsed_s": round(total_elapsed, 2),
+                        },
+                    )
+                    trace.end()
+                    self.langfuse.flush()
+                except Exception:
+                    pass
 
             yield _sse("done", {})
 

@@ -1,110 +1,39 @@
+/**
+ * Floating chat panel — diger sayfalarda gorunur, /chat route'unda gizlenir.
+ * B5: useChat hook kullanimi + route check.
+ */
+
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { toast } from 'sonner'
+import { useLocation } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { api } from '../services/client'
-import { supabase } from '../lib/supabase'
-import ToolSteps, { type ToolStep } from './chat/ToolSteps'
-import { useChatContext } from '../hooks/useChatContext'
-
-interface FileAttachment {
-  url: string
-  filename: string
-  size: string
-  format: string
-}
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-  toolSteps?: ToolStep[]
-  files?: FileAttachment[]
-  isStreaming?: boolean
-  created_at?: string
-}
-
-interface Conversation {
-  id: string
-  title: string
-  updated_at: string
-}
-
-// Custom ReactMarkdown renderer'lari — resimler, linkler ve tablolar icin
-const markdownComponents = {
-  img: ({ src, alt, node, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { node?: unknown }) => {
-    // Tablo icindeyse kucuk thumbnail, disinda normal boyut
-    // node parent kontrolu zor oldugu icin CSS ile cozuyoruz
-    return (
-      <img
-        src={src}
-        alt={alt || ''}
-        loading="lazy"
-        className="rounded border border-[var(--surface-border)] inline-block object-contain chat-img"
-        {...props}
-      />
-    )
-  },
-  a: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-[var(--accent-primary)] hover:underline break-words"
-      {...props}
-    >
-      {children}
-    </a>
-  ),
-  table: ({ children, ...props }: React.TableHTMLAttributes<HTMLTableElement>) => (
-    <div className="overflow-x-auto my-2 rounded-lg border border-[var(--surface-border)]">
-      <table
-        className="min-w-full text-[11px] border-collapse chat-table"
-        {...props}
-      >
-        {children}
-      </table>
-    </div>
-  ),
-  th: ({ children, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) => (
-    <th
-      className="px-2 py-1.5 bg-[var(--surface-raised)] border-b border-[var(--surface-border)] text-left font-semibold text-text-primary whitespace-nowrap text-[11px]"
-      {...props}
-    >
-      {children}
-    </th>
-  ),
-  td: ({ children, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) => (
-    <td
-      className="px-2 py-1.5 border-b border-[var(--surface-border)] text-text-primary align-middle text-[11px] max-w-[150px]"
-      {...props}
-    >
-      {children}
-    </td>
-  ),
-  tr: ({ children, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
-    <tr
-      className="hover:bg-[var(--surface-hover)] transition-colors even:bg-[var(--surface-raised)]/40"
-      {...props}
-    >
-      {children}
-    </tr>
-  ),
-}
+import { useChat } from '../hooks/useChat'
+import ToolSteps from './chat/ToolSteps'
+import { markdownComponents } from './chat/markdownComponents'
 
 export default function ChatPanel() {
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [conversationId, setConversationId] = useState<string | null>(null)
-  const [conversations, setConversations] = useState<Conversation[]>([])
   const [showHistory, setShowHistory] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Sayfa baglami ve onerilen promptlar
-  const { context: pageContext, suggestions } = useChatContext()
+  const {
+    messages,
+    input,
+    setInput,
+    loading,
+    conversationId,
+    conversations,
+    pageContext,
+    suggestions,
+    loadConversations,
+    loadConversation,
+    startNewChat,
+    sendMessage,
+  } = useChat()
 
+  // Auto-scroll mesajlar degisince
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
@@ -119,183 +48,6 @@ export default function ChatPanel() {
     }
   }, [isOpen])
 
-  const loadConversations = async () => {
-    try {
-      const { data } = await api.get('/ai/conversations')
-      setConversations(data)
-    } catch {
-      // Conversations endpoint may not be available yet
-    }
-  }
-
-  const loadConversation = async (convId: string) => {
-    try {
-      const { data } = await api.get(`/ai/conversations/${convId}/messages`)
-      setMessages(data)
-      setConversationId(convId)
-      setShowHistory(false)
-    } catch {
-      toast.error('Sohbet yuklenemedi')
-    }
-  }
-
-  const startNewChat = () => {
-    setMessages([])
-    setConversationId(null)
-    setShowHistory(false)
-  }
-
-  const sendMessage = async (overrideText?: string) => {
-    const trimmed = (overrideText || input).trim()
-    if (!trimmed || loading) return
-
-    const userMessage: Message = { role: 'user', content: trimmed }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setLoading(true)
-
-    // Bos assistant mesaji ekle — streaming dolduracak
-    setMessages(prev => [
-      ...prev,
-      { role: 'assistant', content: '', toolSteps: [], isStreaming: true },
-    ])
-
-    try {
-      // Supabase'den token al (ayni client.ts interceptor pattern'i)
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || ''
-
-      const response = await fetch('/api/ai/chat/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message: trimmed,
-          conversation_id: conversationId,
-          page_context: pageContext,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      // Conversation ID'yi header'dan al
-      const newConvId = response.headers.get('X-Conversation-Id')
-      if (newConvId) setConversationId(newConvId)
-
-      const reader = response.body!.getReader()
-      const decoder = new TextDecoder()
-      let currentEvent = ''
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-
-        // SSE event'lerini \n\n ile ayir
-        const parts = buffer.split('\n\n')
-        buffer = parts.pop() || ''  // son parcayi buffer'da tut (eksik olabilir)
-
-        for (const part of parts) {
-          const lines = part.split('\n')
-
-          for (const line of lines) {
-            if (line.startsWith('event: ')) {
-              currentEvent = line.slice(7).trim()
-            } else if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6))
-
-                setMessages(prev => {
-                  const updated = [...prev]
-                  const last = updated[updated.length - 1]
-                  if (!last || last.role !== 'assistant') return prev
-
-                  if (currentEvent === 'tool_start') {
-                    const newStep: ToolStep = {
-                      name: data.name,
-                      label: data.label,
-                      status: 'running',
-                    }
-                    return [
-                      ...updated.slice(0, -1),
-                      { ...last, toolSteps: [...(last.toolSteps || []), newStep] },
-                    ]
-                  }
-
-                  if (currentEvent === 'tool_done') {
-                    const steps = (last.toolSteps || []).map(s =>
-                      s.name === data.name
-                        ? { ...s, status: 'done' as const, summary: data.summary }
-                        : s
-                    )
-                    return [...updated.slice(0, -1), { ...last, toolSteps: steps }]
-                  }
-
-                  if (currentEvent === 'token') {
-                    return [
-                      ...updated.slice(0, -1),
-                      { ...last, content: last.content + data.content },
-                    ]
-                  }
-
-                  if (currentEvent === 'file_ready') {
-                    const newFile: FileAttachment = {
-                      url: data.url,
-                      filename: data.filename,
-                      size: data.size,
-                      format: data.format,
-                    }
-                    return [
-                      ...updated.slice(0, -1),
-                      { ...last, files: [...(last.files || []), newFile] },
-                    ]
-                  }
-
-                  if (currentEvent === 'done') {
-                    return [...updated.slice(0, -1), { ...last, isStreaming: false }]
-                  }
-
-                  if (currentEvent === 'error') {
-                    return [
-                      ...updated.slice(0, -1),
-                      { ...last, content: data.message, isStreaming: false },
-                    ]
-                  }
-
-                  return prev
-                })
-              } catch {
-                // JSON parse hatasi — satiri atla
-              }
-            }
-          }
-        }
-      }
-    } catch {
-      toast.error('Yanit alinamadi', { id: 'chat-error' })
-      setMessages(prev => {
-        const updated = [...prev]
-        const last = updated[updated.length - 1]
-        if (last?.role === 'assistant') {
-          updated[updated.length - 1] = {
-            ...last,
-            content: 'Bir hata olustu. Lutfen tekrar deneyin.',
-            isStreaming: false,
-          }
-        }
-        return updated
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -307,6 +59,19 @@ export default function ChatPanel() {
     setIsOpen(prev => !prev)
     if (!isOpen) loadConversations()
   }
+
+  const handleLoadConversation = (convId: string) => {
+    loadConversation(convId)
+    setShowHistory(false)
+  }
+
+  const handleStartNewChat = () => {
+    startNewChat()
+    setShowHistory(false)
+  }
+
+  // /chat route'unda floating panel'i gizle
+  if (location.pathname === '/chat') return null
 
   return (
     <>
@@ -343,7 +108,6 @@ export default function ChatPanel() {
                 <span className="font-semibold text-text-primary text-sm">MarketPulse AI</span>
                 {pageContext && (
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                    {/* Sayfa etiketi */}
                     <span className="text-[10px] text-accent-primary leading-none">
                       {pageContext.page === 'dashboard' ? 'Dashboard' :
                        pageContext.page === 'price_monitor' ? 'Fiyat Izleme' :
@@ -353,7 +117,6 @@ export default function ChatPanel() {
                        pageContext.page === 'keyword_search' ? 'Keyword Arama' :
                        pageContext.page}
                     </span>
-                    {/* Detay: kategori adi */}
                     {pageContext.category_name && (
                       <>
                         <span className="text-[10px] text-text-muted leading-none">·</span>
@@ -362,7 +125,6 @@ export default function ChatPanel() {
                         </span>
                       </>
                     )}
-                    {/* Detay: urun adi */}
                     {pageContext.product_name && (
                       <>
                         <span className="text-[10px] text-text-muted leading-none">·</span>
@@ -371,7 +133,6 @@ export default function ChatPanel() {
                         </span>
                       </>
                     )}
-                    {/* Keyword */}
                     {pageContext.keyword && (
                       <>
                         <span className="text-[10px] text-text-muted leading-none">·</span>
@@ -380,7 +141,6 @@ export default function ChatPanel() {
                         </span>
                       </>
                     )}
-                    {/* Platform badge */}
                     {pageContext.platform && (
                       <span className={`text-[9px] font-medium px-1 py-0.5 rounded leading-none ${
                         pageContext.platform === 'hepsiburada'
@@ -409,7 +169,7 @@ export default function ChatPanel() {
                 </svg>
               </button>
               <button
-                onClick={startNewChat}
+                onClick={handleStartNewChat}
                 className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-text-muted transition-colors"
                 title="Yeni sohbet"
               >
@@ -429,7 +189,7 @@ export default function ChatPanel() {
                 conversations.map(conv => (
                   <button
                     key={conv.id}
-                    onClick={() => loadConversation(conv.id)}
+                    onClick={() => handleLoadConversation(conv.id)}
                     className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--surface-hover)] transition-colors border-b border-[var(--surface-border)] last:border-b-0 ${conversationId === conv.id ? 'bg-accent-primary/5' : ''}`}
                   >
                     <div className="text-text-primary truncate text-xs">{conv.title}</div>
@@ -457,7 +217,6 @@ export default function ChatPanel() {
                 <p className="text-text-muted text-xs mt-1">
                   Fiyat takibi, rakip analizi ve karlilik hakkinda sorun
                 </p>
-                {/* Sayfa bazli onerilen promptlar */}
                 <div className="mt-4 space-y-2">
                   {suggestions.map(s => (
                     <button
@@ -482,12 +241,10 @@ export default function ChatPanel() {
                       : 'bg-[var(--surface-raised)] text-text-primary border border-[var(--surface-border)]'
                   }`}
                 >
-                  {/* Tool Steps (sadece assistant icin) */}
                   {msg.role === 'assistant' && msg.toolSteps && msg.toolSteps.length > 0 && (
                     <ToolSteps steps={msg.toolSteps} />
                   )}
 
-                  {/* Message Content */}
                   {msg.role === 'assistant' ? (
                     <>
                       {msg.content ? (
@@ -499,7 +256,6 @@ export default function ChatPanel() {
                       ) : msg.isStreaming ? null : (
                         <span className="text-text-muted">...</span>
                       )}
-                      {/* Dosya indirme kartlari */}
                       {msg.files && msg.files.length > 0 && (
                         <div className="mt-2 space-y-1.5">
                           {msg.files.map((file, fi) => (
@@ -523,7 +279,6 @@ export default function ChatPanel() {
                           ))}
                         </div>
                       )}
-                      {/* Streaming cursor */}
                       {msg.isStreaming && msg.content && (
                         <span className="inline-block w-0.5 h-3.5 bg-accent-primary ml-0.5 animate-pulse" />
                       )}
@@ -535,7 +290,7 @@ export default function ChatPanel() {
               </div>
             ))}
 
-            {/* Global loading (tool phase, henuz token yok) */}
+            {/* Loading dots */}
             {loading && messages[messages.length - 1]?.isStreaming &&
               !messages[messages.length - 1]?.content &&
               (messages[messages.length - 1]?.toolSteps?.length ?? 0) === 0 && (

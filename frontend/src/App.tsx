@@ -31,6 +31,8 @@ const JsonEditor = lazy(() => import('./pages/JsonEditor'))
 const CategoryExplorer = lazy(() => import('./pages/CategoryExplorer'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
+const ChatPage = lazy(() => import('./pages/ChatPage'))
+const MyStore = lazy(() => import('./pages/MyStore'))
 
 function AppRoutes() {
   return (
@@ -48,6 +50,7 @@ function AppRoutes() {
       <Route path="/products" element={<ProtectedRoute><Layout><Products /></Layout></ProtectedRoute>} />
       <Route path="/products/:id" element={<ProtectedRoute><Layout><ProductDetail /></Layout></ProtectedRoute>} />
       <Route path="/ads" element={<ProtectedRoute><Layout><Ads /></Layout></ProtectedRoute>} />
+      <Route path="/my-store" element={<ProtectedRoute><Layout><MyStore /></Layout></ProtectedRoute>} />
       <Route path="/price-monitor" element={<ProtectedRoute><Layout><PriceMonitor /></Layout></ProtectedRoute>} />
       <Route path="/sellers" element={<ProtectedRoute><Layout><Sellers /></Layout></ProtectedRoute>} />
       <Route path="/sellers/:merchantId" element={<ProtectedRoute><Layout><SellerDetail /></Layout></ProtectedRoute>} />
@@ -58,6 +61,7 @@ function AppRoutes() {
       <Route path="/video-transcripts" element={<ProtectedRoute><Layout><VideoTranscripts /></Layout></ProtectedRoute>} />
       <Route path="/json-editor" element={<ProtectedRoute><Layout><JsonEditor /></Layout></ProtectedRoute>} />
       <Route path="/category-explorer" element={<ProtectedRoute><Layout><CategoryExplorer /></Layout></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><Layout><ChatPage /></Layout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
     </Routes>
   )
