@@ -20,7 +20,7 @@ backend/
 │   ├── core/
 │   │   ├── config.py               # Settings (pydantic-settings)
 │   │   │   ├── Database config (pool size, overflow, recycle)
-│   │   │   ├── Proxy config (ScraperAPI, Bright Data)
+│   │   │   ├── Proxy config (ScraperAPI, Direct)
 │   │   │   └── Validation methods (require_*)
 │   │   ├── security.py             # API key middleware (X-API-Key header)
 │   │   └── logger.py               # Structured logging, uvicorn filter
@@ -48,8 +48,7 @@ backend/
 │   │   ├── trendyol_price_monitor_service.py  # Trendyol price monitor
 │   │   ├── proxy_providers.py      # Proxy abstraction layer
 │   │   │   ├── ScraperAPIProvider (primary, cheaper)
-│   │   │   ├── BrightDataProvider (fallback, premium)
-│   │   │   ├── DirectProvider (no proxy, last resort)
+│   │   │   ├── DirectProvider (no proxy, fallback)
 │   │   │   ├── ProxyManager (auto-selection, fallback chain)
 │   │   │   └── DebugLogger (request logging, HTML saving)
 │   │   ├── llm_service.py          # OpenAI GPT-4o-mini integration

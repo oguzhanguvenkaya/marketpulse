@@ -26,7 +26,7 @@ Marketplace Data Analysis Platform for Turkish e-commerce marketplaces. Scrapes 
 | Frontend | React 19, TypeScript, Vite 7, TailwindCSS v4, Plotly.js |
 | Database | PostgreSQL (Neon) |
 | Queue | Redis + Celery |
-| Proxy | ScraperAPI (primary), Bright Data (fallback) |
+| Proxy | ScraperAPI |
 | Scraping | Playwright + playwright-stealth, BeautifulSoup4, aiohttp |
 | AI | OpenAI GPT-4o-mini |
 
@@ -61,7 +61,7 @@ Marketplace Data Analysis Platform for Turkish e-commerce marketplaces. Scrapes 
 │   │   │   ├── scraping.py    # Hepsiburada scraping with Playwright
 │   │   │   ├── price_monitor_service.py      # Hepsiburada price monitoring
 │   │   │   ├── trendyol_price_monitor_service.py  # Trendyol price monitoring
-│   │   │   ├── proxy_providers.py  # Modular proxy system (ScraperAPI/BrightData/Direct)
+│   │   │   ├── proxy_providers.py  # Modular proxy system (ScraperAPI/Direct)
 │   │   │   ├── llm_service.py      # OpenAI integration
 │   │   │   ├── url_scraper_service.py    # Generic URL scraping
 │   │   │   ├── transcript_service.py     # YouTube transcript extraction
@@ -108,15 +108,12 @@ Marketplace Data Analysis Platform for Turkish e-commerce marketplaces. Scrapes 
 | `PRICE_MONITOR_EXECUTOR` | `celery` | Execution mode: `celery` or `local` |
 | `PRICE_MONITOR_MAX_CONCURRENT_REQUESTS` | `40` | Max concurrent price fetch requests |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Comma-separated allowed origins |
-| `PROXY_PROVIDER` | `auto` | Proxy mode: `auto`, `scraperapi`, `brightdata`, `direct` |
+| `PROXY_PROVIDER` | `auto` | Proxy mode: `auto`, `scraperapi`, `direct` |
 | `DB_POOL_SIZE` | `5` | SQLAlchemy pool size |
 | `DB_MAX_OVERFLOW` | `10` | SQLAlchemy max overflow |
 | `DB_POOL_TIMEOUT_SECONDS` | `30` | Pool checkout timeout |
 | `DB_POOL_RECYCLE_SECONDS` | `180` | Connection recycle interval |
 | `DEBUG_SAVE_HTML` | `false` | Save HTML on scraping errors |
-| `BRIGHT_DATA_ACCOUNT_ID` | - | Bright Data customer ID |
-| `BRIGHT_DATA_ZONE_NAME` | - | Bright Data zone |
-| `BRIGHT_DATA_ZONE_PASSWORD` | - | Bright Data zone password |
 | `VITE_QUERY_CACHE_TTL_MS` | `45000` | Frontend query cache TTL |
 
 ## Running Locally

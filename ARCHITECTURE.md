@@ -51,8 +51,8 @@
 │  ┌────────────▼──────┐   ┌──────────▼──────────┐            │
 │  │  Proxy System     │   │  Celery Tasks       │            │
 │  │  ScraperAPI (1st) │   │  tasks.py           │            │
-│  │  BrightData (2nd) │   │  broker: Redis      │            │
-│  │  Direct (3rd)     │   │  backend: Redis     │            │
+│  │  Direct (2nd)     │   │  broker: Redis      │            │
+│  │                   │   │  backend: Redis     │            │
 │  └───────────────────┘   └──────────┬──────────┘            │
 └──────────────────────────────────────┼───────────────────────┘
                                        │
@@ -61,9 +61,9 @@
     ┌──────────────┐         ┌──────────────┐     ┌──────────────┐
     │  PostgreSQL   │         │    Redis      │     │ External APIs│
     │  (Neon)       │         │  Queue/Cache  │     │ ScraperAPI   │
-    │  18 tables    │         │              │     │ Bright Data  │
-    │              │         │              │     │ OpenAI       │
-    └──────────────┘         └──────────────┘     │ YouTube API  │
+    │  18 tables    │         │              │     │ OpenAI       │
+    │              │         │              │     │ YouTube API  │
+    └──────────────┘         └──────────────┘     │              │
                                                    └──────────────┘
 ```
 
@@ -344,17 +344,12 @@ Request → ScraperAPI (cheap, render=true)
               │
               ├── Success → Return data
               │
-              └── Fail → Bright Data (residential proxy)
-                              │
-                              ├── Success → Return data
-                              │
-                              └── Fail → Direct connection (last resort)
+              └── Fail → Direct connection (last resort)
 ```
 
 Configuration via `PROXY_PROVIDER` env var:
-- `auto` (default): ScraperAPI → Bright Data → Direct
+- `auto` (default): ScraperAPI → Direct
 - `scraperapi`: ScraperAPI only
-- `brightdata`: Bright Data only
 - `direct`: No proxy
 
 ## Celery Tasks

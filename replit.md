@@ -7,7 +7,7 @@ The Marketplace Data Analysis Platform empowers marketplace sellers and marketin
 - English language UI with Palantir-style dark theme
 - Focus on Hepsiburada marketplace initially, Trendyol support added for price monitoring
 - Limit to 8 products per search to manage costs
-- ScraperAPI as primary (cheaper), Bright Data for fallback
+- ScraperAPI as primary proxy provider, direct connection as fallback
 
 ## UI Theme (Honey)
 - Light warm color palette: Background #fffbef, Card #fefbf0, Muted #f7eede, Border #e5e0d2
@@ -71,7 +71,7 @@ Identifies individual sponsored products and groups them to track brand advertis
 Integrates OpenAI's GPT-4o-mini for generating insights from collected product data.
 
 ### Modular Proxy System
-Features an "auto" mode that prioritizes ScraperAPI (cheaper) and falls back to Bright Data (premium, for bot protection bypass). Includes debug logging and HTML saving to `/tmp/scraping_debug/` for troubleshooting.
+Features an "auto" mode that prioritizes ScraperAPI and falls back to direct connection. Includes debug logging and HTML saving to `/tmp/scraping_debug/` for troubleshooting.
 
 ### URL Scraper
 Generic URL scraping system. Supports single URL, bulk JSON, and CSV upload. Uses ScraperAPI to fetch pages, extracts data via meta tags, JSON-LD, Open Graph, and HTML parsing. 40 concurrent workers with stop/resume. DB models: `ScrapeJob`, `ScrapeResult`. Routes: `/api/url-scraper/`.
@@ -122,7 +122,7 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 - **AI Service:** OpenAI (GPT-4o-mini)
 - **Proxy Services:**
     - ScraperAPI (Primary, cost-effective)
-    - Bright Data Residential Proxy (Fallback, premium)
+    - Direct connection (Fallback)
 - **Frontend Libraries:**
     - React 19, TypeScript, Vite 7, TailwindCSS v4, Plotly.js, React Router DOM v7, Axios
 - **Backend Libraries:**
@@ -140,10 +140,10 @@ Competitive analysis tool to scrape and browse marketplace category pages. Paste
 
 ### Optional
 - `PRICE_MONITOR_EXECUTOR` (celery|local, default: celery)
-- `PROXY_PROVIDER` (auto|scraperapi|brightdata|direct, default: auto)
+- `PROXY_PROVIDER` (auto|scraperapi|direct, default: auto)
 - `CORS_ALLOWED_ORIGINS` - Comma-separated origins
 - `DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`, `DB_POOL_TIMEOUT_SECONDS=30`, `DB_POOL_RECYCLE_SECONDS=180`
-- `BRIGHT_DATA_ACCOUNT_ID`, `BRIGHT_DATA_ZONE_NAME`, `BRIGHT_DATA_ZONE_PASSWORD`
+
 - `VITE_QUERY_CACHE_TTL_MS=45000`
 
 ## Recent Changes

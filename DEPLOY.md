@@ -4,7 +4,7 @@
 
 - Replit account with Autoscale deployment capability
 - PostgreSQL database (e.g., Neon, Supabase, or Replit DB)
-- ScraperAPI key or Bright Data credentials for scraping features
+- ScraperAPI key for scraping features
 
 ## Environment Variables
 
@@ -26,9 +26,6 @@ cp .env.example .env
 | Variable | Description |
 |---|---|
 | `SCRAPER_API_KEY` | ScraperAPI key (canonical name) |
-| `BRIGHT_DATA_ACCOUNT_ID` | Bright Data account ID |
-| `BRIGHT_DATA_ZONE_PASSWORD` | Bright Data zone password |
-| `BRIGHT_DATA_ZONE_NAME` | Bright Data zone name |
 
 ### Optional
 
@@ -39,7 +36,7 @@ cp .env.example .env
 | `CORS_ALLOWED_ORIGINS` | `localhost:5173` | Comma-separated origins. `REPLIT_DOMAINS` auto-detected |
 | `OPENAI_API_KEY` | — | For AI-powered transcript summaries |
 | `REDIS_URL` | — | Redis connection string (gerekli sadece celery executor kullanildiginda) |
-| `PROXY_PROVIDER` | `auto` | auto/scraperapi/brightdata/direct (varsayilan: auto) |
+| `PROXY_PROVIDER` | `auto` | auto/scraperapi/direct (varsayilan: auto) |
 
 ## Build
 
