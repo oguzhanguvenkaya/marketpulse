@@ -10,6 +10,7 @@ from .search_tools import search_keyword_analysis, get_portfolio_summary, search
 from .category_tools import get_category_analysis, get_product_descriptions, analyze_product_descriptions
 from .action_tools import add_sku_to_monitor, add_competitor, set_price_alert, start_keyword_search
 from .export_tools import export_data
+from .analytics_tools import detect_price_anomalies, get_competitive_intel, suggest_campaign_price
 
 logger = get_logger("ai.tools")
 
@@ -133,7 +134,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_category_analysis",
-            "description": "Kategori tarama verilerini analiz eder. Fiyat dağılımı, marka ve satıcı dağılımı, sponsorlu ürünler. Marka veya satıcıya göre filtreleme yapabilir (örn: 'Sonax marka ürünlerin ortalama fiyatı').",
+            "description": "Kategori tarama verilerini analiz eder. Fiyat dağılımı, marka ve satıcı dağılımı, sponsorlu ürünler. Yazım hatası toleranslı marka filtresi destekler (örn: 'fraber' → 'Fra-Ber').",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -148,14 +149,14 @@ TOOL_DEFINITIONS = [
                     },
                     "brand": {
                         "type": "string",
-                        "description": "Marka filtresi (örn: 'Sonax', 'Meguiars')",
+                        "description": "Marka filtresi — yazım hatası toleranslı (örn: 'Sonax', 'fraber')",
                     },
                     "seller": {
                         "type": "string",
                         "description": "Satıcı filtresi (örn: 'Sonaxshop')",
                     },
                 },
-                "required": ["category_name"],
+                "required": [],
             },
         },
     },
@@ -164,7 +165,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_product_descriptions",
-            "description": "Kategori taramasındaki ürünlerin açıklamalarını (description), özelliklerini (specs) getirir. Ürün detaylarını görmek için kullan.",
+            "description": "Kategori taramasındaki ürünlerin açıklamalarını (description), özelliklerini (specs) getirir. Yazım hatası toleranslı, anlam bazlı arama. Ürün detaylarını görmek için kullan.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -185,7 +186,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "analyze_product_descriptions",
-            "description": "Ürün açıklamalarındaki en çok geçen kelimeleri analiz eder ve ürünler arası karşılaştırır. Kelime frekansı, ortak kelimeler.",
+            "description": "Ürün açıklamalarındaki en çok geçen kelimeleri analiz eder ve ürünler arası karşılaştırır. Yazım hatası toleranslı arama, kelime frekansı, ortak kelimeler.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -335,6 +336,66 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    # --- Analytics Tools (analiz) ---
+    {
+        "type": "function",
+        "function": {
+            "name": "detect_price_anomalies",
+            "description": "Son N gündeki anormal fiyat değişikliklerini tespit eder. Z-score > 2 olan fiyat hareketlerini listeler. Ani fiyat artışı/düşüşü tespiti için kullan.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sku": {
+                        "type": "string",
+                        "description": "Ürün SKU filtresi (opsiyonel, boş bırakılırsa tüm ürünler)",
+                    },
+                    "days": {
+                        "type": "integer",
+                        "description": "Analiz süresi (gün, varsayılan: 7)",
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_competitive_intel",
+            "description": "Rakip satıcılarla karşılaştırmalı analiz yapar. Buybox sıralaması, fiyat farkları, stok ve kargo durumu. Rekabet durumunu görmek için kullan.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sku": {
+                        "type": "string",
+                        "description": "Ürün SKU filtresi (opsiyonel)",
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "suggest_campaign_price",
+            "description": "Hedef kâr marjına göre kampanya fiyat önerisi hesaplar. Komisyon, kargo ve maliyet dahil. Kampanya/indirim fiyatı planlamak için kullan.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sku": {
+                        "type": "string",
+                        "description": "Ürün SKU filtresi (opsiyonel)",
+                    },
+                    "target_margin": {
+                        "type": "number",
+                        "description": "Hedef kâr marjı (0.15 = %15, varsayılan: %15)",
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
 ]
 
 # Tool name → function mapping
@@ -356,6 +417,10 @@ _TOOL_MAP = {
     "start_keyword_search": start_keyword_search,
     # Export tools
     "export_data": export_data,
+    # Analytics tools
+    "detect_price_anomalies": detect_price_anomalies,
+    "get_competitive_intel": get_competitive_intel,
+    "suggest_campaign_price": suggest_campaign_price,
 }
 
 

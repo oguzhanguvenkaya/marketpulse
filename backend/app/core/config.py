@@ -93,16 +93,23 @@ class Settings(BaseSettings):
     DB_POOL_TIMEOUT_SECONDS: int = _env_int("DB_POOL_TIMEOUT_SECONDS", 30)
     DB_POOL_RECYCLE_SECONDS: int = _env_int("DB_POOL_RECYCLE_SECONDS", 180)
     
-    BRIGHT_DATA_ACCOUNT_ID: str = os.getenv("BRIGHT_DATA_ACCOUNT_ID", "")
-    BRIGHT_DATA_ZONE_NAME: str = os.getenv("BRIGHT_DATA_ZONE_NAME", "")
-    BRIGHT_DATA_ZONE_PASSWORD: str = os.getenv("BRIGHT_DATA_ZONE_PASSWORD", "")
-    
     SCRAPER_API_KEY: str = _resolve_scraper_api_key()
     
     PROXY_PROVIDER: str = os.getenv("PROXY_PROVIDER", "auto")
 
     # Hybrid Search (pgvector + pg_trgm)
     HYBRID_SEARCH_ENABLED: bool = os.getenv("HYBRID_SEARCH_ENABLED", "true").lower() == "true"
+
+    # Langfuse Tracing
+    LANGFUSE_PUBLIC_KEY: str = os.getenv("LANGFUSE_PUBLIC_KEY", "")
+    LANGFUSE_SECRET_KEY: str = os.getenv("LANGFUSE_SECRET_KEY", "")
+    LANGFUSE_HOST: str = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
+
+    # Cohere Reranker
+    COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
+    RERANKER_ENABLED: bool = os.getenv("RERANKER_ENABLED", "true").lower() == "true"
+    RERANKER_MODEL: str = os.getenv("RERANKER_MODEL", "rerank-v3.5")
+    RERANKER_TOP_N: int = _env_int("RERANKER_TOP_N", 10)
 
     # Supabase Auth ayarları
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
@@ -122,23 +129,11 @@ class Settings(BaseSettings):
     STRIPE_PRICE_PRO: str = os.getenv("STRIPE_PRICE_PRO", "")
     STRIPE_PRICE_ENTERPRISE: str = os.getenv("STRIPE_PRICE_ENTERPRISE", "")
 
+    # HB Search
+    HB_SEARCH_MAX_PRODUCTS: int = _env_int("HB_SEARCH_MAX_PRODUCTS", 50)
+
     DEBUG_SAVE_HTML: bool = os.getenv("DEBUG_SAVE_HTML", "false").lower() == "true"
     DEBUG_HTML_PATH: str = os.getenv("DEBUG_HTML_PATH", "/tmp/scraping_debug")
-    
-    @property
-    def bright_data_proxy_config(self) -> Optional[dict]:
-        if self.BRIGHT_DATA_ACCOUNT_ID and self.BRIGHT_DATA_ZONE_PASSWORD:
-            zone_name = self.BRIGHT_DATA_ZONE_NAME.strip() if self.BRIGHT_DATA_ZONE_NAME else ""
-            if zone_name and zone_name.lower() not in ["zone_name", "", "empty", "none"]:
-                zone_part = f"-zone-{zone_name}"
-            else:
-                zone_part = ""
-            return {
-                "server": "http://brd.superproxy.io:33335",
-                "username": f"brd-customer-{self.BRIGHT_DATA_ACCOUNT_ID}{zone_part}",
-                "password": self.BRIGHT_DATA_ZONE_PASSWORD
-            }
-        return None
     
     @property
     def scraper_api_proxy_config(self) -> Optional[dict]:
@@ -163,9 +158,6 @@ class Settings(BaseSettings):
     def has_scraper_api(self) -> bool:
         return bool((self.SCRAPER_API_KEY or "").strip())
     
-    def has_bright_data(self) -> bool:
-        return bool(self.BRIGHT_DATA_ACCOUNT_ID and self.BRIGHT_DATA_ZONE_PASSWORD)
-
     def require_database_url(self) -> str:
         db_url = (self.DATABASE_URL or "").strip()
         if not db_url:
